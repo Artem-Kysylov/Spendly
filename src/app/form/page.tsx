@@ -15,7 +15,8 @@ const FormPage = () => {
     <>
       <div className='ml-5 mr-5 mt-[30px]'>
         <Button
-          className='btn-ghost text-primary p-0'
+          variant='ghost'
+          className='text-primary p-0'
           text='Back to Dashboard'
           onClick={() => router.push('/dashboard')}
         />

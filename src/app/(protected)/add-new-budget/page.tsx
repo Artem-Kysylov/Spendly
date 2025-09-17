@@ -1,15 +1,15 @@
 'use client';
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { UserAuth } from '../../context/AuthContext'
-import { supabase } from '../../lib/supabaseClient'
+import { UserAuth } from '@/context/AuthContext'
+import { supabase } from '@/lib/supabaseClient'
 
 // Import components    
-import CreateMainBudget from '../../components/budgets/CreateMainBudget'
-import ToastMessage from '../../components/ui-elements/ToastMessage'
+import CreateMainBudget from '@/components/budgets/CreateMainBudget'
+import ToastMessage from '@/components/ui-elements/ToastMessage'
 
 // Import types
-import { ToastMessageProps } from '../../types/types'
+import { ToastMessageProps } from '@/types/types'
 
 const AddNewBudget = () => {
   const { session } = UserAuth()
@@ -31,13 +31,17 @@ const AddNewBudget = () => {
 
       // Create new budget
       const { error } = await supabase
-        .from('budgets')
-        .insert([
-          {
-            user_id: session.user.id,
-            amount: Number(budget)
-          }
-        ])
+        .from('main_budget')
+        .upsert(
+          [
+            {
+              user_id: session.user.id,
+              amount: Number(budget)
+            }
+          ],
+          { onConflict: 'user_id' }
+        )
+        .select()
 
       if (error) {
         throw error
@@ -46,7 +50,7 @@ const AddNewBudget = () => {
       handleToastMessage('Budget successfully created!', 'success')
       // Redirect to Dashboard after 2 seconds
       setTimeout(() => {
-        router.push('/')
+        router.push('/dashboard')
       }, 2000)
     } catch (error: any) {
       console.error('Error creating budget:', error)

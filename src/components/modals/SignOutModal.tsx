@@ -33,8 +33,8 @@ const SignOutModal = ({ title, text, onClose, signOut }: SignOutModalProps) => {
       <p className="py-4">{text}</p>
       <div className="modal-action">
         <form method="dialog">
-          <Button className='btn-ghost' text='Cancel' onClick={onClose}/>
-          <Button className='btn-primary text-white' text='Sign Out' onClick={handleSignOut}/>
+          <Button text='Cancel' variant="ghost" onClick={onClose}/>
+          <Button text='Sign Out' variant="default" onClick={handleSignOut}/>
         </form>
       </div>
     </div>

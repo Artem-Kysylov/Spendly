@@ -67,12 +67,12 @@ const CreateMainBudget = ({ onSubmit }: CreateMainBudgetProps) => {
             />
             <div className='flex justify-center gap-3 w-full'>
                 <Button 
-                    className='btn-ghost' 
+                    variant='ghost'
                     text='Cancel' 
                     onClick={handleCancel}
                 />
                 <Button 
-                    className='btn-primary text-white'
+                    variant='default'
                     text="Create Main Budget"
                     onClick={handleSubmit}
                 />

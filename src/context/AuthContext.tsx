@@ -11,10 +11,17 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 export const AuthContextProvider = ({ children }: {children:React.ReactNode}) => {
     const [session, setSession] = useState<Session | null>(null)
+    const [isReady, setIsReady] = useState(false)
+    const [isSigningIn, setIsSigningIn] = useState(false)
+    const [isSigningUp, setIsSigningUp] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
     useEffect(() => {
+        let active = true
         supabase.auth.getSession().then(({ data: { session } }) => {
+          if (!active) return
           setSession(session)
+          setIsReady(true)
         })
     
         const {
@@ -23,8 +30,11 @@ export const AuthContextProvider = ({ children }: {children:React.ReactNode}) =>
           setSession(session);
         })
     
-        return () => subscription.unsubscribe()
-      }, [])
+        return () => {
+          active = false
+          subscription.unsubscribe()
+        }
+    }, [])
 
 
     // Sign in with Google
@@ -53,8 +63,50 @@ export const AuthContextProvider = ({ children }: {children:React.ReactNode}) =>
         }
     }
 
+    // Email/Password: Sign in
+    const signInWithPassword = async (email: string, password: string) => {
+        try {
+            setIsSigningIn(true)
+            setError(null)
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+            if (error) {
+                setError(error.message)
+                return { error }
+            }
+            return { data }
+        } finally {
+            setIsSigningIn(false)
+        }
+    }
+
+    // Email/Password: Sign up
+    const signUpWithPassword = async (email: string, password: string) => {
+        try {
+            setIsSigningUp(true)
+            setError(null)
+            const { data, error } = await supabase.auth.signUp({ email, password })
+            if (error) {
+                setError(error.message)
+                return { error }
+            }
+            return { data }
+        } finally {
+            setIsSigningUp(false)
+        }
+    }
+
     return (
-        <AuthContext.Provider value={{session, signInWithGoogle, signOut }}>
+        <AuthContext.Provider value={{
+            session,
+            signInWithGoogle,
+            signOut,
+            signInWithPassword,
+            signUpWithPassword,
+            isReady,
+            isSigningIn,
+            isSigningUp,
+            error
+        }}>
             {children}
         </AuthContext.Provider>
     )

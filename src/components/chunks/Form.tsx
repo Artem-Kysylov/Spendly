@@ -10,6 +10,7 @@ import ToastMessage from '../ui-elements/ToastMessage'
 // Import types
 import { ToastMessageProps } from '../../types/types'
 
+// Component: Form
 const Form = () => {
   const { session } = UserAuth()
 
@@ -38,7 +39,7 @@ const Form = () => {
       try {
         setIsLoading(true)
         const { data, error } = await supabase
-          .from('Transactions')
+          .from('transactions')
           .insert({
             user_id: session.user.id,
             title: title,
@@ -124,14 +125,13 @@ const Form = () => {
             Income
           </label>
         </div>
-      <Button 
-        type='submit'
-        text='Add Transaction'
-        className='btn-primary text-white'
-        disabled={isLoading}
-        isLoading={isLoading}
-      />
-    </form>
+        <Button 
+          type='submit'
+          text='Add Transaction'
+          disabled={isLoading}
+          isLoading={isLoading}
+        />
+      </form>
     </div>
   )
 }

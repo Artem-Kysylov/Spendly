@@ -54,8 +54,8 @@ const TransactionsTable = ({
           onConfirm={handleConfirmDelete}
         />
       )}
-      <div className="overflow-x-auto rounded-[10px] border light-grey bg-base-100">
-        <table className="table">
+      <div className="overflow-x-auto rounded-[10px] border light-grey bg-background">
+        <table className="w-full">
           {/* head */}
           <thead className="border-b">
             <tr>
@@ -74,7 +74,13 @@ const TransactionsTable = ({
                 <td>{transaction.title}</td>
                 <td>{transaction.amount}</td>
                 <td>
-                  <span className={`badge ${transaction.type === 'expense' ? 'badge-error text-white uppercase text-xs' : 'badge-success text-white uppercase text-xs'}`}>
+                  <span
+                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                      transaction.type === 'expense'
+                        ? 'bg-error text-error-foreground'
+                        : 'bg-success text-success-foreground'
+                    }`}
+                  >
                     {transaction.type}
                   </span>
                 </td>
@@ -83,7 +89,8 @@ const TransactionsTable = ({
                   <Button
                     icon={<Trash style={{ width: '24px', height: '24px' }}/>}
                     text="Delete"
-                    className="btn-ghost text-error"
+                    variant="ghost"
+                    className="text-error"
                     onClick={() => handleOpenModal(transaction.id)}
                   />
                 </td>

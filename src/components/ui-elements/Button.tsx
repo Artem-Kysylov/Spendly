@@ -1,26 +1,24 @@
 // Import types
 import { ButtonProps } from '../../types/types'
+import { Button as UIButton } from "@/components/ui/button"
+import type { ButtonVariant } from "@/components/ui/button"
 
-const Button = ({ text, className, onClick, type = 'button', disabled, isLoading, icon }: ButtonProps) => {
+const Button = ({ text, className = '', onClick, type = 'button', disabled, isLoading, icon, variant }: ButtonProps) => {
+  // Normalize alias: primary → default (shadcn)
+  const normalizedVariant = ((variant === 'primary' ? 'default' : (variant ?? 'default')) as ButtonVariant)
+
   return (
-    <button 
-      className={`btn ${className} ${disabled ? 'opacity-50 cursor-not-allowed bg-[#3559E0] text-white' : ''}`} 
+    <UIButton
+      className={className}
       onClick={onClick}
       type={type}
-      disabled={disabled || isLoading}
+      disabled={disabled}
+      isLoading={isLoading}
+      icon={icon}
+      variant={normalizedVariant}
     >
-      {isLoading ? (
-        <>
-          <span className="loading loading-spinner loading-xs mr-2"></span>
-          {text}
-        </>
-      ) : (
-        <>
-          {icon && <span className="icon-class">{icon}</span>}
-          {text}
-        </>
-      )}
-    </button>
+      {text}
+    </UIButton>
   )
 }
 

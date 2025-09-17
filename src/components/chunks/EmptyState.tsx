@@ -1,14 +1,16 @@
+'use client'
+
 // Imports 
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 
 // Import components 
 import Button from '../ui-elements/Button'
 
 const EmptyState = () => {
-  const navigate = useNavigate()
+  const router = useRouter()
   
   const handleClick = () => {
-    navigate('/transactions')
+    router.push('/transactions')
   }
 
   return (
@@ -17,7 +19,7 @@ const EmptyState = () => {
         <h1 className="text-[35px] font-semibold text-secondary-black text-center">Don`t have any transactions yet?</h1>
         <p className="font-semibold text-secondary-black text-center">Create new by clicking this button</p>
         <Button 
-          className="btn-primary text-white"
+          variant="primary"
           text="Add Transaction"
           onClick={handleClick} 
         />

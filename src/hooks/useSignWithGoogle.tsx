@@ -1,17 +1,20 @@
+'use client'
+
+// Imports 
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useRouter } from 'next/navigation'
 import { UserAuth } from '../context/AuthContext' 
 
 export const useSignWithGoogle = () => {
     const { signInWithGoogle } = UserAuth()
-        const navigate = useNavigate()
+    const router = useRouter()
 
-        const handleGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-            e.preventDefault()
-            const { error } = await signInWithGoogle()
-            if(!error) {
-                navigate('/dashboard')
-            }        
-        }
-  return handleGoogleClick
+    const handleGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault()
+        const { error } = await signInWithGoogle()
+        if(!error) {
+            router.push('/dashboard')
+        }        
+    }
+    return handleGoogleClick
 }

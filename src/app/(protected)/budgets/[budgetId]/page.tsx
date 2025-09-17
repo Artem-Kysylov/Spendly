@@ -3,25 +3,26 @@
 // Imports 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { supabase } from '../../../lib/supabaseClient'
-import { UserAuth } from '../../../context/AuthContext'
+import { supabase } from '@/lib/supabaseClient'
+import { UserAuth } from '@/context/AuthContext'
 
 // Import hooks
-import useModal from '../../../hooks/useModal'
+import useModal from '@/hooks/useModal'
 
 // Components 
-import BudgetDetailsInfo from '../../../components/budgets/BudgetDetailsInfo'
-import BudgetDetailsForm from '../../../components/budgets/BudgetDetailsForm'
-import BudgetDetailsControls from '../../../components/budgets/BudgetDetailsControls'
-import Spinner from '../../../components/ui-elements/Spinner'
-import ToastMessage from '../../../components/ui-elements/ToastMessage'
-import DeleteModal from '../../../components/modals/DeleteModal'
-import BudgetModal from '../../../components/modals/BudgetModal'
-import TransactionsTable from '../../../components/chunks/TransactionsTable'
+import BudgetDetailsInfo from '@/components/budgets/BudgetDetailsInfo'
+import BudgetDetailsForm from '@/components/budgets/BudgetDetailsForm'
+import BudgetDetailsControls from '@/components/budgets/BudgetDetailsControls'
+import Spinner from '@/components/ui-elements/Spinner'
+import ToastMessage from '@/components/ui-elements/ToastMessage'
+import DeleteModal from '@/components/modals/DeleteModal'
+import BudgetModal from '@/components/modals/BudgetModal'
+import TransactionsTable from '@/components/chunks/TransactionsTable'
 
 // Import types
-import { BudgetDetailsProps, Transaction, ToastMessageProps } from '../../../types/types'
+import { BudgetDetailsProps, Transaction, ToastMessageProps } from '@/types/types'
 
+// Component: BudgetDetails
 const BudgetDetails = () => {
   const { budgetId } = useParams<{ budgetId: string }>()
   const id = budgetId
@@ -58,7 +59,7 @@ const BudgetDetails = () => {
     try {
       console.log('Fetching budget type for id:', id)
       const { data, error } = await supabase
-        .from('Budget_Folders')
+        .from('budget_folders')
         .select('type')
         .eq('id', id)
         .single()
@@ -84,7 +85,7 @@ const BudgetDetails = () => {
     try {
       // Сначала получаем тип бюджета
       const { data: budgetData, error: budgetError } = await supabase
-        .from('Budget_Folders')
+        .from('budget_folders')
         .select('type')
         .eq('id', id)
         .single()
@@ -108,13 +109,13 @@ const BudgetDetails = () => {
 
       setIsSubmitting(true)
       const { error: transactionError } = await supabase
-        .from('Budget_Folder_Transactions')
+        .from('budget_folder_transactions')
         .insert({
           budget_folder_id: id,
           user_id: session.user.id,
           title,
           amount: Number(amount),
-          type: budgetData.type // Явно используем полученный тип
+          type: budgetData.type
         })
         .select()
 
@@ -140,7 +141,7 @@ const BudgetDetails = () => {
     try {
       setIsDeleting(true)
       const { error } = await supabase
-        .from('Budget_Folders')
+        .from('budget_folders')
         .delete()
         .eq('id', id)
         .eq('user_id', session.user.id)
@@ -170,7 +171,7 @@ const BudgetDetails = () => {
     try {
       setIsSubmitting(true)
       const { error } = await supabase
-        .from('Budget_Folders')
+        .from('budget_folders')
         .update({ emoji, name, amount })
         .eq('id', id)
         .eq('user_id', session.user.id)
@@ -198,7 +199,7 @@ const BudgetDetails = () => {
     try {
       setIsLoading(true)
       const { data, error } = await supabase
-        .from('Budget_Folders')
+        .from('budget_folders')
         .select('emoji, name, amount, type')
         .eq('id', id)
         .eq('user_id', session.user.id)
@@ -224,7 +225,7 @@ const BudgetDetails = () => {
 
     try {
       const { data, error } = await supabase
-        .from('Budget_Folder_Transactions')
+        .from('budget_folder_transactions')
         .select('*')
         .eq('budget_folder_id', id)
         .eq('user_id', session.user.id)

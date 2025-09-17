@@ -2,26 +2,27 @@
 
 // Imports 
 import { useEffect, useState } from 'react'
-import { UserAuth } from '../../context/AuthContext'
-import { supabase } from '../../lib/supabaseClient'
+import { UserAuth } from '@/context/AuthContext'
+import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 
 // Import components 
-import Button from '../../components/ui-elements/Button'
-import TransactionsTable from '../../components/chunks/TransactionsTable'
-import EmptyState from '../../components/chunks/EmptyState'
-import Counters from '../../components/chunks/Counters'
-import Spinner from '../../components/ui-elements/Spinner'
-import MainBudgetModal from '../../components/modals/MainBudgetModal'
-import ToastMessage from '../../components/ui-elements/ToastMessage'
+import Button from '@/components/ui-elements/Button'
+import TransactionsTable from '@/components/chunks/TransactionsTable'
+import EmptyState from '@/components/chunks/EmptyState'
+import Counters from '@/components/chunks/Counters'
+import Spinner from '@/components/ui-elements/Spinner'
+import MainBudgetModal from '@/components/modals/MainBudgetModal'
+import ToastMessage from '@/components/ui-elements/ToastMessage'
 
 // Import hooks 
-import useModal from '../../hooks/useModal'
-import useCheckBudget from '../../hooks/useCheckBudget'
+import useModal from '@/hooks/useModal'
+import useCheckBudget from '@/hooks/useCheckBudget'
 
 // Import types
-import { ToastMessageProps, Transaction } from '../../types/types'
+import { ToastMessageProps, Transaction } from '@/types/types'
 
+// Component: Dashboard
 const Dashboard = () => {
   const { session } = UserAuth()
   const router = useRouter()  
@@ -35,7 +36,7 @@ const Dashboard = () => {
 
   const fetchTransactions = async () => {
     setIsLoading(true)
-    const { data, error } = await supabase.from('Transactions').select('*')
+    const { data, error } = await supabase.from('transactions').select('*')
     setTransactions(data as Transaction[])
     setTimeout(() => setIsLoading(false), 500)
     if (error) {
@@ -69,7 +70,7 @@ const Dashboard = () => {
 
   const handleDeleteTransaction = async (id: string) => {
     try {
-      const { error } = await supabase.from('Transactions').delete().eq('id', id)
+      const { error } = await supabase.from('transactions').delete().eq('id', id)
       
       if (error) {
         console.error('Error deleting transaction:', error)
@@ -102,8 +103,8 @@ const Dashboard = () => {
               Welcome <span className="text-primary">{session?.user?.user_metadata?.name}✌️</span>
             </h1>
             <Button
-              className='btn-primary text-white'
-              text='Add Transaction'
+              variant="primary"
+              text="Add Transaction"
               onClick={() => router.push('/transactions')}
             />
           </div>

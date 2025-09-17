@@ -10,6 +10,7 @@ import RadioButton from '../ui-elements/RadioButton'
 // Import types
 import { TransactionModalProps } from '../../types/types'
 
+// Component: TransactionModal
 const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) => {
   const { session } = UserAuth()
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -38,7 +39,7 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
     try {
       setIsLoading(true)
       const { data, error } = await supabase
-        .from('Transactions')
+        .from('transactions')
         .insert({
           user_id: session.user.id,
           title: transactionTitle,
@@ -108,13 +109,14 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
           <div className="modal-action justify-center gap-4">
             <Button
               text="Cancel"
-              className="btn-ghost text-primary"
+              variant="ghost"
+              className="text-primary"
               onClick={onClose}
             />
             <Button
               type="submit"
               text="Submit"
-              className="btn-primary text-white"
+              variant="default"
               disabled={isLoading}
               isLoading={isLoading}
             />

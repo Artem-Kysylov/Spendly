@@ -9,6 +9,7 @@ import TextInput from '../ui-elements/TextInput'
 // Import types 
 import { MainBudgetModalProps } from '../../types/types'
 
+// Component: TotalBudgetModal
 const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) => {
     const { session } = UserAuth()
     const dialogRef = useRef<HTMLDialogElement>(null)
@@ -28,7 +29,7 @@ const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) =>
 
             try {
                 const { data, error } = await supabase
-                    .from('Main_Budget')
+                    .from('main_budget')
                     .select('amount')
                     .eq('user_id', session.user.id)
                     .single()
@@ -62,7 +63,7 @@ const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) =>
         try {
             setIsLoading(true)
             const { data, error } = await supabase
-                .from('Main_Budget')
+                .from('main_budget')
                 .update({ amount: Number(amount) })
                 .eq('user_id', session.user.id)
                 .select()
@@ -97,13 +98,15 @@ const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) =>
                     <div className="modal-action justify-center gap-4">
                         <Button
                             text="Cancel"
-                            className="btn-ghost text-primary w-[218px]"
+                            variant="ghost"
+                            className="text-primary w-[218px]"
                             onClick={onClose}
                         />
                         <Button
                             type="submit"
                             text="Save"
-                            className="btn-primary text-white w-[218px]"
+                            variant="default"
+                            className="w-[218px]"
                             disabled={isLoading}
                             isLoading={isLoading}
                         />

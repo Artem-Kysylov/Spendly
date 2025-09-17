@@ -1,16 +1,17 @@
 // Imports 
 import { TextInputProps } from '../../types/types'
+import { Input } from "@/components/ui/input"
 
 const TextInput = ({ type, placeholder, value, onChange, onInput, disabled }: TextInputProps) => {
   return (
-    <input
+    <Input
       type={type}
       placeholder={placeholder}
       value={value}
       onChange={onChange}
       onInput={onInput}
       disabled={disabled}
-      className='w-full h-[50px] rounded-lg border light-grey px-[20px] outline-none focus:border-primary transition-colors duration-300'
+      className="h-[50px] px-[20px]"
     />
   )
 }

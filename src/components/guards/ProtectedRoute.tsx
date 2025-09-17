@@ -5,15 +5,16 @@ import { useRouter } from 'next/navigation'
 import { UserAuth } from '@/context/AuthContext'
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { session } = UserAuth()
+  const { session, isReady } = UserAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (!session) {
+    if (isReady && !session) {
       router.replace('/')
     }
-  }, [session, router])
+  }, [isReady, session, router])
 
+  if (!isReady) return null
   if (!session) return null
 
   return children

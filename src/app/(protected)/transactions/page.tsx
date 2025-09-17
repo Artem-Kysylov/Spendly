@@ -1,22 +1,23 @@
 'use client';
 // Imports 
 import { useState, useEffect } from 'react'
-import { supabase } from '../../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 
 // Import hooks 
-import useModal from '../../hooks/useModal'
+import useModal from '@/hooks/useModal'
 
 // Import components 
-import Button from '../../components/ui-elements/Button'
-import Spinner from '../../components/ui-elements/Spinner'
-import TransactionsTable from '../../components/chunks/TransactionsTable'
-import EmptyState from '../../components/chunks/EmptyState'
-import TransactionModal from '../../components/modals/TransactionModal'
-import ToastMessage from '../../components/ui-elements/ToastMessage'
+import Button from '@/components/ui-elements/Button'
+import Spinner from '@/components/ui-elements/Spinner'
+import TransactionsTable from '@/components/chunks/TransactionsTable'
+import EmptyState from '@/components/chunks/EmptyState'
+import TransactionModal from '@/components/modals/TransactionModal'
+import ToastMessage from '@/components/ui-elements/ToastMessage'
 
 // Import types
-import { Transaction, ToastMessageProps } from '../../types/types'
+import { Transaction, ToastMessageProps } from '@/types/types'
 
+// Component: Transactions
 const Transactions = () => {
   // States 
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -28,7 +29,7 @@ const Transactions = () => {
 
   const fetchTransactions = async () => {
     try {
-      const { data, error } = await supabase.from('Transactions').select('*')
+      const { data, error } = await supabase.from('transactions').select('*')
       
       if (error) {
         console.error('Error fetching transactions:', error)
@@ -65,7 +66,7 @@ const Transactions = () => {
 
   const handleDeleteTransaction = async (id: string) => {
     try {
-      const { error } = await supabase.from('Transactions').delete().eq('id', id)
+      const { error } = await supabase.from('transactions').delete().eq('id', id)
       
       if (error) {
         console.error('Error deleting transaction:', error)
@@ -94,8 +95,8 @@ const Transactions = () => {
           Transactions 📉
         </h1>
         <Button
-          className='btn-primary text-white'
-          text='Add Transaction'
+          variant="primary"
+          text="Add Transaction"
           onClick={openModal}
         />
       </div>

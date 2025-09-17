@@ -34,13 +34,13 @@ const DeleteModal = ({ title, text, onClose, onConfirm, isLoading = false }: Del
         <div className="modal-action">
           <form onSubmit={handleSubmit}>
             <Button 
-              className='btn-ghost' 
+              variant="ghost"
               text='Cancel' 
               onClick={onClose}
               disabled={isLoading}
             />
             <Button 
-              className='btn-error text-white' 
+              variant="destructive"
               text={isLoading ? 'Deleting...' : 'Delete'} 
               type="submit"
               disabled={isLoading}

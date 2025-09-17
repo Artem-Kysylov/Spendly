@@ -8,13 +8,22 @@ export interface ButtonProps {
     type?: 'button' | 'submit' | 'reset',
     disabled?: boolean,
     isLoading?: boolean,
-    icon?: ReactNode
+    icon?: ReactNode,
+    variant?: 'default' | 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive',
 }
 
 export interface AuthContextType {
     session: Session | null
     signInWithGoogle: () => Promise<{ error: any }>
     signOut: () => Promise<void>
+    // New methods for email streams
+    signInWithPassword: (email: string, password: string) => Promise<{ data?: any; error?: any }>
+    signUpWithPassword: (email: string, password: string) => Promise<{ data?: any; error?: any }>
+    // States
+    isReady: boolean
+    isSigningIn: boolean
+    isSigningUp: boolean
+    error: string | null
 }
 
 export interface ProtectedRouteProps {

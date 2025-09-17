@@ -2,23 +2,23 @@
 
 // Imports 
 import { useState, useEffect } from 'react'
-import { supabase } from '../../lib/supabaseClient'
-import { UserAuth } from '../../context/AuthContext'
+import { supabase } from '@/lib/supabaseClient'
+import { UserAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 
-
 // Import hooks 
-import useModal from '../../hooks/useModal'
+import useModal from '@/hooks/useModal'
 
 // Import components 
-import NewBudget from '../../components/budgets/AddNewBudget'
-import NewBudgetModal from '../../components/modals/BudgetModal'
-import ToastMessage from '../../components/ui-elements/ToastMessage'
-import BudgetFolderItem from '../../components/budgets/BudgetFolderItem'
+import NewBudget from '@/components/budgets/AddNewBudget'
+import NewBudgetModal from '@/components/modals/BudgetModal'
+import ToastMessage from '@/components/ui-elements/ToastMessage'
+import BudgetFolderItem from '@/components/budgets/BudgetFolderItem'
 
 // Import types
-import { ToastMessageProps, BudgetFolderItemProps } from '../../types/types'
+import { ToastMessageProps, BudgetFolderItemProps } from '@/types/types'
 
+// Component: Budgets
 const Budgets = () => {
   const { session } = UserAuth()
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
@@ -31,7 +31,7 @@ const Budgets = () => {
 
     try {
       const { data, error } = await supabase
-        .from('Budget_Folders')
+        .from('budget_folders')
         .select('*')
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
@@ -65,7 +65,7 @@ const Budgets = () => {
   const handleBudgetSubmit = async (emoji: string, name: string, amount: number, type: 'expense' | 'income') => {
     try {
       const { error } = await supabase
-        .from('Budget_Folders')
+        .from('budget_folders')
         .insert({
           user_id: session?.user?.id,
           emoji,
@@ -102,7 +102,7 @@ const Budgets = () => {
         <NewBudget onClick={openModal} />
         {budgetFolders.map((folder) => (
           <Link  
-            href={`/budget/${folder.id}`} 
+            href={`/budgets/${folder.id}`} 
             key={folder.id}
             className='cursor-pointer'
           >

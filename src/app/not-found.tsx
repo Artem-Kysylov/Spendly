@@ -21,7 +21,7 @@ const NotFound = () => {
       <p className="text-[25px] font-semibold text-secondary-black text-center">Sorry, this page does not exist</p>
       <Button
         text='Go to the Home page'
-        className="btn-primary text-white"
+        variant="primary"
         onClick={handleClick}
       />
     </div>

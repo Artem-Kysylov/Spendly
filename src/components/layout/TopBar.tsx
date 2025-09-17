@@ -1,72 +1,50 @@
+'use client'
+
 // Imports 
-import { UserAuth } from '../../context/AuthContext'
-import { useLocation } from 'react-router-dom'
-import useModal from '../../hooks/useModal'
-import { Link } from 'react-router-dom'
+import { UserAuth } from '@/context/AuthContext'
+import useModal from '@/hooks/useModal'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 // Import components 
-import Button from "../ui-elements/Button"
-import SignOutModal from '../modals/SignOutModal'
+import Button from "@/components/ui-elements/Button"
+import SignOutModal from '@/components/modals/SignOutModal'
 
 const TopBar = () => {
-    const location = useLocation()
-    // Hooks
-    const { isModalOpen, openModal, closeModal } = useModal()
-
     const { session, signOut } = UserAuth()
+    const { isModalOpen, openModal, closeModal } = useModal()
+    const pathname = usePathname()
 
     return (
-        <>
-            {isModalOpen && (
-                <SignOutModal 
-                    title="Signout"
-                    text="Are you sure you want to signout?"
-                    onClose={closeModal}
-                    signOut={signOut}
-                    />
-                )}
-            <div className="flex justify-between items-center p-5 border-b light-grey">
-                <div className="flex items-center">
-                    <img 
-                        src="/Spendly-logo.svg" 
-                        alt="Spendly Logo" 
-                        className="h-6 w-auto"
-                    />
-                </div>
-
+        <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b">
+            <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
                 <nav>
-                    <ul className="flex items-center gap-8">
+                    <ul className="flex items-center gap-6">
                         <li>
-                            <Link 
-                                to="/dashboard" 
+                            <Link
+                                href="/dashboard"
                                 className={`font-medium transition-colors duration-300 hover:text-primary ${
-                                    location.pathname === '/dashboard' 
-                                    ? 'text-primary' 
-                                    : 'text-secondary-black'
+                                    pathname === '/dashboard' ? 'text-primary' : 'text-secondary-black'
                                 }`}
                             >
                                 Dashboard
                             </Link>
                         </li>
                         <li>
-                            <Link 
-                                to="/transactions" 
+                            <Link
+                                href="/transactions"
                                 className={`font-medium transition-colors duration-300 hover:text-primary ${
-                                    location.pathname === '/transactions' 
-                                    ? 'text-primary' 
-                                    : 'text-secondary-black'
+                                    pathname === '/transactions' ? 'text-primary' : 'text-secondary-black'
                                 }`}
                             >
                                 Transactions
                             </Link>
                         </li>
                         <li>
-                            <Link 
-                                to="/budgets" 
+                            <Link
+                                href="/budgets"
                                 className={`font-medium transition-colors duration-300 hover:text-primary ${
-                                    location.pathname === '/budgets' 
-                                    ? 'text-primary' 
-                                    : 'text-secondary-black'
+                                    pathname === '/budgets' ? 'text-primary' : 'text-secondary-black'
                                 }`}
                             >
                                 Budgets
@@ -74,7 +52,6 @@ const TopBar = () => {
                         </li>
                     </ul>
                 </nav>
-
                 <div className="flex items-center gap-2">
                     {session?.user?.user_metadata?.avatar_url && (
                         <div className="avatar flex items-center justify-center bg-white">
@@ -90,12 +67,21 @@ const TopBar = () => {
                     )}
                     <Button
                         text='Signout'
-                        className='btn-ghost text-primary p-0'
+                        variant="ghost"
+                        className='text-primary p-0'
                         onClick={openModal}
                     />
                 </div>
             </div>
-        </>
+            {isModalOpen && (
+                <SignOutModal 
+                    title="Sign Out"
+                    text="Are you sure you want to sign out?"
+                    onClose={closeModal}
+                    signOut={signOut}
+                />
+            )}
+        </header>
     )
 }
 

@@ -14,20 +14,23 @@ const BudgetDetailsControls = ({ onDeleteClick, onEditClick }: BudgetDetailsCont
     <div className='flex items-center justify-between'>
         <Button
             text="Go to Budgets"
-            className="btn-ghost text-primary p-0"
+            className="p-0 text-primary"
+            variant="ghost"
             onClick={() => router.push('/budgets')}
         />
         <div className='flex items-center gap-2'>
             <Button
                 icon={<Pencil />}
                 text="Edit budget"
-                className="btn-ghost text-primary p-0"
+                className="p-0 text-primary"
+                variant="ghost"
                 onClick={onEditClick}
             />
             <Button
                 icon={<Trash />}
                 text="Delete"
-                className="btn-ghost text-error p-0"
+                className="p-0 text-error"
+                variant="ghost"
                 onClick={onDeleteClick}
             />
         </div>

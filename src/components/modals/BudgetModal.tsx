@@ -116,14 +116,15 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                     <div className="modal-action justify-center gap-4">
                         <Button
                             text="Cancel"
-                            className="btn-ghost text-primary"
+                            variant="ghost"
+                            className="text-primary"
                             onClick={handleCancel}
                             disabled={isLoading}
                         />
                         <Button
                             type="submit"
                             text={initialData ? "Save changes" : "Create budget"}
-                            className="btn-primary text-white"
+                            variant="primary"
                             disabled={isLoading || !budgetName || !amount}
                             isLoading={isSubmitting}
                         />

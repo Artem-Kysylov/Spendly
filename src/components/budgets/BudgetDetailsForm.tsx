@@ -44,7 +44,7 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
         />
         <Button
           type="submit"
-          className="btn-primary text-white"
+          variant="primary"
           text="Add new transaction"
           disabled={isSubmitting || !transactionTitle || !amount}
           isLoading={isSubmitting}
