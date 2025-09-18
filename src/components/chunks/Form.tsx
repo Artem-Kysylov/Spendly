@@ -2,34 +2,29 @@
 import { useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { UserAuth } from '../../context/AuthContext'
+import { useToast } from '@/components/ui/use-toast'
 
 // Import components 
 import Button from '../ui-elements/Button'
-import ToastMessage from '../ui-elements/ToastMessage'
-
-// Import types
-import { ToastMessageProps } from '../../types/types'
 
 // Component: Form
 const Form = () => {
   const { session } = UserAuth()
+  const { toast } = useToast()
 
   // State 
   const [title, setTitle] = useState<string>('')
   const [amount, setAmount] = useState<string>('')
   const [type, setType] = useState<'expense' | 'income'>('expense')
   const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
 
-  
   // Handlers 
-  const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
-    console.log('Form: Setting toast message:', { text, type });
-    setToastMessage({ text, type })
-    
-    setTimeout(() => {
-      setToastMessage(null)
-    }, 3000)
+  const handleToastMessage = (text: string, type: 'success' | 'error') => {
+    toast({
+      variant: type === 'success' ? 'success' : 'destructive',
+      description: text,
+      duration: 3000,
+    })
   }
   
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -68,17 +63,13 @@ const Form = () => {
     }
   }
 
-
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.target.value = e.target.value.replace(/[^A-Za-z\s]/g, '');
   }
 
   return (
     <div className="relative">
-      {toastMessage && (
-        <ToastMessage text={toastMessage.text} type={toastMessage.type} />
-      )}
-      <form onSubmit={handleSubmit} className='w-full md:w-[50vw] rounded-lg light-grey border p-5 flex flex-col gap-5'>
+      <form onSubmit={handleSubmit} className='w-full md:w-[50vw] rounded-lg border border-light-grey p-5 flex flex-col gap-5'>
         <input 
           type="text" 
           placeholder="Transaction Name" 
@@ -98,7 +89,7 @@ const Form = () => {
         />
         <div className="flex gap-4 w-full">
           <label className={`cursor-pointer p-7 flex-1 rounded-lg border text-center font-medium transition-all
-            ${type === "expense" ? "bg-error text-white border-error" : "light-grey text-secondary-black"}`}
+            ${type === "expense" ? "bg-error text-white border-error" : "bg-light-grey text-secondary-black border-light-grey"}`}
           >
             <input
               type="radio"
@@ -106,13 +97,12 @@ const Form = () => {
               value="expense"
               className="hidden"
               checked={type === "expense"}
-              onChange={(e) => setType(e.target.value as 'expense' | 'income')}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setType(e.target.value as 'expense' | 'income')}
             />
             Expense
           </label>
-
           <label className={`cursor-pointer p-7 flex-1 rounded-lg border text-center font-medium transition-all
-            ${type === "income" ? "bg-success text-white border-success" : "light-grey text-secondary-black"}`}
+            ${type === "income" ? "bg-success text-white border-success" : "bg-light-grey text-secondary-black border-light-grey"}`}
           >
             <input
               type="radio"
@@ -120,16 +110,16 @@ const Form = () => {
               value="income"
               className="hidden"
               checked={type === "income"}
-              onChange={(e) => setType(e.target.value as 'expense' | 'income')}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setType(e.target.value as 'expense' | 'income')}
             />
             Income
           </label>
         </div>
         <Button 
-          type='submit'
-          text='Add Transaction'
+          text={isLoading ? 'Adding...' : 'Add Transaction'} 
+          variant="primary" 
+          type="submit"
           disabled={isLoading}
-          isLoading={isLoading}
         />
       </form>
     </div>

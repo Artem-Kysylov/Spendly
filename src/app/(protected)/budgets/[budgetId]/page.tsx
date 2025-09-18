@@ -83,7 +83,6 @@ const BudgetDetails = () => {
     if (!session?.user?.id || !id) return
 
     try {
-      // Сначала получаем тип бюджета
       const { data: budgetData, error: budgetError } = await supabase
         .from('budget_folders')
         .select('type')
@@ -243,7 +242,6 @@ const BudgetDetails = () => {
   }
 
   useEffect(() => {
-    // Загружаем тип бюджета сразу при монтировании компонента
     fetchBudgetType()
     fetchBudgetDetails()
     fetchTransactions()
@@ -263,7 +261,7 @@ const BudgetDetails = () => {
     try {
       setIsDeleting(true)
       const { error } = await supabase
-        .from('Budget_Folder_Transactions')
+        .from('budget_folder_transactions') 
         .delete()
         .eq('id', id)
         .eq('user_id', session.user.id)
@@ -280,7 +278,7 @@ const BudgetDetails = () => {
       console.error('Error:', error)
       handleToastMessage('An unexpected error occurred', 'error')
     } finally {
-      setIsDeleting(false)  
+      setIsDeleting(false)
     }
   }
 

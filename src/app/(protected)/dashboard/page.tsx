@@ -29,14 +29,21 @@ const Dashboard = () => {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
+  const [refreshCounters, setRefreshCounters] = useState<number>(0) 
   const { isModalOpen, openModal, closeModal } = useModal()
 
   // Проверяем наличие бюджета
   const { isLoading: isBudgetChecking } = useCheckBudget(session?.user?.id)
 
   const fetchTransactions = async () => {
+    if (!session?.user?.id) return
+    
     setIsLoading(true)
-    const { data, error } = await supabase.from('transactions').select('*')
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('user_id', session.user.id)
+    
     setTransactions(data as Transaction[])
     setTimeout(() => setIsLoading(false), 500)
     if (error) {
@@ -45,8 +52,10 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
-    fetchTransactions()
-  }, [])
+    if (session?.user?.id) {
+      fetchTransactions()
+    }
+  }, [session?.user?.id]) // Добавляем зависимость от user_id
 
   const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
     setToastMessage({ text, type })
@@ -58,6 +67,8 @@ const Dashboard = () => {
   const handleTransactionSubmit = (message: string, type: ToastMessageProps['type']) => {
     handleToastMessage(message, type)
     if (type === 'success') {
+      // Обновляем счетчики после успешного обновления бюджета
+      setRefreshCounters(prev => prev + 1)
       setTimeout(() => {
         fetchTransactions()
       }, 1000)
@@ -82,6 +93,7 @@ const Dashboard = () => {
       // Pause before deleting data from the table
       setTimeout(() => {
         fetchTransactions()
+        setRefreshCounters(prev => prev + 1) // Обновляем счетчики
       }, 1000)
     } catch (error) {
       console.error('Unexpected error during deletion:', error)
@@ -109,11 +121,16 @@ const Dashboard = () => {
             />
           </div>
           <div className="mt-[30px] px-5 flex flex-col gap-5">
-            <Counters onIconClick={handleIconClick} />
+            <Counters onIconClick={handleIconClick} refreshTrigger={refreshCounters} />
             {isLoading ? (
               <Spinner />
             ) : transactions.length === 0 ? (
-              <EmptyState />
+              <EmptyState 
+                title="Don`t have any transactions yet?"
+                description="Create new by clicking this button"
+                buttonText="Add Transaction"
+                onButtonClick={() => router.push('/transactions')}
+              />
             ) : (
               <TransactionsTable 
                 transactions={transactions} 

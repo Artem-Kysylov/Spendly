@@ -5,6 +5,7 @@ import { UserAuth } from '../../context/AuthContext'
 // Import components 
 import Button from '../ui-elements/Button'
 import TextInput from '../ui-elements/TextInput'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 // Import types 
 import { MainBudgetModalProps } from '../../types/types'
@@ -28,19 +29,26 @@ const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) =>
             if (!session?.user?.id) return
 
             try {
+                console.log('Fetching current budget for user:', session.user.id)
+                
                 const { data, error } = await supabase
                     .from('main_budget')
                     .select('amount')
                     .eq('user_id', session.user.id)
-                    .single()
+                    .maybeSingle() // Используем maybeSingle вместо single
 
                 if (error) {
                     console.error('Error fetching budget:', error)
                     return
                 }
 
+                console.log('Current budget data:', data)
+                
                 if (data) {
                     setAmount(data.amount.toString())
+                } else {
+                    console.log('No existing budget found, starting with empty amount')
+                    setAmount('')
                 }
             } catch (error) {
                 console.error('Error fetching budget:', error)
@@ -59,22 +67,35 @@ const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) =>
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (!session?.user) return onSubmit('Please login to update budget', 'error')    
+        if (!amount || Number(amount) <= 0) return onSubmit('Please enter a valid amount', 'error')
     
         try {
             setIsLoading(true)
+            
+            console.log('Saving budget:', {
+                user_id: session.user.id,
+                amount: Number(amount)
+            })
+            
+            // Используем upsert для создания или обновления записи
             const { data, error } = await supabase
                 .from('main_budget')
-                .update({ amount: Number(amount) })
-                .eq('user_id', session.user.id)
+                .upsert(
+                    {
+                        user_id: session.user.id,
+                        amount: Number(amount)
+                    },
+                    { onConflict: 'user_id' }
+                )
                 .select()
     
             if (error) {
-                console.error('Error updating budget:', error)
-                onSubmit('Failed to update budget. Please try again.', 'error')
+                console.error('Error saving budget:', error)
+                onSubmit('Failed to save budget. Please try again.', 'error')
             } else {
-                console.log('Budget updated successfully:', data)
+                console.log('Budget saved successfully:', data)
                 onClose()
-                onSubmit('Budget updated successfully!', 'success')
+                onSubmit('Budget saved successfully!', 'success')
             }
         } catch (error) {
             console.error('Error:', error)
@@ -85,17 +106,21 @@ const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) =>
     }
 
     return (
-        <dialog ref={dialogRef} className="modal">
-            <div className="modal-box">
-                <h3 className="font-bold text-lg mb-4 text-center">{title}</h3>
+        <Dialog open={true} onOpenChange={(o) => { if (!o) onClose() }}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle className="text-center">{title}</DialogTitle>
+                </DialogHeader>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <TextInput
                         type="number"
                         placeholder="Amount(USD)"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
+                        min="0"
+                        step="0.01"
                     />
-                    <div className="modal-action justify-center gap-4">
+                    <DialogFooter className="justify-center sm:justify-center">
                         <Button
                             text="Cancel"
                             variant="ghost"
@@ -107,13 +132,13 @@ const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) =>
                             text="Save"
                             variant="default"
                             className="w-[218px]"
-                            disabled={isLoading}
+                            disabled={isLoading || !amount}
                             isLoading={isLoading}
                         />
-                    </div>
+                    </DialogFooter>
                 </form>
-            </div>
-        </dialog>
+            </DialogContent>
+        </Dialog>
     )
 }
 

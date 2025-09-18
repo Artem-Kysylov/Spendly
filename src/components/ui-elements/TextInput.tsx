@@ -2,7 +2,7 @@
 import { TextInputProps } from '../../types/types'
 import { Input } from "@/components/ui/input"
 
-const TextInput = ({ type, placeholder, value, onChange, onInput, disabled }: TextInputProps) => {
+const TextInput = ({ type, placeholder, value, onChange, onInput, disabled, min, step }: TextInputProps) => {
   return (
     <Input
       type={type}
@@ -11,6 +11,8 @@ const TextInput = ({ type, placeholder, value, onChange, onInput, disabled }: Te
       onChange={onChange}
       onInput={onInput}
       disabled={disabled}
+      min={min}
+      step={step}
       className="h-[50px] px-[20px]"
     />
   )

@@ -54,7 +54,7 @@ const TransactionsTable = ({
           onConfirm={handleConfirmDelete}
         />
       )}
-      <div className="overflow-x-auto rounded-[10px] border light-grey bg-background">
+      <div className="overflow-x-auto rounded-[10px] border border-light-grey bg-background">
         <table className="w-full">
           {/* head */}
           <thead className="border-b">
@@ -75,7 +75,7 @@ const TransactionsTable = ({
                 <td>{transaction.amount}</td>
                 <td>
                   <span
-                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                    className={`inline-flex items-center rounded-full px-2 py-1 text-xs uppercase font-medium ${
                       transaction.type === 'expense'
                         ? 'bg-error text-error-foreground'
                         : 'bg-success text-success-foreground'
@@ -87,7 +87,7 @@ const TransactionsTable = ({
                 <td>{new Date(transaction.created_at).toLocaleDateString()}</td>
                 <td>
                   <Button
-                    icon={<Trash style={{ width: '24px', height: '24px' }}/>}
+                    icon={<Trash size={16}/>}
                     text="Delete"
                     variant="ghost"
                     className="text-error"

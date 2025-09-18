@@ -16,25 +16,27 @@ const useCheckBudget = (userId: string | undefined) => {
             }
 
             try {
-                console.log('Checking budget for user:', userId)
+                console.log('Checking main budget for user:', userId)
                 
                 const { data, error } = await supabase
-                    .from('Budgets')
+                    .from('main_budget') 
                     .select('id')
                     .eq('user_id', userId)
+                    .maybeSingle() 
 
-                console.log('Response:', { data, error })
+                console.log('Main budget response:', { data, error })
 
                 if (error) {
-                    console.error('Error checking budget:', error)
+                    console.error('Error checking main budget:', error)
                     return
                 }
 
-                if (!data || data.length === 0) {
+                if (!data) {
+                    console.log('No main budget found, redirecting to create budget page')
                     router.push('/add-new-budget')
                 }
             } catch (error) {
-                console.error('Error checking budget:', error)
+                console.error('Error checking main budget:', error)
             } finally {
                 setIsLoading(false)
             }

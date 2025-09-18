@@ -1,12 +1,12 @@
 'use client';
-// Imports 
+
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 
-// Import hooks 
+// Import hooks
 import useModal from '@/hooks/useModal'
 
-// Import components 
+// Import components
 import Button from '@/components/ui-elements/Button'
 import Spinner from '@/components/ui-elements/Spinner'
 import TransactionsTable from '@/components/chunks/TransactionsTable'
@@ -17,36 +17,36 @@ import ToastMessage from '@/components/ui-elements/ToastMessage'
 // Import types
 import { Transaction, ToastMessageProps } from '@/types/types'
 
-// Component: Transactions
+// Component
 const Transactions = () => {
-  // States 
   const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [loading, setLoading] = useState(true)
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
-
-  // Import hooks 
   const { isModalOpen, openModal, closeModal } = useModal()
-
-  const fetchTransactions = async () => {
-    try {
-      const { data, error } = await supabase.from('transactions').select('*')
-      
-      if (error) {
-        console.error('Error fetching transactions:', error)
-        return
-      }
-      
-      setTransactions(data as Transaction[])
-    } catch (error) {
-      console.error('Unexpected error:', error)
-    } finally {
-      setTimeout(() => setIsLoading(false), 500)
-    }
-  }
 
   useEffect(() => {
     fetchTransactions()
   }, [])
+
+  const fetchTransactions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('*')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching transactions:', error)
+        return
+      }
+
+      setTransactions(data || [])
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
     setToastMessage({ text, type })
@@ -57,78 +57,69 @@ const Transactions = () => {
 
   const handleTransactionSubmit = (message: string, type: ToastMessageProps['type']) => {
     handleToastMessage(message, type)
-    if (type === 'success') {
-      setTimeout(() => {
-        fetchTransactions()
-      }, 1000)
-    }
+    fetchTransactions()
   }
 
   const handleDeleteTransaction = async (id: string) => {
     try {
-      const { error } = await supabase.from('transactions').delete().eq('id', id)
-      
+      const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('id', id)
+
       if (error) {
         console.error('Error deleting transaction:', error)
         handleToastMessage('Error deleting transaction', 'error')
         return
       }
-      
+
       handleToastMessage('Transaction deleted successfully', 'success')
-      // Pause before deleting data from the table
-      setTimeout(() => {
-        fetchTransactions()
-      }, 1000)
+      fetchTransactions()
     } catch (error) {
-      console.error('Unexpected error during deletion:', error)
+      console.error('Error:', error)
       handleToastMessage('An unexpected error occurred', 'error')
     }
   }
 
   return (
-    <div>
+    <div className="flex flex-col gap-6 px-5">
       {toastMessage && (
         <ToastMessage text={toastMessage.text} type={toastMessage.type} />
       )}
-      <div className="flex flex-col items-center gap-5 text-center mt-[30px] px-5 md:flex-row md:justify-between md:text-left">
-        <h1 className="text-[35px] font-semibold text-secondary-black">
-          Transactions 📉
-        </h1>
+      
+      <div className="flex items-center justify-between mt-[30px] md:flex-row md:justify-between md:text-left">
+        <h1 className="text-[35px] font-semibold text-secondary-black">Transactions📉</h1>
         <Button
-          variant="primary"
           text="Add Transaction"
+          variant="primary"
           onClick={openModal}
         />
       </div>
 
+      {loading ? (
+        <Spinner />
+      ) : transactions.length === 0 ? (
+        <EmptyState
+          title="No transactions yet"
+          description="Start by adding your first transaction"
+          buttonText="Add Transaction"
+          onButtonClick={openModal}
+        />
+      ) : (
+        <TransactionsTable
+          transactions={transactions}
+          onDeleteTransaction={handleDeleteTransaction}
+        />
+      )}
+
       {isModalOpen && (
         <TransactionModal
           title="Add Transaction"
-          onClose={() => {
-            closeModal()
-            handleToastMessage('Transaction cancelled', 'error')
-          }}
+          onClose={closeModal}
           onSubmit={(message, type) => {
             handleTransactionSubmit(message, type)
           }}
         />
-      )}
-
-      {isLoading ? (
-        <Spinner />
-      ) : transactions.length === 0 ? (
-        <EmptyState />
-      ) : (
-        <div className='mt-[30px] px-5'>
-          <TransactionsTable 
-            transactions={transactions} 
-            onDeleteTransaction={handleDeleteTransaction}
-            deleteModalConfig={{
-              title: "Delete transaction",
-              text: "Are you sure you want to delete this transaction?"
-            }}
-          />
-        </div>
       )}
     </div>
   )

@@ -4,6 +4,7 @@
 import { UserAuth } from '@/context/AuthContext'
 import useModal from '@/hooks/useModal'
 import Link from 'next/link'
+import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 
 // Import components 
@@ -17,9 +18,10 @@ const TopBar = () => {
 
     return (
         <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b">
-            <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+            <div className="mx-auto px-5 h-16 flex items-center justify-between">
+                <Image src="/Spendly-logo.svg" alt="logo" width={100} height={100} />
                 <nav>
-                    <ul className="flex items-center gap-6">
+                    <ul className="flex items-center gap-6 list-none">
                         <li>
                             <Link
                                 href="/dashboard"

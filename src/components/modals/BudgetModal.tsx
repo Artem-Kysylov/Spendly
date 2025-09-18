@@ -1,68 +1,67 @@
-// Imports 
+// Import types
 import { useState, useEffect, useRef } from 'react'
 import EmojiPicker from 'emoji-picker-react'
 
-// Import components 
+// Import components
 import Button from '../ui-elements/Button'
 import TextInput from '../ui-elements/TextInput'
 import RadioButton from '../ui-elements/RadioButton'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
-// Import types 
+// Import types
 import { BudgetModalProps } from '../../types/types'
 
 const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData, handleToastMessage }: BudgetModalProps) => {
-    const dialogRef = useRef<HTMLDialogElement>(null)
-
-    // State 
-    const [emojiIcon, setEmojiIcon] = useState<string>(initialData?.emoji || '😊')
-    const [openEmojiPicker, setOpenEmojiPicker] = useState<boolean>(false)
-    const [budgetName, setBudgetName] = useState<string>(initialData?.name || '')
-    const [amount, setAmount] = useState<string>(initialData?.amount?.toString() || '')
+    const [emojiIcon, setEmojiIcon] = useState(initialData?.emoji || '💰')
+    const [name, setName] = useState(initialData?.name || '')
+    const [amount, setAmount] = useState(initialData?.amount?.toString() || '')
     const [type, setType] = useState<'expense' | 'income'>(initialData?.type || 'expense')
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
+    const [openEmojiPicker, setOpenEmojiPicker] = useState(false)
+    const inputRef = useRef<HTMLInputElement>(null)
 
     useEffect(() => {
-        if (dialogRef.current) {
-            dialogRef.current.showModal()
-        }
-        return () => {
-            if (dialogRef.current) {
-                dialogRef.current.close()
-            }
+        if (inputRef.current) {
+            inputRef.current.focus()
         }
     }, [])
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!emojiIcon || !budgetName || !amount) return
-
-        try {
-            setIsSubmitting(true)
-            await onSubmit(emojiIcon, budgetName, Number(amount), type)
-            onClose()
-        } catch (error) {
-            console.error('Error submitting budget:', error)
-        } finally {
-            setIsSubmitting(false)
+    const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
+        const value = e.currentTarget.value
+        if (value === '' || /^\d*\.?\d*$/.test(value)) {
+            setAmount(value)
         }
     }
 
-    const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.target.value = e.target.value.replace(/[^A-Za-z\s]/g, '')
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!name.trim() || !amount) return
+
+        try {
+            await onSubmit(emojiIcon, name.trim(), parseFloat(amount), type)
+            onClose()
+        } catch (error) {
+            console.error('Error in budget modal:', error)
+            if (handleToastMessage) {
+                handleToastMessage('Failed to save budget folder', 'error')
+            }
+        }
     }
 
     const handleCancel = () => {
-        if (handleToastMessage) {
-            handleToastMessage('Budget creation cancelled', 'error')
-        }
+        setEmojiIcon(initialData?.emoji || '💰')
+        setName(initialData?.name || '')
+        setAmount(initialData?.amount?.toString() || '')
+        setType(initialData?.type || 'expense')
         onClose()
     }
 
     return (
-        <dialog ref={dialogRef} className="modal">
-            <div className="modal-box">
-                <h3 className="font-semibold text-[25px] mb-4 text-center">{title}</h3>
-                <div>
+        <Dialog open={true} onOpenChange={(o) => { if (!o) onClose() }}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle className="text-center">{title}</DialogTitle>
+                </DialogHeader>
+                <div className="mt-[30px]">
                     <div className='flex items-center justify-center gap-2 mb-[20px]'>
                         <Button
                             text={emojiIcon}
@@ -80,58 +79,57 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                             }}
                         />
                     </div>
-                </div>
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <TextInput
-                        type="text"
-                        placeholder="Budget Name"
-                        value={budgetName}
-                        onChange={(e) => setBudgetName(e.target.value)}
-                        onInput={handleInput}
-                        disabled={isLoading}
-                    />
-                    <TextInput
-                        type="number"
-                        placeholder="Amount(USD)"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        disabled={isLoading}
-                    />
-                    <div className="flex gap-4">
-                        <RadioButton
-                            title="Expense"
-                            value="expense"
-                            currentValue={type}
-                            variant="expense"
-                            onChange={(e) => setType(e.target.value as 'expense' | 'income')}
-                        />
-                        <RadioButton
-                            title="Income"
-                            value="income"
-                            currentValue={type}
-                            variant="income"
-                            onChange={(e) => setType(e.target.value as 'expense' | 'income')}
-                        />
-                    </div>
-                    <div className="modal-action justify-center gap-4">
-                        <Button
-                            text="Cancel"
-                            variant="ghost"
-                            className="text-primary"
-                            onClick={handleCancel}
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                        <TextInput
+                            type="text"
+                            placeholder="Budget Folder Name"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             disabled={isLoading}
                         />
-                        <Button
-                            type="submit"
-                            text={initialData ? "Save changes" : "Create budget"}
-                            variant="primary"
-                            disabled={isLoading || !budgetName || !amount}
-                            isLoading={isSubmitting}
+                        <TextInput
+                            type="text"
+                            placeholder="Amount(USD)"
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                            onInput={handleInput}
+                            disabled={isLoading}
                         />
-                    </div>
-                </form>
-            </div>
-        </dialog>
+                        <div className="flex gap-4">
+                            <RadioButton
+                                title="Expense"
+                                value="expense"
+                                currentValue={type}
+                                variant="expense"
+                                onChange={(e) => setType(e.target.value as 'expense' | 'income')}
+                            />
+                            <RadioButton
+                                title="Income"
+                                value="income"
+                                currentValue={type}
+                                variant="income"
+                                onChange={(e) => setType(e.target.value as 'expense' | 'income')}
+                            />
+                        </div>
+                        <DialogFooter className="justify-center sm:justify-center gap-4">
+                            <Button
+                                text="Cancel"
+                                variant="ghost"
+                                className="text-primary"
+                                onClick={handleCancel}
+                                disabled={isLoading}
+                            />
+                            <Button
+                                type="submit"
+                                text={isLoading ? 'Saving...' : 'Submit'}
+                                variant="primary"
+                                disabled={isLoading || !name.trim() || !amount}
+                            />
+                        </DialogFooter>
+                    </form>
+                </div>
+            </DialogContent>
+        </Dialog>
     )
 }
 

@@ -29,8 +29,13 @@ const AddNewBudget = () => {
         throw new Error('User not authenticated')
       }
 
+      console.log('Creating main budget:', {
+        user_id: session.user.id,
+        amount: Number(budget)
+      })
+
       // Create new budget
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('main_budget')
         .upsert(
           [
@@ -44,9 +49,11 @@ const AddNewBudget = () => {
         .select()
 
       if (error) {
+        console.error('Error creating main budget:', error)
         throw error
       }
 
+      console.log('Main budget created successfully:', data)
       handleToastMessage('Budget successfully created!', 'success')
       // Redirect to Dashboard after 2 seconds
       setTimeout(() => {

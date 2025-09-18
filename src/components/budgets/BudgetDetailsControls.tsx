@@ -18,16 +18,16 @@ const BudgetDetailsControls = ({ onDeleteClick, onEditClick }: BudgetDetailsCont
             variant="ghost"
             onClick={() => router.push('/budgets')}
         />
-        <div className='flex items-center gap-2'>
+        <div className='flex items-center gap-8'>
             <Button
-                icon={<Pencil />}
+                icon={<Pencil size={16}/>}
                 text="Edit budget"
                 className="p-0 text-primary"
                 variant="ghost"
                 onClick={onEditClick}
             />
             <Button
-                icon={<Trash />}
+                icon={<Trash size={16}/>}
                 text="Delete"
                 className="p-0 text-error"
                 variant="ghost"

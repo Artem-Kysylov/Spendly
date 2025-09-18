@@ -8,7 +8,7 @@ const RadioButton = ({ value, currentValue, variant, onChange, title }: RadioBut
         ? 'bg-error text-error-foreground border-error'
         : 'bg-success text-success-foreground border-success'
     }
-    return 'bg-secondary text-secondary-foreground border-border'
+    return 'text-secondary-foreground border-border'
   }
 
   return (

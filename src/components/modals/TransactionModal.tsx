@@ -6,6 +6,7 @@ import { UserAuth } from '../../context/AuthContext'
 import Button from '../ui-elements/Button'
 import TextInput from '../ui-elements/TextInput'
 import RadioButton from '../ui-elements/RadioButton'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 // Import types
 import { TransactionModalProps } from '../../types/types'
@@ -73,10 +74,12 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
   }
 
   return (
-    <dialog ref={dialogRef} className="modal">
-      <div className="modal-box">
-        <h3 className="font-bold text-lg mb-4 text-center">{title}</h3>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <Dialog open={true} onOpenChange={(o) => { if (!o) onClose() }}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-center">{title}</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-[30px]" >
           <TextInput
             type="text"
             placeholder="Transaction Name"
@@ -106,7 +109,7 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
               onChange={(e) => setType(e.target.value as 'expense' | 'income')}
             />
           </div>
-          <div className="modal-action justify-center gap-4">
+          <DialogFooter className="justify-center sm:justify-center">
             <Button
               text="Cancel"
               variant="ghost"
@@ -120,10 +123,10 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
               disabled={isLoading}
               isLoading={isLoading}
             />
-          </div>
+          </DialogFooter>
         </form>
-      </div>
-    </dialog>
+      </DialogContent>
+    </Dialog>
   )
 }
 

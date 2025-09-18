@@ -6,6 +6,7 @@ import { DeleteModalProps } from '../../types/types'
 
 // Import components 
 import Button from '../ui-elements/Button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 const DeleteModal = ({ title, text, onClose, onConfirm, isLoading = false }: DeleteModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -27,12 +28,14 @@ const DeleteModal = ({ title, text, onClose, onConfirm, isLoading = false }: Del
   }
 
   return (
-    <dialog ref={dialogRef} className="modal">
-      <div className="modal-box">
-        <h3 className="font-bold text-lg">{title}</h3>
+    <Dialog open={true} onOpenChange={(o) => { if (!o) onClose() }}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+        </DialogHeader>
         <p className="py-4">{text}</p>
-        <div className="modal-action">
-          <form onSubmit={handleSubmit}>
+        <DialogFooter>
+          <form onSubmit={handleSubmit} className="flex gap-2">
             <Button 
               variant="ghost"
               text='Cancel' 
@@ -46,9 +49,9 @@ const DeleteModal = ({ title, text, onClose, onConfirm, isLoading = false }: Del
               disabled={isLoading}
             />
           </form>
-        </div>
-      </div>
-    </dialog>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   )
 }
 

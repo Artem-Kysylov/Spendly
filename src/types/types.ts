@@ -9,6 +9,7 @@ export interface ButtonProps {
     disabled?: boolean,
     isLoading?: boolean,
     icon?: ReactNode,
+    title?: string,
     variant?: 'default' | 'primary' | 'secondary' | 'outline' | 'ghost' | 'destructive',
 }
 
@@ -92,6 +93,8 @@ export interface TextInputProps {
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
     onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void,
     disabled?: boolean,
+    min?: string,
+    step?: string,
 }
 
 export interface RadioButtonProps {
@@ -118,6 +121,7 @@ export interface BudgetFolderItemProps {
     emoji: string,
     name: string,
     amount: number,
+    spentAmount?: number,
 }
 
 export interface BudgetDetailsInfoProps {

@@ -1,21 +1,25 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+// IMPORTANT: static access so Next.js inlines values ​​into the client bundle
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase env vars: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY')
+if (!supabaseUrl) {
+  throw new Error("Missing Supabase env var: NEXT_PUBLIC_SUPABASE_URL. Make sure it's set in .env.local");
+}
+if (!supabaseAnonKey) {
+  throw new Error("Missing Supabase env var: NEXT_PUBLIC_SUPABASE_ANON_KEY. Make sure it's set in .env.local");
 }
 
-// To avoid creating multiple instances in dev/HMR
 declare global {
   // eslint-disable-next-line no-var
-  var supabase: SupabaseClient | undefined
+  var supabase: SupabaseClient | undefined;
 }
 
-export const supabase =
-  globalThis.supabase ?? createClient(supabaseUrl, supabaseAnonKey)
+// Один инстанс клиента (кэш через globalThis, чтобы переживать HMR в dev)
+export const supabase: SupabaseClient =
+  globalThis.supabase ?? createClient(supabaseUrl, supabaseAnonKey);
 
-if (process.env.NODE_ENV !== 'production') {
-  globalThis.supabase = supabase
+if (process.env.NODE_ENV !== "production") {
+  globalThis.supabase = supabase;
 }

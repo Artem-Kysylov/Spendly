@@ -1,27 +1,25 @@
 'use client'
 
-// Imports 
-import { useRouter } from 'next/navigation'
-
 // Import components 
 import Button from '../ui-elements/Button'
 
-const EmptyState = () => {
-  const router = useRouter()
-  
-  const handleClick = () => {
-    router.push('/transactions')
-  }
+interface EmptyStateProps {
+  title: string
+  description: string
+  buttonText: string
+  onButtonClick: () => void
+}
 
+const EmptyState = ({ title, description, buttonText, onButtonClick }: EmptyStateProps) => {
   return (
     <div className="flex flex-col items-center justify-center gap-5 mt-[100px]">
       <img src="/illustration-no-transactions.svg" alt="empty-state" />
-        <h1 className="text-[35px] font-semibold text-secondary-black text-center">Don`t have any transactions yet?</h1>
-        <p className="font-semibold text-secondary-black text-center">Create new by clicking this button</p>
+        <h1 className="text-[35px] font-semibold text-secondary-black text-center">{title}</h1>
+        <p className="font-semibold text-secondary-black text-center">{description}</p>
         <Button 
           variant="primary"
-          text="Add Transaction"
-          onClick={handleClick} 
+          text={buttonText}
+          onClick={onButtonClick} 
         />
     </div>  
   )
