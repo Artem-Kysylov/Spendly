@@ -41,7 +41,10 @@ export interface Transaction {
     title: string,
     amount: number,
     type: 'expense' | 'income',
-    created_at: string
+    created_at: string,
+    budget_folder_id?: string | null,
+    category_name?: string,
+    category_emoji?: string
 }
 
 export interface TransactionsTableProps {
@@ -51,6 +54,7 @@ export interface TransactionsTableProps {
         title: string
         text: string
     }
+    onEditTransaction?: (payload: EditTransactionPayload) => Promise<void>
 }
 
 export interface SignOutModalProps {
@@ -154,4 +158,26 @@ export interface BudgetModalProps {
     isLoading?: boolean,
     initialData?: BudgetDetailsProps,
     handleToastMessage?: (text: string, type: ToastMessageProps['type']) => void
+}
+
+export interface EditTransactionPayload {
+    id: string
+    title: string
+    amount: number
+    type: 'expense' | 'income'
+    budget_folder_id?: string | null
+}
+
+export interface EditTransactionModalProps {
+    title: string
+    onClose: () => void
+    isLoading?: boolean
+    initialData: {
+        id: string
+        title: string
+        amount: number
+        type: 'expense' | 'income'
+        budget_folder_id?: string | null
+    }
+    onSubmit: (payload: EditTransactionPayload) => Promise<void>
 }

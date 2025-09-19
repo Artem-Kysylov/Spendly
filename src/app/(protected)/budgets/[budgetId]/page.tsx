@@ -21,6 +21,7 @@ import TransactionsTable from '@/components/chunks/TransactionsTable'
 
 // Import types
 import { BudgetDetailsProps, Transaction, ToastMessageProps } from '@/types/types'
+import type { EditTransactionPayload } from '@/types/types'
 
 // Component: BudgetDetails
 const BudgetDetails = () => {
@@ -108,7 +109,7 @@ const BudgetDetails = () => {
 
       setIsSubmitting(true)
       const { error: transactionError } = await supabase
-        .from('budget_folder_transactions')
+        .from('transactions')
         .insert({
           budget_folder_id: id,
           user_id: session.user.id,
@@ -126,6 +127,8 @@ const BudgetDetails = () => {
 
       handleToastMessage('Transaction added successfully!', 'success')
       fetchTransactions()
+      // Trigger refresh of budget folder items to update progress bars
+      window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
     } catch (error) {
       console.error('Error:', error)
       handleToastMessage('An unexpected error occurred', 'error')
@@ -224,18 +227,32 @@ const BudgetDetails = () => {
 
     try {
       const { data, error } = await supabase
-        .from('budget_folder_transactions')
-        .select('*')
+        .from('transactions')
+        .select(`
+          *,
+          budget_folders (
+            emoji,
+            name
+          )
+        `)
         .eq('budget_folder_id', id)
         .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false })
 
       if (error) {
         console.error('Error fetching transactions:', error)
         return
       }
 
-      console.log('Fetched transactions:', data)
-      setTransactions(data || [])
+      // Transform data to include category info
+      const transformedData = data?.map(transaction => ({
+        ...transaction,
+        category_emoji: transaction.budget_folders?.emoji || null,
+        category_name: transaction.budget_folders?.name || null
+      })) || []
+
+      console.log('Fetched transactions:', transformedData)
+      setTransactions(transformedData)
     } catch (error) {
       console.error('Error:', error)
     }
@@ -261,7 +278,7 @@ const BudgetDetails = () => {
     try {
       setIsDeleting(true)
       const { error } = await supabase
-        .from('budget_folder_transactions') 
+        .from('transactions') 
         .delete()
         .eq('id', id)
         .eq('user_id', session.user.id)
@@ -273,12 +290,48 @@ const BudgetDetails = () => {
       }
 
       handleToastMessage('Transaction deleted successfully!', 'success')
+      fetchTransactions()
       fetchBudgetDetails()
     } catch (error) {
       console.error('Error:', error)
       handleToastMessage('An unexpected error occurred', 'error')
     } finally {
       setIsDeleting(false)
+    }
+  }
+
+  // Update transaction (Edit)
+  const handleUpdateTransaction = async ({ id, title, amount, type, budget_folder_id }: EditTransactionPayload) => {
+    if (!session?.user?.id || !id) return
+  
+    try {
+      console.log('[BudgetDetails] Updating transaction:', { id, title, amount, type, budget_folder_id })
+      const { data, error } = await supabase
+        .from('transactions')
+        .update({
+          title,
+          amount,
+          type,
+          budget_folder_id: budget_folder_id ?? null,
+        })
+        .eq('id', id)
+        .eq('user_id', session.user.id)
+        .select('*')
+  
+      if (error) {
+        console.error('Error updating transaction:', error)
+        handleToastMessage('Failed to update transaction', 'error')
+        return
+      }
+  
+      console.log('[BudgetDetails] Update OK. Updated rows:', data)
+      handleToastMessage('Transaction updated successfully!', 'success')
+      await fetchTransactions()
+      await fetchBudgetDetails()
+      window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
+    } catch (err) {
+      console.error('Error:', err)
+      handleToastMessage('An unexpected error occurred', 'error')
     }
   }
 
@@ -308,6 +361,7 @@ const BudgetDetails = () => {
         <TransactionsTable 
           transactions={transactions}
           onDeleteTransaction={handleDeleteTransaction}
+          onEditTransaction={handleUpdateTransaction}
         />
       )}
 

@@ -68,6 +68,8 @@ const config: Config = {
           DEFAULT: "hsl(var(--income))",
           foreground: "hsl(var(--income-foreground))",
         },
+        "secondary-black": "#1a1a1a",
+        "light-grey": "#e5e5e5",
       },
       borderRadius: {
         lg: "var(--radius)",

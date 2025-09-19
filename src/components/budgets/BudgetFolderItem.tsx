@@ -17,8 +17,8 @@ const BudgetFolderItem = ({ id, emoji, name, amount }: BudgetFolderItemProps) =>
 
     try {
       const { data, error } = await supabase
-        .from('budget_folder_transactions')
-        .select('amount')
+        .from('transactions')
+        .select('amount, type')
         .eq('budget_folder_id', id)
         .eq('user_id', session.user.id)
 
@@ -27,7 +27,12 @@ const BudgetFolderItem = ({ id, emoji, name, amount }: BudgetFolderItemProps) =>
         return
       }
 
-      const total = data?.reduce((sum, transaction) => sum + transaction.amount, 0) || 0
+      // Calculate total spent amount (only expenses count towards budget spending)
+      const total = data?.reduce((sum, transaction) => {
+        // Only count expenses as "spent" money for budget tracking
+        return transaction.type === 'expense' ? sum + transaction.amount : sum
+      }, 0) || 0
+      
       setSpentAmount(total)
     } catch (error) {
       console.error('Error:', error)
@@ -36,6 +41,17 @@ const BudgetFolderItem = ({ id, emoji, name, amount }: BudgetFolderItemProps) =>
 
   useEffect(() => {
     fetchSpentAmount()
+    
+    // Listen for budget transaction updates
+    const handleBudgetUpdate = () => {
+      fetchSpentAmount()
+    }
+    
+    window.addEventListener('budgetTransactionAdded', handleBudgetUpdate)
+    
+    return () => {
+      window.removeEventListener('budgetTransactionAdded', handleBudgetUpdate)
+    }
   }, [id, session?.user?.id])
 
   const progressPercentage = amount > 0 ? (spentAmount / amount) * 100 : 0

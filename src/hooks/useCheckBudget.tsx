@@ -20,9 +20,9 @@ const useCheckBudget = (userId: string | undefined) => {
                 
                 const { data, error } = await supabase
                     .from('main_budget') 
-                    .select('id')
+                    .select('user_id')
                     .eq('user_id', userId)
-                    .maybeSingle() 
+                    .maybeSingle()
 
                 console.log('Main budget response:', { data, error })
 

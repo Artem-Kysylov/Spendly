@@ -21,6 +21,7 @@ import useCheckBudget from '@/hooks/useCheckBudget'
 
 // Import types
 import { ToastMessageProps, Transaction } from '@/types/types'
+import type { EditTransactionPayload } from '@/types/types'
 
 // Component: Dashboard
 const Dashboard = () => {
@@ -101,6 +102,38 @@ const Dashboard = () => {
     }
   }
 
+  // Обработчик редактирования для Dashboard
+  const handleEditTransaction = async (payload: EditTransactionPayload) => {
+    if (!session?.user?.id) return
+    try {
+      const { error } = await supabase
+        .from('transactions')
+        .update({
+          title: payload.title,
+          amount: payload.amount,
+          type: payload.type,
+          budget_folder_id: payload.budget_folder_id ?? null,
+        })
+        .eq('id', payload.id)
+        .eq('user_id', session.user.id)
+        .select('*')
+
+      if (error) {
+        console.error('Error updating transaction:', error)
+        handleToastMessage('Failed to update transaction', 'error')
+        return
+      }
+
+      handleToastMessage('Transaction updated successfully!', 'success')
+      await fetchTransactions()
+      setRefreshCounters(prev => prev + 1) // обновим счетчики
+      window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
+    } catch (e) {
+      console.error('Unexpected error during update:', e)
+      handleToastMessage('An unexpected error occurred', 'error')
+    }
+  }
+
   return (
     <div>
       {(isLoading || isBudgetChecking) ? (
@@ -139,6 +172,7 @@ const Dashboard = () => {
                   title: "Delete transaction",
                   text: "Are you sure you want to delete this transaction?"
                 }}
+                onEditTransaction={handleEditTransaction}
               />
             )}
           </div>

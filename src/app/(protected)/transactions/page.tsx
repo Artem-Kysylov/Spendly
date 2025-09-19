@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { UserAuth } from '@/context/AuthContext'
 
 // Import hooks
 import useModal from '@/hooks/useModal'
@@ -16,23 +17,36 @@ import ToastMessage from '@/components/ui-elements/ToastMessage'
 
 // Import types
 import { Transaction, ToastMessageProps } from '@/types/types'
+import type { EditTransactionPayload } from '@/types/types'
 
 // Component
 const Transactions = () => {
+  const { session } = UserAuth()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
   const { isModalOpen, openModal, closeModal } = useModal()
 
   useEffect(() => {
-    fetchTransactions()
-  }, [])
+    if (session?.user?.id) {
+      fetchTransactions()
+    }
+  }, [session?.user?.id])
 
   const fetchTransactions = async () => {
+    if (!session?.user?.id) return
+
     try {
       const { data, error } = await supabase
         .from('transactions')
-        .select('*')
+        .select(`
+          *,
+          budget_folders (
+            emoji,
+            name
+          )
+        `)
+        .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
 
       if (error) {
@@ -40,7 +54,14 @@ const Transactions = () => {
         return
       }
 
-      setTransactions(data || [])
+      // Transform data to include category info
+      const transformedData = data?.map(transaction => ({
+        ...transaction,
+        category_emoji: transaction.budget_folders?.emoji || null,
+        category_name: transaction.budget_folders?.name || null
+      })) || []
+
+      setTransactions(transformedData)
     } catch (error) {
       console.error('Error:', error)
     } finally {
@@ -61,11 +82,14 @@ const Transactions = () => {
   }
 
   const handleDeleteTransaction = async (id: string) => {
+    if (!session?.user?.id) return
+
     try {
       const { error } = await supabase
         .from('transactions')
         .delete()
         .eq('id', id)
+        .eq('user_id', session.user.id)
 
       if (error) {
         console.error('Error deleting transaction:', error)
@@ -77,6 +101,38 @@ const Transactions = () => {
       fetchTransactions()
     } catch (error) {
       console.error('Error:', error)
+      handleToastMessage('An unexpected error occurred', 'error')
+    }
+  }
+
+  // Обработчик редактирования: апдейт в БД + рефетч + тост
+  const handleEditTransaction = async (payload: EditTransactionPayload) => {
+    if (!session?.user?.id) return
+    try {
+      const { error } = await supabase
+        .from('transactions')
+        .update({
+          title: payload.title,
+          amount: payload.amount,
+          type: payload.type,
+          budget_folder_id: payload.budget_folder_id ?? null,
+        })
+        .eq('id', payload.id)
+        .eq('user_id', session.user.id)
+        .select('*')
+
+      if (error) {
+        console.error('Error updating transaction:', error)
+        handleToastMessage('Failed to update transaction', 'error')
+        return
+      }
+
+      handleToastMessage('Transaction updated successfully!', 'success')
+      await fetchTransactions()
+      // Обновим прогресс бары бюджетов, если открыты соответствующие виджеты
+      window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
+    } catch (e) {
+      console.error('Unexpected error during update:', e)
       handleToastMessage('An unexpected error occurred', 'error')
     }
   }
@@ -109,6 +165,7 @@ const Transactions = () => {
         <TransactionsTable
           transactions={transactions}
           onDeleteTransaction={handleDeleteTransaction}
+          onEditTransaction={handleEditTransaction}
         />
       )}
 
