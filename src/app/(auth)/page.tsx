@@ -5,6 +5,11 @@ import { useRouter } from 'next/navigation'
 import { UserAuth } from '@/context/AuthContext'
 import Button from '@/components/ui-elements/Button'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Eye, EyeOff } from 'lucide-react'
+import Image from 'next/image'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
 export default function AuthPage() {
     const { 
@@ -18,7 +23,6 @@ export default function AuthPage() {
     } = UserAuth()
     const router = useRouter()
 
-    // Перенаправление авторизованного пользователя
     useEffect(() => {
         if (isReady && session) {
             router.replace('/dashboard')
@@ -29,6 +33,8 @@ export default function AuthPage() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [toast, setToast] = useState<{ text: string, type: 'success' | 'error' } | null>(null)
+    const [rememberMe, setRememberMe] = useState(false)
+    const [showPwd, setShowPwd] = useState(false)
 
     const showError = (text: string) => {
         setToast({ text, type: 'error' })
@@ -61,6 +67,14 @@ export default function AuthPage() {
             showError(error.message || 'Invalid credentials')
             return
         }
+        // Remember me — remember email
+        if (rememberMe) {
+            localStorage.setItem('auth:rememberMe', '1')
+            localStorage.setItem('auth:rememberedEmail', email)
+        } else {
+            localStorage.removeItem('auth:rememberMe')
+            localStorage.removeItem('auth:rememberedEmail')
+        }
         router.replace('/dashboard')
     }
 
@@ -72,104 +86,172 @@ export default function AuthPage() {
             showError(error.message || 'Sign up failed')
             return
         }
+        if (rememberMe) {
+            localStorage.setItem('auth:rememberMe', '1')
+            localStorage.setItem('auth:rememberedEmail', email)
+        }
         router.replace('/dashboard')
     }
+
+    useEffect(() => {
+        document.documentElement.classList.remove('dark')
+
+        const remembered = localStorage.getItem('auth:rememberMe') === '1'
+        const savedEmail = localStorage.getItem('auth:rememberedEmail') || ''
+        if (remembered && savedEmail) {
+            setEmail(savedEmail)
+            setRememberMe(true)
+        }
+    }, [])
 
     if (!isReady) return null
     if (session) return null
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-6">
-            {toast && <ToastMessage text={toast.text} type={toast.type} />}
+        <div
+            className="min-h-screen bg-cover bg-center"
+            style={{ backgroundImage: "url('/Sign up screen-bg.png')" }}
+        >
+            <div className="container mx-auto flex min-h-screen items-center justify-center p-4">
+                <div className="w-full max-w-md rounded-[10px] border border-gray-200 bg-white text-gray-900 shadow-sm dark:bg-white dark:text-gray-900">
+                    <div className="p-6 sm:p-8">
+                        {/* Здесь остаётся весь ваш текущий контент: лого, заголовок, Google-кнопка, разделитель, Tabs и формы */}
+                        <div className="w-full max-w-md space-y-6">
+                            {/* Логотип сверху */}
+                            <div className="flex justify-center">
+                              <Image src="/Spendly-logo.svg" alt="Spendly" width={120} height={32} />
+                            </div>
 
-            <div className="w-full max-w-md space-y-6">
-                <h1 className="text-2xl font-semibold">Sign in to Spendly</h1>
+                            {/* Заголовок всегда 'Sign in' */}
+                            <h1 className="text-2xl font-semibold text-secondary-black text-center">Sign in</h1>
 
-                <Button
-                    variant="primary"
-                    className="w-full"
-                    text="Sign in with Google"
-                    onClick={onGoogle}
-                />
+                            {/* Кнопка Google */}
+                            <Button
+                                variant="outline"
+                                className="w-full bg-white text-black border border-gray-300 hover:bg-gray-50"
+                                text="Sign in with Google"
+                                onClick={onGoogle}
+                            />
 
-                <div className="flex gap-2 mt-4">
-                    <button
-                        className={`px-3 py-1 rounded ${tab === 'signin' ? 'bg-primary text-white' : 'bg-gray-100'}`}
-                        onClick={() => setTab('signin')}
-                    >
-                        Sign in
-                    </button>
-                    <button
-                        className={`px-3 py-1 rounded ${tab === 'signup' ? 'bg-primary text-white' : 'bg-gray-100'}`}
-                        onClick={() => setTab('signup')}
-                    >
-                        Sign up
-                    </button>
+                            <div className="flex items-center gap-3">
+                              <div className="h-px flex-1 bg-gray-300" />
+                              <span className="text-xs text-gray-500 uppercase tracking-wide">or</span>
+                              <div className="h-px flex-1 bg-gray-300" />
+                            </div>
+
+                            <Tabs
+                              value={tab}
+                              onValueChange={(v) => setTab(v as 'signin' | 'signup')}
+                              className="space-y-4"
+                            >
+                              <div className="flex justify-center">
+                                <TabsList>
+                                  <TabsTrigger value="signin">Sign in</TabsTrigger>
+                                  <TabsTrigger value="signup">Sign up</TabsTrigger>
+                                </TabsList>
+                              </div>
+
+                              <TabsContent value="signin">
+                                <form onSubmit={onEmailSignIn} className="space-y-3">
+                                    <Input
+                                        type="email"
+                                        placeholder="Email"
+                                        className="h-[50px] px-[20px]"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                    />
+                                    <div className="relative">
+                                        <Input
+                                            type={showPwd ? 'text' : 'password'}
+                                            placeholder="Password"
+                                            className="h-[50px] px-[20px] pr-10"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPwd((v) => !v)}
+                                            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-900"
+                                            aria-label={showPwd ? 'Hide password' : 'Show password'}
+                                        >
+                                            {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
+                                    </div>
+
+                                    <div className="flex items-center justify-between">
+                                        <label className="inline-flex items-center gap-2">
+                                            <Checkbox
+                                                checked={rememberMe}
+                                                onChange={(e) => setRememberMe(e.target.checked)}
+                                            />
+                                            <span className="text-sm text-secondary-black">Remember me</span>
+                                        </label>
+                                        {/* Здесь можно добавить link Forgot password */}
+                                    </div>
+
+                                    <Button
+                                        type="submit"
+                                        variant="primary"
+                                        className="w-full"
+                                        text={isSigningIn ? 'Signing in...' : 'Sign in'}
+                                        disabled={isSigningIn}
+                                    />
+                                </form>
+                              </TabsContent>
+
+                              <TabsContent value="signup">
+                                <form onSubmit={onEmailSignUp} className="space-y-3">
+                                    <Input
+                                        type="email"
+                                        placeholder="Email"
+                                        className="h-[50px] px-[20px]"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                    />
+                                    <div className="relative">
+                                        <Input
+                                            type={showPwd ? 'text' : 'password'}
+                                            placeholder="Password"
+                                            className="h-[50px] px-[20px] pr-10"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPwd((v) => !v)}
+                                            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-900"
+                                            aria-label={showPwd ? 'Hide password' : 'Show password'}
+                                        >
+                                            {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
+                                    </div>
+
+                                    {/* Живой чеклист требований */}
+                                    <ul className="text-sm space-y-1">
+                                        <li className={pwdCheck.len ? 'text-green-600' : 'text-gray-500'}>• Minimum 6 characters</li>
+                                        <li className={pwdCheck.lower ? 'text-green-600' : 'text-gray-500'}>• At least one lowercase letter</li>
+                                        <li className={pwdCheck.upper ? 'text-green-600' : 'text-gray-500'}>• At least one uppercase letter</li>
+                                        <li className={pwdCheck.digit ? 'text-green-600' : 'text-gray-500'}>• At least one digit</li>
+                                        <li className={pwdCheck.symbol ? 'text-green-600' : 'text-gray-500'}>• At least one special symbol</li>
+                                    </ul>
+
+                                    <Button
+                                        type="submit"
+                                        variant="primary"
+                                        className="w-full"
+                                        text={isSigningUp ? 'Creating account...' : 'Sign up'}
+                                        disabled={!pwdCheck.all || isSigningUp}
+                                    />
+                                </form>
+                              </TabsContent>
+                            </Tabs>
+                        </div>
+                    </div>
                 </div>
-
-                {tab === 'signin' ? (
-                    <form onSubmit={onEmailSignIn} className="space-y-3">
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            className="input input-bordered w-full"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            className="input input-bordered w-full"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                        <Button
-                            type="submit"
-                            variant="primary"
-                            className="w-full"
-                            text={isSigningIn ? 'Signing in...' : 'Sign in'}
-                            disabled={isSigningIn}
-                        />
-                    </form>
-                ) : (
-                    <form onSubmit={onEmailSignUp} className="space-y-3">
-                        <input
-                            type="email"
-                            placeholder="Email"
-                            className="input input-bordered w-full"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                        <input
-                            type="password"
-                            placeholder="Password"
-                            className="input input-bordered w-full"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-
-                        {/* Живой чеклист требований */}
-                        <ul className="text-sm space-y-1">
-                            <li className={pwdCheck.len ? 'text-green-600' : 'text-gray-500'}>• Minimum 6 characters</li>
-                            <li className={pwdCheck.lower ? 'text-green-600' : 'text-gray-500'}>• At least one lowercase letter</li>
-                            <li className={pwdCheck.upper ? 'text-green-600' : 'text-gray-500'}>• At least one uppercase letter</li>
-                            <li className={pwdCheck.digit ? 'text-green-600' : 'text-gray-500'}>• At least one digit</li>
-                            <li className={pwdCheck.symbol ? 'text-green-600' : 'text-gray-500'}>• At least one special symbol</li>
-                        </ul>
-
-                        <Button
-                            type="submit"
-                            variant="primary"
-                            className="w-full"
-                            text={isSigningUp ? 'Creating account...' : 'Sign up'}
-                            disabled={!pwdCheck.all || isSigningUp}
-                        />
-                    </form>
-                )}
             </div>
         </div>
     )

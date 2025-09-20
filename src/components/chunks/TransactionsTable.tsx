@@ -30,7 +30,8 @@ const TransactionsTable = ({
     title: "Delete transaction",
     text: "Are you sure you want to delete this transaction?"
   },
-  onEditTransaction
+  onEditTransaction,
+  allowTypeChange = true
 }: TransactionsTableProps) => {
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
@@ -186,6 +187,7 @@ const TransactionsTable = ({
             type: editingTransaction.type,
             budget_folder_id: editingTransaction.budget_folder_id ?? null,
           }}
+          allowTypeChange={allowTypeChange}
           onSubmit={async (payload) => {
             try {
               setIsEditing(true)

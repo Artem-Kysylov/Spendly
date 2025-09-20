@@ -55,6 +55,7 @@ export interface TransactionsTableProps {
         text: string
     }
     onEditTransaction?: (payload: EditTransactionPayload) => Promise<void>
+    allowTypeChange?: boolean
 }
 
 export interface SignOutModalProps {
@@ -180,4 +181,5 @@ export interface EditTransactionModalProps {
         budget_folder_id?: string | null
     }
     onSubmit: (payload: EditTransactionPayload) => Promise<void>
+    allowTypeChange?: boolean
 }

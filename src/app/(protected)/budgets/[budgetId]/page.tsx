@@ -362,6 +362,7 @@ const BudgetDetails = () => {
           transactions={transactions}
           onDeleteTransaction={handleDeleteTransaction}
           onEditTransaction={handleUpdateTransaction}
+          allowTypeChange={false}
         />
       )}
 

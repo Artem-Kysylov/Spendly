@@ -5,7 +5,7 @@ import RadioButton from '../ui-elements/RadioButton'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { EditTransactionModalProps } from '../../types/types'
 
-const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, initialData }: EditTransactionModalProps) => {
+const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, initialData, allowTypeChange = true }: EditTransactionModalProps) => {
     const [localTitle, setLocalTitle] = useState(initialData.title || '')
     const [amount, setAmount] = useState(initialData.amount?.toString() || '')
     const [type, setType] = useState<'expense' | 'income'>(initialData.type || 'expense')
@@ -30,7 +30,7 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
             id: initialData.id,
             title: localTitle.trim(),
             amount: parseFloat(amount),
-            type,
+            type: allowTypeChange ? type : initialData.type,
             budget_folder_id: initialData.budget_folder_id ?? null,
         })
 
@@ -67,22 +67,24 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
                             onInput={handleAmountInput}
                             disabled={isLoading}
                         />
-                        <div className="flex gap-4">
-                            <RadioButton
-                                title="Expense"
-                                value="expense"
-                                currentValue={type}
-                                variant="expense"
-                                onChange={(e) => setType(e.target.value as 'expense' | 'income')}
-                            />
-                            <RadioButton
-                                title="Income"
-                                value="income"
-                                currentValue={type}
-                                variant="income"
-                                onChange={(e) => setType(e.target.value as 'expense' | 'income')}
-                            />
-                        </div>
+                        {allowTypeChange && (
+                            <div className="flex gap-4">
+                                <RadioButton
+                                    title="Expense"
+                                    value="expense"
+                                    currentValue={type}
+                                    variant="expense"
+                                    onChange={(e) => setType(e.target.value as 'expense' | 'income')}
+                                />
+                                <RadioButton
+                                    title="Income"
+                                    value="income"
+                                    currentValue={type}
+                                    variant="income"
+                                    onChange={(e) => setType(e.target.value as 'expense' | 'income')}
+                                />
+                            </div>
+                        )}
                         <DialogFooter className="justify-center sm:justify-center gap-4">
                             <Button
                                 text="Cancel"
