@@ -7,7 +7,6 @@ import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 
 // Import components 
-import Button from '@/components/ui-elements/Button'
 import TransactionsTable from '@/components/chunks/TransactionsTable'
 import EmptyState from '@/components/chunks/EmptyState'
 import Counters from '@/components/chunks/Counters'
@@ -147,11 +146,6 @@ const Dashboard = () => {
             <h1 className="text-[35px] font-semibold text-secondary-black">
               Welcome <span className="text-primary">{session?.user?.user_metadata?.name}✌️</span>
             </h1>
-            <Button
-              variant="primary"
-              text="Add Transaction"
-              onClick={() => router.push('/transactions')}
-            />
           </div>
           <div className="mt-[30px] px-5 flex flex-col gap-5">
             <Counters onIconClick={handleIconClick} refreshTrigger={refreshCounters} />

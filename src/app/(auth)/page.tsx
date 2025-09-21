@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Eye, EyeOff } from 'lucide-react'
 import Image from 'next/image'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import Link from 'next/link'
 
 export default function AuthPage() {
     const { 
@@ -29,7 +30,7 @@ export default function AuthPage() {
         }
     }, [isReady, session, router])
 
-    const [tab, setTab] = useState<'signin' | 'signup'>('signin')
+    const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [toast, setToast] = useState<{ text: string, type: 'success' | 'error' } | null>(null)
@@ -41,7 +42,6 @@ export default function AuthPage() {
         setTimeout(() => setToast(null), 3000)
     }
 
-    // Валидация пароля (синхронно)
     const pwdCheck = useMemo(() => {
         const len = password.length >= 6
         const lower = /[a-z]/.test(password)
@@ -115,21 +115,21 @@ export default function AuthPage() {
             <div className="container mx-auto flex min-h-screen items-center justify-center p-4">
                 <div className="w-full max-w-md rounded-[10px] border border-gray-200 bg-white text-gray-900 shadow-sm dark:bg-white dark:text-gray-900">
                     <div className="p-6 sm:p-8">
-                        {/* Здесь остаётся весь ваш текущий контент: лого, заголовок, Google-кнопка, разделитель, Tabs и формы */}
+                        <div className="flex justify-center">
+                            <Image src="/Spendly-logo.svg" alt="Spendly" width={120} height={32} />
+                        </div>
+
+                        <h1 className="mt-6 mb-4 text-2xl font-semibold text-center">
+                            {activeTab === 'signin' ? 'Sign in' : 'Sign up'}
+                        </h1>
+
                         <div className="w-full max-w-md space-y-6">
-                            {/* Логотип сверху */}
-                            <div className="flex justify-center">
-                              <Image src="/Spendly-logo.svg" alt="Spendly" width={120} height={32} />
-                            </div>
-
-                            {/* Заголовок всегда 'Sign in' */}
-                            <h1 className="text-2xl font-semibold text-secondary-black text-center">Sign in</h1>
-
                             {/* Кнопка Google */}
                             <Button
                                 variant="outline"
                                 className="w-full bg-white text-black border border-gray-300 hover:bg-gray-50"
                                 text="Sign in with Google"
+                                icon={<Image src="/google.svg" alt="Google" width={20} height={20} />}
                                 onClick={onGoogle}
                             />
 
@@ -140,10 +140,11 @@ export default function AuthPage() {
                             </div>
 
                             <Tabs
-                              value={tab}
-                              onValueChange={(v) => setTab(v as 'signin' | 'signup')}
-                              className="space-y-4"
+                              value={activeTab}
+                              onValueChange={(v) => setActiveTab(v as 'signin' | 'signup')}
+                              className="mt-6"
                             >
+                              {/* TabsList / TabsTrigger / TabsContent — без изменений */}
                               <div className="flex justify-center">
                                 <TabsList>
                                   <TabsTrigger value="signin">Sign in</TabsTrigger>
@@ -188,7 +189,13 @@ export default function AuthPage() {
                                             />
                                             <span className="text-sm text-secondary-black">Remember me</span>
                                         </label>
-                                        {/* Здесь можно добавить link Forgot password */}
+
+                                        <Link
+                                            href="/forgot-password"
+                                            className="text-blue-600 hover:text-blue-700 underline text-sm"
+                                        >
+                                            Forgot your password?
+                                        </Link>
                                     </div>
 
                                     <Button
@@ -230,14 +237,28 @@ export default function AuthPage() {
                                         </button>
                                     </div>
 
-                                    {/* Живой чеклист требований */}
-                                    <ul className="text-sm space-y-1">
-                                        <li className={pwdCheck.len ? 'text-green-600' : 'text-gray-500'}>• Minimum 6 characters</li>
-                                        <li className={pwdCheck.lower ? 'text-green-600' : 'text-gray-500'}>• At least one lowercase letter</li>
-                                        <li className={pwdCheck.upper ? 'text-green-600' : 'text-gray-500'}>• At least one uppercase letter</li>
-                                        <li className={pwdCheck.digit ? 'text-green-600' : 'text-gray-500'}>• At least one digit</li>
-                                        <li className={pwdCheck.symbol ? 'text-green-600' : 'text-gray-500'}>• At least one special symbol</li>
-                                    </ul>
+                                    <div className="text-xs space-y-1">
+                                        <div className={`flex items-center gap-2 ${pwdCheck.len ? 'text-green-600' : 'text-gray-400'}`}>
+                                            <span>{pwdCheck.len ? '✓' : '○'}</span>
+                                            <span>At least 6 characters</span>
+                                        </div>
+                                        <div className={`flex items-center gap-2 ${pwdCheck.lower ? 'text-green-600' : 'text-gray-400'}`}>
+                                            <span>{pwdCheck.lower ? '✓' : '○'}</span>
+                                            <span>One lowercase letter</span>
+                                        </div>
+                                        <div className={`flex items-center gap-2 ${pwdCheck.upper ? 'text-green-600' : 'text-gray-400'}`}>
+                                            <span>{pwdCheck.upper ? '✓' : '○'}</span>
+                                            <span>One uppercase letter</span>
+                                        </div>
+                                        <div className={`flex items-center gap-2 ${pwdCheck.digit ? 'text-green-600' : 'text-gray-400'}`}>
+                                            <span>{pwdCheck.digit ? '✓' : '○'}</span>
+                                            <span>One number</span>
+                                        </div>
+                                        <div className={`flex items-center gap-2 ${pwdCheck.symbol ? 'text-green-600' : 'text-gray-400'}`}>
+                                            <span>{pwdCheck.symbol ? '✓' : '○'}</span>
+                                            <span>One special character</span>
+                                        </div>
+                                    </div>
 
                                     <Button
                                         type="submit"
