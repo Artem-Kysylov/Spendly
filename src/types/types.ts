@@ -108,6 +108,7 @@ export interface RadioButtonProps {
     currentValue: 'expense' | 'income',
     variant: 'expense' | 'income',
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+    disabled?: boolean,
 }
 
 export interface BudgetPresetProps {
@@ -127,6 +128,7 @@ export interface BudgetFolderItemProps {
     name: string,
     amount: number,
     spentAmount?: number,
+    type: 'expense' | 'income',
 }
 
 export interface BudgetDetailsInfoProps {
