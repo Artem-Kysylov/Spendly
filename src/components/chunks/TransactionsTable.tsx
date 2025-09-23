@@ -68,13 +68,21 @@ const TransactionsTable = ({
   const updateTransactionDirect = async (payload: EditTransactionPayload) => {
     if (!session?.user?.id) throw new Error('No session user id')
     console.log('[TransactionsTable] Fallback update:', payload)
+    
+    const updateData: any = {
+      title: payload.title,
+      amount: payload.amount,
+      type: payload.type,
+    }
+    
+    // Добавляем created_at только если он передан
+    if (payload.created_at) {
+      updateData.created_at = payload.created_at
+    }
+
     const { error } = await supabase
       .from('transactions')
-      .update({
-        title: payload.title,
-        amount: payload.amount,
-        type: payload.type,
-      })
+      .update(updateData)
       .eq('id', payload.id)
       .eq('user_id', session.user.id)
 
@@ -186,6 +194,7 @@ const TransactionsTable = ({
             amount: editingTransaction.amount,
             type: editingTransaction.type,
             budget_folder_id: editingTransaction.budget_folder_id ?? null,
+            created_at: editingTransaction.created_at,
           }}
           allowTypeChange={allowTypeChange}
           onSubmit={async (payload) => {

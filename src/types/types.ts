@@ -145,7 +145,7 @@ export interface BudgetDetailsProps {
 }
 
 export interface BudgetDetailsFormProps {
-    onSubmit: (title: string, amount: string) => Promise<void>;
+    onSubmit: (title: string, amount: string, date: Date) => Promise<void>;
     isSubmitting: boolean;
 }
 
@@ -169,6 +169,7 @@ export interface EditTransactionPayload {
     amount: number
     type: 'expense' | 'income'
     budget_folder_id?: string | null
+    created_at?: string
 }
 
 export interface EditTransactionModalProps {
@@ -181,6 +182,7 @@ export interface EditTransactionModalProps {
         amount: number
         type: 'expense' | 'income'
         budget_folder_id?: string | null
+        created_at?: string
     }
     onSubmit: (payload: EditTransactionPayload) => Promise<void>
     allowTypeChange?: boolean

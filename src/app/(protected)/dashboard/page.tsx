@@ -105,14 +105,21 @@ const Dashboard = () => {
   const handleEditTransaction = async (payload: EditTransactionPayload) => {
     if (!session?.user?.id) return
     try {
+      const updateData: any = {
+        title: payload.title,
+        amount: payload.amount,
+        type: payload.type,
+        budget_folder_id: payload.budget_folder_id ?? null,
+      }
+      
+      // Добавляем created_at только если он передан
+      if (payload.created_at) {
+        updateData.created_at = payload.created_at
+      }
+
       const { error } = await supabase
         .from('transactions')
-        .update({
-          title: payload.title,
-          amount: payload.amount,
-          type: payload.type,
-          budget_folder_id: payload.budget_folder_id ?? null,
-        })
+        .update(updateData)
         .eq('id', payload.id)
         .eq('user_id', session.user.id)
         .select('*')

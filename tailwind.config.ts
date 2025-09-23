@@ -68,6 +68,10 @@ const config: Config = {
           DEFAULT: "hsl(var(--income))",
           foreground: "hsl(var(--income-foreground))",
         },
+        notification: {
+          DEFAULT: "hsl(var(--notification))",
+          foreground: "hsl(var(--notification-foreground))",
+        },
         "secondary-black": "#1a1a1a",
         "light-grey": "#e5e5e5",
       },

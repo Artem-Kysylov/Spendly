@@ -80,7 +80,7 @@ const BudgetDetails = () => {
     }
   }
 
-  const handleTransactionSubmit = async (title: string, amount: string) => {
+  const handleTransactionSubmit = async (title: string, amount: string, date: Date) => {
     if (!session?.user?.id || !id) return
 
     try {
@@ -115,7 +115,8 @@ const BudgetDetails = () => {
           user_id: session.user.id,
           title,
           amount: Number(amount),
-          type: budgetData.type
+          type: budgetData.type,
+          created_at: date.toISOString()
         })
         .select()
 
@@ -301,19 +302,27 @@ const BudgetDetails = () => {
   }
 
   // Update transaction (Edit)
-  const handleUpdateTransaction = async ({ id, title, amount, type, budget_folder_id }: EditTransactionPayload) => {
+  const handleUpdateTransaction = async ({ id, title, amount, type, budget_folder_id, created_at }: EditTransactionPayload) => {
     if (!session?.user?.id || !id) return
   
     try {
-      console.log('[BudgetDetails] Updating transaction:', { id, title, amount, type, budget_folder_id })
+      console.log('[BudgetDetails] Updating transaction:', { id, title, amount, type, budget_folder_id, created_at })
+      
+      const updateData: any = {
+        title,
+        amount,
+        type,
+        budget_folder_id: budget_folder_id ?? null,
+      }
+      
+      // Добавляем created_at только если он передан
+      if (created_at) {
+        updateData.created_at = created_at
+      }
+
       const { data, error } = await supabase
         .from('transactions')
-        .update({
-          title,
-          amount,
-          type,
-          budget_folder_id: budget_folder_id ?? null,
-        })
+        .update(updateData)
         .eq('id', id)
         .eq('user_id', session.user.id)
         .select('*')
@@ -344,17 +353,21 @@ const BudgetDetails = () => {
         onDeleteClick={openDeleteModal}
         onEditClick={openEditModal}
       />
-      <div className='flex items-start justify-between gap-[20px] mb-[30px]'>
-        <BudgetDetailsInfo 
-          emoji={budgetDetails.emoji}
-          name={budgetDetails.name}
-          amount={budgetDetails.amount}
-          type={budgetDetails.type}
-        />
-        <BudgetDetailsForm 
-          onSubmit={handleTransactionSubmit}
-          isSubmitting={isSubmitting}
-        />
+      <div className='flex items-stretch justify-between gap-[20px] mb-[30px]'>
+        <div className='w-1/2'>
+          <BudgetDetailsInfo 
+            emoji={budgetDetails.emoji}
+            name={budgetDetails.name}
+            amount={budgetDetails.amount}
+            type={budgetDetails.type}
+          />
+        </div>
+        <div className='w-1/2'>
+          <BudgetDetailsForm 
+            onSubmit={handleTransactionSubmit}
+            isSubmitting={isSubmitting}
+          />
+        </div>
       </div>
 
       {transactions.length > 0 && (
