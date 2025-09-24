@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { AuthContextProvider } from "@/context/AuthContext";
+import { QueryProvider } from "@/context/QueryProvider";
 import { ToastProvider } from '@/components/ui/use-toast'
 import { Toaster } from '@/components/ui/toaster'
 
@@ -24,13 +25,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={montserrat.className}>
-        <ToastProvider>
-          <AuthContextProvider>
-            {children}
-          </AuthContextProvider>
-          {/* Global pop-up notifications */}
-          <Toaster />
-        </ToastProvider>
+        <QueryProvider>
+          <ToastProvider>
+            <AuthContextProvider>
+              {children}
+            </AuthContextProvider>
+            {/* Global pop-up notifications */}
+            <Toaster />
+          </ToastProvider>
+        </QueryProvider>
       </body>
     </html>
   )

@@ -187,3 +187,237 @@ export interface EditTransactionModalProps {
     onSubmit: (payload: EditTransactionPayload) => Promise<void>
     allowTypeChange?: boolean
 }
+
+// ===== CHART INTERFACES =====
+
+// Pie Chart Data Interface (for Recharts)
+export interface PieChartData {
+    name: string
+    value: number
+    fill: string
+    percentage?: number
+    emoji?: string        // Category emoji
+    [key: string]: string | number | undefined
+}
+
+// Line Chart Data Interface (for Recharts)
+export interface LineChartData {
+    date: string          // Date in format (e.g., "2025-01-15")
+    amount: number        // Total amount for this date
+    formattedDate?: string // Human readable date (e.g., "Jan 15")
+}
+
+// Bar Chart Data Interface (for Recharts)
+export interface BarChartData {
+    category: string      // Category name (e.g., "Food", "Transport")
+    amount: number        // Amount spent in this category
+    fill: string          // Color for the bar
+    emoji?: string        // Category emoji
+}
+
+// Chart Filter Types
+export type ChartPeriod = 'week' | 'month' | 'quarter' | 'year' | 'custom'
+export type ChartDataType = 'expenses' | 'income' | 'both'
+
+// Chart Filters Interface
+export interface ChartFilters {
+    period: ChartPeriod
+    startDate: Date
+    endDate: Date
+    categories: string[]
+    budgetId: string | null
+    dataType: ChartDataType
+    selectedMonth?: number
+    selectedYear?: number
+}
+
+// Chart Props Interfaces
+export interface PieChartProps {
+    data: PieChartData[]
+    title?: string
+    description?: string
+    showLegend?: boolean
+    showTooltip?: boolean
+    height?: number
+    currency?: string
+    isLoading?: boolean
+    error?: string | null
+    emptyMessage?: string
+    className?: string
+}
+
+export interface LineChartProps {
+    data: LineChartData[]
+    title?: string
+    description?: string
+    showGrid?: boolean
+    showTooltip?: boolean
+    showLegend?: boolean
+    height?: number
+    currency?: string
+    isLoading?: boolean
+    error?: string | null
+    emptyMessage?: string
+    lineColor?: string
+    strokeWidth?: number
+    className?: string
+    xPeriod?: 'day' | 'week' | 'month' | 'year'
+}
+
+export interface BarChartProps {
+    data: BarChartData[]
+    title?: string
+    description?: string
+    showGrid?: boolean
+    showTooltip?: boolean
+    showLegend?: boolean
+    height?: number
+    currency?: string
+    isLoading?: boolean
+    error?: string | null
+    emptyMessage?: string
+    barColor?: string
+    orientation?: 'vertical' | 'horizontal'
+    className?: string
+}
+
+// Chart Container Props
+export interface ChartsContainerProps {
+    filters: ChartFilters
+    onFiltersChange: (filters: ChartFilters) => void
+    className?: string
+}
+
+// Chart Data Hook Return Types
+export interface ChartDataHookReturn {
+    pieData: PieChartData[]
+    lineData: LineChartData[]
+    barData: BarChartData[]
+    isLoading: boolean
+    error: string | null
+    refetch: () => void
+}
+
+export interface UseChartDataReturn<T> {
+    data: T[]
+    isLoading: boolean
+    error: string | null
+    refetch: () => void
+}
+
+// Chart Utils Types
+export interface ChartColorPalette {
+    primary: string
+    secondary: string
+    success: string
+    warning: string
+    error: string
+    info: string
+    [key: string]: string
+}
+
+// Chart Visibility Control
+export interface ChartVisibility {
+    pieChart: boolean
+    barChart: boolean
+    lineChart: boolean
+}
+
+// Custom Legend Types
+export interface LegendItem {
+    value: string | number
+    name: string
+    color: string
+    payload?: any
+    emoji?: string
+    icon?: React.ReactNode
+}
+
+export interface CustomLegendProps {
+    payload?: LegendItem[]
+    layout?: 'horizontal' | 'vertical' | 'grid'
+    align?: 'left' | 'center' | 'right'
+    verticalAlign?: 'top' | 'middle' | 'bottom'
+    iconType?: 'circle' | 'square' | 'line' | 'rect'
+    iconSize?: number
+    fontSize?: number
+    currency?: string
+    showValues?: boolean
+    showBadges?: boolean
+    interactive?: boolean
+    onItemClick?: (item: LegendItem, index: number) => void
+    onItemHover?: (item: LegendItem | null, index: number | null) => void
+    hiddenItems?: Set<number>
+    className?: string
+    itemClassName?: string
+    spacing?: 'compact' | 'normal' | 'relaxed'
+    maxItems?: number
+    showToggleAll?: boolean
+}
+
+// Export related types
+export type ExportFormat = 'png' | 'pdf' | 'all-pdf' | 'svg' | 'all-svg'
+
+export interface ExportOptions {
+  // Размер изображения
+  width?: number
+  height?: number
+  scale?: number
+  
+  // Качество
+  quality?: 'low' | 'medium' | 'high'
+  
+  // Водяной знак
+  watermark?: {
+    enabled: boolean
+    text?: string
+    position?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center'
+    opacity?: number
+    fontSize?: number
+    color?: string
+  }
+  
+  // Дополнительные настройки
+  backgroundColor?: string
+  includeLegend?: boolean
+  format?: 'png' | 'jpeg'
+  
+  // PDF специфичные настройки
+  orientation?: 'portrait' | 'landscape'
+  pageSize?: 'a4' | 'a3' | 'letter'
+  margin?: number
+  
+  // SVG специфичные настройки
+  svgOptimization?: boolean
+  embedFonts?: boolean
+  preserveAspectRatio?: string
+  svgAttributes?: Record<string, string>
+}
+
+export interface ChartRef {
+  current: HTMLElement | null
+}
+
+export interface ChartsRefs {
+  pieChart?: ChartRef
+  barChart?: ChartRef
+  lineChart?: ChartRef
+}
+
+export interface ExportControlsProps {
+  chartsRefs: ChartsRefs
+  onExport?: (format: ExportFormat, filename: string, options?: ExportOptions) => void
+  onExportStart?: () => void
+  onExportComplete?: (success: boolean, error?: string) => void
+  className?: string
+  disabled?: boolean
+  showSettingsButton?: boolean
+}
+
+export interface ExportSettingsModalProps {
+  isOpen: boolean
+  onClose: () => void
+  onExport: (format: ExportFormat, filename: string, options: ExportOptions) => void
+  chartsRefs: ChartsRefs
+  defaultOptions?: ExportOptions
+}

@@ -13,6 +13,7 @@ import Counters from '@/components/chunks/Counters'
 import Spinner from '@/components/ui-elements/Spinner'
 import MainBudgetModal from '@/components/modals/MainBudgetModal'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
+import { ChartsContainer } from '@/components/charts/ChartsContainer'
 
 // Import hooks 
 import useModal from '@/hooks/useModal'
@@ -156,6 +157,15 @@ const Dashboard = () => {
           </div>
           <div className="mt-[30px] px-5 flex flex-col gap-5">
             <Counters onIconClick={handleIconClick} refreshTrigger={refreshCounters} />
+            
+            {/* Добавляем графики под компонентом Counters */}
+            <div className="mt-8">
+              <ChartsContainer 
+                showFilters={true}
+                currency="USD"
+              />
+            </div>
+            
             {isLoading ? (
               <Spinner />
             ) : transactions.length === 0 ? (
