@@ -1,14 +1,18 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { PieChart } from './PieChart'
 import { LineChart } from './LineChart'
 import { BarChart } from './BarChart'
 import { ChartFilters } from './ChartFilters'
-import { ChartToggleControls, ChartVisibility } from './ChartToggleControls'
-import { ExportControls } from './ExportControls'
 import { useAllChartsData } from '@/hooks/useChartData'
-import { ChartFilters as ChartFiltersType, ChartsRefs } from '@/types/types'
+import type { ChartFilters as ChartFiltersType } from '@/types/types'
+
+type ChartVisibility = {
+  pie: boolean
+  bar: boolean
+  line: boolean
+}
 
 interface ChartsContainerProps {
   initialFilters?: ChartFiltersType
@@ -23,129 +27,133 @@ export const ChartsContainer: React.FC<ChartsContainerProps> = ({
     period: 'month',
     startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     endDate: new Date(),
-    categories: [],
-    budgetId: null,
-    dataType: 'both',
+    dataType: 'expenses',
     selectedMonth: new Date().getMonth() + 1,
-    selectedYear: new Date().getFullYear()
+    selectedYear: new Date().getFullYear(),
   },
   showFilters = true,
-  showToggleControls = true,
-  showExportControls = true,
-  currency = "USD"
+  // параметры ниже не используются внутри контейнера сейчас, оставлены ради совместимости пропсов
+  showToggleControls: _showToggleControls = true,
+  showExportControls: _showExportControls = true,
+  currency = 'USD',
 }) => {
   const [filters, setFilters] = useState<ChartFiltersType>(initialFilters)
-  const [chartVisibility, setChartVisibility] = useState<ChartVisibility>(() => {
-    // Загружаем настройки из localStorage
+
+  // Инициализация видимости графиков (на будущее), читаем из localStorage
+  const [chartVisibility] = useState<ChartVisibility>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('spendly-chart-visibility')
-      if (saved) {
-        try {
-          return JSON.parse(saved)
-        } catch {
-          // Fallback to default
-        }
+      try {
+        const saved = localStorage.getItem('spendly-chart-visibility')
+        if (saved) return JSON.parse(saved) as ChartVisibility
+      } catch {
+        // ignore
       }
     }
     return { pie: true, bar: true, line: true }
   })
 
-  // Ref'ы для графиков
+  // Refs для экспорта и скролла (если понадобится)
   const pieChartRef = useRef<HTMLDivElement>(null)
   const barChartRef = useRef<HTMLDivElement>(null)
   const lineChartRef = useRef<HTMLDivElement>(null)
 
-  // Объект с ref'ами для ExportControls
-  const chartsRefs: ChartsRefs = {
-    pieChart: chartVisibility.pie ? pieChartRef : undefined,
-    barChart: chartVisibility.bar ? barChartRef : undefined,
-    lineChart: chartVisibility.line ? lineChartRef : undefined
-  }
-  
-  const {
-    pieChart,
-    lineChart,
-    barChart,
-    isLoading,
-    error,
-    refetchAll,
-  } = useAllChartsData(filters)
+  const { pieChart, lineChart, barChart, isLoading } = useAllChartsData(filters)
 
-  // Сохраняем настройки видимости в localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('spendly-chart-visibility', JSON.stringify(chartVisibility))
+  // Хелперы: формат периода и маппинг типа
+  const formatCompactRange = (start: Date, end: Date) => {
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    const sameDay =
+      start.getFullYear() === end.getFullYear() &&
+      start.getMonth() === end.getMonth() &&
+      start.getDate() === end.getDate()
+    const sameMonth = start.getFullYear() === end.getFullYear() && start.getMonth() === end.getMonth()
+    const sameYear = start.getFullYear() === end.getFullYear()
+
+    if (sameDay) {
+      return `${start.getDate()} ${months[start.getMonth()]} ${start.getFullYear()}`
     }
-  }, [chartVisibility])
-
-  const handleFiltersChange = (newFilters: ChartFiltersType) => {
-    setFilters(newFilters)
+    if (sameMonth) {
+      return `${start.getDate()}–${end.getDate()} ${months[start.getMonth()]} ${start.getFullYear()}`
+    }
+    if (sameYear) {
+      return `${start.getDate()} ${months[start.getMonth()]} – ${end.getDate()} ${months[end.getMonth()]} ${start.getFullYear()}`
+    }
+    return `${start.getDate()} ${months[start.getMonth()]} ${start.getFullYear()} – ${end.getDate()} ${months[end.getMonth()]} ${end.getFullYear()}`
   }
+
+  const getTypeLabel = (type: 'expenses' | 'income' | 'both') =>
+    type === 'expenses' ? 'Expenses' : type === 'income' ? 'Income' : 'All transactions'
 
   const getResponsiveHeight = () => {
     if (typeof window === 'undefined') return 350
     return window.innerWidth < 768 ? 300 : 350
   }
 
+  // Заголовки/описания
+  const pieTitle = 'Category Comparison'
+  const pieDescription = `${getTypeLabel(filters.dataType)} for ${formatCompactRange(
+    filters.startDate,
+    filters.endDate
+  )}`
+
+  // Подготовка данных пустого состояния Pie
+  const visiblePieData = Array.isArray(pieChart.data)
+    ? pieChart.data.filter((d) => (d?.value ?? 0) > 0)
+    : []
+  const showPieEmptyState = !pieChart.isLoading && !pieChart.error && visiblePieData.length === 0
+  const emptyMessage =
+    filters.dataType === 'income'
+      ? 'No income for the selected period'
+      : 'No expenses for the selected period'
+
   return (
     <div className="space-y-4 md:space-y-6">
       {showFilters && (
-        <ChartFilters
-          filters={filters}
-          onFiltersChange={handleFiltersChange}
-          isLoading={isLoading}
-        />
-      )}
-      
-      {showToggleControls && (
-        <ChartToggleControls
-          visibility={chartVisibility}
-          onVisibilityChange={setChartVisibility}
-        />
+        <ChartFilters filters={filters} onFiltersChange={setFilters} isLoading={isLoading} />
       )}
 
-      {showExportControls && (
-        <ExportControls
-          chartsRefs={chartsRefs}
-          onExportStart={() => console.log('Export started')}
-          onExportComplete={(success, error) => {
-            if (success) {
-              console.log('Export completed successfully')
-            } else {
-              console.error('Export failed:', error)
-            }
-          }}
-        />
-      )}
-      
-      {/* Адаптивная сетка для круговой и столбчатой диаграмм */}
-      {(chartVisibility.pie || chartVisibility.bar) && (
-        <div className="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
-          {/* Круговая диаграмма */}
+      {(chartVisibility.pie || chartVisibility.bar || chartVisibility.line) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+          {/* Pie chart */}
           {chartVisibility.pie && (
             <div className="transition-all duration-300 ease-in-out">
-              <PieChart
-                ref={pieChartRef}
-                data={pieChart.data}
-                title="Расходы по категориям"
-                description="Распределение расходов по категориям за выбранный период"
-                currency={currency}
-                isLoading={pieChart.isLoading}
-                error={pieChart.error}
-                height={getResponsiveHeight()}
-                className="w-full"
-              />
+              {showPieEmptyState ? (
+                <div
+                  className="flex flex-col items-center justify-center rounded-lg border bg-card text-card-foreground p-6"
+                  style={{ height: getResponsiveHeight() }}
+                >
+                  <p className="text-base font-medium">{emptyMessage}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Selected period: {formatCompactRange(filters.startDate, filters.endDate)}
+                  </p>
+                </div>
+              ) : (
+                <PieChart
+                  ref={pieChartRef}
+                  data={pieChart.data}
+                  title={pieTitle}
+                  description={pieDescription}
+                  currency={currency}
+                  isLoading={pieChart.isLoading}
+                  error={pieChart.error}
+                  height={getResponsiveHeight()}
+                  className="w-full"
+                />
+              )}
             </div>
           )}
-          
-          {/* Столбчатая диаграмма */}
+
+          {/* Bar chart */}
           {chartVisibility.bar && (
             <div className="transition-all duration-300 ease-in-out">
               <BarChart
                 ref={barChartRef}
                 data={barChart.data}
-                title="Сравнение категорий"
-                description="Сравнение трат между категориями"
+                title="Category Comparison"
+                description={`${getTypeLabel(filters.dataType)} for ${formatCompactRange(
+                  filters.startDate,
+                  filters.endDate
+                )}`}
                 currency={currency}
                 isLoading={barChart.isLoading}
                 error={barChart.error}
@@ -155,23 +163,23 @@ export const ChartsContainer: React.FC<ChartsContainerProps> = ({
               />
             </div>
           )}
-        </div>
-      )}
-      
-      {/* Линейная диаграмма на всю ширину */}
-      {chartVisibility.line && (
-        <div className="w-full transition-all duration-300 ease-in-out">
-          <LineChart
-            ref={lineChartRef}
-            data={lineChart.data}
-            title="Динамика расходов во времени"
-            description="Изменение расходов во времени"
-            currency={currency}
-            isLoading={lineChart.isLoading}
-            error={lineChart.error}
-            height={typeof window !== 'undefined' && window.innerWidth < 768 ? 300 : 400}
-            className="w-full"
-          />
+
+          {/* Line chart */}
+          {chartVisibility.line && (
+            <div className="transition-all duration-300 ease-in-out">
+              <LineChart
+                ref={lineChartRef}
+                data={lineChart.data}
+                title="Expense Trends Over Time"
+                description="Changes in expenses over time"
+                currency={currency}
+                isLoading={lineChart.isLoading}
+                error={lineChart.error}
+                height={getResponsiveHeight()}
+                className="w-full"
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

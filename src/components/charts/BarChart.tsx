@@ -9,8 +9,8 @@ import { CustomLegend, useLegendState, LegendItem } from './CustomLegend'
 import { BarChartProps } from '@/types/types'
 import { ChartDescription } from './ChartDescription'
 
-// Файл: BarChart.tsx (компонент BarChart)
-// Компонент BarChartComponent (forwardRef)
+// File: BarChart.tsx (BarChart component)
+// BarChartComponent component (forwardRef)
 const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({ 
   data,
   title = "Expenses by category",
@@ -74,21 +74,33 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
     )
   }
 
-  const colors = generatePieColors(data.length)
+  const normalizedData = data.map(item => ({
+    ...item,
+    amount:
+      typeof item.amount === 'number'
+        ? item.amount
+        : Number(String(item.amount).replace(/[^\d.-]/g, '')) || 0,
+  }))
 
-  // Фильтрация данных на основе скрытых элементов
-  const visibleData = data.filter((_, index) => !hiddenItems.has(index))
+  const colors = generatePieColors(normalizedData.length)
 
-  // Подготовка данных для легенды
-  const legendData: LegendItem[] = data.map((item, index) => ({
+  const filteredData = normalizedData.filter((_, index) => !hiddenItems.has(index))
+  const dataToRender = filteredData
+
+  const cleanLegendName = (name: string, emoji?: string) => {
+    if (!emoji) return name.trim()
+    const escaped = emoji.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    return name.replace(new RegExp(`^${escaped}\\s*`), '').trim()
+  }
+
+  const legendData: LegendItem[] = normalizedData.map((item, index) => ({
     value: item.amount,
-    name: item.category,
+    name: cleanLegendName(item.category, item.emoji),
     color: item.fill || colors[index % colors.length],
     payload: item,
     emoji: item.emoji
   }))
 
-  // Обработчики для интерактивности
   const handleLegendClick = (item: LegendItem, index: number) => {
     toggleItem(index)
   }
@@ -97,13 +109,11 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
     setHoveredIndex(index)
   }
 
-  // Функция для получения цвета столбца
   const getBarColor = (index: number) => {
-    const originalIndex = data.findIndex(item => visibleData[index] === item)
-    return data[originalIndex]?.fill || colors[originalIndex % colors.length]
+    const originalIndex = normalizedData.findIndex(item => dataToRender[index] === item)
+    return normalizedData[originalIndex]?.fill || colors[originalIndex % colors.length]
   }
 
-  // Форматирование меток для осей
   const formatYAxisLabel = (value: number) => {
     return formatCurrency(value, currency, true)
   }
@@ -119,7 +129,7 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
       <CardContent>
         <ResponsiveContainer width="100%" height={height}>
           <RechartsBarChart 
-            data={visibleData}
+            data={dataToRender}
             layout={orientation === "horizontal" ? "horizontal" : "vertical"}
             margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
           >
@@ -131,16 +141,6 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
               />
             )}
             <XAxis 
-              type={orientation === "horizontal" ? "number" : "category"}
-              dataKey={orientation === "horizontal" ? undefined : "category"}
-              tickFormatter={orientation === "horizontal" ? formatYAxisLabel : undefined}
-              stroke="hsl(var(--muted-foreground))"
-              fontSize={12}
-              tickLine={false}
-              axisLine={false}
-              height={orientation === "horizontal" ? undefined : 60}
-            />
-            <YAxis 
               type={orientation === "horizontal" ? "category" : "number"}
               dataKey={orientation === "horizontal" ? "category" : undefined}
               tickFormatter={orientation === "horizontal" ? undefined : formatYAxisLabel}
@@ -148,7 +148,18 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              width={orientation === "horizontal" ? 100 : undefined}
+              height={orientation === "horizontal" ? 60 : undefined}
+            />
+            <YAxis 
+              type={orientation === "horizontal" ? "number" : "category"}
+              dataKey={orientation === "horizontal" ? undefined : "category"}
+              tickFormatter={orientation === "horizontal" ? formatYAxisLabel : undefined}
+              stroke="hsl(var(--muted-foreground))"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+              width={orientation === "horizontal" ? undefined : 100}
+              domain={orientation === "horizontal" ? [0, 'dataMax'] : undefined}
             />
             {showTooltip && (
               <Tooltip 
@@ -162,9 +173,10 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
               radius={[4, 4, 0, 0]}
               animationDuration={800}
               name="Amount"
+              minPointSize={2}
             >
-              {visibleData.map((entry, index) => {
-                const originalIndex = data.findIndex(item => item === entry)
+              {dataToRender.map((entry, index) => {
+                const originalIndex = normalizedData.findIndex(item => item === entry)
                 const isHovered = hoveredIndex === originalIndex
                 
                 return (

@@ -18,15 +18,15 @@ import {
   Settings, 
   Loader2,
   AlertCircle,
-  FileCode // Новая иконка для SVG
+  FileCode // New icon for SVG
 } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 import { 
   exportChartToPNG, 
   exportChartToPDF, 
   exportAllChartsToPDF,
-  exportChartToSVG,        // Новый импорт
-  exportAllChartsToSVG,    // Новый импорт
+  exportChartToSVG,        // New import
+  exportAllChartsToSVG,    // New import
   checkBrowserSupport 
 } from '@/lib/chartExportUtils'
 import { ExportControlsProps, ExportFormat, ExportOptions, ChartRef } from '@/types/types'
@@ -45,27 +45,27 @@ export const ExportControls: React.FC<ExportControlsProps> = ({
   const [exportingFormat, setExportingFormat] = useState<ExportFormat | null>(null)
   const [showSettings, setShowSettings] = useState(false)
 
-  // Проверка поддержки браузером
+  // Check browser support
   const browserSupport = checkBrowserSupport()
 
-  // Получение доступных графиков
+  // Get available charts
   const getAvailableCharts = () => {
     const available = []
-    if (chartsRefs.pieChart?.current) available.push('Круговая диаграмма')
-    if (chartsRefs.barChart?.current) available.push('Столбчатая диаграмма')
-    if (chartsRefs.lineChart?.current) available.push('Линейная диаграмма')
+    if (chartsRefs.pieChart?.current) available.push('Pie Chart')
+    if (chartsRefs.barChart?.current) available.push('Bar Chart')
+    if (chartsRefs.lineChart?.current) available.push('Line Chart')
     return available
   }
 
   const availableCharts = getAvailableCharts()
   const hasCharts = availableCharts.length > 0
 
-  // Обработка экспорта
+  // Handle export
   const handleExport = async (format: ExportFormat, chartType?: 'pie' | 'bar' | 'line') => {
     if (!browserSupport.supported) {
       toast({
-        title: "Ошибка экспорта",
-        description: `Ваш браузер не поддерживает экспорт: ${browserSupport.missing.join(', ')}`,
+        title: "Export Error",
+        description: `Your browser doesn't support export: ${browserSupport.missing.join(', ')}`,
         variant: "destructive"
       })
       return
@@ -73,8 +73,8 @@ export const ExportControls: React.FC<ExportControlsProps> = ({
 
     if (!hasCharts) {
       toast({
-        title: "Ошибка экспорта",
-        description: 'Нет доступных графиков для экспорта',
+        title: "Export Error",
+        description: 'No charts available for export',
         variant: "destructive"
       })
       return
@@ -160,23 +160,23 @@ export const ExportControls: React.FC<ExportControlsProps> = ({
 
       if (success) {
         const formatName = format === 'svg' ? 'SVG' : 
-                          format === 'all-svg' ? 'SVG (все графики)' :
+                          format === 'all-svg' ? 'SVG (all charts)' :
                           format === 'png' ? 'PNG' : 
-                          format === 'pdf' ? 'PDF' : 'PDF (все графики)'
+                          format === 'pdf' ? 'PDF' : 'PDF (all charts)'
         
         toast({
-          title: "Экспорт завершен",
-          description: `Экспорт в ${formatName} завершен успешно!`
+          title: "Export Complete",
+          description: `Export to ${formatName} completed successfully!`
         })
         onExport?.(format, filename!, defaultOptions)
       }
 
     } catch (error) {
       console.error('Export error:', error)
-      const errorMessage = error instanceof Error ? error.message : 'Неизвестная ошибка'
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
       toast({
-        title: "Ошибка экспорта",
-        description: `Ошибка экспорта: ${errorMessage}`,
+        title: "Export Error",
+        description: `Export error: ${errorMessage}`,
         variant: "destructive"
       })
       onExportComplete?.(false, errorMessage)
@@ -187,7 +187,7 @@ export const ExportControls: React.FC<ExportControlsProps> = ({
     }
   }
 
-  // Вспомогательная функция для получения ссылки на график
+  // Helper function to get chart reference
   const getChartRef = (chartType: 'pie' | 'bar' | 'line'): ChartRef | undefined => {
     switch (chartType) {
       case 'pie':
@@ -201,7 +201,7 @@ export const ExportControls: React.FC<ExportControlsProps> = ({
     }
   }
 
-  // Рендер кнопки экспорта для конкретного графика
+  // Render export button for specific chart
   const renderChartExportButton = (chartType: 'pie' | 'bar' | 'line', label: string, icon: React.ReactNode) => {
     const chartRef = getChartRef(chartType)
     if (!chartRef?.current) return null
@@ -228,21 +228,21 @@ export const ExportControls: React.FC<ExportControlsProps> = ({
             disabled={isExporting}
           >
             <FileImage className="h-4 w-4 mr-2" />
-            Экспорт в PNG
+            Export to PNG
           </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={() => handleExport('pdf', chartType)}
             disabled={isExporting}
           >
             <FileText className="h-4 w-4 mr-2" />
-            Экспорт в PDF
+            Export to PDF
           </DropdownMenuItem>
           <DropdownMenuItem 
             onClick={() => handleExport('svg', chartType)}
             disabled={isExporting}
           >
             <FileCode className="h-4 w-4 mr-2" />
-            Экспорт в SVG
+            Export to SVG
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -256,7 +256,7 @@ export const ExportControls: React.FC<ExportControlsProps> = ({
           <div className="flex items-center gap-2 text-muted-foreground">
             <AlertCircle className="h-4 w-4" />
             <span className="text-sm">
-              Экспорт недоступен в вашем браузере
+              Export not available in your browser
             </span>
           </div>
         </CardContent>
@@ -269,7 +269,7 @@ export const ExportControls: React.FC<ExportControlsProps> = ({
       <CardHeader>
         <CardTitle className="text-base font-medium flex items-center gap-2">
           <Download className="h-4 w-4" />
-          Экспорт графиков
+          Export Charts
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -301,7 +301,7 @@ export const ExportControls: React.FC<ExportControlsProps> = ({
                 className="flex items-center gap-2"
               >
                 <Files className="h-4 w-4" />
-                Все графики в PDF
+                All Charts to PDF
                 {isExporting && exportingFormat === 'all-pdf' && (
                   <Loader2 className="h-3 w-3 animate-spin ml-1" />
                 )}
@@ -322,7 +322,7 @@ export const ExportControls: React.FC<ExportControlsProps> = ({
               className="flex items-center gap-2 w-full justify-start"
             >
               <Settings className="h-4 w-4" />
-              Настройки экспорта
+              Export Settings
             </Button>
           </>
         )}
@@ -330,7 +330,7 @@ export const ExportControls: React.FC<ExportControlsProps> = ({
         {/* Информация о доступных графиках */}
         {availableCharts.length > 0 && (
           <div className="text-xs text-muted-foreground">
-            Доступно графиков: {availableCharts.join(', ')}
+            Available charts: {availableCharts.join(', ')}
           </div>
         )}
       </CardContent>

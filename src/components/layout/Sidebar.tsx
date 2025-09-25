@@ -34,8 +34,8 @@ const Sidebar = () => {
                 <Image 
                     src="/Spendly-logo.svg" 
                     alt="Spendly Logo" 
-                    width={120} 
-                    height={40}
+                    width={90} 
+                    height={30}
                     className="h-8 w-auto"
                 />
             </div>

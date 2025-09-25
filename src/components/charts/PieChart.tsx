@@ -26,7 +26,7 @@ const PieChartComponent = forwardRef<HTMLDivElement, PieChartProps>(({
   const { hiddenItems, toggleItem } = useLegendState()
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
-  // Обработка состояний загрузки и ошибок
+  // Handle loading and error states
   if (isLoading) {
     return (
       <Card className="w-full">
@@ -74,26 +74,24 @@ const PieChartComponent = forwardRef<HTMLDivElement, PieChartProps>(({
 
   const colors = generatePieColors(data.length)
 
-  // Функция метки должна принимать PieLabelRenderProps
-  const renderCustomLabel = (props: PieLabelRenderProps) => {
-    const { percent } = props
+  // Label function should accept PieLabelRenderProps
+  const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: PieLabelRenderProps) => {
     return typeof percent === 'number' ? `${(percent * 100).toFixed(1)}%` : ''
   }
 
-  // Фильтрация данных на основе скрытых элементов
-  const visibleData = data.filter((_, index) => !hiddenItems.has(index))
+  // Filter data based on hidden items
+  const filteredData = data.filter((_, index) => !hiddenItems.has(index))
 
-  // Подготовка данных для легенды
+  // Prepare data for legend
   const legendData: LegendItem[] = data.map((item, index) => ({
     value: item.value,
     name: item.name,
     color: colors[index % colors.length],
-    payload: item,
-    emoji: item.emoji  // Используем item.emoji вместо item.category_emoji
+    emoji: item.emoji
   }))
 
-  // Обработчики для интерактивности
-  const handleLegendClick = (item: LegendItem, index: number) => {
+  // Handlers for interactivity
+  const handleLegendItemClick = (item: LegendItem, index: number) => {
     toggleItem(index)
   }
 
@@ -113,7 +111,7 @@ const PieChartComponent = forwardRef<HTMLDivElement, PieChartProps>(({
         <ResponsiveContainer width="100%" height={height}>
           <RechartsPieChart>
             <Pie
-              data={visibleData}
+              data={filteredData}
               cx="50%"
               cy="50%"
               labelLine={false}
@@ -124,7 +122,7 @@ const PieChartComponent = forwardRef<HTMLDivElement, PieChartProps>(({
               animationBegin={0}
               animationDuration={800}
             >
-              {visibleData.map((entry, index) => {
+              {filteredData.map((entry, index) => {
                 const originalIndex = data.findIndex(item => item === entry)
                 const isHovered = hoveredIndex === originalIndex
                 
@@ -161,7 +159,7 @@ const PieChartComponent = forwardRef<HTMLDivElement, PieChartProps>(({
             showValues={true}
             showBadges={true}
             interactive={true}
-            onItemClick={handleLegendClick}
+            onItemClick={handleLegendItemClick}
             onItemHover={handleLegendHover}
             hiddenItems={hiddenItems}
             spacing="normal"

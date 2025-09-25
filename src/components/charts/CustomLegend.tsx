@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { formatCurrency } from '@/lib/chartUtils'
 import { cn } from '@/lib/utils'
 
-// Базовый интерфейс для элемента легенды
+// Basic interface for legend item
 export interface LegendItem {
   value: string | number
   name: string
@@ -15,7 +15,7 @@ export interface LegendItem {
   icon?: React.ReactNode
 }
 
-// Интерфейс для пропсов CustomLegend
+// Interface for CustomLegend props
 export interface CustomLegendProps {
   payload?: LegendItem[]
   layout?: 'horizontal' | 'vertical' | 'grid'
@@ -62,14 +62,14 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const [allHidden, setAllHidden] = useState(false)
 
-  // Обработка клика по элементу
+  // Handle item click
   const handleItemClick = (item: LegendItem, index: number) => {
     if (interactive && onItemClick) {
       onItemClick(item, index)
     }
   }
 
-  // Обработка hover
+  // Handle hover
   const handleItemHover = (item: LegendItem | null, index: number | null) => {
     setHoveredIndex(index)
     if (onItemHover) {
@@ -77,7 +77,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
     }
   }
 
-  // Обработка toggle all
+  // Handle toggle all
   const handleToggleAll = () => {
     setAllHidden(!allHidden)
     if (onItemClick) {
@@ -87,7 +87,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
     }
   }
 
-  // Определение стилей для layout
+  // Define styles for layout
   const getContainerClasses = () => {
     const baseClasses = 'flex'
     const spacingClasses = {
@@ -126,8 +126,8 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
     }
   }
 
-  // Рендер иконки
-  const renderIcon = (item: LegendItem) => {
+  // Render icon
+  const renderIcon = (item: LegendItem, size: number) => {
     const iconStyle = {
       backgroundColor: item.color,
       width: iconSize,
@@ -163,7 +163,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
     return <div className={iconClasses} style={iconStyle} />
   }
 
-  // Ограничение количества элементов
+  // Limit number of items
   const displayItems = maxItems ? payload.slice(0, maxItems) : payload
   const hasMoreItems = maxItems && payload.length > maxItems
 
@@ -177,9 +177,9 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
         <div className="mb-2 flex justify-center">
           <button
             onClick={handleToggleAll}
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            className="text-xs text-blue-600 hover:text-blue-800 underline"
           >
-            {allHidden ? 'Показать все' : 'Скрыть все'}
+            {allHidden ? 'Show All' : 'Hide All'}
           </button>
         </div>
       )}
@@ -214,7 +214,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
               )}
               
               {/* Цветовая иконка */}
-              {renderIcon(item)}
+              {renderIcon(item, iconSize)}
               
               {/* Название */}
               <span 
@@ -269,7 +269,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
       {hasMoreItems && (
         <div className="mt-2 text-center">
           <span className="text-xs text-muted-foreground">
-            и еще {payload.length - maxItems!} элементов...
+            and {payload.length - maxItems!} more items...
           </span>
         </div>
       )}
@@ -277,7 +277,7 @@ export const CustomLegend: React.FC<CustomLegendProps> = ({
   )
 }
 
-// Хук для управления состоянием легенды
+// Hook for managing legend state
 export const useLegendState = (initialHidden: number[] = []) => {
   const [hiddenItems, setHiddenItems] = useState<Set<number>>(
     new Set(initialHidden)
@@ -294,7 +294,7 @@ export const useLegendState = (initialHidden: number[] = []) => {
   }
 
   const hideAll = () => {
-    const allIndices = Array.from({ length: 10 }, (_, i) => i) // Предполагаем максимум 10 элементов
+    const allIndices = Array.from({ length: 10 }, (_, i) => i) // Assume maximum 10 items
     setHiddenItems(new Set(allIndices))
   }
 

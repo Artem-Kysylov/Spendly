@@ -9,7 +9,7 @@ import { CustomLegend, LegendItem } from './CustomLegend'
 import { LineChartProps } from '@/types/types'
 import { ChartDescription } from './ChartDescription'
 
-// Компонент LineChartComponent (forwardRef)
+// LineChartComponent component (forwardRef)
 const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({ 
   data,
   title = "Expenses over time",
@@ -73,24 +73,22 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
     )
   }
 
-  // Форматирование данных для отображения
+  // Format data for display
   const formattedData = data.map(item => ({
     ...item,
     formattedDate: formatChartDate(item.date, xPeriod)
   }))
 
-  // Подготовка данных для легенды
-  const legendData: LegendItem[] = [
-    {
-      value: data.reduce((sum, item) => sum + item.amount, 0),
-      name: "Total amount",
-      color: lineColor,
-      payload: { dataKey: 'amount' }
-    }
-  ]
+  // Prepare data for legend
+  const legendData: LegendItem[] = [{
+    value: data.reduce((sum, item) => sum + item.amount, 0),
+    name: "Total amount",
+    color: lineColor,
+    payload: { dataKey: 'amount' }
+  }]
 
-  // Обработчик hover для легенды
-  const handleLegendHover = (item: LegendItem | null, index: number | null) => {
+  // Hover handler for legend
+  const handleLegendItemHover = (item: LegendItem | null, index: number | null) => {
     setHoveredIndex(index)
   }
 
@@ -168,7 +166,7 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
             showValues={true}
             showBadges={true}
             interactive={false}
-            onItemHover={handleLegendHover}
+            onItemHover={handleLegendItemHover}
             spacing="normal"
           />
         )}

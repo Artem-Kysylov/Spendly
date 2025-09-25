@@ -98,10 +98,9 @@ const TransactionsTable = ({
         <Table>
           <TableHeader className="border-b border-light-grey">
             <TableRow className="border-b border-light-grey hover:bg-transparent">
-              <TableHead className="!text-[16px] font-semibold text-secondary-black">#</TableHead>
               <TableHead className="!text-[16px] font-semibold text-secondary-black">Transaction Name</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-secondary-black">Category</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-secondary-black">Amount(USD)</TableHead>
+              <TableHead className="!text-[16px] font-semibold text-secondary-black">Budgets</TableHead>
+              <TableHead className="!text-[16px] font-semibold text-secondary-black">Amount</TableHead>
               <TableHead className="!text-[16px] font-semibold text-secondary-black">Type</TableHead>
               <TableHead className="!text-[16px] font-semibold text-secondary-black">Date</TableHead>
               <TableHead className="!text-[16px] font-semibold text-secondary-black">Edit</TableHead>
@@ -111,7 +110,6 @@ const TransactionsTable = ({
           <TableBody>
             {sortedTransactions.map((transaction, index) => (
               <TableRow key={transaction.id} className="border-b border-light-grey hover:bg-gray-50/50">
-                <TableCell className="font-medium text-secondary-black">{index + 1}</TableCell>
                 <TableCell className="text-secondary-black">{transaction.title}</TableCell>
                 <TableCell className="text-secondary-black">
                   {transaction.category_emoji && transaction.category_name ? (

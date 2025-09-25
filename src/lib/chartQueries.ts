@@ -55,25 +55,18 @@ export const fetchTransactions = async (
       type,
       created_at,
       budget_folder_id,
-      budget_folders!inner(id, name, emoji)
-    `)
+      budget_folders(id, name, emoji)
+    `) // используем левый join, чтобы включить uncategorized
     .eq('user_id', userId)
     .gte('created_at', filters.startDate.toISOString())
     .lte('created_at', filters.endDate.toISOString())
     .order('created_at', { ascending: true })
 
-  // Применение фильтров
   if (filters.dataType !== 'both') {
-    query = query.eq('type', filters.dataType)
+    const dbType = filters.dataType === 'expenses' ? 'expense' : 'income'
+    query = query.eq('type', dbType)
   }
 
-  if (filters.categories.length > 0) {
-    query = query.in('budget_folder_id', filters.categories)
-  }
-
-  if (filters.budgetId) {
-    query = query.eq('budget_folder_id', filters.budgetId)
-  }
 
   const { data, error } = await query
 
@@ -98,7 +91,6 @@ export const aggregateDataByPeriod = (
 
     switch (period) {
       case 'week':
-        // Группировка по неделям (понедельник как начало недели)
         const weekStart = new Date(date)
         const day = weekStart.getDay()
         const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1)
@@ -107,18 +99,15 @@ export const aggregateDataByPeriod = (
         break
 
       case 'month':
-        // Группировка по месяцам
         periodKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
         break
 
       case 'quarter':
-        // Группировка по кварталам
         const quarter = Math.floor(date.getMonth() / 3) + 1
         periodKey = `${date.getFullYear()}-Q${quarter}`
         break
 
       case 'year':
-        // Группировка по годам
         periodKey = date.getFullYear().toString()
         break
 
@@ -159,8 +148,9 @@ export const aggregateDataByCategory = (
       ? transaction.budget_folders[0]
       : transaction.budget_folders
 
-    const emoji = folder?.emoji ?? ''
-    const name = folder?.name ?? 'Unknown'
+    const hasCategory = !!folder
+    const emoji = hasCategory ? (folder!.emoji ?? '') : '📝'
+    const name = hasCategory ? (folder!.name ?? 'Uncategorized') : 'Uncategorized'
     const categoryName = `${emoji} ${name}`.trim()
 
     if (!aggregated[categoryName]) {
@@ -174,7 +164,7 @@ export const aggregateDataByCategory = (
     }
   })
 
-  return Object.entries(aggregated)
+  const result = Object.entries(aggregated)
     .map(([category, data]) => ({
       category,
       emoji: data.emoji,
@@ -182,7 +172,17 @@ export const aggregateDataByCategory = (
       income: data.income,
       total: data.expenses + data.income
     }))
-    .sort((a, b) => b.total - a.total) // Сортировка по убыванию общей суммы
+    .filter(item => item.total > 0)
+    .sort((a, b) => {
+      // “Uncategorized” всегда в конце
+      const isAUncat = /Uncategorized$/.test(a.category)
+      const isBUncat = /Uncategorized$/.test(b.category)
+      if (isAUncat && !isBUncat) return 1
+      if (!isAUncat && isBUncat) return -1
+      return b.total - a.total
+    })
+
+  return result
 }
 
 // Функция для получения статистики по периоду

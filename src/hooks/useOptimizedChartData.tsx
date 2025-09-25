@@ -17,14 +17,7 @@ import {
   chartQueryKeys,
   TransactionData
 } from '@/lib/chartQueries'
-import { 
-  generateMockPieData, 
-  generateMockLineData, 
-  generateMockBarData,
-  calculatePieChartPercentages,
-  generatePieColors,
-  defaultChartColors
-} from '@/lib/chartUtils'
+
 
 // Оптимизированный хук для данных Pie Chart с кэшированием
 export const useOptimizedPieChartData = (filters: ChartFilters): UseChartDataReturn<PieChartData> => {
@@ -136,7 +129,14 @@ export const useOptimizedLineChartData = (filters: ChartFilters): UseChartDataRe
   }
 }
 
-// Оптимизированный хук для данных Bar Chart с кэшированием
+import {
+  generateMockPieData, 
+  generateMockLineData, 
+  generateMockBarData,
+  calculatePieChartPercentages,
+  generatePieColors,
+} from '@/lib/chartUtils'
+
 export const useOptimizedBarChartData = (filters: ChartFilters): UseChartDataReturn<BarChartData> => {
   const { session } = UserAuth()
 
@@ -154,10 +154,9 @@ export const useOptimizedBarChartData = (filters: ChartFilters): UseChartDataRet
     staleTime: 3 * 60 * 1000,
   })
 
-  // Преобразование в формат BarChart
-  const barData: BarChartData[] = categoryData
+  // Преобразование в формат BarChart без цвета
+  const baseBarData: Omit<BarChartData, 'fill'>[] = categoryData
     .filter(item => {
-      // Фильтрация по типу данных
       if (filters.dataType === 'expenses') return item.expenses > 0
       if (filters.dataType === 'income') return item.income > 0
       return item.total > 0
@@ -168,21 +167,20 @@ export const useOptimizedBarChartData = (filters: ChartFilters): UseChartDataRet
         filters.dataType === 'income' ? item.income :
         item.total
 
-      const fill = 
-        filters.dataType === 'expenses' ? defaultChartColors.error :
-        filters.dataType === 'income' ? defaultChartColors.success :
-        defaultChartColors.primary
-
       return {
         category: item.category,
         amount,
-        fill,
         emoji: item.emoji
       }
     })
-    .slice(0, 10) // Ограничение до 10 категорий для лучшей читаемости
 
-  // Fallback к mock данным при ошибке
+  // Назначаем уникальные цвета
+  const colors = generatePieColors(baseBarData.length)
+  const barData: BarChartData[] = baseBarData
+    .map((item, index) => ({ ...item, fill: colors[index] }))
+    .slice(0, 10)
+
+  // Fallback к mock-данным
   const fallbackData = error ? generateMockBarData() : barData
 
   return {

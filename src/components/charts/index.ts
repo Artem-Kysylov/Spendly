@@ -1,4 +1,4 @@
-// Компоненты графиков
+// Chart components
 export { PieChart } from './PieChart'
 export { LineChart } from './LineChart'
 export { BarChart } from './BarChart'
@@ -6,10 +6,9 @@ export { ChartsContainer } from './ChartsContainer'
 export { ChartFilters } from './ChartFilters'
 export { ChartSkeleton } from './ChartSkeleton'
 export { ChartDescription } from './ChartDescription'
-export { ChartToggleControls } from './ChartToggleControls'
 export { CustomLegend, useLegendState } from './CustomLegend'
 
-// Типы
+// Types
 export type {
   PieChartData,
   LineChartData,

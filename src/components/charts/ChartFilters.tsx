@@ -1,14 +1,11 @@
+// импорт и заголовок файла
 import React from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Select } from '@/components/ui/select'
-import { Toggle } from '@/components/ui/toggle'
-import { MultiSelect } from '@/components/ui/multi-select'
-import { Calendar, RefreshCw } from 'lucide-react'
+import { RefreshCw } from 'lucide-react'
 import { format } from 'date-fns'
 import { enUS } from 'date-fns/locale'
-import { ChartFilters as ChartFiltersType, ChartPeriod, ChartDataType } from '../../types/types'
-import { useBudgets } from '../../hooks/useBudgets'
+import { ChartFilters as ChartFiltersType, ChartPeriod } from '../../types/types'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface ChartFiltersProps {
   filters: ChartFiltersType
@@ -21,8 +18,6 @@ export const ChartFilters: React.FC<ChartFiltersProps> = ({
   onFiltersChange,
   isLoading = false
 }) => {
-  const { budgets, isLoading: budgetsLoading } = useBudgets()
-
   const handlePeriodChange = (period: ChartPeriod) => {
     const now = new Date()
     let startDate = new Date()
@@ -30,21 +25,31 @@ export const ChartFilters: React.FC<ChartFiltersProps> = ({
 
     switch (period) {
       case 'week':
+        // последние 7 дней
         startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
+        endDate = now
         break
       case 'month':
+        // текущий месяц
         startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+        endDate = now
         break
-      case 'quarter':
+      case 'quarter': {
+        // текущий квартал
         const quarter = Math.floor(now.getMonth() / 3)
         startDate = new Date(now.getFullYear(), quarter * 3, 1)
+        endDate = now
         break
+      }
       case 'year':
+        // текущий год
         startDate = new Date(now.getFullYear(), 0, 1)
+        endDate = now
         break
       case 'custom':
-        // For custom period, don't change dates
-        return onFiltersChange({ ...filters, period })
+        // Для custom периода не меняем даты
+        onFiltersChange({ ...filters, period })
+        return
     }
 
     onFiltersChange({
@@ -67,28 +72,13 @@ export const ChartFilters: React.FC<ChartFiltersProps> = ({
     onFiltersChange({ ...filters, ...updates })
   }
 
-  const handleDataTypeChange = (dataType: ChartDataType) => {
-    onFiltersChange({ ...filters, dataType })
-  }
-
-  const handleCategoriesChange = (categories: string[]) => {
-    onFiltersChange({ ...filters, categories })
-  }
-
-  const handleBudgetChange = (budgetId: string) => {
-    onFiltersChange({ 
-      ...filters, 
-      budgetId: budgetId === 'all' ? null : budgetId 
-    })
-  }
-
-  // Generate month options
+  // Список месяцев
   const monthOptions = Array.from({ length: 12 }, (_, i) => ({
     value: (i + 1).toString(),
     label: format(new Date(2024, i, 1), 'LLLL', { locale: enUS })
   }))
 
-  // Generate year options (last 5 years + current + next)
+  // Список лет (последние 5 + текущий + следующий)
   const currentYear = new Date().getFullYear()
   const yearOptions = Array.from({ length: 7 }, (_, i) => {
     const year = currentYear - 5 + i
@@ -98,150 +88,47 @@ export const ChartFilters: React.FC<ChartFiltersProps> = ({
     }
   })
 
-  // Prepare options for MultiSelect categories
-  const categoryOptions = budgets.map(budget => ({
-    value: budget.id,
-    label: `${budget.emoji} ${budget.name}`
-  }))
-
   return (
-    <Card className="w-full">
-      <CardContent className="p-6">
-        <div className="space-y-6">
-          {/* Period */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Period</label>
-            <div className="flex gap-2 flex-wrap">
-              {(['week', 'month', 'quarter', 'year', 'custom'] as ChartPeriod[]).map((period) => (
-                <Button
-                  key={period}
-                  variant={filters.period === period ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => handlePeriodChange(period)}
-                >
-                  {period === 'week' && 'Week'}
-                  {period === 'month' && 'Month'}
-                  {period === 'quarter' && 'Quarter'}
-                  {period === 'year' && 'Year'}
-                  {period === 'custom' && 'Custom'}
-                </Button>
-              ))}
-            </div>
-          </div>
+    <Card className="w-full border-0 shadow-none rounded-none">
+      <CardContent className="p-0">
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Charts filters</h2>
 
-          {/* Month/Year selector */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="flex items-start flex-wrap gap-6">
+            {/* Transactions Type (слева) */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Month</label>
-              <Select
-                value={filters.selectedMonth?.toString() || ''}
-                onChange={(e) => handleMonthYearChange('month', e.target.value)}
+              <Tabs
+                value={filters.dataType}
+                onValueChange={(v) =>
+                  onFiltersChange({ ...filters, dataType: v as 'expenses' | 'income' })
+                }
               >
-                <option value="" disabled>Select month</option>
-                {monthOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
+                <TabsList>
+                  <TabsTrigger value="expenses">Expenses</TabsTrigger>
+                  <TabsTrigger value="income">Income</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
 
+            {/* Period (справа) */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Year</label>
-              <Select
-                value={filters.selectedYear?.toString() || ''}
-                onChange={(e) => handleMonthYearChange('year', e.target.value)}
+              <Tabs
+                value={filters.period}
+                onValueChange={(v) => handlePeriodChange(v as ChartPeriod)}
               >
-                <option value="" disabled>Select year</option>
-                {yearOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Select>
+                <TabsList>
+                  <TabsTrigger value="week">Week</TabsTrigger>
+                  <TabsTrigger value="month">Month</TabsTrigger>
+                  <TabsTrigger value="quarter">Quarter</TabsTrigger>
+                  <TabsTrigger value="year">Year</TabsTrigger>
+                </TabsList>
+              </Tabs>
             </div>
           </div>
 
-          {/* Data type toggle */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Data Type</label>
-            <div className="flex gap-2">
-              <Toggle
-                pressed={filters.dataType === 'expenses'}
-                onPressedChange={() => handleDataTypeChange('expenses')}
-                variant="outline"
-              >
-                Expenses
-              </Toggle>
-              <Toggle
-                pressed={filters.dataType === 'income'}
-                onPressedChange={() => handleDataTypeChange('income')}
-                variant="outline"
-              >
-                Income
-              </Toggle>
-              <Toggle
-                pressed={filters.dataType === 'both'}
-                onPressedChange={() => handleDataTypeChange('both')}
-                variant="outline"
-              >
-                Both
-              </Toggle>
-            </div>
-          </div>
-
-          {/* Categories filter */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Categories</label>
-            <MultiSelect
-              options={categoryOptions}
-              selected={filters.categories}
-              onChange={handleCategoriesChange}
-              placeholder="Select categories"
-              disabled={budgetsLoading}
-            />
-          </div>
-
-          {/* Budget filter */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Budget</label>
-            <Select
-              value={filters.budgetId || 'all'}
-              onChange={(e) => handleBudgetChange(e.target.value)}
-              disabled={budgetsLoading}
-            >
-              <option value="all">All budgets</option>
-              {budgets.map((budget) => (
-                <option key={budget.id} value={budget.id}>
-                  {budget.emoji} {budget.name}
-                </option>
-              ))}
-            </Select>
-          </div>
-
-          {/* Selected date range */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Selected Period</label>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Calendar className="h-4 w-4" />
-              <span>
-                {format(filters.startDate, 'dd.MM.yyyy', { locale: enUS })} - {format(filters.endDate, 'dd.MM.yyyy', { locale: enUS })}
-              </span>
-            </div>
-          </div>
-
-          {/* Indicators and loading status */}
-          <div className="flex items-center justify-between pt-2 border-t">
-            <div className="text-sm text-muted-foreground">
-              {filters.categories.length > 0 && (
-                <span>Categories: {filters.categories.length}</span>
-              )}
-              {filters.budgetId && (
-                <span className="ml-2">Budget selected</span>
-              )}
-            </div>
-            
-            {(isLoading || budgetsLoading) && (
+          {/* Loading status */}
+          <div className="flex items-center justify-end">
+            {isLoading && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <RefreshCw className="h-4 w-4 animate-spin" />
                 Loading...

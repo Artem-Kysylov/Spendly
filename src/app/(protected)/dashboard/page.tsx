@@ -42,14 +42,29 @@ const Dashboard = () => {
     setIsLoading(true)
     const { data, error } = await supabase
       .from('transactions')
-      .select('*')
+      .select(`
+        *,
+        budget_folders (
+          emoji,
+          name
+        )
+      `)
       .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false })
     
-    setTransactions(data as Transaction[])
-    setTimeout(() => setIsLoading(false), 500)
     if (error) {
       console.error('Error fetching transactions:', error)
     }
+
+    // Трансформируем данные, добавляя поля для таблицы
+    const transformedData = (data ?? []).map(transaction => ({
+      ...transaction,
+      category_emoji: transaction.budget_folders?.emoji || null,
+      category_name: transaction.budget_folders?.name || null,
+    }))
+
+    setTransactions(transformedData as Transaction[])
+    setTimeout(() => setIsLoading(false), 500)
   }
 
   useEffect(() => {
@@ -68,7 +83,6 @@ const Dashboard = () => {
   const handleTransactionSubmit = (message: string, type: ToastMessageProps['type']) => {
     handleToastMessage(message, type)
     if (type === 'success') {
-      // Обновляем счетчики после успешного обновления бюджета
       setRefreshCounters(prev => prev + 1)
       setTimeout(() => {
         fetchTransactions()
@@ -152,7 +166,7 @@ const Dashboard = () => {
           )}
           <div className="flex flex-col items-center gap-5 text-center mt-[30px] px-5 md:flex-row md:justify-between md:text-left">
             <h1 className="text-[35px] font-semibold text-secondary-black">
-              Welcome <span className="text-primary">{session?.user?.user_metadata?.name}✌️</span>
+              Welcome <span className="text-primary">{session?.user?.user_metadata?.name}👋</span>
             </h1>
           </div>
           <div className="mt-[30px] px-5 flex flex-col gap-5">

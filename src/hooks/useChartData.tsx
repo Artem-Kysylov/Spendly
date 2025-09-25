@@ -16,10 +16,8 @@ import {
   generateMockBarData,
   calculatePieChartPercentages,
   generatePieColors,
-  defaultChartColors
 } from '@/lib/chartUtils'
 
-// Импорт оптимизированных хуков
 import {
   useOptimizedPieChartData,
   useOptimizedLineChartData,
@@ -57,26 +55,19 @@ export const usePieChartData = (filters: ChartFilters): UseChartDataReturn<PieCh
         .select(`
           amount,
           type,
-          budget_folders!inner(id, name, emoji)
+          budget_folders(id, name, emoji)
         `)
         .eq('user_id', session.user.id)
         .gte('created_at', filters.startDate.toISOString())
         .lte('created_at', filters.endDate.toISOString())
 
-      // Фильтр по типу данных
+      // Фильтр по типу данных (маппинг в enum БД)
       if (filters.dataType !== 'both') {
-        query = query.eq('type', filters.dataType)
+        const dbType = filters.dataType === 'expenses' ? 'expense' : 'income'
+        query = query.eq('type', dbType)
       }
 
-      // Фильтр по категориям
-      if (filters.categories.length > 0) {
-        query = query.in('budget_folder_id', filters.categories)
-      }
-
-      // Фильтр по конкретному бюджету
-      if (filters.budgetId) {
-        query = query.eq('budget_folder_id', filters.budgetId)
-      }
+      // Удалены фильтры по категориям и бюджету
 
       const { data: transactions, error } = await query
 
@@ -91,7 +82,7 @@ export const usePieChartData = (filters: ChartFilters): UseChartDataReturn<PieCh
           : transaction.budget_folders
 
         const emoji = folder?.emoji ?? ''
-        const name = folder?.name ?? 'Unknown'
+        const name = folder?.name ?? 'Uncategorized'
         const categoryName = `${emoji} ${name}`.trim()
 
         acc[categoryName] = (acc[categoryName] ?? 0) + (transaction.amount ?? 0)
@@ -170,20 +161,15 @@ export const useLineChartData = (filters: ChartFilters): UseChartDataReturn<Line
         .lte('created_at', filters.endDate.toISOString())
         .order('created_at', { ascending: true })
 
-      // Фильтр по типу данных
+      // Фильтр по типу данных (маппинг в enum БД)
       if (filters.dataType !== 'both') {
-        query = query.eq('type', filters.dataType)
+        const dbType = filters.dataType === 'expenses' ? 'expense' : 'income'
+        query = query.eq('type', dbType)
       }
 
-      // Фильтр по категориям
-      if (filters.categories.length > 0) {
-        query = query.in('budget_folder_id', filters.categories)
-      }
-
-      // Фильтр по конкретному бюджету
-      if (filters.budgetId) {
-        query = query.eq('budget_folder_id', filters.budgetId)
-      }
+      // Удалены фильтры:
+      // if (filters.categories.length > 0) { ... }
+      // if (filters.budgetId) { ... }
 
       const { data: transactions, error } = await query
 
@@ -260,7 +246,9 @@ export const useBarChartData = (filters: ChartFilters): UseChartDataReturn<BarCh
   const [error, setError] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
-    if (!session?.user?.id) return
+    if (!session?.user?.id) {
+      return
+    }
 
     try {
       setIsLoading(true)
@@ -273,26 +261,21 @@ export const useBarChartData = (filters: ChartFilters): UseChartDataReturn<BarCh
           amount,
           type,
           created_at,
-          budget_folders!inner(name, emoji)
+          budget_folders(name, emoji)
         `)
         .eq('user_id', session.user.id)
         .gte('created_at', filters.startDate.toISOString())
         .lte('created_at', filters.endDate.toISOString())
 
-      // Фильтр по типу данных
+      // Фильтр по типу данных (маппинг в enum БД)
       if (filters.dataType !== 'both') {
-        query = query.eq('type', filters.dataType)
+        const dbType = filters.dataType === 'expenses' ? 'expense' : 'income'
+        query = query.eq('type', dbType)
       }
 
-      // Фильтр по категориям
-      if (filters.categories.length > 0) {
-        query = query.in('budget_folder_id', filters.categories)
-      }
-
-      // Фильтр по конкретному бюджету
-      if (filters.budgetId) {
-        query = query.eq('budget_folder_id', filters.budgetId)
-      }
+      // Удалены фильтры по категориям/бюджету:
+      // if (filters.categories.length > 0) { ... }
+      // if (filters.budgetId) { ... }
 
       const { data: transactions, error } = await query
 
@@ -307,7 +290,7 @@ export const useBarChartData = (filters: ChartFilters): UseChartDataReturn<BarCh
           : transaction.budget_folders
 
         const emoji = folder?.emoji ?? ''
-        const name = folder?.name ?? 'Unknown'
+        const name = folder?.name ?? 'Uncategorized'
         const categoryName = `${emoji} ${name}`.trim()
 
         if (!acc[categoryName]) {
@@ -324,7 +307,7 @@ export const useBarChartData = (filters: ChartFilters): UseChartDataReturn<BarCh
       }, {})
 
       // Преобразование в формат для BarChart (amount + fill)
-      const barData: BarChartData[] = Object.entries(categoryTotals).map(([category, totals]) => {
+      const baseBarData: Omit<BarChartData, 'fill'>[] = Object.entries(categoryTotals).map(([category, totals]) => {
         const amount =
           filters.dataType === 'expenses'
             ? totals.expenses
@@ -332,20 +315,22 @@ export const useBarChartData = (filters: ChartFilters): UseChartDataReturn<BarCh
               ? totals.income
               : totals.expenses + totals.income
 
-        const fill =
-          filters.dataType === 'expenses'
-            ? defaultChartColors.error
-            : filters.dataType === 'income'
-              ? defaultChartColors.success
-              : defaultChartColors.primary
-
         return {
           category,
           amount,
-          fill,
           emoji: totals.emoji
         }
       })
+
+      // Генерируем уникальные цвета и прописываем в fill
+      const colors = generatePieColors(baseBarData.length)
+      const barData: BarChartData[] = baseBarData.map((item, index) => ({
+        ...item,
+        fill: colors[index]
+      }))
+
+      // console.log('categoryTotals:', categoryTotals)
+      // console.log('barData:', barData)
 
       setData(barData)
       

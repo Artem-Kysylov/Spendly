@@ -12,7 +12,7 @@ const NotificationBell = ({ count = 99, className = '' }: NotificationBellProps)
   return (
     <div className={`cursor-pointer relative ${className}`}>
       {/* Background */}
-      <div className="w-[35px] h-[35px] rounded-full bg-primary/30 flex items-center justify-center transition-all duration-200 hover:bg-primary/40">
+      <div className="w-[35px] h-[35px] rounded-full bg-primary/10 flex items-center justify-center transition-all duration-200 hover:bg-primary/40">
         {/* Bell icon */}
         <Bell className="w-5 h-5 text-primary" />
       </div>

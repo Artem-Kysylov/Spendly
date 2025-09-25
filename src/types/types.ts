@@ -224,8 +224,6 @@ export interface ChartFilters {
     period: ChartPeriod
     startDate: Date
     endDate: Date
-    categories: string[]
-    budgetId: string | null
     dataType: ChartDataType
     selectedMonth?: number
     selectedYear?: number
