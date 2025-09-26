@@ -189,3 +189,27 @@ export const customTooltipFormatter = (value: number, name: string): [string, st
 export const customPieLabelFormatter = (entry: PieChartData): string => {
   return `${entry.name}: ${formatPercentage(entry.value, 1000)}` // 1000 is placeholder total
 }
+
+// Format date range for display in chart descriptions
+export const formatCompactRange = (startDate: Date, endDate: Date): string => {
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+  
+  // If same day
+  if (start.toDateString() === end.toDateString()) {
+    return start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+  
+  // If same month and year
+  if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { day: 'numeric', year: 'numeric' })}`
+  }
+  
+  // If same year
+  if (start.getFullYear() === end.getFullYear()) {
+    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+  }
+  
+  // Different years
+  return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+}

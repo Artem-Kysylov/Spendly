@@ -356,6 +356,7 @@ const BudgetDetails = () => {
       <div className='flex items-stretch justify-between gap-[20px] mb-[30px]'>
         <div className='w-1/2'>
           <BudgetDetailsInfo 
+            id={id}
             emoji={budgetDetails.emoji}
             name={budgetDetails.name}
             amount={budgetDetails.amount}

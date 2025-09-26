@@ -66,18 +66,18 @@ const TransactionsCounters = ({
     
     return (
         <div className="flex flex-col md:flex-row justify-between gap-5">
-            <div className="flex flex-col items-center justify-center gap-2 w-full h-[20vh] rounded-lg bg-white border relative">
+            <div className="flex flex-col items-center justify-center gap-2 w-full h-[10vh] rounded-lg bg-white border relative">
                 <div className="absolute top-5 right-5 cursor-pointer" onClick={onIconClick}>
-                    <Pencil className="text-primary text-[24px] duration-300 hover:opacity-50"/>
+                    <Pencil className="text-primary text-[20px] duration-300 hover:opacity-50"/>
                 </div>
                 <h3 className="text-6 text-primary text-center">Total Budget</h3>
                 <span className="text-[25px] font-semibold text-primary text-center">${budget}</span>
             </div>
-            <div className="flex flex-col items-center justify-center gap-2 w-full h-[20vh] rounded-lg bg-white border">
+            <div className="flex flex-col items-center justify-center gap-2 w-full h-[10vh] rounded-lg bg-white border">
                 <h3 className="text-6 text-error text-center">Total Expenses</h3>
                 <span className="text-[25px] font-semibold text-error text-center">${totalExpenses}</span>
             </div>
-            <div className="flex flex-col items-center justify-center gap-2 w-full h-[20vh] rounded-lg bg-white border">
+            <div className="flex flex-col items-center justify-center gap-2 w-full h-[10vh] rounded-lg bg-white border">
                 <h3 className="text-6 text-success text-center">Total Income</h3>
                 <span className="text-[25px] font-semibold text-success text-center">${totalIncome}</span>
             </div>

@@ -49,7 +49,7 @@ export function DialogContent({
       <div className="fixed inset-0 bg-black/50 backdrop-blur-[1px]" />
       <div
         className={cn(
-          "relative z-10 w-[90vw] max-w-md rounded-lg border bg-background p-6 text-foreground shadow-lg",
+          "relative z-10 w-[90vw] max-w-md rounded-lg border bg-white p-6 text-foreground shadow-lg",
           className
         )}
         onClick={(e) => e.stopPropagation()}

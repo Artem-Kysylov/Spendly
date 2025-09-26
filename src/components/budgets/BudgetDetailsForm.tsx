@@ -41,7 +41,7 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
   }
 
   return (
-    <div className='w-full rounded-lg border border-light-grey p-[20px] min-h-[300px] flex flex-col'>
+    <div className='w-full rounded-lg border border-border bg-white p-[20px] min-h-[300px] flex flex-col'>
       <h3 className='text-secondary-black text-[25px] font-semibold text-center mb-[20px]'>Add new transaction📝</h3>
       <form onSubmit={handleSubmit} className='flex flex-col gap-[20px] flex-1 justify-center'>
         <TextInput

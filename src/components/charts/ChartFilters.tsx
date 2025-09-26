@@ -89,7 +89,7 @@ export const ChartFilters: React.FC<ChartFiltersProps> = ({
   })
 
   return (
-    <Card className="w-full border-0 shadow-none rounded-none">
+    <Card className="w-full border-0 shadow-none rounded-none bg-transparent">
       <CardContent className="p-0">
         <div className="space-y-4">
           <h2 className="text-lg font-semibold">Charts filters</h2>

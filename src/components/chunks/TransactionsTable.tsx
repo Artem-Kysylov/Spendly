@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/table"
 
 // Import components 
-import Button from '../ui-elements/Button'
+import { Button } from "@/components/ui/button"
 import DeleteModal from '../modals/DeleteModal'
 import EditTransactionModal from '../modals/EditTransactionModal'
 
@@ -94,22 +94,21 @@ const TransactionsTable = ({
 
   return (
     <div className="relative">
-      <div className="overflow-x-auto rounded-[10px] border border-light-grey bg-background">
+      <div className="overflow-x-auto rounded-lg border border-border bg-white shadow-sm">
         <Table>
-          <TableHeader className="border-b border-light-grey">
-            <TableRow className="border-b border-light-grey hover:bg-transparent">
+          <TableHeader className="border-b border-border">
+            <TableRow className="border-b border-border hover:bg-transparent">
               <TableHead className="!text-[16px] font-semibold text-secondary-black">Transaction Name</TableHead>
               <TableHead className="!text-[16px] font-semibold text-secondary-black">Budgets</TableHead>
               <TableHead className="!text-[16px] font-semibold text-secondary-black">Amount</TableHead>
               <TableHead className="!text-[16px] font-semibold text-secondary-black">Type</TableHead>
               <TableHead className="!text-[16px] font-semibold text-secondary-black">Date</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-secondary-black">Edit</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-secondary-black">Delete</TableHead>
+              <TableHead className="!text-[16px] font-semibold text-secondary-black">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedTransactions.map((transaction, index) => (
-              <TableRow key={transaction.id} className="border-b border-light-grey hover:bg-gray-50/50">
+              <TableRow key={transaction.id} className="border-b border-border hover:bg-gray-50/30">
                 <TableCell className="text-secondary-black">{transaction.title}</TableCell>
                 <TableCell className="text-secondary-black">
                   {transaction.category_emoji && transaction.category_name ? (
@@ -124,7 +123,11 @@ const TransactionsTable = ({
                 <TableCell className="text-secondary-black">{transaction.amount}</TableCell>
                 <TableCell>
                   <span
-                    className={`${transaction.type === 'expense' ? 'text-error' : 'text-success'} text-[14px]`}
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide ${
+                      transaction.type === 'expense' 
+                        ? 'bg-red-100 text-red-700' 
+                        : 'bg-green-100 text-green-700'
+                    }`}
                   >
                     {transaction.type}
                   </span>
@@ -133,28 +136,30 @@ const TransactionsTable = ({
                   {new Date(transaction.created_at).toLocaleDateString()}
                 </TableCell>
                 <TableCell>
-                  <Button
-                    icon={<Pencil size={16} />}
-                    text="Edit"
-                    className="p-0 text-primary"
-                    variant="ghost"
-                    onClick={() => {
-                      setEditingTransaction(transaction)
-                      setIsEditOpen(true)
-                    }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Button
-                    icon={<Trash size={16} />}
-                    text="Delete"
-                    className="p-0 text-error"
-                    variant="ghost"
-                    onClick={() => {
-                      setSelectedTransactionId(transaction.id)
-                      setIsModalOpen(true)
-                    }}
-                  />
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-primary hover:bg-blue-50"
+                      onClick={() => {
+                        setEditingTransaction(transaction)
+                        setIsEditOpen(true)
+                      }}
+                    >
+                      <Pencil size={16} />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-error hover:bg-red-50"
+                      onClick={() => {
+                        setSelectedTransactionId(transaction.id)
+                        setIsModalOpen(true)
+                      }}
+                    >
+                      <Trash size={16} />
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

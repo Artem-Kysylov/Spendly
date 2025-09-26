@@ -112,6 +112,7 @@ const Budgets = () => {
               emoji={folder.emoji}
               name={folder.name}
               amount={folder.amount}
+              type={folder.type}
             />
           </Link>
         ))}

@@ -5,7 +5,6 @@ import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tool
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, formatChartDate } from '@/lib/chartUtils'
 import { CustomTooltip } from './CustomTooltip'
-import { CustomLegend, LegendItem } from './CustomLegend'
 import { LineChartProps } from '@/types/types'
 import { ChartDescription } from './ChartDescription'
 
@@ -30,13 +29,16 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
 
   if (isLoading) {
     return (
-      <Card className="w-full">
+      <Card ref={ref} className={`w-full ${className}`}>
         <CardHeader>
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+          {description && (
+            <ChartDescription>{description}</ChartDescription>
+          )}
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[300px]">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <div className="flex items-center justify-center h-64">
+            <div className="text-muted-foreground">Loading chart data...</div>
           </div>
         </CardContent>
       </Card>
@@ -45,13 +47,16 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
 
   if (error) {
     return (
-      <Card className="w-full">
+      <Card ref={ref} className={`w-full ${className}`}>
         <CardHeader>
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+          {description && (
+            <ChartDescription>{description}</ChartDescription>
+          )}
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-            <p>Error loading data: {error}</p>
+          <div className="flex items-center justify-center h-64">
+            <div className="text-destructive">Error loading chart: {error}</div>
           </div>
         </CardContent>
       </Card>
@@ -60,37 +65,28 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
 
   if (!data || data.length === 0) {
     return (
-      <Card className="w-full">
+      <Card ref={ref} className={`w-full ${className}`}>
         <CardHeader>
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+          {description && (
+            <ChartDescription>{description}</ChartDescription>
+          )}
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-            <p>No data to display</p>
+          <div className="flex items-center justify-center h-64">
+            <div className="text-muted-foreground">No data available</div>
           </div>
         </CardContent>
       </Card>
     )
   }
 
-  // Format data for display
-  const formattedData = data.map(item => ({
+  // Format data for chart
+  const chartData = data.map((item, index) => ({
     ...item,
-    formattedDate: formatChartDate(item.date, xPeriod)
+    formattedDate: formatChartDate(item.date, xPeriod),
+    opacity: hoveredIndex === null || hoveredIndex === index ? 1 : 0.6
   }))
-
-  // Prepare data for legend
-  const legendData: LegendItem[] = [{
-    value: data.reduce((sum, item) => sum + item.amount, 0),
-    name: "Total amount",
-    color: lineColor,
-    payload: { dataKey: 'amount' }
-  }]
-
-  // Hover handler for legend
-  const handleLegendItemHover = (item: LegendItem | null, index: number | null) => {
-    setHoveredIndex(index)
-  }
 
   return (
     <Card ref={ref} className={`w-full ${className}`}>
@@ -102,12 +98,22 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={height}>
-          <RechartsLineChart data={formattedData}>
+          <RechartsLineChart
+            data={chartData}
+            margin={{
+              top: 20,
+              right: 30,
+              left: 20,
+              bottom: 5,
+            }}
+          >
             {showGrid && (
-              <CartesianGrid 
-                strokeDasharray="3 3" 
+              <CartesianGrid
+                strokeDasharray="4 4"
+                horizontal={true}
+                vertical={true}
                 stroke="hsl(var(--muted-foreground))"
-                opacity={0.3}
+                opacity={0.18}
               />
             )}
             <XAxis 
@@ -122,7 +128,7 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => formatCurrency(value, currency, true)}
+              tickFormatter={(value) => formatCurrency(value, currency)}
             />
             {showTooltip && (
               <Tooltip 
@@ -130,23 +136,18 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
                 cursor={{ stroke: lineColor, strokeWidth: 1, strokeDasharray: '3 3' }}
               />
             )}
-            <Line 
-              type="monotone" 
-              dataKey="amount" 
+            <Line
+              type="monotone"
+              dataKey="amount"
               stroke={lineColor}
               strokeWidth={strokeWidth}
-              dot={{ 
-                fill: lineColor, 
-                strokeWidth: 2, 
+              dot={{
                 r: 4,
-                style: {
-                  filter: hoveredIndex === 0 ? 'brightness(1.2)' : 'none',
-                  transition: 'filter 0.2s ease'
-                }
+                strokeWidth: 2,
+                fill: 'hsl(var(--background))'
               }}
-              activeDot={{ 
-                r: 6, 
-                stroke: lineColor, 
+              activeDot={{
+                r: 6,
                 strokeWidth: 2,
                 fill: 'hsl(var(--background))'
               }}
@@ -155,21 +156,6 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
             />
           </RechartsLineChart>
         </ResponsiveContainer>
-        
-        {showLegend && (
-          <CustomLegend
-            payload={legendData}
-            layout="horizontal"
-            align="center"
-            iconType="line"
-            currency={currency}
-            showValues={true}
-            showBadges={true}
-            interactive={false}
-            onItemHover={handleLegendItemHover}
-            spacing="normal"
-          />
-        )}
       </CardContent>
     </Card>
   )

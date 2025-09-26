@@ -68,7 +68,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                             className="bg-[#F5F3FF] text-primary text-[25px] w-[60px] h-[60px] flex items-center justify-center rounded-lg hover:opacity-50 transition-opacity duration-300 border-none"
                             onClick={() => setOpenEmojiPicker(true)}
                         />
-                        <span className='text-light-grey'>Pick an emoji (optional)</span>
+                        <span className='text-secondary-black'>Pick an emoji (optional)</span>
                     </div>
                     <div className='absolute top-0 right-0'>
                         <EmojiPicker 
@@ -86,6 +86,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             disabled={isLoading}
+                            className="!bg-gray-50"
                         />
                         <TextInput
                             type="text"
@@ -94,6 +95,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                             onChange={(e) => setAmount(e.target.value)}
                             onInput={handleInput}
                             disabled={isLoading}
+                            className="!bg-gray-50"
                         />
                         <div className="flex gap-4">
                             <RadioButton
@@ -102,6 +104,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                                 currentValue={type}
                                 variant="expense"
                                 onChange={(e) => setType(e.target.value as 'expense' | 'income')}
+                                inactiveBgClassName="bg-background"
                             />
                             <RadioButton
                                 title="Income"
@@ -109,6 +112,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                                 currentValue={type}
                                 variant="income"
                                 onChange={(e) => setType(e.target.value as 'expense' | 'income')}
+                                inactiveBgClassName="bg-background"
                             />
                         </div>
                         <DialogFooter className="justify-center sm:justify-center gap-4">

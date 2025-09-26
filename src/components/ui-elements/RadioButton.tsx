@@ -1,7 +1,7 @@
 // Import types 
 import { RadioButtonProps } from '../../types/types'
 
-const RadioButton = ({ value, currentValue, variant, onChange, title, disabled = false }: RadioButtonProps) => {
+const RadioButton = ({ value, currentValue, variant, onChange, title, disabled = false, inactiveBgClassName }: RadioButtonProps) => {
   const getStyles = () => {
     const baseStyles = disabled ? 'cursor-not-allowed' : 'cursor-pointer'
     const opacityStyles = disabled ? 'opacity-50' : ''
@@ -11,7 +11,7 @@ const RadioButton = ({ value, currentValue, variant, onChange, title, disabled =
         ? `bg-error text-error-foreground border-error ${baseStyles} ${opacityStyles}`
         : `bg-success text-success-foreground border-success ${baseStyles} ${opacityStyles}`
     }
-    return `text-secondary-foreground border-border ${baseStyles} ${opacityStyles}`
+    return `${inactiveBgClassName ?? 'bg-background'} text-secondary-foreground border-border ${baseStyles} ${opacityStyles}`
   }
 
   return (

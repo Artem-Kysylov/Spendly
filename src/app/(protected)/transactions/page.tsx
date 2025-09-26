@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { UserAuth } from '@/context/AuthContext'
+import { Plus } from 'lucide-react'
+
+
 
 // Import hooks
 import useModal from '@/hooks/useModal'
@@ -156,6 +159,7 @@ const Transactions = () => {
           text="Add Transaction"
           variant="primary"
           onClick={openModal}
+          icon={<Plus size={16} className="text-white" />}
         />
       </div>
 

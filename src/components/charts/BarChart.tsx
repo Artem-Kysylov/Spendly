@@ -5,7 +5,6 @@ import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, generatePieColors } from '@/lib/chartUtils'
 import { CustomTooltip } from './CustomTooltip'
-import { CustomLegend, useLegendState, LegendItem } from './CustomLegend'
 import { BarChartProps } from '@/types/types'
 import { ChartDescription } from './ChartDescription'
 
@@ -26,7 +25,6 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
   orientation = "vertical",
   className = ""
 }, ref) => {
-  const { hiddenItems, toggleItem } = useLegendState()
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   if (isLoading) {
@@ -51,8 +49,8 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-            <p>Error loading data: {error}</p>
+          <div className="flex items-center justify-center h-[300px]">
+            <div className="text-destructive">Error: {error}</div>
           </div>
         </CardContent>
       </Card>
@@ -66,56 +64,31 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[300px] text-muted-foreground">
-            <p>No data to display</p>
+          <div className="flex items-center justify-center h-[300px]">
+            <div className="text-muted-foreground">No data available</div>
           </div>
         </CardContent>
       </Card>
     )
   }
 
-  const normalizedData = data.map(item => ({
+  // Generate colors for bars
+  const colors = generatePieColors(data.length)
+
+  // Normalize data and add colors
+  const normalizedData = data.map((item, index) => ({
     ...item,
-    amount:
-      typeof item.amount === 'number'
-        ? item.amount
-        : Number(String(item.amount).replace(/[^\d.-]/g, '')) || 0,
+    fill: item.fill || colors[index % colors.length],
+    opacity: hoveredIndex === null || hoveredIndex === index ? 1 : 0.6
   }))
-
-  const colors = generatePieColors(normalizedData.length)
-
-  const filteredData = normalizedData.filter((_, index) => !hiddenItems.has(index))
-  const dataToRender = filteredData
-
-  const cleanLegendName = (name: string, emoji?: string) => {
-    if (!emoji) return name.trim()
-    const escaped = emoji.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    return name.replace(new RegExp(`^${escaped}\\s*`), '').trim()
-  }
-
-  const legendData: LegendItem[] = normalizedData.map((item, index) => ({
-    value: item.amount,
-    name: cleanLegendName(item.category, item.emoji),
-    color: item.fill || colors[index % colors.length],
-    payload: item,
-    emoji: item.emoji
-  }))
-
-  const handleLegendClick = (item: LegendItem, index: number) => {
-    toggleItem(index)
-  }
-
-  const handleLegendHover = (item: LegendItem | null, index: number | null) => {
-    setHoveredIndex(index)
-  }
-
-  const getBarColor = (index: number) => {
-    const originalIndex = normalizedData.findIndex(item => dataToRender[index] === item)
-    return normalizedData[originalIndex]?.fill || colors[originalIndex % colors.length]
-  }
 
   const formatYAxisLabel = (value: number) => {
     return formatCurrency(value, currency, true)
+  }
+
+  const formatXAxisLabel = (value: string) => {
+    // Возвращаем исходную категорию с эмодзи
+    return value.trim()
   }
 
   return (
@@ -128,89 +101,93 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={height}>
-          <RechartsBarChart 
-            data={dataToRender}
-            layout={orientation === "horizontal" ? "horizontal" : "vertical"}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+          <RechartsBarChart
+            data={normalizedData}
+            layout={orientation === "horizontal" ? "vertical" : "horizontal"}
+            margin={{
+              top: 36,
+              right: 30,
+              left: orientation === "horizontal" ? 80 : 20,
+              bottom: orientation === "horizontal" ? 8 : 8,
+            }}
           >
             {showGrid && (
-              <CartesianGrid 
-                strokeDasharray="3 3" 
+              <CartesianGrid
+                strokeDasharray="4 4"
+                horizontal={true}
+                vertical={true}
                 stroke="hsl(var(--muted-foreground))"
-                opacity={0.3}
+                opacity={0.18}
               />
             )}
-            <XAxis 
-              type={orientation === "horizontal" ? "category" : "number"}
-              dataKey={orientation === "horizontal" ? "category" : undefined}
-              tickFormatter={orientation === "horizontal" ? undefined : formatYAxisLabel}
-              stroke="hsl(var(--muted-foreground))"
-              fontSize={12}
-              tickLine={false}
-              axisLine={false}
-              height={orientation === "horizontal" ? 60 : undefined}
-            />
-            <YAxis 
-              type={orientation === "horizontal" ? "number" : "category"}
-              dataKey={orientation === "horizontal" ? undefined : "category"}
-              tickFormatter={orientation === "horizontal" ? formatYAxisLabel : undefined}
-              stroke="hsl(var(--muted-foreground))"
-              fontSize={12}
-              tickLine={false}
-              axisLine={false}
-              width={orientation === "horizontal" ? undefined : 100}
-              domain={orientation === "horizontal" ? [0, 'dataMax'] : undefined}
-            />
+            
+            {orientation === "horizontal" ? (
+              <>
+                <XAxis 
+                  type="number"
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={formatYAxisLabel}
+                />
+                <YAxis 
+                  type="category"
+                  dataKey="category"
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={formatXAxisLabel}
+                  width={90}
+                />
+              </>
+            ) : (
+              <>
+                <XAxis 
+                  dataKey="category"
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={formatXAxisLabel}
+                  // Ровные подписи с эмодзи, меньше «воздуха» снизу
+                  height={28}
+                  tickMargin={4}
+                  interval={0}
+                />
+                <YAxis 
+                  stroke="hsl(var(--muted-foreground))"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={formatYAxisLabel}
+                />
+              </>
+            )}
+            
             {showTooltip && (
               <Tooltip 
                 content={<CustomTooltip currency={currency} />}
-                cursor={{ fill: 'hsl(var(--muted))', opacity: 0.3 }}
+                cursor={{ fill: 'hsl(var(--muted))', opacity: 0.1 }}
               />
             )}
-            <Bar 
-              dataKey="amount" 
-              fill={barColor}
+            
+            <Bar
+              dataKey="amount"
               radius={[4, 4, 0, 0]}
               animationDuration={800}
-              name="Amount"
-              minPointSize={2}
             >
-              {dataToRender.map((entry, index) => {
-                const originalIndex = normalizedData.findIndex(item => item === entry)
-                const isHovered = hoveredIndex === originalIndex
-                
-                return (
-                  <Cell 
-                    key={`bar-${index}`} 
-                    fill={getBarColor(index)}
-                    style={{
-                      filter: isHovered ? 'brightness(1.1)' : 'none',
-                      transition: 'filter 0.2s ease'
-                    }}
-                  />
-                )
-              })}
+              {normalizedData.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fill={entry.fill}
+                  opacity={entry.opacity}
+                />
+              ))}
             </Bar>
           </RechartsBarChart>
         </ResponsiveContainer>
-        
-        {showLegend && (
-          <CustomLegend
-            payload={legendData}
-            layout="horizontal"
-            align="center"
-            iconType="rect"
-            currency={currency}
-            showValues={true}
-            showBadges={true}
-            interactive={true}
-            onItemClick={handleLegendClick}
-            onItemHover={handleLegendHover}
-            hiddenItems={hiddenItems}
-            spacing="normal"
-            showToggleAll={true}
-          />
-        )}
       </CardContent>
     </Card>
   )

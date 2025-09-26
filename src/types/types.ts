@@ -17,10 +17,10 @@ export interface AuthContextType {
     session: Session | null
     signInWithGoogle: () => Promise<{ error: any }>
     signOut: () => Promise<void>
-    // New methods for email streams
+    loading: boolean
     signInWithPassword: (email: string, password: string) => Promise<{ data?: any; error?: any }>
     signUpWithPassword: (email: string, password: string) => Promise<{ data?: any; error?: any }>
-    // States
+    resetPassword: (email: string) => Promise<{ data?: any; error?: any }>
     isReady: boolean
     isSigningIn: boolean
     isSigningUp: boolean
@@ -100,6 +100,7 @@ export interface TextInputProps {
     disabled?: boolean,
     min?: string,
     step?: string,
+    className?: string, // allow custom styles (e.g., bg-muted for modal)
 }
 
 export interface RadioButtonProps {
@@ -109,6 +110,7 @@ export interface RadioButtonProps {
     variant: 'expense' | 'income',
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
     disabled?: boolean,
+    inactiveBgClassName?: string, // custom background for inactive state
 }
 
 export interface BudgetPresetProps {
@@ -138,6 +140,7 @@ export interface BudgetDetailsInfoProps {
 }
 
 export interface BudgetDetailsProps {
+    id?: string,
     emoji: string,
     name: string,
     amount: number,
@@ -188,9 +191,7 @@ export interface EditTransactionModalProps {
     allowTypeChange?: boolean
 }
 
-// ===== CHART INTERFACES =====
-
-// Pie Chart Data Interface (for Recharts)
+// Chart Data Types
 export interface PieChartData {
     name: string
     value: number
@@ -200,48 +201,14 @@ export interface PieChartData {
     [key: string]: string | number | undefined
 }
 
-// Line Chart Data Interface (for Recharts)
+// Line Chart Data
 export interface LineChartData {
     date: string          // Date in format (e.g., "2025-01-15")
     amount: number        // Total amount for this date
     formattedDate?: string // Human readable date (e.g., "Jan 15")
-}
-
-// Bar Chart Data Interface (for Recharts)
-export interface BarChartData {
-    category: string      // Category name (e.g., "Food", "Transport")
-    amount: number        // Amount spent in this category
-    fill: string          // Color for the bar
-    emoji?: string        // Category emoji
-}
-
-// Chart Filter Types
-export type ChartPeriod = 'week' | 'month' | 'quarter' | 'year' | 'custom'
-export type ChartDataType = 'expenses' | 'income' | 'both'
-
-// Chart Filters Interface
-export interface ChartFilters {
-    period: ChartPeriod
-    startDate: Date
-    endDate: Date
-    dataType: ChartDataType
-    selectedMonth?: number
-    selectedYear?: number
-}
-
-// Chart Props Interfaces
-export interface PieChartProps {
-    data: PieChartData[]
-    title?: string
-    description?: string
-    showLegend?: boolean
-    showTooltip?: boolean
-    height?: number
-    currency?: string
-    isLoading?: boolean
-    error?: string | null
-    emptyMessage?: string
-    className?: string
+    cumulativeAmount?: number // Cumulative amount up to this date
+    budgetLine?: number   // Budget line value for this date
+    budgetUsagePercent?: number // Percentage of budget used
 }
 
 export interface LineChartProps {
@@ -260,6 +227,47 @@ export interface LineChartProps {
     strokeWidth?: number
     className?: string
     xPeriod?: 'day' | 'week' | 'month' | 'year'
+    showBudgetLine?: boolean  // Новое свойство для показа бюджетной линии
+    showCumulative?: boolean  // Новое свойство для показа кумулятивных данных
+    budgetLineColor?: string  // Цвет бюджетной линии
+    mainBudget?: number       // Общий бюджет для отображения в легенде
+}
+
+// Bar Chart Data
+export interface BarChartData {
+    category: string      // Category name (e.g., "Food", "Transport")
+    amount: number        // Amount spent in this category
+    fill: string          // Color for the bar
+    emoji?: string        // Category emoji
+}
+
+// Chart Configuration Types
+export type ChartPeriod = 'week' | 'month' | 'quarter' | 'year' | 'custom'
+export type ChartDataType = 'expenses' | 'income' | 'both'
+
+// Chart Filters
+export interface ChartFilters {
+    period: ChartPeriod
+    startDate: Date
+    endDate: Date
+    dataType: ChartDataType
+    selectedMonth?: number
+    selectedYear?: number
+}
+
+// Pie Chart Props
+export interface PieChartProps {
+    data: PieChartData[]
+    title?: string
+    description?: string
+    showLegend?: boolean
+    showTooltip?: boolean
+    height?: number
+    currency?: string
+    isLoading?: boolean
+    error?: string | null
+    emptyMessage?: string
+    className?: string
 }
 
 export interface BarChartProps {
@@ -277,16 +285,19 @@ export interface BarChartProps {
     barColor?: string
     orientation?: 'vertical' | 'horizontal'
     className?: string
+    showBudgetLine?: boolean    // Показывать ли бюджетную линию
+    mainBudget?: number         // Общий бюджет
+    budgetLineColor?: string    // Цвет бюджетной линии
 }
 
-// Chart Container Props
+// Charts Container Props
 export interface ChartsContainerProps {
     filters: ChartFilters
     onFiltersChange: (filters: ChartFilters) => void
     className?: string
 }
 
-// Chart Data Hook Return Types
+// Hook Return Types
 export interface ChartDataHookReturn {
     pieData: PieChartData[]
     lineData: LineChartData[]
@@ -303,7 +314,7 @@ export interface UseChartDataReturn<T> {
     refetch: () => void
 }
 
-// Chart Utils Types
+// Chart Styling
 export interface ChartColorPalette {
     primary: string
     secondary: string
@@ -314,58 +325,26 @@ export interface ChartColorPalette {
     [key: string]: string
 }
 
-// Chart Visibility Control
+// Chart Visibility
 export interface ChartVisibility {
     pieChart: boolean
     barChart: boolean
     lineChart: boolean
 }
 
-// Custom Legend Types
-export interface LegendItem {
-    value: string | number
-    name: string
-    color: string
-    payload?: any
-    emoji?: string
-    icon?: React.ReactNode
-}
-
-export interface CustomLegendProps {
-    payload?: LegendItem[]
-    layout?: 'horizontal' | 'vertical' | 'grid'
-    align?: 'left' | 'center' | 'right'
-    verticalAlign?: 'top' | 'middle' | 'bottom'
-    iconType?: 'circle' | 'square' | 'line' | 'rect'
-    iconSize?: number
-    fontSize?: number
-    currency?: string
-    showValues?: boolean
-    showBadges?: boolean
-    interactive?: boolean
-    onItemClick?: (item: LegendItem, index: number) => void
-    onItemHover?: (item: LegendItem | null, index: number | null) => void
-    hiddenItems?: Set<number>
-    className?: string
-    itemClassName?: string
-    spacing?: 'compact' | 'normal' | 'relaxed'
-    maxItems?: number
-    showToggleAll?: boolean
-}
-
 // Export related types
 export type ExportFormat = 'png' | 'pdf' | 'all-pdf' | 'svg' | 'all-svg'
 
 export interface ExportOptions {
-  // Размер изображения
+  // Common options
   width?: number
   height?: number
   scale?: number
   
-  // Качество
+  // Quality settings
   quality?: 'low' | 'medium' | 'high'
   
-  // Водяной знак
+  // Watermark settings
   watermark?: {
     enabled: boolean
     text?: string
@@ -375,17 +354,17 @@ export interface ExportOptions {
     color?: string
   }
   
-  // Дополнительные настройки
+  // PNG/JPEG specific
   backgroundColor?: string
   includeLegend?: boolean
   format?: 'png' | 'jpeg'
   
-  // PDF специфичные настройки
+  // PDF specific
   orientation?: 'portrait' | 'landscape'
   pageSize?: 'a4' | 'a3' | 'letter'
   margin?: number
   
-  // SVG специфичные настройки
+  // SVG specific
   svgOptimization?: boolean
   embedFonts?: boolean
   preserveAspectRatio?: string

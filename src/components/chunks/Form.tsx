@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { supabase } from '../../lib/supabaseClient'
 import { UserAuth } from '../../context/AuthContext'
 import { useToast } from '@/components/ui/use-toast'
+import { Plus } from 'lucide-react'
 
 // Import components 
 import Button from '../ui-elements/Button'
@@ -73,7 +74,7 @@ const Form = () => {
         <input 
           type="text" 
           placeholder="Transaction Name" 
-          className="w-full px-4 py-3 rounded-lg border border-primary focus:border-primary focus:outline-none text-base" 
+          className="w-full px-4 py-3 rounded-lg border border-primary bg-background focus:border-primary focus:outline-none text-base" 
           value={title}
           required
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
@@ -82,14 +83,14 @@ const Form = () => {
         <input 
           type="number" 
           placeholder="Amount(USD)" 
-          className="w-full px-4 py-3 rounded-lg border border-primary focus:border-primary focus:outline-none text-base" 
+          className="w-full px-4 py-3 rounded-lg border border-primary bg-background focus:border-primary focus:outline-none text-base" 
           value={amount}
           required
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAmount((e.target.value))}
         />
         <div className="flex gap-4 w-full">
           <label className={`cursor-pointer p-7 flex-1 rounded-lg border text-center font-medium transition-all
-            ${type === "expense" ? "bg-error text-white border-error" : "bg-light-grey text-secondary-black border-light-grey"}`}
+            ${type === "expense" ? "bg-error text-white border-error" : "bg-background text-secondary-black border-light-grey"}`}
           >
             <input
               type="radio"
@@ -102,7 +103,7 @@ const Form = () => {
             Expense
           </label>
           <label className={`cursor-pointer p-7 flex-1 rounded-lg border text-center font-medium transition-all
-            ${type === "income" ? "bg-success text-white border-success" : "bg-light-grey text-secondary-black border-light-grey"}`}
+            ${type === "income" ? "bg-success text-white border-success" : "bg-background text-secondary-black border-light-grey"}`}
           >
             <input
               type="radio"
@@ -120,6 +121,7 @@ const Form = () => {
           variant="primary" 
           type="submit"
           disabled={isLoading}
+          icon={!isLoading ? <Plus size={16} className="text-white" /> : undefined}
         />
       </form>
     </div>
