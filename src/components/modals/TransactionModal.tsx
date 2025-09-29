@@ -290,7 +290,7 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
                 onChange={handleBudgetChange}
                 className="h-[50px] px-[20px] pr-[40px] w-full rounded-md border border-input bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
               >
-                <option value="uncategorized">📝 Uncategorized</option>
+                <option value="uncategorized">📝 Unbudgeted</option>
                 {budgetFolders.map((budget) => (
                   <option key={budget.id} value={budget.id}>
                     {budget.emoji} {budget.name}

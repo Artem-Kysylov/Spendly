@@ -192,14 +192,6 @@ export interface EditTransactionModalProps {
 }
 
 // Chart Data Types
-export interface PieChartData {
-    name: string
-    value: number
-    fill: string
-    percentage?: number
-    emoji?: string        // Category emoji
-    [key: string]: string | number | undefined
-}
 
 // Line Chart Data
 export interface LineChartData {
@@ -241,9 +233,9 @@ export interface BarChartData {
     emoji?: string        // Category emoji
 }
 
-// Chart Configuration Types
-export type ChartPeriod = 'week' | 'month' | 'quarter' | 'year' | 'custom'
-export type ChartDataType = 'expenses' | 'income' | 'both'
+// Chart Configuration Types (обновленные для новых фильтров)
+export type ChartPeriod = 'Week' | 'Month'  // Убрали 'quarter', 'year', 'custom'
+export type ChartDataType = 'Expenses' | 'Income'  // Убрали 'both', изменили на заглавные буквы
 
 // Chart Filters
 export interface ChartFilters {
@@ -253,21 +245,6 @@ export interface ChartFilters {
     dataType: ChartDataType
     selectedMonth?: number
     selectedYear?: number
-}
-
-// Pie Chart Props
-export interface PieChartProps {
-    data: PieChartData[]
-    title?: string
-    description?: string
-    showLegend?: boolean
-    showTooltip?: boolean
-    height?: number
-    currency?: string
-    isLoading?: boolean
-    error?: string | null
-    emptyMessage?: string
-    className?: string
 }
 
 export interface BarChartProps {
@@ -297,9 +274,8 @@ export interface ChartsContainerProps {
     className?: string
 }
 
-// Hook Return Types
+// Chart Data Hook Return Types
 export interface ChartDataHookReturn {
-    pieData: PieChartData[]
     lineData: LineChartData[]
     barData: BarChartData[]
     isLoading: boolean
@@ -314,7 +290,7 @@ export interface UseChartDataReturn<T> {
     refetch: () => void
 }
 
-// Chart Styling
+// Chart Color Palette
 export interface ChartColorPalette {
     primary: string
     secondary: string
@@ -327,16 +303,15 @@ export interface ChartColorPalette {
 
 // Chart Visibility
 export interface ChartVisibility {
-    pieChart: boolean
     barChart: boolean
     lineChart: boolean
 }
 
-// Export related types
+// Export Types
 export type ExportFormat = 'png' | 'pdf' | 'all-pdf' | 'svg' | 'all-svg'
 
 export interface ExportOptions {
-  // Common options
+  // PNG/JPEG specific
   width?: number
   height?: number
   scale?: number
@@ -354,7 +329,7 @@ export interface ExportOptions {
     color?: string
   }
   
-  // PNG/JPEG specific
+  // General settings
   backgroundColor?: string
   includeLegend?: boolean
   format?: 'png' | 'jpeg'
@@ -376,7 +351,6 @@ export interface ChartRef {
 }
 
 export interface ChartsRefs {
-  pieChart?: ChartRef
   barChart?: ChartRef
   lineChart?: ChartRef
 }
@@ -397,4 +371,64 @@ export interface ExportSettingsModalProps {
   onExport: (format: ExportFormat, filename: string, options: ExportOptions) => void
   chartsRefs: ChartsRefs
   defaultOptions?: ExportOptions
+}
+
+// Comparison Line Chart Types
+export interface ComparisonLineChartData {
+  date: string                    // Date in format (e.g., "2025-01-15")
+  formattedDate?: string         // Human readable date (e.g., "Jan 15")
+  currentPeriod: number          // Amount for current period (this month/week)
+  previousPeriod: number         // Amount for previous period (last month/week)
+  currentCumulative?: number     // Cumulative amount for current period
+  previousCumulative?: number    // Cumulative amount for previous period
+}
+
+export interface ComparisonLineChartProps {
+  data: ComparisonLineChartData[]
+  title?: string
+  description?: string
+  showGrid?: boolean
+  showTooltip?: boolean
+  showLegend?: boolean
+  height?: number
+  currency?: string
+  isLoading?: boolean
+  error?: string | null
+  emptyMessage?: string
+  className?: string
+  xPeriod?: 'day' | 'week' | 'month' | 'year'
+  
+  // Color customization
+  currentPeriodColor?: string    // Основной синий цвет для текущего периода
+  previousPeriodColor?: string   // Синий с прозрачностью для предыдущего периода
+  strokeWidth?: number
+  
+  // Data display options
+  showCumulative?: boolean       // Показывать кумулятивные данные или обычные
+  periodType?: 'month' | 'week'  // Тип периода для правильных подписей в легенде
+  
+  // Labels customization
+  currentPeriodLabel?: string    // "This Month" / "This Week"
+  previousPeriodLabel?: string   // "Last Month" / "Last Week"
+  
+  // Additional context
+  startDate?: Date               // Дата начала текущего периода
+  endDate?: Date                 // Дата окончания текущего периода
+  dataType?: 'expenses' | 'income' | 'both'  // Тип данных для правильного описания
+  
+  // Summary data
+  currentPeriodTotal?: number    // Общая сумма за текущий период
+  previousPeriodTotal?: number   // Общая сумма за предыдущий период
+  percentageChange?: number      // Процентное изменение между периодами
+}
+
+// Hook return type for comparison chart
+export interface UseComparisonChartDataReturn {
+  data: ComparisonLineChartData[]
+  isLoading: boolean
+  error: string | null
+  refetch: () => void
+  currentPeriodTotal?: number    // Общая сумма за текущий период
+  previousPeriodTotal?: number   // Общая сумма за предыдущий период
+  percentageChange?: number      // Процентное изменение между периодами
 }

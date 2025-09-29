@@ -147,7 +147,7 @@ const Dashboard = () => {
 
       handleToastMessage('Transaction updated successfully!', 'success')
       await fetchTransactions()
-      setRefreshCounters(prev => prev + 1) // обновим счетчики
+      setRefreshCounters(prev => prev + 1) 
       window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
     } catch (e) {
       console.error('Unexpected error during update:', e)
@@ -172,7 +172,7 @@ const Dashboard = () => {
           <div className="mt-[30px] px-5 flex flex-col gap-5">
             <Counters onIconClick={handleIconClick} refreshTrigger={refreshCounters} />
             
-            {/* Добавляем графики под компонентом Counters */}
+            
             <div className="mt-8">
               <ChartsContainer 
                 showFilters={true}

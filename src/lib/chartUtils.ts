@@ -1,7 +1,8 @@
 import React from 'react'
-import { ChartColorPalette, PieChartData, LineChartData, BarChartData } from '@/types/types'
+import { ChartColorPalette, LineChartData, BarChartData } from '@/types/types'
 
-// Default color palette for charts
+
+// Цветовая палитра для графиков
 export const defaultChartColors: ChartColorPalette = {
   primary: '#3B82F6',      // Brand blue
   secondary: '#6B7280',    // Gray
@@ -15,27 +16,13 @@ export const defaultChartColors: ChartColorPalette = {
   teal: '#14B8A6',         // Teal
 }
 
-// Generate colors for pie chart segments
-export const generatePieColors = (dataLength: number): string[] => {
-  const colors = Object.values(defaultChartColors)
-  const result: string[] = []
-  
-  for (let i = 0; i < dataLength; i++) {
-    result.push(colors[i % colors.length])
-  }
-  
-  return result
-}
-
-// Format currency for display
+// Форматирование валюты
 export const formatCurrency = (amount: number, currency: string = 'USD', abbreviated: boolean = false): string => {
   if (abbreviated && amount >= 1000) {
     if (amount >= 1000000) {
       return `${(amount / 1000000).toFixed(1)}M ${currency}`
     }
-    if (amount >= 1000) {
-      return `${(amount / 1000).toFixed(1)}K ${currency}`
-    }
+    return `${(amount / 1000).toFixed(1)}K ${currency}`
   }
   
   return new Intl.NumberFormat('en-US', {
@@ -46,24 +33,12 @@ export const formatCurrency = (amount: number, currency: string = 'USD', abbrevi
   }).format(amount)
 }
 
-// Format percentage for display
+// Форматирование процентов
 export const formatPercentage = (value: number, total: number): string => {
-  if (total === 0) return '0%'
-  const percentage = (value / total) * 100
-  return `${percentage.toFixed(1)}%`
+  return `${((value / total) * 100).toFixed(1)}%`
 }
 
-// Calculate percentages for pie chart data
-export const calculatePieChartPercentages = (data: PieChartData[]): PieChartData[] => {
-  const total = data.reduce((sum, item) => sum + item.value, 0)
-  
-  return data.map(item => ({
-    ...item,
-    percentage: total > 0 ? (item.value / total) * 100 : 0
-  }))
-}
-
-// Format date for line chart
+// Форматирование дат для графиков
 export const formatChartDate = (dateString: string, period: 'day' | 'week' | 'month' | 'year'): string => {
   const date = new Date(dateString)
   
@@ -81,43 +56,33 @@ export const formatChartDate = (dateString: string, period: 'day' | 'week' | 'mo
   }
 }
 
-// Get week number of the year
+// Получение номера недели
 const getWeekNumber = (date: Date): number => {
-  const firstDayOfYear = new Date(date.getFullYear(), 0, 1)
-  const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000
-  return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7)
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  return Math.ceil((((d.getTime() - new Date(d.getFullYear(), 0, 1).getTime()) / 86400000) + 1) / 7)
 }
 
-// Sort chart data by amount (descending)
+// Сортировка данных графиков по сумме
 export const sortChartDataByAmount = <T extends { amount?: number; value?: number }>(data: T[]): T[] => {
   return [...data].sort((a, b) => {
-    const aValue = a.amount || a.value || 0
-    const bValue = b.amount || b.value || 0
+    const aValue = a.amount ?? a.value ?? 0
+    const bValue = b.amount ?? b.value ?? 0
     return bValue - aValue
   })
 }
 
-// Generate mock data for development (temporary)
-export const generateMockPieData = (): PieChartData[] => [
-  { name: 'Food', value: 400, fill: defaultChartColors.primary },
-  { name: 'Transport', value: 300, fill: defaultChartColors.success },
-  { name: 'Entertainment', value: 200, fill: defaultChartColors.warning },
-  { name: 'Shopping', value: 150, fill: defaultChartColors.error },
-  { name: 'Other', value: 100, fill: defaultChartColors.secondary },
-]
-
+// Моковые данные для разработки
 export const generateMockLineData = (): LineChartData[] => {
   const data: LineChartData[] = []
   const today = new Date()
   
-  for (let i = 29; i >= 0; i--) {
+  for (let i = 6; i >= 0; i--) {
     const date = new Date(today)
     date.setDate(date.getDate() - i)
-    
     data.push({
       date: date.toISOString().split('T')[0],
-      amount: Math.floor(Math.random() * 200) + 50,
-      formattedDate: formatChartDate(date.toISOString(), 'day')
+      amount: Math.floor(Math.random() * 500) + 100,
+      formattedDate: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     })
   }
   
@@ -133,83 +98,226 @@ export const generateMockBarData = (): BarChartData[] => [
   { category: 'Other', amount: 100, fill: defaultChartColors.secondary, emoji: '📦' },
 ]
 
-// Validate chart data
+// Валидация данных графиков
 export const validateChartData = <T>(data: T[]): boolean => {
   return Array.isArray(data) && data.length > 0
 }
 
-// Interface for CustomTooltip props
-interface CustomTooltipProps {
-  active?: boolean
-  payload?: Array<{
-    value: number
-    name: string
-    color: string
-  }>
-  label?: string
-  currency?: string
-}
-
-// Custom tooltip component for Recharts
-export const CustomTooltip: React.FC<CustomTooltipProps> = ({ 
-  active, 
-  payload, 
-  label, 
-  currency = 'USD' 
-}) => {
-  if (active && payload && payload.length) {
-    return React.createElement(
-      'div',
-      { className: 'bg-background border border-border rounded-lg shadow-lg p-3' },
-      [
-        React.createElement(
-          'p',
-          { key: 'label', className: 'text-sm font-medium text-foreground' },
-          label
-        ),
-        ...payload.map((entry, index) =>
-          React.createElement(
-            'p',
-            { key: index, className: 'text-sm', style: { color: entry.color } },
-            `${entry.name}: ${formatCurrency(entry.value, currency)}`
-          )
-        ),
-      ]
-    )
-  }
-  return null
-}
-
-// Custom tooltip formatter for Recharts
+// Форматтеры для тултипов
 export const customTooltipFormatter = (value: number, name: string): [string, string] => {
   return [formatCurrency(value), name]
 }
 
-// Custom label formatter for pie chart
-export const customPieLabelFormatter = (entry: PieChartData): string => {
-  return `${entry.name}: ${formatPercentage(entry.value, 1000)}` // 1000 is placeholder total
+// Форматирование диапазона дат
+export const formatCompactRange = (startDate: Date, endDate: Date): string => {
+  const start = startDate.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric' 
+  })
+  
+  const end = endDate.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric',
+    year: startDate.getFullYear() !== endDate.getFullYear() ? 'numeric' : undefined
+  })
+  
+  if (start === end) {
+    return start
+  }
+  
+  return `${start} - ${end}`
 }
 
-// Format date range for display in chart descriptions
-export const formatCompactRange = (startDate: Date, endDate: Date): string => {
-  const start = new Date(startDate)
-  const end = new Date(endDate)
+// Утилиты для сравнительных графиков
+
+// Расчет предыдущего периода
+export const calculatePreviousPeriod = (startDate: Date, endDate: Date): { previousStart: Date; previousEnd: Date } => {
+  const duration = endDate.getTime() - startDate.getTime()
+  const previousEnd = new Date(startDate.getTime() - 1) // День перед началом текущего периода
+  const previousStart = new Date(previousEnd.getTime() - duration)
   
-  // If same day
-  if (start.toDateString() === end.toDateString()) {
-    return start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return { previousStart, previousEnd }
+}
+
+// Определение типа периода
+export const determinePeriodType = (startDate: Date, endDate: Date): 'day' | 'week' | 'month' | 'year' => {
+  const diffTime = Math.abs(endDate.getTime() - startDate.getTime())
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  
+  if (diffDays <= 1) return 'day'
+  if (diffDays <= 7) return 'week'
+  if (diffDays <= 31) return 'month'
+  return 'year'
+}
+
+// Генерация заголовка для сравнения
+export const generateComparisonTitle = (startDate: Date, endDate: Date): string => {
+  const periodType = determinePeriodType(startDate, endDate)
+  
+  switch (periodType) {
+    case 'day':
+      return 'Daily Comparison'
+    case 'week':
+      return 'Weekly Comparison'
+    case 'month':
+      return 'Monthly Comparison'
+    case 'year':
+      return 'Yearly Comparison'
+    default:
+      return 'Period Comparison'
+  }
+}
+
+// Генерация меток для сравнения
+export const generateComparisonLabels = (startDate: Date, endDate: Date): { current: string; previous: string } => {
+  const periodType = determinePeriodType(startDate, endDate)
+  
+  switch (periodType) {
+    case 'day':
+      return { current: 'Today', previous: 'Yesterday' }
+    case 'week':
+      return { current: 'This Week', previous: 'Last Week' }
+    case 'month':
+      return { current: 'This Month', previous: 'Last Month' }
+    case 'year':
+      return { current: 'This Year', previous: 'Last Year' }
+    default:
+      return { current: 'Current Period', previous: 'Previous Period' }
+  }
+}
+
+// Генерация описания для сравнения
+export const generateComparisonDescription = (
+  startDate: Date, 
+  endDate: Date, 
+  dataType: 'Expenses' | 'Income' = 'Expenses'
+): string => {
+  const periodType = determinePeriodType(startDate, endDate)
+  const dataTypeText = dataType.toLowerCase()
+  
+  switch (periodType) {
+    case 'day':
+      return `Compare today's ${dataTypeText} with yesterday's`
+    case 'week':
+      return `Compare this week's ${dataTypeText} with last week's`
+    case 'month':
+      return `Compare this month's ${dataTypeText} with last month's`
+    case 'year':
+      return `Compare this year's ${dataTypeText} with last year's`
+    default:
+      return `Compare current period's ${dataTypeText} with previous period's`
+  }
+}
+
+// Расчет процентного изменения
+export const calculatePercentageChange = (currentValue: number, previousValue: number): number => {
+  if (previousValue === 0) return currentValue > 0 ? 100 : 0
+  return ((currentValue - previousValue) / previousValue) * 100
+}
+
+// Форматирование процентного изменения
+export const formatPercentageChange = (change: number): { text: string; isPositive: boolean; isNeutral: boolean } => {
+  const isPositive = change > 0
+  const isNeutral = change === 0
+  const text = isNeutral ? '0%' : `${isPositive ? '+' : ''}${change.toFixed(1)}%`
+  
+  return { text, isPositive, isNeutral }
+}
+
+// Группировка транзакций по дням
+export const groupTransactionsByDay = (
+  transactions: Array<{ amount: number; type: 'expense' | 'income'; created_at: string }>
+): Record<string, { expenses: number; income: number }> => {
+  return transactions.reduce((acc, transaction) => {
+    const date = new Date(transaction.created_at).toISOString().split('T')[0]
+    
+    if (!acc[date]) {
+      acc[date] = { expenses: 0, income: 0 }
+    }
+    
+    if (transaction.type === 'expense') {
+      acc[date].expenses += transaction.amount
+    } else {
+      acc[date].income += transaction.amount
+    }
+    
+    return acc
+  }, {} as Record<string, { expenses: number; income: number }>)
+}
+
+// Генерация диапазона дат
+export const generateDateRange = (startDate: Date, endDate: Date): Date[] => {
+  const dates: Date[] = []
+  const currentDate = new Date(startDate)
+  
+  while (currentDate <= endDate) {
+    dates.push(new Date(currentDate))
+    currentDate.setDate(currentDate.getDate() + 1)
   }
   
-  // If same month and year
-  if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
-    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { day: 'numeric', year: 'numeric' })}`
+  return dates
+}
+
+// Получение суммы по типу данных
+export const getAmountByDataType = (
+  totals: { expenses: number; income: number }, 
+  dataType: 'expenses' | 'income'
+): number => {
+  if (!totals) return 0
+  return dataType === 'expenses' ? totals.expenses : totals.income
+}
+
+// Форматирование диапазона дат для отображения
+export const formatDateRange = (startDate: Date, endDate: Date): string => {
+  const options: Intl.DateTimeFormatOptions = { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
   }
   
-  // If same year
-  if (start.getFullYear() === end.getFullYear()) {
-    return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
-  }
+  const start = startDate.toLocaleDateString('en-US', options)
+  const end = endDate.toLocaleDateString('en-US', options)
   
-  // Different years
-  return `${start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
+  return `${start} - ${end}`
+}
+
+// Утилиты для Counters компонента
+export const getPreviousMonthRange = (): { start: Date; end: Date } => {
+  const now = new Date()
+  const currentMonth = now.getMonth()
+  const currentYear = now.getFullYear()
+  
+  // Предыдущий месяц
+  const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1
+  const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear
+  
+  const start = new Date(previousYear, previousMonth, 1)
+  const end = new Date(previousYear, previousMonth + 1, 0) // последний день предыдущего месяца
+  
+  return { start, end }
+}
+
+export const getCurrentMonthRange = (): { start: Date; end: Date } => {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth(), 1)
+  const end = new Date() // текущая дата
+  
+  return { start, end }
+}
+
+// Расчет процентного покрытия доходами расходов
+export const calculateIncomeCoverage = (income: number, expenses: number): number => {
+  if (expenses === 0) return income > 0 ? 100 : 0
+  return (income / expenses) * 100
+}
+
+// Форматирование разности с предыдущим месяцем
+export const formatMonthlyDifference = (current: number, previous: number): string => {
+  const difference = current - previous
+  const isPositive = difference > 0
+  
+  if (difference === 0) return '±$0 vs last month'
+  
+  const sign = isPositive ? '+' : ''
+  return `${sign}$${Math.abs(difference).toFixed(0)} vs last month`
 }

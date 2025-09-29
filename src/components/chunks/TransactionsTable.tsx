@@ -117,7 +117,7 @@ const TransactionsTable = ({
                       <span>{transaction.category_name}</span>
                     </span>
                   ) : (
-                    <span className="text-gray-500 italic">Uncategorized</span>
+                    <span className="text-gray-500 italic">Unbudgeted</span>
                   )}
                 </TableCell>
                 <TableCell className="text-secondary-black">{transaction.amount}</TableCell>

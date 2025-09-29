@@ -4,8 +4,12 @@ import { Card, CardContent } from '@/components/ui/card'
 import { RefreshCw } from 'lucide-react'
 import { format } from 'date-fns'
 import { enUS } from 'date-fns/locale'
+
+// Import types 
 import { ChartFilters as ChartFiltersType, ChartPeriod } from '../../types/types'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+
+// Import components 
+import { TransactionsFilter } from '../ui-elements'
 
 interface ChartFiltersProps {
   filters: ChartFiltersType
@@ -24,32 +28,21 @@ export const ChartFilters: React.FC<ChartFiltersProps> = ({
     let endDate = new Date()
 
     switch (period) {
-      case 'week':
+      case 'Week':
         // последние 7 дней
         startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
         endDate = now
         break
-      case 'month':
+      case 'Month':
         // текущий месяц
         startDate = new Date(now.getFullYear(), now.getMonth(), 1)
         endDate = now
         break
-      case 'quarter': {
-        // текущий квартал
-        const quarter = Math.floor(now.getMonth() / 3)
-        startDate = new Date(now.getFullYear(), quarter * 3, 1)
+      default:
+        // защита от некорректных значений
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1)
         endDate = now
-        break
-      }
-      case 'year':
-        // текущий год
-        startDate = new Date(now.getFullYear(), 0, 1)
-        endDate = now
-        break
-      case 'custom':
-        // Для custom периода не меняем даты
-        onFiltersChange({ ...filters, period })
-        return
+        period = 'Month'
     }
 
     onFiltersChange({
@@ -92,38 +85,17 @@ export const ChartFilters: React.FC<ChartFiltersProps> = ({
     <Card className="w-full border-0 shadow-none rounded-none bg-transparent">
       <CardContent className="p-0">
         <div className="space-y-4">
-          <h2 className="text-lg font-semibold">Charts filters</h2>
+          <h2 className="text-[25px] font-semibold">Budgets Analytics</h2>
 
           <div className="flex items-start flex-wrap gap-6">
-            {/* Transactions Type (слева) */}
-            <div className="space-y-2">
-              <Tabs
-                value={filters.dataType}
-                onValueChange={(v) =>
-                  onFiltersChange({ ...filters, dataType: v as 'expenses' | 'income' })
-                }
-              >
-                <TabsList>
-                  <TabsTrigger value="expenses">Expenses</TabsTrigger>
-                  <TabsTrigger value="income">Income</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
-
-            {/* Period (справа) */}
-            <div className="space-y-2">
-              <Tabs
-                value={filters.period}
-                onValueChange={(v) => handlePeriodChange(v as ChartPeriod)}
-              >
-                <TabsList>
-                  <TabsTrigger value="week">Week</TabsTrigger>
-                  <TabsTrigger value="month">Month</TabsTrigger>
-                  <TabsTrigger value="quarter">Quarter</TabsTrigger>
-                  <TabsTrigger value="year">Year</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
+            <TransactionsFilter
+              transactionType={filters.dataType}
+              onTransactionTypeChange={(type) =>
+                onFiltersChange({ ...filters, dataType: type })
+              }
+              datePeriod={filters.period}
+              onDatePeriodChange={(p) => handlePeriodChange(p)}
+            />
           </div>
 
           {/* Loading status */}

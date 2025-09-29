@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useRef, useState } from 'react'
-import { LineChart } from './LineChart'
+import { ComparisonLineChart } from '@/components/charts'
 import { BarChart } from './BarChart'
-import { ChartFilters } from './ChartFilters'
-import { useAllChartsData } from '@/hooks/useChartData'
+import { TransactionsFilter } from '@/components/ui-elements'
+import { useAllChartsData, useComparisonLineChartData } from '@/hooks/useChartData'
 import { formatCompactRange } from '@/lib/chartUtils'
-import type { ChartFilters as ChartFiltersType } from '@/types/types'
+import type { ChartFilters as ChartFiltersType, ChartPeriod, ChartDataType } from '@/types/types'
 
 type ChartVisibility = {
   bar: boolean
@@ -23,10 +23,10 @@ interface ChartsContainerProps {
 
 export const ChartsContainer: React.FC<ChartsContainerProps> = ({
   initialFilters = {
-    period: 'month',
-    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    period: 'Week',
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 7),
     endDate: new Date(),
-    dataType: 'expenses',
+    dataType: 'Expenses',
     selectedMonth: new Date().getMonth() + 1,
     selectedYear: new Date().getFullYear(),
   },
@@ -59,29 +59,77 @@ export const ChartsContainer: React.FC<ChartsContainerProps> = ({
     barChart,
     lineChart,
     isLoading,
+    error
   } = useAllChartsData(filters)
 
-  const getTypeLabel = (type: 'expenses' | 'income' | 'both') =>
-    type === 'expenses' ? 'Expenses' : type === 'income' ? 'Income' : 'All transactions'
+  // Добавляем хук для сравнительного графика
+  const comparisonChart = useComparisonLineChartData(filters)
 
-  // Фиксированная высота для обоих графиков
-  const chartHeight = typeof window !== 'undefined' && window.innerWidth < 768 ? 320 : 400
+  // Обработчики изменения фильтров
+  const handleTransactionTypeChange = (type: ChartDataType) => {
+    setFilters(prev => ({ ...prev, dataType: type }))
+  }
+
+  const handleDatePeriodChange = (period: ChartPeriod) => {
+    const now = new Date()
+    let startDate = new Date()
+    let endDate = new Date()
+
+    switch (period) {
+      case 'Week':
+        // последние 7 дней
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
+        endDate = now
+        break
+      case 'Month':
+        // текущий месяц
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1)
+        endDate = now
+        break
+    }
+
+    setFilters(prev => ({
+      ...prev,
+      period,
+      startDate,
+      endDate,
+      selectedMonth: period === 'Month' ? now.getMonth() + 1 : prev.selectedMonth,
+      selectedYear: now.getFullYear()
+    }))
+  }
+
+  const getTypeLabel = (type: ChartDataType) =>
+    type === 'Expenses' ? 'Expenses' : 'Income'
+
+  // Увеличенная высота для графиков
+  // Одинаковая высота области карточки для выравнивания нижних плейсхолдеров
+  const chartHeight = 400
+  const cardHeight = 650
 
   return (
     <div className="space-y-4 md:space-y-6">
       {showFilters && (
-        <ChartFilters filters={filters} onFiltersChange={setFilters} isLoading={isLoading} />
+        <>
+          <h2 className="text-[25px] font-semibold">Budgets Analytics</h2>
+          <TransactionsFilter
+            transactionType={filters.dataType}
+            onTransactionTypeChange={handleTransactionTypeChange}
+            datePeriod={filters.period}
+            onDatePeriodChange={handleDatePeriodChange}
+            className="mb-6"
+          />
+        </>
       )}
 
       {(chartVisibility.bar || chartVisibility.line) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch">
           {/* Bar chart */}
           {chartVisibility.bar && (
-            <div className="transition-all duration-300 ease-in-out">
+            <div className="transition-all duration-300 ease-in-out" style={{ height: `${cardHeight}px` }}>
               <BarChart
                 ref={barChartRef}
                 data={barChart.data}
-                title="Category Comparison"
+                title="Budgets Comparison"
                 description={`${getTypeLabel(filters.dataType)} for ${formatCompactRange(
                   filters.startDate,
                   filters.endDate
@@ -94,27 +142,31 @@ export const ChartsContainer: React.FC<ChartsContainerProps> = ({
                 showGrid={true}
                 showTooltip={true}
                 showLegend={false}
-                className="w-full"
+                className="w-full h-full"
               />
             </div>
           )}
 
           {/* Line chart */}
           {chartVisibility.line && (
-            <div className="transition-all duration-300 ease-in-out">
-              <LineChart
+            <div className="transition-all duration-300 ease-in-out" style={{ height: `${cardHeight}px` }}>
+              <ComparisonLineChart
                 ref={lineChartRef}
-                data={lineChart.data}
-                title={`${getTypeLabel(filters.dataType)} Trends Over Time`}
-                description={`Changes in ${filters.dataType.toLowerCase()} over time`}
+                data={comparisonChart.data}
+                startDate={filters.startDate}
+                endDate={filters.endDate}
+                dataType={filters.dataType.toLowerCase() as 'expenses' | 'income'}
+                currentPeriodTotal={comparisonChart.currentPeriodTotal}
+                previousPeriodTotal={comparisonChart.previousPeriodTotal}
+                percentageChange={comparisonChart.percentageChange}
                 currency={currency}
-                isLoading={lineChart.isLoading}
-                error={lineChart.error}
+                isLoading={comparisonChart.isLoading}
+                error={comparisonChart.error}
                 height={chartHeight}
                 showGrid={true}
                 showTooltip={true}
                 showLegend={false}
-                className="w-full"
+                className="w-full h-full"
               />
             </div>
           )}

@@ -13,31 +13,33 @@ const BudgetProgressBar = ({ spentAmount, totalAmount, type, className }: Budget
   const remainingAmount = Math.max(totalAmount - spentAmount, 0)
   const budgetType: 'expense' | 'income' = type ?? 'expense'
 
-  // Определяем цвет прогресс бара в зависимости от типа и процента заполнения
+  // Определяем цвет прогресс бара с фирменными синими цветами
   const getProgressColor = () => {
     if (percentage >= 100) {
       return budgetType === 'expense' ? 'bg-red-500' : 'bg-green-500'
     }
-    return 'bg-primary'
+    // Используем фирменный синий цвет для нормального состояния
+    return 'bg-blue-500'
   }
 
   const getBackgroundColor = () => {
     if (percentage >= 100) {
-      return budgetType === 'expense' ? 'bg-red-500/30' : 'bg-green-500/30'
+      return budgetType === 'expense' ? 'bg-red-100' : 'bg-green-100'
     }
-    return 'bg-primary/30'
+    // Используем светло-синий фон для нормального состояния
+    return 'bg-blue-100'
   }
 
   return (
     <div className={cn("w-full flex flex-col gap-1", className)}>
       {/* Прогресс бар */}
       <div className={cn(
-        "relative h-2 w-full overflow-hidden rounded-full transition-colors duration-300",
+        "relative h-2.5 w-full overflow-hidden rounded-full transition-colors duration-300",
         getBackgroundColor()
       )}>
         <div
           className={cn(
-            "h-full transition-all duration-300 ease-in-out",
+            "h-full transition-all duration-500 ease-in-out rounded-full",
             getProgressColor()
           )}
           style={{ 
@@ -47,9 +49,9 @@ const BudgetProgressBar = ({ spentAmount, totalAmount, type, className }: Budget
       </div>
       
       {/* Информация о прогрессе */}
-      <div className="flex justify-between text-xs text-secondary-black/70">
-        <span>${spentAmount.toFixed(2)} spent</span>
-        <span>${remainingAmount.toFixed(2)} left</span>
+      <div className="flex justify-between text-xs text-gray-600">
+        <span className="font-medium">${spentAmount.toFixed(0)} spent</span>
+        <span>${remainingAmount.toFixed(0)} left</span>
       </div>
     </div>
   )
