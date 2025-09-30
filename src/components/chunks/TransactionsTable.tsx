@@ -23,6 +23,16 @@ import type { Transaction, EditTransactionPayload } from '../../types/types'
 import { supabase } from '../../lib/supabaseClient'
 import { UserAuth } from '../../context/AuthContext'
 
+// Расширенный интерфейс для поддержки фильтрации
+interface EnhancedTransactionsTableProps extends TransactionsTableProps {
+  // Дополнительные опции для фильтрации и сортировки
+  sortBy?: 'date' | 'amount' | 'title' | 'type'
+  sortOrder?: 'asc' | 'desc'
+  showFilters?: boolean
+  emptyStateMessage?: string
+  onTransactionUpdate?: () => void
+}
+
 const TransactionsTable = ({ 
   transactions, 
   onDeleteTransaction,
@@ -31,8 +41,14 @@ const TransactionsTable = ({
     text: "Are you sure you want to delete this transaction?"
   },
   onEditTransaction,
-  allowTypeChange = true
-}: TransactionsTableProps) => {
+  allowTypeChange = true,
+  // Новые пропсы
+  sortBy = 'date',
+  sortOrder = 'desc',
+  showFilters = false,
+  emptyStateMessage = "No transactions found",
+  onTransactionUpdate
+}: EnhancedTransactionsTableProps) => {
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
@@ -43,10 +59,29 @@ const TransactionsTable = ({
 
   const { session } = UserAuth()
 
-  // Sort transactions 
-  const sortedTransactions = [...transactions].sort((a, b) => 
-    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  )
+  // Улучшенная сортировка транзакций
+  const sortedTransactions = [...transactions].sort((a, b) => {
+    let comparison = 0
+    
+    switch (sortBy) {
+      case 'date':
+        comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        break
+      case 'amount':
+        comparison = a.amount - b.amount
+        break
+      case 'title':
+        comparison = a.title.localeCompare(b.title)
+        break
+      case 'type':
+        comparison = a.type.localeCompare(b.type)
+        break
+      default:
+        comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    }
+    
+    return sortOrder === 'desc' ? -comparison : comparison
+  })
 
   const handleOpenModal = (id: string) => {
     setSelectedTransactionId(id)
@@ -62,6 +97,8 @@ const TransactionsTable = ({
     if (selectedTransactionId) {
       await onDeleteTransaction(selectedTransactionId)
       handleCloseModal()
+      // Вызываем колбэк обновления если он есть
+      onTransactionUpdate?.()
     }
   }
 
@@ -92,6 +129,15 @@ const TransactionsTable = ({
     }
   }
 
+  // Если нет транзакций, показываем сообщение
+  if (transactions.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">{emptyStateMessage}</p>
+      </div>
+    )
+  }
+
   return (
     <div className="relative">
       <div className="overflow-x-auto rounded-lg border border-border bg-white shadow-sm">
@@ -120,7 +166,7 @@ const TransactionsTable = ({
                     <span className="text-gray-500 italic">Unbudgeted</span>
                   )}
                 </TableCell>
-                <TableCell className="text-secondary-black">{transaction.amount}</TableCell>
+                <TableCell className="text-secondary-black">${transaction.amount}</TableCell>
                 <TableCell>
                   <span
                     className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide ${
@@ -176,7 +222,10 @@ const TransactionsTable = ({
           onConfirm={() => {
             if (selectedTransactionId) {
               onDeleteTransaction(selectedTransactionId)
-                .finally(() => setIsModalOpen(false))
+                .finally(() => {
+                  setIsModalOpen(false)
+                  onTransactionUpdate?.()
+                })
             }
           }}
         />
@@ -212,6 +261,8 @@ const TransactionsTable = ({
               }
               setIsEditOpen(false)
               setEditingTransaction(null)
+              // Вызываем колбэк обновления если он есть
+              onTransactionUpdate?.()
             } catch (e) {
               console.error('[TransactionsTable] Edit submit failed:', e)
             } finally {

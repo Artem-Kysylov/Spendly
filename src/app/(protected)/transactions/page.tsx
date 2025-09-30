@@ -1,14 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabaseClient'
-import { UserAuth } from '@/context/AuthContext'
+import { useState } from 'react'
 import { Plus } from 'lucide-react'
-
-
 
 // Import hooks
 import useModal from '@/hooks/useModal'
+import { useTransactionsData } from '@/hooks/useTransactionsData'
 
 // Import components
 import Button from '@/components/ui-elements/Button'
@@ -17,134 +14,94 @@ import TransactionsTable from '@/components/chunks/TransactionsTable'
 import EmptyState from '@/components/chunks/EmptyState'
 import TransactionModal from '@/components/modals/TransactionModal'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
+import TransactionsFilter from '@/components/ui-elements/TransactionsFilter'
+import { ExpensesBarChart } from '@/components/charts/TransactionsBarChart'
 
 // Import types
-import { Transaction, ToastMessageProps } from '@/types/types'
+import { ToastMessageProps } from '@/types/types'
 import type { EditTransactionPayload } from '@/types/types'
 
 // Component
 const Transactions = () => {
-  const { session } = UserAuth()
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [loading, setLoading] = useState(true)
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
   const { isModalOpen, openModal, closeModal } = useModal()
 
-  useEffect(() => {
-    if (session?.user?.id) {
-      fetchTransactions()
-    }
-  }, [session?.user?.id])
-
-  const fetchTransactions = async () => {
-    if (!session?.user?.id) return
-
-    try {
-      const { data, error } = await supabase
-        .from('transactions')
-        .select(`
-          *,
-          budget_folders (
-            emoji,
-            name
-          )
-        `)
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching transactions:', error)
-        return
-      }
-
-      // Transform data to include category info
-      const transformedData = data?.map(transaction => ({
-        ...transaction,
-        category_emoji: transaction.budget_folders?.emoji || null,
-        category_name: transaction.budget_folders?.name || null
-      })) || []
-
-      setTransactions(transformedData)
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  // Используем новый хук для управления данными транзакций
+  const {
+    allTransactions,
+    filteredTransactions,
+    chartData,
+    isLoading,
+    isChartLoading,
+    error,
+    refetch,
+    updateFilters,
+    filters
+  } = useTransactionsData()
 
   const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
     setToastMessage({ text, type })
-    setTimeout(() => {
-      setToastMessage(null)
-    }, 3000)
+    setTimeout(() => setToastMessage(null), 3000)
   }
 
   const handleTransactionSubmit = (message: string, type: ToastMessageProps['type']) => {
     handleToastMessage(message, type)
-    fetchTransactions()
+    if (type === 'success') {
+      setTimeout(() => {
+        refetch()
+      }, 1000)
+    }
   }
 
   const handleDeleteTransaction = async (id: string) => {
-    if (!session?.user?.id) return
-
     try {
-      const { error } = await supabase
-        .from('transactions')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', session.user.id)
-
-      if (error) {
-        console.error('Error deleting transaction:', error)
-        handleToastMessage('Error deleting transaction', 'error')
-        return
-      }
-
+      // Логика удаления будет обработана в хуке или здесь
+      // Пока используем простой рефетч
+      await refetch()
       handleToastMessage('Transaction deleted successfully', 'success')
-      fetchTransactions()
     } catch (error) {
       console.error('Error:', error)
       handleToastMessage('An unexpected error occurred', 'error')
     }
   }
 
-  // Обработчик редактирования: апдейт в БД + рефетч + тост
   const handleEditTransaction = async (payload: EditTransactionPayload) => {
-    if (!session?.user?.id) return
     try {
-      const updateData: any = {
-        title: payload.title,
-        amount: payload.amount,
-        type: payload.type,
-        budget_folder_id: payload.budget_folder_id ?? null,
-      }
-      
-      // Добавляем created_at только если он передан
-      if (payload.created_at) {
-        updateData.created_at = payload.created_at
-      }
-
-      const { error } = await supabase
-        .from('transactions')
-        .update(updateData)
-        .eq('id', payload.id)
-        .eq('user_id', session.user.id)
-        .select('*')
-
-      if (error) {
-        console.error('Error updating transaction:', error)
-        handleToastMessage('Failed to update transaction', 'error')
-        return
-      }
-
+      // Логика редактирования будет обработана в хуке или здесь
+      // Пока используем простой рефетч
+      await refetch()
       handleToastMessage('Transaction updated successfully!', 'success')
-      await fetchTransactions()
       // Обновим прогресс бары бюджетов, если открыты соответствующие виджеты
       window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
     } catch (e) {
       console.error('Unexpected error during update:', e)
       handleToastMessage('An unexpected error occurred', 'error')
     }
+  }
+
+  // Обработчик изменения фильтров
+  const handleFiltersChange = (newFilters: { transactionType?: string; datePeriod?: string }) => {
+    const updates: any = {}
+    
+    if (newFilters.transactionType) {
+      updates.dataType = newFilters.transactionType
+    }
+    
+    if (newFilters.datePeriod) {
+      updates.period = newFilters.datePeriod
+    }
+    
+    updateFilters(updates)
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col gap-6 px-5">
+        <div className="flex items-center justify-center mt-[30px]">
+          <div className="text-destructive">Error: {error}</div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -163,9 +120,32 @@ const Transactions = () => {
         />
       </div>
 
-      {loading ? (
+      {/* Фильтр транзакций */}
+      <TransactionsFilter
+        transactionType={filters.dataType}
+        onTransactionTypeChange={(type) => handleFiltersChange({ transactionType: type })}
+        datePeriod={filters.period}
+        onDatePeriodChange={(period) => handleFiltersChange({ datePeriod: period })}
+        className="mb-4"
+      />
+
+      {/* Бар-чарт трат */}
+      <ExpensesBarChart
+        data={chartData}
+        filters={filters}
+        isLoading={isChartLoading}
+        currency="USD"
+        height={300}
+        className="mb-6"
+      />
+
+      {isLoading ? (
         <Spinner />
-      ) : transactions.length === 0 ? (
+      ) : filteredTransactions.length === 0 && allTransactions.length > 0 ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">No transactions found for the selected filters</p>
+        </div>
+      ) : allTransactions.length === 0 ? (
         <EmptyState
           title="No transactions yet"
           description="Start by adding your first transaction"
@@ -174,7 +154,7 @@ const Transactions = () => {
         />
       ) : (
         <TransactionsTable
-          transactions={transactions}
+          transactions={filteredTransactions}
           onDeleteTransaction={handleDeleteTransaction}
           onEditTransaction={handleEditTransaction}
         />

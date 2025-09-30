@@ -175,13 +175,13 @@ const TransactionsCounters = ({
                             
                             <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 p-4 hover:shadow-md transition-all duration-300">
                                 <div className="flex items-center gap-2">
-                                    <h3 className="text-sm text-primary text-center font-medium">Total Budget</h3>
+                                    <h3 className="text-lg text-primary text-center font-medium">Total Budget</h3>
                                     {budgetStatus === 'exceeded' && <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">Exceeded</span>}
                                     {budgetStatus === 'warning' && <span className="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full">Warning</span>}
                                     {budgetStatus === 'not-set' && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Not Set</span>}
                                 </div>
                                 
-                                <span className={`text-[22px] font-bold text-center ${
+                                <span className={`text-[30px] font-bold text-center ${
                                     budgetStatus === 'exceeded' ? 'text-red-600' : 
                                     budgetStatus === 'warning' ? 'text-yellow-600' : 'text-primary'
                                 }`}>
@@ -214,12 +214,12 @@ const TransactionsCounters = ({
                         {/* Enhanced Expenses Section */}
                         <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 p-4 hover:shadow-md transition-all duration-300">
                             <div className="flex items-center gap-2">
-                                <h3 className="text-sm text-red-700 text-center font-medium">Total Expenses</h3>
+                                <h3 className="text-lg text-red-700 text-center font-medium">Total Expenses</h3>
                                 {totalExpenses > budget && budget > 0 && (
                                     <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">Over Budget</span>
                                 )}
                             </div>
-                            <span className="text-[22px] font-bold text-red-700 text-center">
+                            <span className="text-[30px] font-bold text-red-700 text-center">
                                 {formatCurrency(totalExpenses)}
                             </span>
                             <TrendArrow trend={expensesTrend} variant="expense" />
@@ -236,8 +236,8 @@ const TransactionsCounters = ({
                         {/* Enhanced Income Section */}
                         <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 p-4 hover:shadow-md transition-all duration-300" 
                              style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
-                            <h3 className="text-sm text-green-700 text-center font-medium">Total Income</h3>
-                            <span className="text-[22px] font-bold text-green-700 text-center">
+                            <h3 className="text-lg text-green-700 text-center font-medium">Total Income</h3>
+                            <span className="text-[30px] font-bold text-green-700 text-center">
                                 {formatCurrency(totalIncome)}
                             </span>
                             <TrendArrow trend={incomeTrend} variant="income" />
