@@ -432,3 +432,33 @@ export interface UseComparisonChartDataReturn {
   previousPeriodTotal?: number   // Общая сумма за предыдущий период
   percentageChange?: number      // Процентное изменение между периодами
 }
+
+// AI Chat Types
+export interface ChatMessage {
+    id: string
+    content: string
+    role: 'user' | 'assistant'
+    timestamp: Date
+}
+
+export interface ChatState {
+    messages: ChatMessage[]
+    isOpen: boolean
+    isTyping: boolean
+}
+
+export interface ChatPreset {
+    id: string
+    title: string
+    prompt: string
+}
+
+export interface UseChatReturn {
+    messages: ChatMessage[]
+    isOpen: boolean
+    isTyping: boolean
+    openChat: () => void
+    closeChat: () => void
+    sendMessage: (content: string) => Promise<void>
+    clearMessages: () => void
+}
