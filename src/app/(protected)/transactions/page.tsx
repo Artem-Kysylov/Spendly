@@ -22,6 +22,9 @@ import { ToastMessageProps } from '@/types/types'
 import type { EditTransactionPayload } from '@/types/types'
 
 // Component
+import { supabase } from '@/lib/supabaseClient'
+import { UserAuth } from '@/context/AuthContext'
+
 const Transactions = () => {
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
   const { isModalOpen, openModal, closeModal } = useModal()
@@ -53,12 +56,27 @@ const Transactions = () => {
     }
   }
 
+  const { session } = UserAuth()
   const handleDeleteTransaction = async (id: string) => {
+    if (!session?.user?.id || !id) return
+
     try {
-      // Логика удаления будет обработана в хуке или здесь
-      // Пока используем простой рефетч
-      await refetch()
+      const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', session.user.id)
+
+      if (error) {
+        console.error('Error deleting transaction:', error)
+        handleToastMessage('Failed to delete transaction. Please try again.', 'error')
+        return
+      }
+
       handleToastMessage('Transaction deleted successfully', 'success')
+      setTimeout(() => {
+        refetch()
+      }, 1000)
     } catch (error) {
       console.error('Error:', error)
       handleToastMessage('An unexpected error occurred', 'error')
