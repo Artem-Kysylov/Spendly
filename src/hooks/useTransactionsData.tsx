@@ -213,6 +213,12 @@ export const useTransactionsData = (initialFilters?: Partial<ChartFilters>): Use
     }
   }, [session?.user?.id, fetchTransactions])
 
+  useEffect(() => {
+    const handler = () => fetchTransactions()
+    window.addEventListener('budgetTransactionAdded', handler)
+    return () => window.removeEventListener('budgetTransactionAdded', handler)
+  }, [fetchTransactions])
+
   return {
     allTransactions,
     filteredTransactions,

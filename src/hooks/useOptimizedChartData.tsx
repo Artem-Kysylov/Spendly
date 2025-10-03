@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { useQuery, useQueries } from '@tanstack/react-query'
 import { UserAuth } from '../context/AuthContext'
 import { 
@@ -53,6 +54,12 @@ export const useOptimizedLineChartData = (filters: ChartFilters): UseChartDataRe
     })
     .filter(d => d.amount > 0)
 
+  useEffect(() => {
+    const handler = () => refetch()
+    window.addEventListener('budgetTransactionAdded', handler)
+    return () => window.removeEventListener('budgetTransactionAdded', handler)
+  }, [refetch])
+
   return {
     data: lineData,
     isLoading,
@@ -105,6 +112,12 @@ export const useOptimizedBarChartData = (filters: ChartFilters): UseChartDataRet
       }
     })
     .filter(item => item.amount > 0)
+
+  useEffect(() => {
+    const handler = () => refetch()
+    window.addEventListener('budgetTransactionAdded', handler)
+    return () => window.removeEventListener('budgetTransactionAdded', handler)
+  }, [refetch])
 
   return {
     data: barData,

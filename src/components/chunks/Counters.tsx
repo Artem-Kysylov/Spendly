@@ -25,6 +25,7 @@ import {
 
 // Import types
 import { Transaction } from '../../types/types'
+import { useAISuggestions } from '@/hooks/useAISuggestions'
 
 // Component: TransactionsCounters
 const TransactionsCounters = ({ 
@@ -154,6 +155,15 @@ const TransactionsCounters = ({
         return 'good'
     }, [budget, budgetUsagePercentage])
 
+    // Initialize AI suggestions hook
+    const { text: tip, loading: tipLoading, error: tipError, isRateLimited, fetchSuggestion } = useAISuggestions()
+
+    // Refresh AI tip based on current budget and expenses
+    const refreshTip = () => {
+      const prompt = 'Given my remaining budget and current expenses, provide actionable advice to stay within budget this period.'
+      fetchSuggestion(prompt)
+    }
+
     useEffect(() => {
         fetchBudget()
         fetchCurrentMonthTransactions()
@@ -252,7 +262,24 @@ const TransactionsCounters = ({
 
                     {/* AI Suggestions Placeholder inside the card */}
                     <div className="flex items-center gap-3 p-4 mt-6 bg-gray-50 rounded-lg border border-gray-200">
-                        <span className="text-gray-600 text-sm">💡 Here will be AI suggestions</span>
+                        <Lightbulb className="text-yellow-500" size={18} />
+                        <div className="flex-1">
+                          {tipLoading && <span className="text-gray-600 text-sm">Loading tip...</span>}
+                          {!tipLoading && tip && <span className="text-gray-800 text-sm">{tip}</span>}
+                          {!tipLoading && !tip && !tipError && (
+                            <span className="text-gray-600 text-sm">💡 Here will be AI suggestions</span>
+                          )}
+                          {tipError && <p className="text-red-600 text-xs mt-1">{tipError}</p>}
+                          {isRateLimited && <p className="text-yellow-600 text-xs mt-1">Rate limit reached. Try later.</p>}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={refreshTip}
+                          className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded hover:bg-gray-200"
+                          disabled={tipLoading}
+                        >
+                          Get tip
+                        </button>
                     </div>
                 </CardContent>
             </Card>

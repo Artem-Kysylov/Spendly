@@ -461,4 +461,16 @@ export interface UseChatReturn {
     closeChat: () => void
     sendMessage: (content: string) => Promise<void>
     clearMessages: () => void
+    // Добавлено для поддержки abort в useChat
+    abort: () => void
+    // Добавлено для подтверждения действий ассистента
+    confirmAction: (confirm: boolean) => Promise<void>
+    hasPendingAction: boolean
+    isRateLimited: boolean
+    pendingActionPayload?: {
+        title: string
+        amount: number
+        budget_folder_id: string | null
+        budget_name: string
+    } | null
 }

@@ -7,6 +7,7 @@ import { formatCurrency } from '@/lib/chartUtils'
 import { CustomTooltip } from './CustomTooltip'
 import { ChartDescription } from './ChartDescription'
 import { ChartFilters } from '@/types/types'
+import { useAISuggestions } from '@/hooks/useAISuggestions'
 
 // Интерфейс для данных бар-чарта трат
 interface ExpensesBarData {
@@ -46,6 +47,13 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
   className = ""
 }, ref) => {
   
+  const { text: tip, loading: tipLoading, error: tipError, isRateLimited, fetchSuggestion } = useAISuggestions()
+
+  const refreshTip = () => {
+    const prompt = `Analyze my current ${filters.dataType} trends and suggest budgeting improvements for the selected period.`
+    fetchSuggestion(prompt)
+  }
+
   // Генерируем заголовок на основе фильтров
   const generateTitle = () => {
     if (title) return title
@@ -175,9 +183,16 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
           </RechartsBarChart>
         </ResponsiveContainer>
         
-        {/* AI Suggestions Placeholder */}
-        <div className="flex items-center gap-3 p-4 mt-4 bg-gray-50 rounded-lg border border-gray-200">
-          <span className="text-gray-600 text-sm">💡 Here will be AI suggestions</span>
+        {/* AI Suggestions */}
+        <div className="mt-2">
+          <div className="flex items-center justify-between">
+            <span className="text-gray-600 text-sm">💡 AI suggestions</span>
+            <button className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" onClick={refreshTip} disabled={tipLoading || isRateLimited}>
+              {tipLoading ? 'Loading…' : 'Refresh tip'}
+            </button>
+          </div>
+          {tipError && <div className="text-xs text-amber-700 mt-1">{tipError}</div>}
+          <div className="text-sm text-gray-800 mt-1 whitespace-pre-wrap">{tip}</div>
         </div>
       </CardContent>
     </Card>

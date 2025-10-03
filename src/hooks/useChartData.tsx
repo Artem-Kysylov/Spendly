@@ -107,6 +107,12 @@ export const useLineChartData = (filters: ChartFilters): UseChartDataReturn<Line
     fetchData()
   }, [fetchData])
 
+  useEffect(() => {
+    const handler = () => fetchData()
+    window.addEventListener('budgetTransactionAdded', handler)
+    return () => window.removeEventListener('budgetTransactionAdded', handler)
+  }, [fetchData])
+
   return {
     data,
     isLoading,
@@ -209,6 +215,12 @@ export const useBarChartData = (filters: ChartFilters): UseChartDataReturn<BarCh
 
   useEffect(() => {
     fetchData()
+  }, [fetchData])
+
+  useEffect(() => {
+    const handler = () => fetchData()
+    window.addEventListener('budgetTransactionAdded', handler)
+    return () => window.removeEventListener('budgetTransactionAdded', handler)
   }, [fetchData])
 
   return {

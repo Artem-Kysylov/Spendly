@@ -12,7 +12,12 @@ const AIAssistantProvider: React.FC = () => {
     isTyping,
     openChat,
     closeChat,
-    sendMessage
+    sendMessage,
+    abort,
+    confirmAction,
+    hasPendingAction,
+    isRateLimited,
+    pendingActionPayload,
   } = useChat()
 
   const handleAIButtonClick = () => {
@@ -35,6 +40,11 @@ const AIAssistantProvider: React.FC = () => {
         isTyping={isTyping}
         onClose={closeChat}
         onSendMessage={sendMessage}
+        onAbort={abort}
+        onConfirmAction={confirmAction}
+        hasPendingAction={hasPendingAction}
+        isRateLimited={isRateLimited}
+        pendingAction={pendingActionPayload}
       />
     </>
   )

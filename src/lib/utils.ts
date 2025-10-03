@@ -8,9 +8,9 @@ export function cn(...inputs: ClassValue[]) {
 export function normalizeBudgetName(name: string): string {
   return name
     .toLowerCase()
-    .normalize('NFKD')                     // декомпозиция юникода
-    .replace(/[\u0300-\u036f]/g, '')       // удаление диакритики
-    .replace(/[^a-z0-9\s-]/g, '')          // только буквы/цифры/пробелы/дефисы
-    .replace(/\s+/g, ' ')                  // схлопываем пробелы
+    .normalize('NFKD')                     // Unicode decomposition
+    .replace(/[\u0300-\u036f]/g, '')       // Strip diacritics
+    .replace(/[^a-z0-9\s-]/g, '')          // Keep letters/digits/spaces/hyphens
+    .replace(/\s+/g, ' ')                  // Collapse spaces
     .trim()
 }
