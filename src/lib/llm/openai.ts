@@ -4,18 +4,27 @@ type StreamParams = {
   model: string
   prompt: string
   system?: string
+  requestId?: string
 }
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions'
 
-export function streamOpenAIText({ model, prompt, system }: StreamParams): ReadableStream<string> {
+export function streamOpenAIText({ model, prompt, system, requestId }: StreamParams): ReadableStream<string> {
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) {
     throw new Error('Missing OPENAI_API_KEY')
   }
 
+  const debug = (process.env.LLM_DEBUG === '1' || process.env.LLM_DEBUG === 'true')
+
   return new ReadableStream<string>({
     async start(controller) {
+      if (debug) {
+        try {
+          console.debug('[LLM_DEBUG openai pre]', JSON.stringify({ requestId, model, promptLengthChars: prompt.length, hasSystem: !!system }))
+        } catch { /* no-op */ }
+      }
+
       const res = await fetch(OPENAI_API_URL, {
         method: 'POST',
         headers: {
@@ -42,11 +51,18 @@ export function streamOpenAIText({ model, prompt, system }: StreamParams): Reada
       const reader = res.body.getReader()
       const decoder = new TextDecoder('utf-8')
       let buf = ''
+      let sseLines = 0
+      let totalTextLen = 0
 
       const pump = async () => {
         try {
           const { done, value } = await reader.read()
           if (done) {
+            if (debug) {
+              try {
+                console.debug('[LLM_DEBUG openai post]', JSON.stringify({ requestId, model, sseLines, totalTextLen }))
+              } catch { /* no-op */ }
+            }
             controller.close()
             return
           }
@@ -58,8 +74,14 @@ export function streamOpenAIText({ model, prompt, system }: StreamParams): Reada
           for (const line of lines) {
             const trimmed = line.trim()
             if (!trimmed.startsWith('data:')) continue
+            sseLines++
             const data = trimmed.slice(5).trim()
             if (data === '[DONE]') {
+              if (debug) {
+                try {
+                  console.debug('[LLM_DEBUG openai post]', JSON.stringify({ requestId, model, sseLines, totalTextLen }))
+                } catch { /* no-op */ }
+              }
               controller.close()
               return
             }
@@ -68,6 +90,7 @@ export function streamOpenAIText({ model, prompt, system }: StreamParams): Reada
               const delta = json?.choices?.[0]?.delta?.content
               if (typeof delta === 'string' && delta.length > 0) {
                 controller.enqueue(delta)
+                totalTextLen += delta.length
               }
             } catch {
               // skip

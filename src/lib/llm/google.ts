@@ -4,9 +4,10 @@ type StreamParams = {
   model: string
   prompt: string
   system?: string
+  requestId?: string
 }
 
-export function streamGeminiText({ model, prompt, system }: StreamParams): ReadableStream<string> {
+export function streamGeminiText({ model, prompt, system, requestId }: StreamParams): ReadableStream<string> {
   const apiKey = process.env.GOOGLE_API_KEY
   if (!apiKey) {
     throw new Error('Missing GOOGLE_API_KEY')
@@ -41,7 +42,7 @@ export function streamGeminiText({ model, prompt, system }: StreamParams): Reada
       if (debug) {
         try {
           const lengths = userParts.map(p => (typeof p?.text === 'string' ? p.text.length : 0))
-          console.debug('[Gemini] model:', model, 'userParts.len:', userParts.length, 'userParts.lengths:', lengths)
+          console.debug('[LLM_DEBUG gemini pre]', JSON.stringify({ requestId, model, userPartsLen: userParts.length, userPartsLengths: lengths }))
         } catch {
           // no-op
         }
@@ -61,7 +62,13 @@ export function streamGeminiText({ model, prompt, system }: StreamParams): Reada
         contents: [
           { role: 'user', parts: userParts }
         ],
-        generationConfig: { temperature: 0.1, candidateCount: 1, maxOutputTokens: 1024 }
+        generationConfig: {
+          temperature: 0.3,
+          topP: 0.9,
+          candidateCount: 1,
+          // Убираем responseMimeType, оставляем лимит длины ответа
+          maxOutputTokens: 1024
+        }
       }
 
       const res = await fetch(url, {
@@ -95,11 +102,20 @@ export function streamGeminiText({ model, prompt, system }: StreamParams): Reada
       if (debug) {
         try {
           const firstParts = candidates?.[0]?.content?.parts ?? []
-          const partLengths = Array.isArray(firstParts)
-            ? firstParts.map(p => (typeof p?.text === 'string' ? p.text.length : 0))
-            : []
+          const firstPartsLengths = firstParts.map((p: any) => (typeof p?.text === 'string' ? p.text.length : 0))
           const blockReason = (json as any)?.promptFeedback?.blockReason
-          console.debug('[Gemini] candidates.len:', Array.isArray(candidates) ? candidates.length : 0, 'firstCandidate.parts.lengths:', partLengths, 'blockReason:', blockReason)
+          const safetyRatings = (json as any)?.promptFeedback?.safetyRatings ?? []
+          const finishReason = candidates?.[0]?.finishReason
+          console.debug('[LLM_DEBUG gemini post]', JSON.stringify({
+            requestId,
+            model,
+            candidatesLen: Array.isArray(candidates) ? candidates.length : 0,
+            firstCandidatePartsLen: firstParts.length,
+            firstCandidatePartsLengths: firstPartsLengths,
+            blockReason,
+            safetyRatings,
+            finishReason
+          }))
         } catch {
           // no-op
         }

@@ -98,15 +98,19 @@ export const AIChatWindow = ({
                     </div>
                   </div>
                 )}
-                {/* Input with Abort */}
+                {/* Input with integrated Abort */}
                 <div className="border-t border-gray-100 bg-white rounded-b-xl flex-shrink-0">
                     <div className="flex items-center gap-2 p-2">
                       <div className="flex-1">
-                        <ChatInput onSendMessage={onSendMessage} disabled={isTyping || isRateLimited} />
+                        <ChatInput
+                          onSendMessage={onSendMessage}
+                          disabled={isRateLimited}
+                          isThinking={isTyping}
+                          onAbort={onAbort}
+                        />
                       </div>
-                      {isTyping && (
-                        <button className="px-3 py-2 rounded bg-red-600 text-white text-sm" onClick={onAbort}>Abort</button>
-                      )}
+                      {/* removed: separate Abort button */}
+                      {/* previously: {isTyping && (<button className="px-3 py-2 rounded bg-red-600 text-white text-sm" onClick={onAbort}>Abort</button>)} */}
                     </div>
                 </div>
             </div>
