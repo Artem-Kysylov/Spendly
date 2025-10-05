@@ -177,7 +177,7 @@ export async function POST(req: NextRequest) {
   const MAX_PROMPT = Number(process.env.MAX_PROMPT_CHARS ?? '4000')
   const safeMessage = String(message).slice(0, MAX_PROMPT)
 
-  // Проверка лимитов (для не‑pro пользователей)
+  // Check a limits not a pro users 
   const limits = await checkLimits(userId, isPro, enableLimits)
   if (!limits.ok) {
     await logUsage({
@@ -226,11 +226,19 @@ export async function POST(req: NextRequest) {
   try {
     if (provider === 'openai') {
       const model = process.env.OPENAI_MODEL ?? 'gpt-4o-mini'
-      const stream = streamOpenAIText({ model, prompt, system: 'You are Spendly assistant.' })
+      const stream = streamOpenAIText({
+        model,
+        prompt,
+        system: 'You are the Spendly assistant. Respond directly to the user request. Use the provided TransactionsThisWeek or TransactionsLastWeek to summarize expenses for the requested period. Do not give application instructions, onboarding, UI steps, or how-to guides. Do not include greetings or introductions.'
+      })
       return streamProviderWithUsage(stream, { userId, provider: 'openai', model, promptLength: prompt.length })
     } else {
       const model = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash'
-      const stream = streamGeminiText({ model, prompt, system: 'You are Spendly assistant.' })
+      const stream = streamGeminiText({
+        model,
+        prompt,
+        system: 'You are the Spendly assistant. Respond directly to the user request. Use the provided TransactionsThisWeek or TransactionsLastWeek to summarize expenses for the requested period. Do not give application instructions, onboarding, UI steps, or how-to guides. Do not include greetings or introductions.'
+      })
       return streamProviderWithUsage(stream, { userId, provider: 'gemini', model, promptLength: prompt.length })
     }
   } catch (e) {

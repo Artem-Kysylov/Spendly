@@ -156,13 +156,142 @@ export const composeLLMPrompt = (ctx: { budgets: Array<{ id: string; name: strin
     .slice(0, 15)
     .join(', ')
 
+  //  Budget ID
+  const budgetNameById = new Map<string, string>()
+  for (const b of (ctx.budgets || [])) {
+    if (b.id) budgetNameById.set(b.id, b.name)
+  }
+
+  // Start of new week 
+  const now = new Date()
+  const day = now.getDay() === 0 ? 7 : now.getDay() // 1..7 (Пн..Вс)
+  const weekStart = new Date(now)
+  weekStart.setDate(now.getDate() - (day - 1))
+  weekStart.setHours(0, 0, 0, 0)
+
+  // Транзакции за текущую неделю
+  const txs = (ctx.lastTransactions || []).filter(tx => {
+    const d = new Date(tx.created_at)
+    return d >= weekStart && d <= now
+  })
+
+  const thisWeekExpensesTotal = txs
+    .filter(tx => tx.type === 'expense')
+    .reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0)
+
+  // Форматированный список (ограничим до 50 для компактности)
+  const txLines = txs.slice(0, 50).map(tx => {
+    const d = new Date(tx.created_at)
+    const dateStr = d.toISOString().slice(0, 10)
+    const budgetName = tx.budget_folder_id ? (budgetNameById.get(tx.budget_folder_id) || 'Unknown') : 'Unassigned'
+    const amt = Number(tx.amount) || 0
+    return `${dateStr} | ${tx.type} | $${amt.toFixed(2)} | budget: ${budgetName} | title: ${tx.title}`
+  }).join('\n')
+
+  // Добавляем прошлую неделю
+  const lastWeekStart = new Date(weekStart)
+  lastWeekStart.setDate(weekStart.getDate() - 7)
+  lastWeekStart.setHours(0, 0, 0, 0)
+  const lastWeekEnd = new Date(weekStart)
+  lastWeekEnd.setDate(weekStart.getDate() - 1)
+  lastWeekEnd.setHours(23, 59, 59, 999)
+
+  const txsLastWeek = (ctx.lastTransactions || []).filter(tx => {
+    const d = new Date(tx.created_at)
+    return d >= lastWeekStart && d <= lastWeekEnd
+  })
+  const lastWeekExpensesTotal = txsLastWeek
+    .filter(tx => tx.type === 'expense')
+    .reduce((sum, tx) => sum + (Number(tx.amount) || 0), 0)
+
+  const txLastWeekLines = txsLastWeek.slice(0, 50).map(tx => {
+    const d = new Date(tx.created_at)
+    const dateStr = d.toISOString().slice(0, 10)
+    const budgetName = tx.budget_folder_id ? (budgetNameById.get(tx.budget_folder_id) || 'Unknown') : 'Unassigned'
+    const amt = Number(tx.amount) || 0
+    return `${dateStr} | ${tx.type} | $${amt.toFixed(2)} | budget: ${budgetName} | title: ${tx.title}`
+  }).join('\n')
+
+  // Итоги по бюджетам за неделю (только расходы)
+  const budgetTotals = new Map<string, number>()
+  for (const tx of txs) {
+    if (tx.type !== 'expense') continue
+    const budgetName = tx.budget_folder_id ? (budgetNameById.get(tx.budget_folder_id) || 'Unknown') : 'Unassigned'
+    budgetTotals.set(budgetName, (budgetTotals.get(budgetName) || 0) + (Number(tx.amount) || 0))
+  }
+  const budgetTotalsLines = Array.from(budgetTotals.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([name, total]) => `${name}: $${total.toFixed(2)}`)
+    .join('\n')
+
+  // Итоги по бюджетам за прошлую неделю
+  const budgetTotalsLastWeek = new Map<string, number>()
+  for (const tx of txsLastWeek) {
+    if (tx.type !== 'expense') continue
+    const budgetName = tx.budget_folder_id ? (budgetNameById.get(tx.budget_folder_id) || 'Unknown') : 'Unassigned'
+    budgetTotalsLastWeek.set(budgetName, (budgetTotalsLastWeek.get(budgetName) || 0) + (Number(tx.amount) || 0))
+  }
+  const budgetTotalsLastWeekLines = Array.from(budgetTotalsLastWeek.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([name, total]) => `${name}: $${total.toFixed(2)}`)
+    .join('\n')
+
+  // Топ-3 расходов недели
+  const top3Lines = txs
+    .filter(tx => tx.type === 'expense')
+    .sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0))
+    .slice(0, 3)
+    .map(tx => {
+      const d = new Date(tx.created_at).toISOString().slice(0, 10)
+      const budgetName = tx.budget_folder_id ? (budgetNameById.get(tx.budget_folder_id) || 'Unknown') : 'Unassigned'
+      return `${d} | $${Number(tx.amount).toFixed(2)} | ${budgetName} | ${tx.title}`
+    })
+    .join('\n')
+
+  // Топ-3 прошлой недели
+  const top3LastWeekLines = txsLastWeek
+    .filter(tx => tx.type === 'expense')
+    .sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0))
+    .slice(0, 3)
+    .map(tx => {
+      const d = new Date(tx.created_at).toISOString().slice(0, 10)
+      const budgetName = tx.budget_folder_id ? (budgetNameById.get(tx.budget_folder_id) || 'Unknown') : 'Unassigned'
+      return `${d} | $${Number(tx.amount).toFixed(2)} | ${budgetName} | ${tx.title}`
+    })
+    .join('\n')
+
   const instructions = [
     'You are a helpful finance assistant.',
-    'If user asks to add a transaction, prefer concise confirmations and avoid hallucinations.',
-    'If budget name is unclear, ask a clarifying question.',
+    'Respond directly and concisely in the user’s language. Do not include greetings or introductions.',
+    'Use only the data provided below (TransactionsThisWeek, TransactionsLastWeek, Known budgets). Do not invent transactions, merchants, categories, or amounts.',
+    'Answer in plain text only. Do not use JSON, code fences, or markdown tables.',
+    'If the user asks to show expenses for this week, use the ThisWeek data.',
+    'If the user asks to show expenses for last week, use the LastWeek data.',
+    'If the requested period has "none", reply exactly: "No expenses recorded this week." or "No expenses recorded last week."',
+    'Output strictly in this format for the requested period:',
+    '1) Total<Period>: $<number>',
+    '2) BudgetTotals<Period>: <budget: amount> per line',
+    '3) TopExpenses<Period>: <date | amount | budget | title> up to 3 lines',
+    'Do not provide application instructions, onboarding, UI steps, or how-to guides unless explicitly asked.'
   ].join(' ')
 
-  return `${instructions}\nKnown budgets: ${budgetsSummary || 'none'}.\nUser: ${userMessage}`
+  return [
+    instructions,
+    `Known budgets: ${budgetsSummary || 'none'}.`,
+    `ThisWeekStart: ${weekStart.toISOString().slice(0,10)}; ThisWeekEnd: ${now.toISOString().slice(0,10)}.`,
+    `TotalThisWeek: $${thisWeekExpensesTotal.toFixed(2)}.`,
+    `BudgetTotalsThisWeek:\n${budgetTotalsLines || 'none'}`,
+    `TransactionsThisWeek:\n${txLines || 'none'}`,
+    `TopExpensesThisWeek:\n${top3Lines || 'none'}`,
+    `LastWeekStart: ${lastWeekStart.toISOString().slice(0,10)}; LastWeekEnd: ${lastWeekEnd.toISOString().slice(0,10)}.`,
+    `TotalLastWeek: $${lastWeekExpensesTotal.toFixed(2)}.`,
+    `BudgetTotalsLastWeek:\n${budgetTotalsLastWeekLines || 'none'}`,
+    `TransactionsLastWeek:\n${txLastWeekLines || 'none'}`,
+    `TopExpensesLastWeek:\n${top3LastWeekLines || 'none'}`,
+    `User: ${userMessage}`
+  ].join('\n')
 }
 
 // Основной обработчик запроса ИИ (без стрима — стрим делаем в API)

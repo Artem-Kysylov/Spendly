@@ -1,0 +1,36 @@
+
+> spendly-app-ver-1.0@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.32
+  - Local:        http://localhost:3000
+  - Environments: .env.local
+
+ ✓ Starting...
+> [PWA] PWA support is disabled
+> [PWA] PWA support is disabled
+ ✓ Ready in 1754ms
+ ○ Compiling / ...
+ ✓ Compiled / in 1460ms (931 modules)
+(node:1323) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ GET / 200 in 1886ms
+ ✓ Compiled in 400ms (450 modules)
+ GET / 200 in 44ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 1759ms (4305 modules)
+ ✓ Compiled /api/assistant in 476ms (2264 modules)
+[Gemini] model: gemini-2.5-flash userParts.len: 2 userParts.lengths: [ 299, 2 ]
+[Gemini] candidates.len: 1 firstCandidate.parts.lengths: [ 42 ] blockReason: undefined
+ POST /api/assistant 200 in 2569ms
+[Gemini] model: gemini-2.5-flash userParts.len: 2 userParts.lengths: [ 299, 2 ]
+[Gemini] candidates.len: 1 firstCandidate.parts.lengths: [ 48 ] blockReason: undefined
+ POST /api/assistant 200 in 1527ms
+[Gemini] model: gemini-2.5-flash userParts.len: 2 userParts.lengths: [ 299, 2 ]
+[Gemini] candidates.len: 1 firstCandidate.parts.lengths: [ 87 ] blockReason: undefined
+ POST /api/assistant 200 in 4400ms
+ ○ Compiling /transactions ...
+ ✓ Compiled /transactions in 652ms (4398 modules)
+[Gemini] model: gemini-2.5-flash userParts.len: 2 userParts.lengths: [ 299, 2 ]
+[Gemini] candidates.len: 1 firstCandidate.parts.lengths: [ 80 ] blockReason: undefined
+ POST /api/assistant 200 in 1955ms

@@ -1,10 +1,12 @@
 "use client"
 
+// Imports 
 import React from 'react'
 import { Sparkles, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
+// Types 
 interface FloatingAIButtonProps {
   onClick?: () => void
   className?: string
