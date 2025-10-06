@@ -150,33 +150,33 @@ const TransactionsTable = ({
 
   return (
     <div className="relative mb-24">
-      <div className="overflow-x-auto rounded-lg border border-border bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
         <Table>
           <TableHeader className="border-b border-border">
             <TableRow className="border-b border-border hover:bg-transparent">
-              <TableHead className="!text-[16px] font-semibold text-secondary-black">Transaction Name</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-secondary-black">Budgets</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-secondary-black">Amount</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-secondary-black">Type</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-secondary-black">Date</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-secondary-black">Actions</TableHead>
+              <TableHead className="!text-[16px] font-semibold text-foreground">Transaction Name</TableHead>
+              <TableHead className="!text-[16px] font-semibold text-foreground">Budgets</TableHead>
+              <TableHead className="!text-[16px] font-semibold text-foreground">Amount</TableHead>
+              <TableHead className="!text-[16px] font-semibold text-foreground">Type</TableHead>
+              <TableHead className="!text-[16px] font-semibold text-foreground">Date</TableHead>
+              <TableHead className="!text-[16px] font-semibold text-foreground">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {pageItems.map((transaction, index) => (
-              <TableRow key={transaction.id} className="border-b border-border hover:bg-gray-50/30">
-                <TableCell className="text-secondary-black">{transaction.title}</TableCell>
-                <TableCell className="text-secondary-black">
+              <TableRow key={transaction.id} className="border-b border-border hover:bg-muted/30">
+                <TableCell className="text-foreground">{transaction.title}</TableCell>
+                <TableCell className="text-foreground">
                   {transaction.category_emoji && transaction.category_name ? (
                     <span className="flex items-center gap-1">
                       <span>{transaction.category_emoji}</span>
                       <span>{transaction.category_name}</span>
                     </span>
                   ) : (
-                    <span className="text-gray-500 italic">Unbudgeted</span>
+                    <span className="text-muted-foreground italic">Unbudgeted</span>
                   )}
                 </TableCell>
-                <TableCell className="text-secondary-black">${transaction.amount}</TableCell>
+                <TableCell className="text-foreground">${transaction.amount}</TableCell>
                 <TableCell>
                   <span
                     className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium uppercase tracking-wide ${

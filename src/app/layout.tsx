@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Montserrat } from "next/font/google";
+import { ThemeProvider } from "@/context/ThemeContext";
 import "./globals.css";
 import { AuthContextProvider } from "@/context/AuthContext";
 import { QueryProvider } from "@/context/QueryProvider";
@@ -106,14 +107,34 @@ export default function RootLayout({
         <meta name="application-name" content="Spendly" />
         <meta name="msapplication-TileColor" content="#3b82f6" />
         <meta name="msapplication-config" content="/browserconfig.xml" />
+        {/* Inline script to set initial theme class before CSS loads */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+        (function(){
+          try {
+            var KEY='app-theme';
+            var stored = localStorage.getItem(KEY);
+            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            var theme = (stored === 'light' || stored === 'dark' || stored === 'system') ? stored : 'system';
+            var resolved = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
+            if (resolved === 'dark') document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
+          } catch(e) {}
+        })();`,
+          }}
+        />
       </head>
       <body className={montserrat.className}>
         <QueryProvider>
           <ToastProvider>
             <AuthContextProvider>
-              {children}
-              {/* AI Assistant Floating Button */}
-              <AIAssistantProvider />
+              {/* Wrap app with ThemeProvider */}
+              <ThemeProvider>
+                {children}
+                {/* AI Assistant Floating Button */}
+                <AIAssistantProvider />
+              </ThemeProvider>
             </AuthContextProvider>
             {/* Global pop-up notifications */}
             <Toaster />

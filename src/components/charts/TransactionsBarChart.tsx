@@ -1,16 +1,23 @@
 'use client'
 
+// Imports 
 import React, { forwardRef } from 'react'
-import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency } from '@/lib/chartUtils'
-import { CustomTooltip } from './CustomTooltip'
 import { ChartDescription } from './ChartDescription'
+import Image from 'next/image'
+
+
+// Import types 
 import { ChartFilters } from '@/types/types'
 import { useAISuggestions } from '@/hooks/useAISuggestions'
 import { buildBarChartPrompt } from '@/lib/ai/promptBuilders'
 import { getLocalePreference, sanitizeTip, makeContextKey, getCachedTip, setCachedTip } from '@/lib/ai/tipUtils'
-import Image from 'next/image'
+
+// Import components 
+import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { CustomTooltip } from './CustomTooltip'
+
 
 // Интерфейс для данных бар-чарта трат
 interface ExpensesBarData {

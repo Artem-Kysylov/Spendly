@@ -22,12 +22,17 @@ export const AuthContextProvider = ({ children }: {children:React.ReactNode}) =>
           if (!active) return
           setSession(session)
           setIsReady(true)
+
+          // Apply theme from user metadata on initial session
+          applyUserThemePreference(session)
         })
     
         const {
           data: { subscription },
         }: { data: { subscription: Subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
           setSession(session);
+          // Apply theme from user metadata when session changes
+          applyUserThemePreference(session)
         })
     
         return () => {
@@ -36,6 +41,36 @@ export const AuthContextProvider = ({ children }: {children:React.ReactNode}) =>
         }
     }, [])
 
+    // Helper: read theme from user_metadata and apply
+    type Theme = "light" | "dark" | "system"
+    const applyUserThemePreference = (session: Session | null) => {
+      try {
+        const pref = session?.user?.user_metadata?.theme_preference as Theme | undefined
+        if (!pref || !["light","dark","system"].includes(pref)) return
+        // Persist and apply
+        window.localStorage.setItem("app-theme", pref)
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+        const resolved = pref === "system" ? (prefersDark ? "dark" : "light") : pref
+        document.documentElement.classList.toggle("dark", resolved === "dark")
+        // Notify ThemeProvider to sync its state
+        window.dispatchEvent(new CustomEvent("theme-preference-updated"))
+      } catch {}
+    }
+
+    // Public API: update user theme preference in user_metadata
+    const setUserThemePreference = async (theme: Theme) => {
+      if (!["light","dark","system"].includes(theme)) return { error: new Error("Invalid theme value") }
+      const { error } = await supabase.auth.updateUser({ data: { theme_preference: theme } })
+      if (!error) {
+        // Optimistically apply locally
+        window.localStorage.setItem("app-theme", theme)
+        const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+        const resolved = theme === "system" ? (prefersDark ? "dark" : "light") : theme
+        document.documentElement.classList.toggle("dark", resolved === "dark")
+        window.dispatchEvent(new CustomEvent("theme-preference-updated"))
+      }
+      return { error }
+    }
 
     // Sign in with Google
     const signInWithGoogle = async () => {
@@ -105,7 +140,9 @@ export const AuthContextProvider = ({ children }: {children:React.ReactNode}) =>
             isReady,
             isSigningIn,
             isSigningUp,
-            error
+            error,
+            // expose theme setter via auth context
+            setUserThemePreference,
         }}>
             {children}
         </AuthContext.Provider>

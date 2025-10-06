@@ -29,7 +29,7 @@ const Sidebar = () => {
     ]
 
     return (
-        <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-border flex flex-col">
+        <aside className="fixed left-0 top-0 h-full w-64 bg-card border-r border-border flex flex-col">
             <div className="h-[65px] px-6 border-b border-border flex items-center">
                 <Image 
                     src="/Spendly-logo.svg" 
@@ -56,7 +56,7 @@ const Sidebar = () => {
                                         px-3 py-2.5
                                         ${isActive 
                                             ? 'bg-primary/10 text-primary px-5 py-4' 
-                                            : 'text-secondary-black hover:text-primary hover:bg-gray-50'
+                                            : 'text-foreground hover:text-primary hover:bg-muted'
                                         }
                                     `}
                                 >

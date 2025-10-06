@@ -17,14 +17,18 @@ export interface AuthContextType {
     session: Session | null
     signInWithGoogle: () => Promise<{ error: any }>
     signOut: () => Promise<void>
-    loading: boolean
+    // необязательные (для совместимости со старым кодом)
+    loading?: boolean
     signInWithPassword: (email: string, password: string) => Promise<{ data?: any; error?: any }>
     signUpWithPassword: (email: string, password: string) => Promise<{ data?: any; error?: any }>
-    resetPassword: (email: string) => Promise<{ data?: any; error?: any }>
+    // необязательные (для совместимости со старым кодом)
+    resetPassword?: (email: string) => Promise<{ data?: any; error?: any }>
     isReady: boolean
     isSigningIn: boolean
     isSigningUp: boolean
     error: string | null
+    // новое свойство для управления темой
+    setUserThemePreference: (theme: 'light' | 'dark' | 'system') => Promise<{ error: any }>
 }
 
 export interface ProtectedRouteProps {

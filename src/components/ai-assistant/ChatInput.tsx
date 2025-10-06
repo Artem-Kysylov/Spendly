@@ -38,12 +38,12 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort }: Chat
                     placeholder="Ask about your expenses..."
                     disabled={(disabled ?? false) || (isThinking ?? false)}
                     rows={1}
-                    className="flex-1 resize-none border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed h-10"
+                    className="flex-1 resize-none border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed h-10"
                 />
                 <button
                     onClick={isThinking ? (onAbort ?? (() => {})) : handleSend}
                     disabled={isThinking ? false : (!message.trim() || !!disabled)}
-                    className={`h-10 w-10 ${isThinking ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center flex-shrink-0`}
+                    className={`h-10 w-10 ${isThinking ? 'bg-error hover:bg-error/90' : 'bg-primary hover:bg-primary/90'} text-primary-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center flex-shrink-0`}
                     aria-label={isThinking ? 'Abort' : 'Send'}
                     title={isThinking ? 'Abort' : 'Send'}
                 >

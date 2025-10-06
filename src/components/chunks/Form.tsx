@@ -9,7 +9,7 @@ import { Plus } from 'lucide-react'
 import Button from '../ui-elements/Button'
 
 // Component: Form
-const Form = () => {
+function Form() {
   const { session } = UserAuth()
   const { toast } = useToast()
 
@@ -70,7 +70,7 @@ const Form = () => {
 
   return (
     <div className="relative">
-      <form onSubmit={handleSubmit} className='w-full md:w-[50vw] rounded-lg border border-light-grey p-5 flex flex-col gap-5'>
+      <form onSubmit={handleSubmit} className='w-full md:w-[50vw] rounded-lg border border-border p-5 flex flex-col gap-5'>
         <input 
           type="text" 
           placeholder="Transaction Name" 
@@ -90,7 +90,7 @@ const Form = () => {
         />
         <div className="flex gap-4 w-full">
           <label className={`cursor-pointer p-7 flex-1 rounded-lg border text-center font-medium transition-all
-            ${type === "expense" ? "bg-error text-white border-error" : "bg-background text-secondary-black border-light-grey"}`}
+            ${type === "expense" ? "bg-error text-error-foreground border-error" : "bg-background text-foreground border-border"}`}
           >
             <input
               type="radio"
@@ -103,7 +103,7 @@ const Form = () => {
             Expense
           </label>
           <label className={`cursor-pointer p-7 flex-1 rounded-lg border text-center font-medium transition-all
-            ${type === "income" ? "bg-success text-white border-success" : "bg-background text-secondary-black border-light-grey"}`}
+            ${type === "income" ? "bg-success text-success-foreground border-success" : "bg-background text-foreground border-border"}`}
           >
             <input
               type="radio"
@@ -121,7 +121,7 @@ const Form = () => {
           variant="primary" 
           type="submit"
           disabled={isLoading}
-          icon={!isLoading ? <Plus size={16} className="text-white" /> : undefined}
+          icon={!isLoading ? <Plus size={16} className="text-primary-foreground" /> : undefined}
         />
       </form>
     </div>
