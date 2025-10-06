@@ -29,12 +29,12 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
 
   if (isLoading) {
     return (
-      <Card className="w-full">
+      <Card className="w-full flex flex-col h-full">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[300px]">
+        <CardContent className="flex-1" style={{ minHeight: height }}>
+          <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         </CardContent>
@@ -44,12 +44,12 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
 
   if (error) {
     return (
-      <Card className="w-full">
+      <Card className="w-full flex flex-col h-full">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[300px]">
+        <CardContent className="flex-1" style={{ minHeight: height }}>
+          <div className="flex items-center justify-center h-full">
             <div className="text-destructive">Error: {error}</div>
           </div>
         </CardContent>
@@ -59,12 +59,12 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
 
   if (!data || data.length === 0) {
     return (
-      <Card className="w-full">
+      <Card className="w-full flex flex-col h-full">
         <CardHeader>
           <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center h-[300px]">
+        <CardContent className="flex-1" style={{ minHeight: height }}>
+          <div className="flex items-center justify-center h-full">
             <div className="text-muted-foreground">No data available</div>
           </div>
         </CardContent>
@@ -91,18 +91,19 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
   }
 
   return (
-    <Card ref={ref} className={`w-full ${className} flex flex-col h-full`}>
+    <Card ref={ref} className={className}>
       <CardHeader>
         <CardTitle className="text-lg font-semibold">{title}</CardTitle>
         {description && (
           <ChartDescription>{description}</ChartDescription>
         )}
       </CardHeader>
-      <CardContent className="flex-1">
+      <CardContent>
         <ResponsiveContainer width="100%" height={height}>
           <RechartsBarChart
             data={normalizedData}
             layout={orientation === "horizontal" ? "vertical" : "horizontal"}
+            barCategoryGap="25%"
             margin={{
               top: 36,
               right: 30,
@@ -174,6 +175,7 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
             
             <Bar
               dataKey="amount"
+              maxBarSize={48}
               radius={[4, 4, 0, 0]}
               animationDuration={800}
             >
@@ -188,14 +190,7 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
           </RechartsBarChart>
         </ResponsiveContainer>
       </CardContent>
-      {/* AI suggestions placeholder */}
-      <div className="px-6 pb-4">
-        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-          <p className="text-gray-500 text-sm flex items-center gap-2">
-            💡 Here will be AI suggestions
-          </p>
-        </div>
-      </div>
+
     </Card>
   )
 })

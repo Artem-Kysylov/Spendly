@@ -77,7 +77,7 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
           <ChartDescription>{dynamicDescription}</ChartDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-64">
+          <div className="flex items-center justify-center h-[240px]">
             <div className="text-muted-foreground">Loading chart data...</div>
           </div>
         </CardContent>
@@ -109,7 +109,7 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
           <ChartDescription>{dynamicDescription}</ChartDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-64">
+          <div className="flex items-center justify-center h-[240px]">
             <div className="text-muted-foreground">No data available</div>
           </div>
         </CardContent>
@@ -169,15 +169,15 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
           )}
         </div>
       </CardHeader>
-      <CardContent className="flex-1">
-        <ResponsiveContainer width="100%" height={height}>
+      <CardContent className="flex-1" style={{ minHeight: height }}>
+        <ResponsiveContainer width="100%" height="100%">
           <RechartsLineChart
             data={chartData}
             margin={{
               top: 20,
               right: 30,
               left: 20,
-              bottom: 5,
+              bottom: 20,
             }}
           >
             {showGrid && (
@@ -195,6 +195,8 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
               fontSize={12}
               tickLine={false}
               axisLine={false}
+              height={28}
+              tickMargin={4}
             />
             <YAxis 
               stroke="hsl(var(--muted-foreground))"
@@ -253,14 +255,6 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
           </RechartsLineChart>
         </ResponsiveContainer>
       </CardContent>
-      {/* AI suggestions placeholder */}
-      <div className="px-6 pb-4">
-        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-          <p className="text-gray-500 text-sm flex items-center gap-2">
-            💡 Here will be AI suggestions
-          </p>
-        </div>
-      </div>
     </Card>
   )
 })

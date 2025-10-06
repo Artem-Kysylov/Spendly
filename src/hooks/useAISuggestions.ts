@@ -9,6 +9,7 @@ export function useAISuggestions() {
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
   const [isRateLimited, setIsRateLimited] = useState<boolean>(false)
+  const [abortController, setAbortController] = useState<AbortController | null>(null)
 
   const fetchSuggestion = useCallback(async (prompt: string) => {
     if (!session?.user?.id) return
@@ -16,6 +17,9 @@ export function useAISuggestions() {
     setLoading(true)
     setError(null)
     setIsRateLimited(false)
+
+    const controller = new AbortController()
+    setAbortController(controller)
 
     try {
       const res = await fetch('/api/assistant', {
@@ -26,7 +30,8 @@ export function useAISuggestions() {
           isPro: false,
           enableLimits: true,
           message: prompt
-        })
+        }),
+        signal: controller.signal
       })
 
       if (!res.ok) {
@@ -55,12 +60,39 @@ export function useAISuggestions() {
         acc += decoder.decode(value, { stream: true })
         setText(acc)
       }
+
+      const providerEmptyMsgPattern = /LLM provider returned empty text candidates\./i
+      if (providerEmptyMsgPattern.test(acc)) {
+        const blockedReasonMatch = acc.match(/Blocked:\s*([^.\n]+)/i)
+        const reason = blockedReasonMatch?.[1]?.trim()
+        const isRu = (typeof navigator !== 'undefined' ? (navigator.language || '').toLowerCase().startsWith('ru') : false)
+
+        const friendly = reason
+          ? (isRu
+              ? `Запрос был заблокирован провайдером (${reason}). Попробуйте переформулировать и избегать чувствительного контента.`
+              : `Your request was blocked by the provider (${reason}). Tip: Try rephrasing and avoid sensitive content.`)
+          : (isRu
+              ? 'Модель не смогла сгенерировать ответ. Попробуйте переформулировать запрос короче и конкретнее.'
+              : 'The assistant could not generate a response this time. Try rephrasing your request or reducing its complexity.')
+
+        setText(friendly)
+      }
     } catch (e) {
-      setError('Network error')
+      if ((e as any)?.name === 'AbortError') {
+        setError(null)
+      } else {
+        setError('Network error')
+      }
     } finally {
       setLoading(false)
+      setAbortController(null)
     }
   }, [session?.user?.id])
 
-  return { text, loading, error, isRateLimited, fetchSuggestion }
+  const abort = useCallback(() => {
+    abortController?.abort()
+    setLoading(false)
+  }, [abortController])
+
+  return { text, loading, error, isRateLimited, fetchSuggestion, abort }
 }

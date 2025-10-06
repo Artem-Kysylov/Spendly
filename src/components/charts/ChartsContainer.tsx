@@ -101,10 +101,8 @@ export const ChartsContainer: React.FC<ChartsContainerProps> = ({
   const getTypeLabel = (type: ChartDataType) =>
     type === 'Expenses' ? 'Expenses' : 'Income'
 
-  // Увеличенная высота для графиков
-  // Одинаковая высота области карточки для выравнивания нижних плейсхолдеров
-  const chartHeight = 400
-  const cardHeight = 650
+  // Единая высота графиков
+  const chartHeight = 240
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -125,7 +123,7 @@ export const ChartsContainer: React.FC<ChartsContainerProps> = ({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch">
           {/* Bar chart */}
           {chartVisibility.bar && (
-            <div className="transition-all duration-300 ease-in-out" style={{ height: `${cardHeight}px` }}>
+            <div className="transition-all duration-300 ease-in-out">
               <BarChart
                 ref={barChartRef}
                 data={barChart.data}
@@ -142,14 +140,14 @@ export const ChartsContainer: React.FC<ChartsContainerProps> = ({
                 showGrid={true}
                 showTooltip={true}
                 showLegend={false}
-                className="w-full h-full"
+                className="w-full"
               />
             </div>
           )}
 
           {/* Line chart */}
           {chartVisibility.line && (
-            <div className="transition-all duration-300 ease-in-out" style={{ height: `${cardHeight}px` }}>
+            <div className="transition-all duration-300 ease-in-out">
               <ComparisonLineChart
                 ref={lineChartRef}
                 data={comparisonChart.data}
@@ -166,7 +164,7 @@ export const ChartsContainer: React.FC<ChartsContainerProps> = ({
                 showGrid={true}
                 showTooltip={true}
                 showLegend={false}
-                className="w-full h-full"
+                className="w-full"
               />
             </div>
           )}

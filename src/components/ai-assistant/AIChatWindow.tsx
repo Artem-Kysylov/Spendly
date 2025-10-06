@@ -40,7 +40,7 @@ export const AIChatWindow = ({
     if (!isOpen) return null
 
     return (
-        <div className="fixed bottom-20 right-4 w-80 h-[496px] bg-white rounded-xl shadow-2xl border border-gray-200/50 flex flex-col z-40 animate-in slide-in-from-bottom-2 fade-in-0 duration-300">
+        <div className="fixed bottom-20 right-4 w-[450px] h-[550px] bg-white rounded-xl shadow-2xl border border-gray-200/50 flex flex-col z-40 animate-in slide-in-from-bottom-2 fade-in-0 duration-300">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 rounded-t-xl flex-shrink-0">
                 <div className="flex items-center space-x-2">
@@ -109,8 +109,6 @@ export const AIChatWindow = ({
                           onAbort={onAbort}
                         />
                       </div>
-                      {/* removed: separate Abort button */}
-                      {/* previously: {isTyping && (<button className="px-3 py-2 rounded bg-red-600 text-white text-sm" onClick={onAbort}>Abort</button>)} */}
                     </div>
                 </div>
             </div>

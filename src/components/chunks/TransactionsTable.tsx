@@ -22,6 +22,7 @@ import { TransactionsTableProps } from '../../types/types'
 import type { Transaction, EditTransactionPayload } from '../../types/types'
 import { supabase } from '../../lib/supabaseClient'
 import { UserAuth } from '../../context/AuthContext'
+import { Pagination } from '@/components/ui/pagination'
 
 // Расширенный интерфейс для поддержки фильтрации
 interface EnhancedTransactionsTableProps extends TransactionsTableProps {
@@ -59,6 +60,10 @@ const TransactionsTable = ({
 
   const { session } = UserAuth()
 
+  // Пагинация
+  const [currentPage, setCurrentPage] = useState<number>(1)
+  const pageSize = 10
+
   // Улучшенная сортировка транзакций
   const sortedTransactions = [...transactions].sort((a, b) => {
     let comparison = 0
@@ -82,6 +87,11 @@ const TransactionsTable = ({
     
     return sortOrder === 'desc' ? -comparison : comparison
   })
+
+  const totalPages = Math.ceil(sortedTransactions.length / pageSize) || 1
+  const startIndex = (currentPage - 1) * pageSize
+  const endIndex = startIndex + pageSize
+  const pageItems = sortedTransactions.slice(startIndex, endIndex)
 
   const handleOpenModal = (id: string) => {
     setSelectedTransactionId(id)
@@ -132,14 +142,14 @@ const TransactionsTable = ({
   // Если нет транзакций, показываем сообщение
   if (transactions.length === 0) {
     return (
-      <div className="text-center py-8">
+      <div className="text-center py-8 mb-24">
         <p className="text-muted-foreground">{emptyStateMessage}</p>
       </div>
     )
   }
 
   return (
-    <div className="relative">
+    <div className="relative mb-24">
       <div className="overflow-x-auto rounded-lg border border-border bg-white shadow-sm">
         <Table>
           <TableHeader className="border-b border-border">
@@ -153,7 +163,7 @@ const TransactionsTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedTransactions.map((transaction, index) => (
+            {pageItems.map((transaction, index) => (
               <TableRow key={transaction.id} className="border-b border-border hover:bg-gray-50/30">
                 <TableCell className="text-secondary-black">{transaction.title}</TableCell>
                 <TableCell className="text-secondary-black">
@@ -211,6 +221,15 @@ const TransactionsTable = ({
             ))}
           </TableBody>
         </Table>
+      </div>
+
+      {/* Пагинация */}
+      <div className="mt-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(p) => setCurrentPage(p)}
+        />
       </div>
 
       {/* Delete modal */}

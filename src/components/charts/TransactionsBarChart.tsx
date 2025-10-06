@@ -8,6 +8,9 @@ import { CustomTooltip } from './CustomTooltip'
 import { ChartDescription } from './ChartDescription'
 import { ChartFilters } from '@/types/types'
 import { useAISuggestions } from '@/hooks/useAISuggestions'
+import { buildBarChartPrompt } from '@/lib/ai/promptBuilders'
+import { getLocalePreference, sanitizeTip, makeContextKey, getCachedTip, setCachedTip } from '@/lib/ai/tipUtils'
+import Image from 'next/image'
 
 // Интерфейс для данных бар-чарта трат
 interface ExpensesBarData {
@@ -39,7 +42,7 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
   description,
   showGrid = true,
   showTooltip = true,
-  height = 300,
+  height = 240,
   currency = "USD",
   isLoading = false,
   error = null,
@@ -47,12 +50,50 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
   className = ""
 }, ref) => {
   
-  const { text: tip, loading: tipLoading, error: tipError, isRateLimited, fetchSuggestion } = useAISuggestions()
+  const { text: tip, loading: tipLoading, error: tipError, isRateLimited, fetchSuggestion, abort } = useAISuggestions()
+
+  const [displayTip, setDisplayTip] = React.useState<string>('')
+  const [cooldownUntil, setCooldownUntil] = React.useState<number>(0)
+  const lastKeyRef = React.useRef<string | null>(null)
 
   const refreshTip = () => {
-    const prompt = `Analyze my current ${filters.dataType} trends and suggest budgeting improvements for the selected period.`
+    const now = Date.now()
+    if (now < cooldownUntil) return
+    setCooldownUntil(now + 4000) // анти-спам
+
+    // Краевой случай: мало данных для сравнения
+    if (!data || data.length < 2) {
+      setDisplayTip('Недостаточно данных для сравнения, попробуйте позже.')
+      return
+    }
+
+    const locale = getLocalePreference()
+    const prompt = buildBarChartPrompt({
+      data: data.map(({ period, amount }) => ({ period, amount })),
+      filters: { period: filters.period, dataType: filters.dataType },
+      currency,
+      locale,
+      windowSize: filters.period === 'Week' ? 6 : 6
+    })
+
+    const key = makeContextKey(prompt)
+    lastKeyRef.current = key
+
+    const cached = getCachedTip(key, 120000)
+    if (cached) {
+      setDisplayTip(sanitizeTip(cached))
+      return
+    }
+
     fetchSuggestion(prompt)
   }
+
+  React.useEffect(() => {
+    if (!tip) return
+    const clean = sanitizeTip(tip)
+    setDisplayTip(clean)
+    if (lastKeyRef.current) setCachedTip(lastKeyRef.current, clean)
+  }, [tip])
 
   // Генерируем заголовок на основе фильтров
   const generateTitle = () => {
@@ -79,7 +120,7 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
           <CardTitle className="text-lg font-semibold">{generateTitle()}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[300px]">
+          <div className="flex items-center justify-center h-[240px]">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
         </CardContent>
@@ -94,7 +135,7 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
           <CardTitle className="text-lg font-semibold">{generateTitle()}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[300px]">
+          <div className="flex items-center justify-center h-[240px]">
             <div className="text-destructive">Error: {error}</div>
           </div>
         </CardContent>
@@ -132,10 +173,10 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
           <RechartsBarChart
             data={data}
             margin={{
-              top: 36,
+              top: 20,
               right: 30,
               left: 20,
-              bottom: 5,
+              bottom: 20,
             }}
           >
             {showGrid && (
@@ -184,15 +225,56 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
         </ResponsiveContainer>
         
         {/* AI Suggestions */}
-        <div className="mt-2">
+        <div className="mt-5">
           <div className="flex items-center justify-between">
-            <span className="text-gray-600 text-sm">💡 AI suggestions</span>
-            <button className="text-xs px-2 py-1 rounded bg-gray-100 hover:bg-gray-200" onClick={refreshTip} disabled={tipLoading || isRateLimited}>
-              {tipLoading ? 'Loading…' : 'Refresh tip'}
+            {/* Левая часть: плейсхолдер/прелоадер. Когда есть ответ — плейсхолдер пропадает */}
+            {!displayTip && (
+              <>
+                {tipLoading ? (
+                  <span className="text-gray-600 text-sm inline-flex items-center">
+                    <span>💡 Thinking</span>
+                    <span className="flex items-center gap-1 ml-2">
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </span>
+                  </span>
+                ) : (
+                  <span className="text-gray-600 text-sm">💡 Get AI tips based on your data</span>
+                )}
+              </>
+            )}
+
+            {/* Правая часть: кнопка Get tip / Stop */}
+            <button
+              className={`text-sm font-medium px-3 py-2 rounded-md transition-colors flex items-center gap-2 ${tipLoading ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}
+              onClick={tipLoading ? abort : refreshTip}
+              disabled={isRateLimited || Date.now() < cooldownUntil}
+            >
+              {tipLoading ? (
+                <>
+                  <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                  </svg>
+                  <span>Stop</span>
+                </>
+              ) : (
+                <>
+                  <Image src="/sparkles.svg" alt="Sparkles" width={16} height={16} />
+                  <span>{Date.now() < cooldownUntil ? 'Please wait…' : 'Get AI Insight'}</span>
+                </>
+              )}
             </button>
           </div>
+
           {tipError && <div className="text-xs text-amber-700 mt-1">{tipError}</div>}
-          <div className="text-sm text-gray-800 mt-1 whitespace-pre-wrap">{tip}</div>
+
+          {/* Текст подсказки с лампочкой. Плейсхолдер убирается при наличии displayTip */}
+          {displayTip && (
+            <div className="text-sm text-gray-800 mt-1 whitespace-pre-wrap">💡 {displayTip}</div>
+          )}
         </div>
       </CardContent>
     </Card>

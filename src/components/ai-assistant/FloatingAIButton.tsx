@@ -2,8 +2,11 @@
 
 // Imports 
 import React from 'react'
-import { Sparkles, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import Image from 'next/image'
+
+// Import components 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 // Types 
@@ -52,13 +55,15 @@ const FloatingAIButton: React.FC<FloatingAIButtonProps> = ({
             aria-label={isOpen ? "Close AI Assistant" : "Ask Spendly Pal"}
           >
             <div className="relative w-6 h-6 flex items-center justify-center">
-              <Sparkles 
-                size={24} 
-                className={cn(
-                  "absolute transition-all duration-300 ease-in-out",
-                  isOpen ? "opacity-0 rotate-90 scale-75" : "opacity-100 rotate-0 scale-100"
-                )}
-              />
+              <Image  
+                src="/sparkles.svg"
+                alt="Sparkles"
+                width={24}
+                height={24} 
+              className={cn(
+                "absolute transition-all duration-300 ease-in-out",
+                isOpen ? "opacity-0 rotate-90 scale-75" : "opacity-100 rotate-0 scale-100"
+                )} />
               <X 
                 size={24} 
                 className={cn(

@@ -190,10 +190,11 @@ export const generateComparisonLabels = (startDate: Date, endDate: Date): { curr
 export const generateComparisonDescription = (
   startDate: Date, 
   endDate: Date, 
-  dataType: 'Expenses' | 'Income' = 'Expenses'
+  dataType: 'expenses' | 'income' | 'both' | 'Expenses' | 'Income' = 'expenses'
 ): string => {
   const periodType = determinePeriodType(startDate, endDate)
-  const dataTypeText = dataType.toLowerCase()
+  const normalized = dataType.toLowerCase() as 'expenses' | 'income' | 'both'
+  const dataTypeText = normalized === 'both' ? 'expenses and income' : normalized
   
   switch (periodType) {
     case 'day':

@@ -1,7 +1,11 @@
 // Import types
 import { ButtonProps } from '../../types/types'
-import { Button as UIButton } from "@/components/ui/button"
-import type { ButtonVariant } from "@/components/ui/button"
+import type { VariantProps } from "class-variance-authority"
+
+// Import components 
+import { Button as UIButton, buttonVariants } from "@/components/ui/button"
+
+type ButtonVariant = VariantProps<typeof buttonVariants>["variant"]
 
 const Button = ({ text, className = '', onClick, type = 'button', disabled, isLoading, icon, variant }: ButtonProps) => {
   // Normalize alias: primary → default (shadcn)

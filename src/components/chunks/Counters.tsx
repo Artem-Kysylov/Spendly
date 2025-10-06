@@ -1,10 +1,10 @@
 'use client'
 
 // Imports 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { supabase } from '../../lib/supabaseClient' 
 import { UserAuth } from '../../context/AuthContext'
-import { Pencil, Lightbulb } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 
 // Import Shadcn components
 import { Card, CardContent } from '@/components/ui/card'
@@ -26,6 +26,9 @@ import {
 // Import types
 import { Transaction } from '../../types/types'
 import { useAISuggestions } from '@/hooks/useAISuggestions'
+import { buildCountersPrompt } from '@/lib/ai/promptBuilders'
+import { getLocalePreference, sanitizeTip, makeContextKey, getCachedTip, setCachedTip } from '@/lib/ai/tipUtils'
+import Image from 'next/image'
 
 // Component: TransactionsCounters
 const TransactionsCounters = ({ 
@@ -156,13 +159,65 @@ const TransactionsCounters = ({
     }, [budget, budgetUsagePercentage])
 
     // Initialize AI suggestions hook
-    const { text: tip, loading: tipLoading, error: tipError, isRateLimited, fetchSuggestion } = useAISuggestions()
+    const { text: tip, loading: tipLoading, error: tipError, isRateLimited, fetchSuggestion, abort } = useAISuggestions()
+
+    // Local state for displaying tip (with cache and sanitization)
+    const [displayTip, setDisplayTip] = useState<string>('')
+    const [cooldownUntil, setCooldownUntil] = useState<number>(0)
+    const lastKeyRef = useRef<string | null>(null)
 
     // Refresh AI tip based on current budget and expenses
     const refreshTip = () => {
-      const prompt = 'Given my remaining budget and current expenses, provide actionable advice to stay within budget this period.'
+      const now = Date.now()
+      if (now < cooldownUntil) return
+      setCooldownUntil(now + 4000) // anti-spam: 4 seconds
+
+      // Edge case: no data at all
+      const noData = budget === 0 && totalExpenses === 0 && totalIncome === 0
+      if (noData) {
+        setDisplayTip('Недостаточно данных для сравнения, попробуйте позже.')
+        return
+      }
+
+      const locale = getLocalePreference()
+      const prompt = buildCountersPrompt({
+        budget,
+        totalExpenses,
+        totalIncome,
+        previousMonthExpenses,
+        previousMonthIncome,
+        budgetUsagePercentage,
+        remainingBudget,
+        budgetStatus,
+        expensesTrendPercent: expensesTrend,
+        incomeTrendPercent: incomeTrend,
+        incomeCoveragePercent: incomeCoverage,
+        expensesDifferenceText: expensesDifference,
+        incomeDifferenceText: incomeDifference,
+        currency: 'USD',
+        locale
+      })
+
+      const key = makeContextKey(prompt)
+      lastKeyRef.current = key
+
+      // Cache: if there is a fresh tip — show immediately and skip API call
+      const cached = getCachedTip(key, 120000)
+      if (cached) {
+        setDisplayTip(sanitizeTip(cached))
+        return
+      }
+
       fetchSuggestion(prompt)
     }
+
+    // When text comes from the hook — sanitize and put into cache
+    useEffect(() => {
+      if (!tip) return
+      const clean = sanitizeTip(tip)
+      setDisplayTip(clean)
+      if (lastKeyRef.current) setCachedTip(lastKeyRef.current, clean)
+    }, [tip])
 
     useEffect(() => {
         fetchBudget()
@@ -260,25 +315,47 @@ const TransactionsCounters = ({
                         </div>
                     </div>
 
-                    {/* AI Suggestions Placeholder inside the card */}
-                    <div className="flex items-center gap-3 p-4 mt-6 bg-gray-50 rounded-lg border border-gray-200">
-                        <Lightbulb className="text-yellow-500" size={18} />
+                    {/* AI Suggestions inside the card */}
+                    <div className="flex items-center gap-3 mt-5">
                         <div className="flex-1">
-                          {tipLoading && <span className="text-gray-600 text-sm">Loading tip...</span>}
-                          {!tipLoading && tip && <span className="text-gray-800 text-sm">{tip}</span>}
-                          {!tipLoading && !tip && !tipError && (
-                            <span className="text-gray-600 text-sm">💡 Here will be AI suggestions</span>
+                          {tipLoading && (
+                            <span className="text-gray-600 text-sm inline-flex items-center">
+                              <span>💡 Thinking</span>
+                              <span className="flex items-center gap-1 ml-2">
+                                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                              </span>
+                            </span>
+                          )}
+                          {!tipLoading && displayTip && <span className="text-gray-800 text-sm whitespace-pre-wrap">💡 {displayTip}</span>}
+                          {!tipLoading && !displayTip && !tipError && (
+                            <span className="text-gray-600 text-sm">💡 Get AI tips based on your data</span>
                           )}
                           {tipError && <p className="text-red-600 text-xs mt-1">{tipError}</p>}
                           {isRateLimited && <p className="text-yellow-600 text-xs mt-1">Rate limit reached. Try later.</p>}
                         </div>
                         <button
                           type="button"
-                          onClick={refreshTip}
-                          className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded hover:bg-gray-200"
-                          disabled={tipLoading}
+                          onClick={tipLoading ? abort : refreshTip}
+                          className={`text-sm font-medium px-4 py-2 rounded-md transition-colors flex items-center gap-2 ${tipLoading ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}
+                          disabled={Date.now() < cooldownUntil}
                         >
-                          Get tip
+                          {tipLoading ? (
+                            <>
+                              <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                              </svg>
+                              <span>Stop</span>
+                            </>
+                          ) : (
+                            <>
+                              <Image src="/sparkles.svg" alt="Sparkles" width={16} height={16} />
+                              <span>{Date.now() < cooldownUntil ? 'Please wait…' : 'Get AI Insight'}</span>
+                            </>
+                          )}
                         </button>
                     </div>
                 </CardContent>

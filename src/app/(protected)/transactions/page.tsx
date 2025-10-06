@@ -153,7 +153,7 @@ const Transactions = () => {
         filters={filters}
         isLoading={isChartLoading}
         currency="USD"
-        height={300}
+        height={240}
         className="mb-6"
       />
 

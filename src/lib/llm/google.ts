@@ -66,8 +66,8 @@ export function streamGeminiText({ model, prompt, system, requestId }: StreamPar
           temperature: 0.3,
           topP: 0.9,
           candidateCount: 1,
-          // Убираем responseMimeType, оставляем лимит длины ответа
-          maxOutputTokens: 1024
+          // Увеличиваем лимит ответных токенов, чтобы снизить вероятность finishReason=MAX_TOKENS без текста
+          maxOutputTokens: 2048
         }
       }
 
