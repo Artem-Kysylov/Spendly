@@ -13,21 +13,21 @@ const BudgetProgressBar = ({ spentAmount, totalAmount, type, className }: Budget
   const remainingAmount = Math.max(totalAmount - spentAmount, 0)
   const budgetType: 'expense' | 'income' = type ?? 'expense'
 
-  // Определяем цвет прогресс бара с фирменными синими цветами
+  // Определяем цвет прогресс бара с поддержкой темной темы
   const getProgressColor = () => {
     if (percentage >= 100) {
       return budgetType === 'expense' ? 'bg-red-500' : 'bg-green-500'
     }
     // Используем фирменный синий цвет для нормального состояния
-    return 'bg-blue-500'
+    return 'bg-primary'
   }
 
   const getBackgroundColor = () => {
     if (percentage >= 100) {
-      return budgetType === 'expense' ? 'bg-red-100' : 'bg-green-100'
+      return budgetType === 'expense' ? 'bg-red-100 dark:bg-red-900/20' : 'bg-green-100 dark:bg-green-900/20'
     }
-    // Используем светло-синий фон для нормального состояния
-    return 'bg-blue-100'
+    // Используем светло-синий фон для нормального состояния с поддержкой темной темы
+    return 'bg-blue-100 dark:bg-primary/20'
   }
 
   return (
@@ -49,7 +49,7 @@ const BudgetProgressBar = ({ spentAmount, totalAmount, type, className }: Budget
       </div>
       
       {/* Информация о прогрессе */}
-      <div className="flex justify-between text-xs text-gray-600">
+      <div className="flex justify-between text-xs text-gray-700 dark:text-white">
         <span className="font-medium">${spentAmount.toFixed(0)} spent</span>
         <span>${remainingAmount.toFixed(0)} left</span>
       </div>

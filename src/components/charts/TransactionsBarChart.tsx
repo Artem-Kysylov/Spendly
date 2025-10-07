@@ -238,7 +238,7 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
             {!displayTip && (
               <>
                 {tipLoading ? (
-                  <span className="text-gray-600 text-sm inline-flex items-center">
+                  <span className="text-white text-sm inline-flex items-center">
                     <span>💡 Thinking</span>
                     <span className="flex items-center gap-1 ml-2">
                       <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -247,7 +247,7 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
                     </span>
                   </span>
                 ) : (
-                  <span className="text-gray-600 text-sm">💡 Get AI tips based on your data</span>
+                  <span className="text-white text-sm">💡 Get AI tips based on your data</span>
                 )}
               </>
             )}
@@ -280,7 +280,7 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
 
           {/* Текст подсказки с лампочкой. Плейсхолдер убирается при наличии displayTip */}
           {displayTip && (
-            <div className="text-sm text-gray-800 mt-1 whitespace-pre-wrap">💡 {displayTip}</div>
+            <div className="text-sm text-white mt-1 whitespace-pre-wrap">💡 {displayTip}</div>
           )}
         </div>
       </CardContent>

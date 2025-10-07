@@ -238,7 +238,7 @@ const TransactionsCounters = ({
                                 <Pencil className="text-primary text-[18px] duration-300 hover:opacity-50"/>
                             </div>
                             
-                            <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 p-4 hover:shadow-md transition-all duration-300">
+                            <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:bg-transparent dark:border dark:border-primary p-4 hover:shadow-md transition-all duration-300">
                                 <div className="flex items-center gap-2">
                                     <h3 className="text-lg text-primary text-center font-medium">Total Budget</h3>
                                     {budgetStatus === 'exceeded' && <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">Exceeded</span>}
@@ -264,10 +264,10 @@ const TransactionsCounters = ({
                                             />
                                         </div>
                                         <div className="text-center space-y-1">
-                                            <p className="text-xs text-gray-700 font-medium">
+                                            <p className="text-xs text-gray-700 dark:text-white font-medium">
                                                 {formatCurrency(remainingBudget)} remaining
                                             </p>
-                                            <p className="text-xs text-gray-600">
+                                            <p className="text-xs text-gray-600 dark:text-white">
                                                 {budgetUsagePercentage.toFixed(1)}% used
                                             </p>
                                         </div>
@@ -277,7 +277,7 @@ const TransactionsCounters = ({
                         </div>
 
                         {/* Enhanced Expenses Section */}
-                        <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 p-4 hover:shadow-md transition-all duration-300">
+                        <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 dark:bg-transparent dark:border dark:border-red-500 p-4 hover:shadow-md transition-all duration-300">
                             <div className="flex items-center gap-2">
                                 <h3 className="text-lg text-red-700 text-center font-medium">Total Expenses</h3>
                                 {totalExpenses > budget && budget > 0 && (
@@ -289,9 +289,9 @@ const TransactionsCounters = ({
                             </span>
                             <TrendArrow trend={expensesTrend} variant="expense" />
                             <div className="text-center space-y-1">
-                                <p className="text-xs text-gray-600">{expensesDifference}</p>
+                                <p className="text-xs text-gray-600 dark:text-white">{expensesDifference}</p>
                                 {budget > 0 && (
-                                    <p className="text-xs text-gray-600">
+                                    <p className="text-xs text-gray-600 dark:text-white">
                                         {((totalExpenses / budget) * 100).toFixed(1)}% of budget
                                     </p>
                                 )}
@@ -299,16 +299,15 @@ const TransactionsCounters = ({
                         </div>
 
                         {/* Enhanced Income Section */}
-                        <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 p-4 hover:shadow-md transition-all duration-300" 
-                             style={{ backgroundColor: 'rgba(16, 185, 129, 0.1)' }}>
+                        <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:bg-transparent dark:border dark:border-green-500 p-4 hover:shadow-md transition-all duration-300">
                             <h3 className="text-lg text-green-700 text-center font-medium">Total Income</h3>
                             <span className="text-[30px] font-bold text-green-700 text-center">
                                 {formatCurrency(totalIncome)}
                             </span>
                             <TrendArrow trend={incomeTrend} variant="income" />
                             <div className="text-center space-y-1">
-                                <p className="text-xs text-gray-600">{incomeDifference}</p>
-                                <p className="text-xs text-gray-600">
+                                <p className="text-xs text-gray-600 dark:text-white">{incomeDifference}</p>
+                                <p className="text-xs text-gray-600 dark:text-white">
                                     Covers {incomeCoverage.toFixed(0)}% of expenses
                                 </p>
                             </div>
@@ -319,7 +318,7 @@ const TransactionsCounters = ({
                     <div className="flex items-center gap-3 mt-5">
                         <div className="flex-1">
                           {tipLoading && (
-                            <span className="text-gray-600 text-sm inline-flex items-center">
+                            <span className="text-white text-sm inline-flex items-center">
                               <span>💡 Thinking</span>
                               <span className="flex items-center gap-1 ml-2">
                                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -328,9 +327,9 @@ const TransactionsCounters = ({
                               </span>
                             </span>
                           )}
-                          {!tipLoading && displayTip && <span className="text-gray-800 text-sm whitespace-pre-wrap">💡 {displayTip}</span>}
+                          {!tipLoading && displayTip && <span className="text-white text-sm whitespace-pre-wrap">💡 {displayTip}</span>}
                           {!tipLoading && !displayTip && !tipError && (
-                            <span className="text-gray-600 text-sm">💡 Get AI tips based on your data</span>
+                            <span className="text-white text-sm">💡 Get AI tips based on your data</span>
                           )}
                           {tipError && <p className="text-red-600 text-xs mt-1">{tipError}</p>}
                           {isRateLimited && <p className="text-yellow-600 text-xs mt-1">Rate limit reached. Try later.</p>}

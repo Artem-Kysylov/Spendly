@@ -55,7 +55,7 @@ const Sidebar = () => {
                                         flex items-center gap-3 rounded-md text-sm font-medium transition-all duration-200
                                         px-3 py-2.5
                                         ${isActive 
-                                            ? 'bg-primary/10 text-primary px-5 py-4' 
+                                            ? 'bg-primary/20 dark:bg-primary/30 text-primary px-5 py-4' 
                                             : 'text-foreground hover:text-primary hover:bg-muted'
                                         }
                                     `}
@@ -77,8 +77,8 @@ const Sidebar = () => {
                         flex items-center gap-3 rounded-md text-sm font-medium transition-all duration-200
                         px-3 py-2.5
                         ${pathname === '/user-settings' 
-                            ? 'bg-primary/30 text-primary px-5 py-4' 
-                            : 'text-secondary-black hover:text-primary hover:bg-gray-50'
+                            ? 'bg-primary/20 dark:bg-primary/30 text-primary px-5 py-4' 
+                            : 'text-foreground hover:text-primary hover:bg-muted'
                         }
                     `}
                 >

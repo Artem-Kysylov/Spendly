@@ -95,7 +95,7 @@ const AIInsights = ({
     <div className={cn("space-y-3", className)}>
       <div className="flex items-center gap-2 mb-4">
         <Brain className="w-5 h-5 text-purple-600" />
-        <h3 className="text-sm font-medium text-gray-800">AI Insights</h3>
+        <h3 className="text-sm font-medium text-white">AI Insights</h3>
         <span className="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full">Beta</span>
       </div>
       

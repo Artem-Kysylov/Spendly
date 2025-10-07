@@ -22,12 +22,12 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
     <div className={`flex items-center gap-4 ${className}`}>
       {/* Type Selector */}
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-gray-700">Type</label>
+        <label className="text-sm font-medium text-white">Type</label>
         <div className="relative">
           <Select
             value={transactionType}
             onChange={(e) => onTransactionTypeChange(e.target.value as 'Expenses' | 'Income')}
-            className="min-w-[140px] bg-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none"
+            className="min-w-[140px] bg-background pl-4 pr-[40px] h-[50px] rounded-md appearance-none"
           >
             <option value="Expenses">Expense</option>
             <option value="Income">Income</option>
@@ -42,12 +42,12 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
 
       {/* Date Period Selector */}
       <div className="flex flex-col gap-1">
-        <label className="text-sm font-medium text-gray-700">Date</label>
+        <label className="text-sm font-medium text-white">Date</label>
         <div className="relative">
           <Select
             value={datePeriod}
             onChange={(e) => onDatePeriodChange(e.target.value as 'Week' | 'Month')}
-            className="min-w-[140px] bg-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none"
+            className="min-w-[140px] bg-background pl-4 pr-[40px] h-[50px] rounded-md appearance-none"
           >
             <option value="Week">Week</option>
             <option value="Month">Month</option>
