@@ -6,6 +6,7 @@ import { AuthContextProvider } from "@/context/AuthContext";
 import { QueryProvider } from "@/context/QueryProvider";
 import { ToastProvider } from '@/components/ui/use-toast'
 import { Toaster } from '@/components/ui/toaster'
+import ServiceWorkerRegistration from '@/components/notifications/ServiceWorkerRegistration'
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -96,44 +97,20 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="Spendly" />
-        <meta name="application-name" content="Spendly" />
-        <meta name="msapplication-TileColor" content="#3b82f6" />
-        <meta name="msapplication-config" content="/browserconfig.xml" />
-        {/* Inline script to set initial theme class before CSS loads */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-        (function(){
-          try {
-            var KEY='app-theme';
-            var stored = localStorage.getItem(KEY);
-            var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            var theme = (stored === 'light' || stored === 'dark' || stored === 'system') ? stored : 'system';
-            var resolved = theme === 'system' ? (prefersDark ? 'dark' : 'light') : theme;
-            if (resolved === 'dark') document.documentElement.classList.add('dark');
-            else document.documentElement.classList.remove('dark');
-          } catch(e) {}
-        })();`,
-          }}
-        />
+        <meta name="theme-color" content="#000000" />
       </head>
       <body className={montserrat.className}>
         <QueryProvider>
           <ToastProvider>
             <AuthContextProvider>
-              {/* Wrap app with ThemeProvider */}
               <ThemeProvider>
                 {children}
+                <ServiceWorkerRegistration />
               </ThemeProvider>
             </AuthContextProvider>
-            {/* Global pop-up notifications */}
             <Toaster />
           </ToastProvider>
         </QueryProvider>

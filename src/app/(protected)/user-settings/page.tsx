@@ -4,6 +4,7 @@ import { UserAuth } from '@/context/AuthContext'
 import useModal from '@/hooks/useModal'
 import Button from "@/components/ui-elements/Button"
 import SignOutModal from '@/components/modals/SignOutModal'
+import NotificationSettings from '@/components/notifications/NotificationSettings'
 
 export default function UserSettingsPage() {
     const { signOut } = UserAuth()
@@ -19,23 +20,34 @@ export default function UserSettingsPage() {
                 </div>
 
                 {/* Settings Content */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                    <div className="space-y-6">
-                        {/* Account Section */}
-                        <div>
-                            <h2 className="text-lg font-semibold text-secondary-black mb-4">Account</h2>
-                            <div className="space-y-4">
-                                <div className="flex items-center justify-between py-3 border-b border-gray-100">
-                                    <div>
-                                        <h3 className="font-medium text-secondary-black">Sign Out</h3>
-                                        <p className="text-sm text-gray-600">Sign out of your account</p>
+                <div className="space-y-6">
+                    {/* Notifications Section */}
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="mb-6">
+                            <h2 className="text-lg font-semibold text-secondary-black mb-2">Notifications</h2>
+                            <p className="text-gray-600 text-sm">Manage how and when you receive notifications</p>
+                        </div>
+                        <NotificationSettings />
+                    </div>
+
+                    {/* Account Section */}
+                    <div className="bg-white rounded-lg border border-gray-200 p-6">
+                        <div className="space-y-6">
+                            <div>
+                                <h2 className="text-lg font-semibold text-secondary-black mb-4">Account</h2>
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                                        <div>
+                                            <h3 className="font-medium text-secondary-black">Sign Out</h3>
+                                            <p className="text-sm text-gray-600">Sign out of your account</p>
+                                        </div>
+                                        <Button
+                                            text='Sign Out'
+                                            variant="outline"
+                                            className='text-red-600 border-red-600 hover:bg-red-50'
+                                            onClick={openModal}
+                                        />
                                     </div>
-                                    <Button
-                                        text='Sign Out'
-                                        variant="outline"
-                                        className='text-red-600 border-red-600 hover:bg-red-50'
-                                        onClick={openModal}
-                                    />
                                 </div>
                             </div>
                         </div>

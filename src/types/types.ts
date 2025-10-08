@@ -478,3 +478,87 @@ export interface UseChatReturn {
         budget_name: string
     } | null
 }
+
+// ===== NOTIFICATION TYPES =====
+
+export type NotificationFrequency = 'disabled' | 'gentle' | 'aggressive' | 'relentless'
+
+export interface NotificationSettings {
+    id: string
+    user_id: string
+    frequency: NotificationFrequency
+    push_enabled: boolean
+    email_enabled: boolean
+    created_at: string
+    updated_at: string
+}
+
+export interface Notification {
+    id: string
+    user_id: string
+    title: string
+    message: string
+    type: 'budget_alert' | 'weekly_reminder' | 'expense_warning' | 'goal_achieved' | 'info' | 'success' | 'warning' | 'error'
+    is_read: boolean
+    created_at: string
+    metadata?: {
+        budget_id?: string
+        amount?: number
+        budget_name?: string
+        [key: string]: any
+    }
+}
+
+export interface NotificationBellProps {
+    count?: number
+    className?: string
+    onClick?: () => void
+}
+
+export interface NotificationDropdownProps {
+    isOpen: boolean
+    onClose: () => void
+    notifications: Notification[]
+    onMarkAsRead: (id: string) => void
+    onMarkAllAsRead: () => void
+    isLoading?: boolean
+}
+
+export interface NotificationSettingsProps {
+    settings: NotificationSettings
+    onUpdate: (settings: Partial<NotificationSettings>) => Promise<void>
+    isLoading?: boolean
+}
+
+export interface NotificationFrequencyOption {
+    value: NotificationFrequency
+    label: string
+    description: string
+    emoji: string
+    selected?: boolean
+}
+
+export interface UseNotificationsReturn {
+    notifications: Notification[]
+    unreadCount: number
+    isLoading: boolean
+    error: string | null
+    markAsRead: (id: string) => Promise<void>
+    markAllAsRead: () => Promise<void>
+    createNotification: (notificationData: {
+        title: string
+        message: string
+        type?: 'info' | 'success' | 'warning' | 'error'
+        metadata?: Record<string, any>
+    }) => Promise<Notification>
+    refetch: (limit?: number, offset?: number, unreadOnly?: boolean) => Promise<void>
+}
+
+export interface UseNotificationSettingsReturn {
+    settings: NotificationSettings | null
+    isLoading: boolean
+    error: string | null
+    updateSettings: (updates: Partial<NotificationSettings>) => Promise<void>
+    subscribeToPush: () => Promise<boolean>
+    unsubscribeFromPush: () => Promise<boolean>
+}
