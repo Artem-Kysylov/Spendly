@@ -38,7 +38,7 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort }: Chat
                     placeholder="Ask about your expenses..."
                     disabled={(disabled ?? false) || (isThinking ?? false)}
                     rows={1}
-                    className="flex-1 resize-none border border-border rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed h-10"
+                    className="flex-1 resize-none border border-gray-700 bg-black text-white placeholder:text-gray-400 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed h-10"
                 />
                 <button
                     onClick={isThinking ? (onAbort ?? (() => {})) : handleSend}

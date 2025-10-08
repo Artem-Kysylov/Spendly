@@ -54,10 +54,10 @@ const BudgetDetailsInfo = ({ id, emoji, name, amount, type }: BudgetDetailsProps
   }, [id, session?.user?.id])
 
   return (
-    <div className='flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg h-full bg-black p-[20px]'>
+    <div className='flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg h-full bg-card p-[20px]'>
       <span className='text-[25px]'>{emoji}</span>
-      <h1 className='text-white text-[25px] font-semibold'>{name}</h1>
-      <p className='text-white text-[25px] font-semibold'>${amount}</p>
+      <h1 className='text-secondary-black dark:text-white text-[25px] font-semibold'>{name}</h1>
+      <p className='text-secondary-black dark:text-white text-[25px] font-semibold'>${amount}</p>
       
       <div className="w-full mt-4">
         <BudgetProgressBar 

@@ -88,7 +88,7 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
                         
                         {/* Date Picker */}
                         <div className="flex flex-col gap-2">
-                            <label className="text-sm font-medium text-secondary-black">
+                            <label className="text-sm font-medium text-secondary-black dark:text-white">
                                 Pick up the date
                             </label>
                             <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>

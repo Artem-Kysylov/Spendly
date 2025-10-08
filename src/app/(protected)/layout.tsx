@@ -4,6 +4,7 @@ import React from 'react'
 import TopBar from '@/components/layout/TopBar'
 import Sidebar from '@/components/layout/Sidebar'
 import ProtectedRoute from '@/components/guards/ProtectedRoute'
+import { AIAssistantProvider } from '@/components/ai-assistant'
 
 export default function ProtectedLayout({
   children,
@@ -12,18 +13,19 @@ export default function ProtectedLayout({
 }) {
   return (
     <ProtectedRoute>
-      <div className="flex h-screen">
-        {/* Sidebar */}
-        <Sidebar />
-        
-        {/* Main Content Area */}
-        <div className="flex-1 flex flex-col ml-64">
-          <TopBar />
-          <main className="flex-1 overflow-auto">
-            {children}
-          </main>
+      <AIAssistantProvider/>
+        <div className="flex h-screen">
+          {/* Sidebar */}
+          <Sidebar />
+          
+          {/* Main Content Area */}
+          <div className="flex-1 flex flex-col ml-64">
+            <TopBar />
+            <main className="flex-1 overflow-auto">
+              {children}
+            </main>
+          </div>
         </div>
-      </div>
     </ProtectedRoute>
   )
 }

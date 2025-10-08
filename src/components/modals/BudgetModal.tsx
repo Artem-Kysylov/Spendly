@@ -65,10 +65,10 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                     <div className='flex items-center justify-center gap-2 mb-[20px]'>
                         <Button
                             text={emojiIcon}
-                            className="bg-[#F5F3FF] text-primary text-[25px] w-[60px] h-[60px] flex items-center justify-center rounded-lg hover:opacity-50 transition-opacity duration-300 border-none"
+                            className="bg-[#F5F3FF] dark:bg-background text-primary text-[25px] w-[60px] h-[60px] flex items-center justify-center rounded-lg hover:opacity-50 transition-opacity duration-300 border-none"
                             onClick={() => setOpenEmojiPicker(true)}
                         />
-                        <span className='text-secondary-black'>Pick an emoji (optional)</span>
+                        <span className='text-secondary-black dark:text-white'>Pick an emoji (optional)</span>
                     </div>
                     <div className='absolute top-0 right-0'>
                         <EmojiPicker 
@@ -86,7 +86,6 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             disabled={isLoading}
-                            className="!bg-gray-50"
                         />
                         <TextInput
                             type="text"
@@ -95,7 +94,6 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                             onChange={(e) => setAmount(e.target.value)}
                             onInput={handleInput}
                             disabled={isLoading}
-                            className="!bg-gray-50"
                         />
                         <div className="flex gap-4">
                             <RadioButton

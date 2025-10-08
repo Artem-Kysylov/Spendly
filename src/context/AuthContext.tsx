@@ -9,6 +9,9 @@ import { AuthContextType } from '../types/types'
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
+// Экспортируем контекст для прямого использования
+export { AuthContext }
+
 export const AuthContextProvider = ({ children }: {children:React.ReactNode}) => {
     const [session, setSession] = useState<Session | null>(null)
     const [isReady, setIsReady] = useState(false)
@@ -156,3 +159,5 @@ export const UserAuth = (): AuthContextType => {
     }
     return context
 }
+
+    

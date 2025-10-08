@@ -41,8 +41,8 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
   }
 
   return (
-    <div className='w-full rounded-lg border border-border bg-black p-[20px] min-h-[300px] flex flex-col'>
-      <h3 className='text-white text-[25px] font-semibold text-center mb-[20px]'>Add new transaction📝</h3>
+    <div className='w-full rounded-lg border border-border bg-card p-[20px] min-h-[300px] flex flex-col'>
+      <h3 className='text-secondary-black dark:text-white text-[25px] font-semibold text-center mb-[20px]'>Add new transaction📝</h3>
       <form onSubmit={handleSubmit} className='flex flex-col gap-[20px] flex-1 justify-center'>
         <TextInput
           type="text"
@@ -62,7 +62,7 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
         
         {/* Date Picker */}
         <div className="flex flex-col gap-2">
-          <label className="text-sm font-medium text-white">
+          <label className="text-sm font-medium text-secondary-black dark:text-white">
             Pick up the date
           </label>
           <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>

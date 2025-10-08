@@ -6,14 +6,14 @@ import { supabase } from '../../lib/supabaseClient'
 import { UserAuth } from '../../context/AuthContext'
 import { Pencil } from 'lucide-react'
 
-// Import Shadcn components
+// Import components 
 import { Card, CardContent } from '@/components/ui/card'
 
-// Import components
+// Import UI elements 
 import BudgetProgressBar from '../ui-elements/BudgetProgressBar'
 import TrendArrow from '../ui-elements/TrendArrow'
 
-// Import utilities
+// Import utils 
 import { 
   calculatePercentageChange, 
   getPreviousMonthRange, 
@@ -23,7 +23,7 @@ import {
   formatCurrency
 } from '../../lib/chartUtils'
 
-// Import types
+// Import types 
 import { Transaction } from '../../types/types'
 import { useAISuggestions } from '@/hooks/useAISuggestions'
 import { buildCountersPrompt } from '@/lib/ai/promptBuilders'
@@ -39,132 +39,141 @@ const TransactionsCounters = ({
   refreshTrigger?: number 
 }) => {
     const { session } = UserAuth()
-    
-    // Current month data
-    const [totalExpenses, setTotalExpenses] = useState(0)
-    const [totalIncome, setTotalIncome] = useState(0)
-    const [budget, setBudget] = useState(0)
-    
-    // Previous month data for trends
-    const [previousMonthExpenses, setPreviousMonthExpenses] = useState(0)
-    const [previousMonthIncome, setPreviousMonthIncome] = useState(0)
 
-    const fetchBudget = async () => {
+    // State for transactions and budget data
+    const [transactions, setTransactions] = useState<Transaction[]>([])
+    const [budget, setBudget] = useState<number>(0)
+    const [loading, setLoading] = useState<boolean>(true)
+
+    // Fetch transactions and budget data
+    const fetchData = async () => {
         if (!session?.user?.id) return
 
-        const { data, error } = await supabase
-            .from('main_budget')
-            .select('amount')
-            .eq('user_id', session.user.id)
-            .maybeSingle()
+        setLoading(true)
+        try {
+            // Fetch transactions
+            const { data: transactionsData, error: transactionsError } = await supabase
+                .from('transactions')
+                .select('*')
+                .eq('user_id', session.user.id)
+                .order('created_at', { ascending: false })
 
-        if (error) {
-            console.error('Error fetching budget:', error)
-            return
+            if (transactionsError) {
+                console.error('Error fetching transactions:', transactionsError)
+                return
+            }
+
+            // Fetch budget
+            const { data: budgetData, error: budgetError } = await supabase
+                .from('main_budget')
+                .select('amount')
+                .eq('user_id', session.user.id)
+                .single()
+
+            if (budgetError && budgetError.code !== 'PGRST116') {
+                console.error('Error fetching budget:', budgetError)
+                return
+            }
+
+            setTransactions(transactionsData || [])
+            setBudget(budgetData?.amount || 0)
+        } catch (error) {
+            console.error('Error in fetchData:', error)
+        } finally {
+            setLoading(false)
         }
-
-        setBudget(data?.amount ?? 0)
     }
 
-    const fetchCurrentMonthTransactions = async () => {
-        if (!session?.user?.id) return
+    // Effect to fetch data on component mount and when session changes
+    useEffect(() => {
+        fetchData()
+    }, [session?.user?.id, refreshTrigger])
 
+    // Calculate current month data
+    const currentMonthData = useMemo(() => {
         const { start, end } = getCurrentMonthRange()
+        return transactions.filter(transaction => {
+            const transactionDate = new Date(transaction.created_at)
+            return transactionDate >= start && transactionDate <= end
+        })
+    }, [transactions])
 
-        const { data, error } = await supabase
-            .from('transactions')
-            .select('type, amount')
-            .eq('user_id', session.user.id)
-            .gte('created_at', start.toISOString())
-            .lte('created_at', end.toISOString()) as { data: Transaction[] | null, error: any }
-
-        if (error) {
-            console.error('Error fetching current month transactions:', error)
-            return
-        }
-      
-        const expensesTotal = data?.filter(t => t.type === 'expense').reduce((total, t) => total + t.amount, 0) || 0
-        const incomeTotal = data?.filter(t => t.type === 'income').reduce((total, t) => total + t.amount, 0) || 0
-
-        setTotalExpenses(expensesTotal)
-        setTotalIncome(incomeTotal)
-    }
-
-    const fetchPreviousMonthTransactions = async () => {
-        if (!session?.user?.id) return
-
+    // Calculate previous month data
+    const previousMonthData = useMemo(() => {
         const { start, end } = getPreviousMonthRange()
+        return transactions.filter(transaction => {
+            const transactionDate = new Date(transaction.created_at)
+            return transactionDate >= start && transactionDate <= end
+        })
+    }, [transactions])
 
-        const { data, error } = await supabase
-            .from('transactions')
-            .select('type, amount')
-            .eq('user_id', session.user.id)
-            .gte('created_at', start.toISOString())
-            .lte('created_at', end.toISOString()) as { data: Transaction[] | null, error: any }
+    // Calculate totals
+    const totalExpenses = useMemo(() => {
+        return currentMonthData
+            .filter(transaction => transaction.type === 'expense')
+            .reduce((sum, transaction) => sum + transaction.amount, 0)
+    }, [currentMonthData])
 
-        if (error) {
-            console.error('Error fetching previous month transactions:', error)
-            return
-        }
-      
-        const expensesTotal = data?.filter(t => t.type === 'expense').reduce((total, t) => total + t.amount, 0) || 0
-        const incomeTotal = data?.filter(t => t.type === 'income').reduce((total, t) => total + t.amount, 0) || 0
+    const totalIncome = useMemo(() => {
+        return currentMonthData
+            .filter(transaction => transaction.type === 'income')
+            .reduce((sum, transaction) => sum + transaction.amount, 0)
+    }, [currentMonthData])
 
-        setPreviousMonthExpenses(expensesTotal)
-        setPreviousMonthIncome(incomeTotal)
-    }
+    const previousMonthExpenses = useMemo(() => {
+        return previousMonthData
+            .filter(transaction => transaction.type === 'expense')
+            .reduce((sum, transaction) => sum + transaction.amount, 0)
+    }, [previousMonthData])
 
-    // Memoized calculations
-    const expensesTrend = useMemo(() => 
-        calculatePercentageChange(totalExpenses, previousMonthExpenses), 
-        [totalExpenses, previousMonthExpenses]
-    )
+    const previousMonthIncome = useMemo(() => {
+        return previousMonthData
+            .filter(transaction => transaction.type === 'income')
+            .reduce((sum, transaction) => sum + transaction.amount, 0)
+    }, [previousMonthData])
 
-    const incomeTrend = useMemo(() => 
-        calculatePercentageChange(totalIncome, previousMonthIncome), 
-        [totalIncome, previousMonthIncome]
-    )
+    // Calculate derived values
+    const budgetUsagePercentage = budget > 0 ? (totalExpenses / budget) * 100 : 0
+    const remainingBudget = budget - totalExpenses
+    const budgetStatus = budget === 0 ? 'not-set' : 
+                        budgetUsagePercentage > 100 ? 'exceeded' : 
+                        budgetUsagePercentage > 80 ? 'warning' : 'good'
 
-    const incomeCoverage = useMemo(() => 
-        calculateIncomeCoverage(totalIncome, totalExpenses), 
-        [totalIncome, totalExpenses]
-    )
+    // Calculate trends
+    const expensesTrend = calculatePercentageChange(previousMonthExpenses, totalExpenses)
+    const incomeTrend = calculatePercentageChange(previousMonthIncome, totalIncome)
+    const incomeCoverage = calculateIncomeCoverage(totalIncome, totalExpenses)
 
-    const expensesDifference = useMemo(() => 
-        formatMonthlyDifference(totalExpenses, previousMonthExpenses), 
-        [totalExpenses, previousMonthExpenses]
-    )
+    // Format differences
+    const expensesDifference = formatMonthlyDifference(previousMonthExpenses, totalExpenses)
+    const incomeDifference = formatMonthlyDifference(previousMonthIncome, totalIncome)
 
-    const incomeDifference = useMemo(() => 
-        formatMonthlyDifference(totalIncome, previousMonthIncome), 
-        [totalIncome, previousMonthIncome]
-    )
-
-    // Budget calculations
-    const budgetUsagePercentage = useMemo(() => 
-        budget > 0 ? (totalExpenses / budget) * 100 : 0, 
-        [totalExpenses, budget]
-    )
-
-    const remainingBudget = useMemo(() => 
-        Math.max(budget - totalExpenses, 0), 
-        [budget, totalExpenses]
-    )
-
-    const budgetStatus = useMemo(() => {
-        if (budget === 0) return 'not-set'
-        if (budgetUsagePercentage >= 100) return 'exceeded'
-        if (budgetUsagePercentage >= 80) return 'warning'
-        return 'good'
-    }, [budget, budgetUsagePercentage])
-
-    // Initialize AI suggestions hook
+    // AI suggestions hook — moved before conditional return to maintain hook order
     const { text: tip, loading: tipLoading, error: tipError, isRateLimited, fetchSuggestion, abort } = useAISuggestions()
 
     // Local state for displaying tip (with cache and sanitization)
     const [displayTip, setDisplayTip] = useState<string>('')
     const [cooldownUntil, setCooldownUntil] = useState<number>(0)
     const lastKeyRef = useRef<string | null>(null)
+
+    // Effect to handle tip updates — перемещён выше раннего return
+    useEffect(() => {
+      if (tip && lastKeyRef.current) {
+        const sanitized = sanitizeTip(tip)
+        setDisplayTip(sanitized)
+        setCachedTip(lastKeyRef.current, tip)
+      }
+    }, [tip]) 
+
+    if (loading) {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {[1, 2, 3].map((i) => (
+                    <div key={i} className="h-[140px] bg-gray-200 animate-pulse rounded-lg"></div>
+                ))}
+            </div>
+        )
+    }
 
     // Refresh AI tip based on current budget and expenses
     const refreshTip = () => {
@@ -211,34 +220,18 @@ const TransactionsCounters = ({
       fetchSuggestion(prompt)
     }
 
-    // When text comes from the hook — sanitize and put into cache
-    useEffect(() => {
-      if (!tip) return
-      const clean = sanitizeTip(tip)
-      setDisplayTip(clean)
-      if (lastKeyRef.current) setCachedTip(lastKeyRef.current, clean)
-    }, [tip])
-
-    useEffect(() => {
-        fetchBudget()
-        fetchCurrentMonthTransactions()
-        fetchPreviousMonthTransactions()
-    }, [session?.user?.id, refreshTrigger]) 
-    
     return (
-        <div className="space-y-6">
-            {/* Main Financial Overview Card */}
-            <Card className="w-full">
-                <CardContent className="pt-6">
-                    {/* Three main counters in responsive grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="mb-8">
+            <Card className="bg-card border-border">
+                <CardContent className="p-6">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                         {/* Enhanced Budget Section */}
                         <div className="group relative">
                             <div className="absolute top-3 right-3 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" onClick={onIconClick}>
                                 <Pencil className="text-primary text-[18px] duration-300 hover:opacity-50"/>
                             </div>
                             
-                            <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:bg-transparent dark:border dark:border-primary p-4 hover:shadow-md transition-all duration-300">
+                            <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-primary/40 p-4 hover:shadow-md transition-all duration-300">
                                 <div className="flex items-center gap-2">
                                     <h3 className="text-lg text-primary text-center font-medium">Total Budget</h3>
                                     {budgetStatus === 'exceeded' && <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">Exceeded</span>}
@@ -277,7 +270,7 @@ const TransactionsCounters = ({
                         </div>
 
                         {/* Enhanced Expenses Section */}
-                        <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 dark:bg-transparent dark:border dark:border-red-500 p-4 hover:shadow-md transition-all duration-300">
+                        <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-red-500/40 p-4 hover:shadow-md transition-all duration-300">
                             <div className="flex items-center gap-2">
                                 <h3 className="text-lg text-red-700 text-center font-medium">Total Expenses</h3>
                                 {totalExpenses > budget && budget > 0 && (
@@ -299,7 +292,7 @@ const TransactionsCounters = ({
                         </div>
 
                         {/* Enhanced Income Section */}
-                        <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:bg-transparent dark:border dark:border-green-500 p-4 hover:shadow-md transition-all duration-300">
+                        <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-green-500/40 p-4 hover:shadow-md transition-all duration-300">
                             <h3 className="text-lg text-green-700 text-center font-medium">Total Income</h3>
                             <span className="text-[30px] font-bold text-green-700 text-center">
                                 {formatCurrency(totalIncome)}
@@ -318,7 +311,7 @@ const TransactionsCounters = ({
                     <div className="flex items-center gap-3 mt-5">
                         <div className="flex-1">
                           {tipLoading && (
-                            <span className="text-white text-sm inline-flex items-center">
+                            <span className="text-black dark:text-white text-sm inline-flex items-center">
                               <span>💡 Thinking</span>
                               <span className="flex items-center gap-1 ml-2">
                                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
@@ -327,9 +320,9 @@ const TransactionsCounters = ({
                               </span>
                             </span>
                           )}
-                          {!tipLoading && displayTip && <span className="text-white text-sm whitespace-pre-wrap">💡 {displayTip}</span>}
+                          {!tipLoading && displayTip && <span className="text-black dark:text-white text-sm whitespace-pre-wrap">💡 {displayTip}</span>}
                           {!tipLoading && !displayTip && !tipError && (
-                            <span className="text-white text-sm">💡 Get AI tips based on your data</span>
+                            <span className="text-black dark:text-white text-sm">💡 Get AI tips based on your data</span>
                           )}
                           {tipError && <p className="text-red-600 text-xs mt-1">{tipError}</p>}
                           {isRateLimited && <p className="text-yellow-600 text-xs mt-1">Rate limit reached. Try later.</p>}

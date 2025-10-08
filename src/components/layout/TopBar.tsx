@@ -12,7 +12,7 @@ const TopBar = () => {
     })
 
     return (
-        <header className="sticky top-0 z-40 bg-background/90 backdrop-blur border-b">
+        <header className="sticky top-0 z-40 bg-card backdrop-blur border-b">
             <div className="mx-auto px-5 h-16 flex items-center justify-between">
                 {/* Current Date */}
                 <div className="text-sm text-foreground font-medium">

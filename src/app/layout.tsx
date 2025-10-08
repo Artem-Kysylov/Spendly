@@ -6,7 +6,6 @@ import { AuthContextProvider } from "@/context/AuthContext";
 import { QueryProvider } from "@/context/QueryProvider";
 import { ToastProvider } from '@/components/ui/use-toast'
 import { Toaster } from '@/components/ui/toaster'
-import { AIAssistantProvider } from '@/components/ai-assistant'
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -132,8 +131,6 @@ export default function RootLayout({
               {/* Wrap app with ThemeProvider */}
               <ThemeProvider>
                 {children}
-                {/* AI Assistant Floating Button */}
-                <AIAssistantProvider />
               </ThemeProvider>
             </AuthContextProvider>
             {/* Global pop-up notifications */}

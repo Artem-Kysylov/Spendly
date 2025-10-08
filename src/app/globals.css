@@ -124,7 +124,7 @@
     /* Base surfaces */
     --background: 0 0% 6%;         /* light-black for grayish backgrounds */
     --foreground: 0 0% 95%;        /* near white text */
-    --card: 0 0% 0%;               /* pure black for radically white surfaces in light theme */
+    --card: 0 0% 3%;               /* pure black for radically white surfaces in light theme */
     --card-foreground: 0 0% 95%;
     --popover: 0 0% 0%;            /* pure black */
     --popover-foreground: 0 0% 95%;
@@ -242,6 +242,123 @@
     --notification-800: 25 85% 78%;
     --notification-900: 25 80% 86%;
   }
+}
+
+/* Auth-only: принудительно светлая тема через локальный контейнер */
+.auth-light {
+  color-scheme: light;
+
+  /* Base tokens (light) */
+  --background: 0 0% 98%;
+  --foreground: 0 0% 7%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 7%;
+  --primary: 227 73% 54%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 226 81% 98%;
+  --secondary-foreground: 0 0% 7%;
+  --muted: 226 81% 98%;
+  --muted-foreground: 0 0% 67%;
+  --accent: 226 81% 98%;
+  --accent-foreground: 0 0% 7%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 96%;
+  --input: 0 0% 96%;
+  --ring: 227 73% 54%;
+  --radius: 0.5rem;
+
+  /* Domain tokens */
+  --error: 357 100% 65%;
+  --error-foreground: 0 0% 100%;
+  --success: 158 100% 31%;
+  --success-foreground: 0 0% 100%;
+  --expense: 357 100% 65%;
+  --expense-foreground: 0 0% 100%;
+  --income: 158 100% 31%;
+  --income-foreground: 0 0% 100%;
+  --notification: 25 100% 55%;
+  --notification-foreground: 0 0% 100%;
+
+  /* Scales (light) */
+  --primary-50: 227 100% 97%;
+  --primary-100: 227 95% 90%;
+  --primary-200: 227 90% 80%;
+  --primary-300: 227 85% 70%;
+  --primary-400: 227 80% 60%;
+  --primary-500: 227 75% 58%;
+  --primary-600: 227 73% 54%;
+  --primary-700: 227 65% 46%;
+  --primary-800: 227 60% 38%;
+  --primary-900: 227 55% 30%;
+
+  --neutral-50: 0 0% 98%;
+  --neutral-100: 0 0% 96%;
+  --neutral-200: 0 0% 92%;
+  --neutral-300: 0 0% 88%;
+  --neutral-400: 0 0% 70%;
+  --neutral-500: 0 0% 60%;
+  --neutral-600: 0 0% 48%;
+  --neutral-700: 0 0% 36%;
+  --neutral-800: 0 0% 22%;
+  --neutral-900: 0 0% 10%;
+
+  --success-50: 158 100% 95%;
+  --success-100: 158 100% 88%;
+  --success-200: 158 100% 72%;
+  --success-300: 158 95% 52%;
+  --success-400: 158 95% 42%;
+  --success-500: 158 95% 36%;
+  --success-600: 158 100% 31%;
+  --success-700: 158 100% 26%;
+  --success-800: 158 100% 20%;
+  --success-900: 158 100% 15%;
+
+  --error-50: 357 100% 95%;
+  --error-100: 357 100% 90%;
+  --error-200: 357 100% 80%;
+  --error-300: 357 95% 70%;
+  --error-400: 357 95% 60%;
+  --error-500: 357 100% 65%;
+  --error-600: 357 95% 55%;
+  --error-700: 357 90% 45%;
+  --error-800: 357 85% 35%;
+  --error-900: 357 80% 25%;
+
+  --income-50: var(--success-50);
+  --income-100: var(--success-100);
+  --income-200: var(--success-200);
+  --income-300: var(--success-300);
+  --income-400: var(--success-400);
+  --income-500: var(--success-500);
+  --income-600: var(--success-600);
+  --income-700: var(--success-700);
+  --income-800: var(--success-800);
+  --income-900: var(--success-900);
+
+  --expense-50: var(--error-50);
+  --expense-100: var(--error-100);
+  --expense-200: var(--error-200);
+  --expense-300: var(--error-300);
+  --expense-400: var(--error-400);
+  --expense-500: var(--error-500);
+  --expense-600: var(--error-600);
+  --expense-700: var(--error-700);
+  --expense-800: var(--error-800);
+  --expense-900: var(--error-900);
+
+  --notification-50: 25 100% 95%;
+  --notification-100: 25 100% 90%;
+  --notification-200: 25 100% 80%;
+  --notification-300: 25 95% 68%;
+  --notification-400: 25 95% 62%;
+  --notification-500: 25 100% 55%;
+  --notification-600: 25 95% 48%;
+  --notification-700: 25 90% 40%;
+  --notification-800: 25 85% 32%;
+  --notification-900: 25 80% 25%;
 }
 
 @layer base {

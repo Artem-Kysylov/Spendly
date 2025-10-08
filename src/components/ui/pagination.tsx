@@ -19,8 +19,8 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
           className={cn(
             "px-3 py-2 rounded border text-sm transition-colors",
             currentPage === 1
-              ? "bg-neutral-200 text-neutral-400 cursor-not-allowed"
-              : "bg-background hover:bg-neutral-100 text-white"
+              ? "bg-neutral-200 text-neutral-400 cursor-not-allowed border-gray-300"
+              : "bg-background hover:bg-neutral-100 text-black dark:text-white border-gray-400 dark:border-border"
           )}
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
@@ -36,7 +36,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
                   "min-w-[36px] px-3 py-2 rounded border text-sm transition-colors",
                   page === currentPage
                     ? "bg-primary text-primary-foreground border-primary"
-                    : "bg-background hover:bg-neutral-100 text-white"
+                    : "bg-background hover:bg-neutral-100 text-black dark:text-white border-gray-400 dark:border-border"
                 )}
                 onClick={() => onPageChange(page)}
                 aria-current={page === currentPage ? "page" : undefined}
@@ -51,8 +51,8 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
           className={cn(
             "px-3 py-2 rounded border text-sm transition-colors",
             currentPage === totalPages
-              ? "bg-neutral-200 text-neutral-400 cursor-not-allowed"
-              : "bg-background hover:bg-neutral-100 text-white"
+              ? "bg-neutral-200 text-neutral-400 cursor-not-allowed border-gray-300"
+              : "bg-background hover:bg-neutral-100 text-black dark:text-white border-gray-400 dark:border-border"
           )}
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}

@@ -109,7 +109,7 @@ export default function AuthPage() {
 
     return (
         <div
-            className="min-h-screen bg-cover bg-center"
+            className="auth-light min-h-screen bg-cover bg-center"
             style={{ backgroundImage: "url('/Sign up screen-bg.png')" }}
         >
             <div className="container mx-auto flex min-h-screen items-center justify-center p-4">

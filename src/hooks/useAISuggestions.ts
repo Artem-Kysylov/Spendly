@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { UserAuth } from '@/context/AuthContext'
+import { useState, useCallback, useContext } from 'react'
+import { AuthContext } from '@/context/AuthContext'
 
 export function useAISuggestions() {
-  const { session } = UserAuth()
+  const authContext = useContext(AuthContext)
+  const session = authContext?.session || null
   const [text, setText] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
