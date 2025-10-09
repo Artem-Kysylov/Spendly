@@ -6,19 +6,38 @@ import { Copy, Check, Database, AlertCircle } from 'lucide-react'
 const DatabaseSetupInstructions = () => {
     const [copied, setCopied] = useState(false)
 
-    const sqlScript = `-- Создание таблицы для настроек уведомлений
+    const sqlScript = `-- Создание типа для частоты уведомлений (если не существует)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_frequency') THEN
+    CREATE TYPE notification_frequency AS ENUM ('disabled', 'gentle', 'aggressive', 'relentless');
+  END IF;
+END
+$$ LANGUAGE 'plpgsql';
+
+-- Таблица настроек уведомлений (ваша: notification_preferences)
 CREATE TABLE IF NOT EXISTS notification_preferences (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    frequency TEXT NOT NULL DEFAULT 'gentle' CHECK (frequency IN ('disabled', 'gentle', 'aggressive', 'relentless')),
+    engagement_frequency notification_frequency NOT NULL DEFAULT 'gentle',
     push_enabled BOOLEAN NOT NULL DEFAULT false,
     email_enabled BOOLEAN NOT NULL DEFAULT true,
-    created_at TIMESTAMP WITH TIME ZОНЕ DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZОНЕ DEFAULT NOW(),
+    quiet_hours_enabled BOOLEAN NOT NULL DEFAULT false,
+    quiet_hours_start TIME NULL,
+    quiet_hours_end TIME NULL,
+    quiet_hours_timezone TEXT NULL,
+    budget_overrun_push BOOLEAN NOT NULL DEFAULT false,
+    budget_overrun_email BOOLEAN NOT NULL DEFAULT false,
+    budget_warning_push BOOLEAN NOT NULL DEFAULT false,
+    budget_warning_email BOOLEAN NOT NULL DEFAULT false,
+    ai_insights_push BOOLEAN NOT NULL DEFAULT false,
+    ai_insights_email BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
     UNIQUE(user_id)
 );
 
--- Создание таблицы для уведомлений
+-- Таблица уведомлений (как раньше)
 CREATE TABLE IF NOT EXISTS notifications (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -26,63 +45,52 @@ CREATE TABLE IF NOT EXISTS notifications (
     message TEXT NOT NULL,
     type TEXT NOT NULL DEFAULT 'general' CHECK (type IN ('budget_alert', 'weekly_reminder', 'expense_warning', 'goal_achieved', 'general')),
     is_read BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZОНЕ DEFAULT NOW(),
-    updated_at TIMESTAMP WITH TIME ZОНЕ DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Создание индексов для оптимизации запросов
+-- Индексы
 CREATE INDEX IF NOT EXISTS idx_notification_preferences_user_id ON notification_preferences(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id_created_at ON notifications(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id_is_read ON notifications(user_id, is_read);
 
--- Создание функции для автоматического обновления updated_at
+-- Триггер на обновление updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
-$$ language 'plpgsql';
+$$ LANGUAGE 'plpgsql';
 
--- Создание триггеров для автоматического обновления updated_at
-CREATE TRIGGER update_notification_preferences_updated_at 
-    BEFORE UPDATE ON notification_preferences 
+CREATE TRIGGER update_notification_preferences_updated_at
+    BEFORE UPDATE ON notification_preferences
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_notifications_updated_at 
-    BEFORE UPDATE ON notifications 
+CREATE TRIGGER update_notifications_updated_at
+    BEFORE UPDATE ON notifications
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
--- Включение Row Level Security (RLS)
+-- RLS
 ALTER TABLE notification_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 
--- Создание политик безопасности для notification_preferences
-CREATE POLICY "Users can view their own notification settings" ON notification_preferences
+CREATE POLICY "Users can view their own notification preferences" ON notification_preferences
     FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert their own notification settings" ON notification_preferences
+CREATE POLICY "Users can insert their own notification preferences" ON notification_preferences
     FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update their own notification settings" ON notification_preferences
+CREATE POLICY "Users can update their own notification preferences" ON notification_preferences
     FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete their own notification settings" ON notification_preferences
+CREATE POLICY "Users can delete their own notification preferences" ON notification_preferences
     FOR DELETE USING (auth.uid() = user_id);
 
--- Создание политик безопасности для notifications
 CREATE POLICY "Users can view their own notifications" ON notifications
     FOR SELECT USING (auth.uid() = user_id);
-
 CREATE POLICY "Users can update their own notifications" ON notifications
     FOR UPDATE USING (auth.uid() = user_id);
 
--- Политики для вставки уведомлений (обычно делается системой)
-CREATE POLICY "System can insert notifications" ON notifications
-    FOR INSERT WITH CHECK (true);
-
--- Создание функции для создания тестовых уведомлений
+-- Вставка тестовых уведомлений
 CREATE OR REPLACE FUNCTION create_sample_notifications(target_user_id UUID)
 RETURNS void AS $$
 BEGIN
@@ -92,7 +100,7 @@ BEGIN
     (target_user_id, 'Крупная трата', 'Обнаружена трата в размере $250. Проверьте детали транзакции', 'expense_warning', true),
     (target_user_id, 'Цель достигнута!', 'Поздравляем! Вы достигли цели по экономии на этот месяц', 'goal_achieved', true);
 END;
-$$ language 'plpgsql';`
+$$ LANGUAGE 'plpgsql';`
 
     const copyToClipboard = async () => {
         try {

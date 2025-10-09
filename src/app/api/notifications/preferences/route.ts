@@ -36,39 +36,59 @@ export async function GET(req: NextRequest) {
 
     const { data, error } = await supabase
       .from('notification_preferences')
-      .select('*')
+      .select('id, user_id, engagement_frequency, push_enabled, email_enabled, created_at, updated_at')
       .eq('user_id', user.id)
       .single()
 
     if (error && error.code !== 'PGRST116') {
-      console.error('Error fetching notification settings:', error)
+      console.error('Error fetching notification preferences:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    // Если настройки не найдены, создаем дефолтные
+    const validFrequencies = ['disabled', 'gentle', 'aggressive', 'relentless'] as const
+
+    const mapRowToSettings = (row: any) => {
+      const dbFreq = row.engagement_frequency
+      const bothOff = row.push_enabled === false && row.email_enabled === false
+      const normalizedFreq =
+        bothOff ? 'disabled' :
+        (validFrequencies.includes(dbFreq) ? dbFreq : 'gentle')
+
+      return {
+        id: row.id,
+        user_id: row.user_id,
+        frequency: normalizedFreq,
+        push_enabled: row.push_enabled ?? false,
+        email_enabled: row.email_enabled ?? true,
+        created_at: row.created_at ?? new Date().toISOString(),
+        updated_at: row.updated_at ?? row.created_at ?? new Date().toISOString(),
+      }
+    }
+
+    // Если настроек нет — создаем дефолтные
     if (!data) {
-      const defaultSettings = {
+      const defaultRecord = {
         user_id: user.id,
-        frequency: 'gentle' as const,
+        engagement_frequency: 'gentle' as const,
         push_enabled: false,
-        email_enabled: true
+        email_enabled: true,
       }
 
-      const { data: newSettings, error: createError } = await supabase
+      const { data: newRow, error: createError } = await supabase
         .from('notification_preferences')
-        .insert(defaultSettings)
-        .select()
+        .insert(defaultRecord)
+        .select('id, user_id, engagement_frequency, push_enabled, email_enabled, created_at, updated_at')
         .single()
 
       if (createError) {
-        console.error('Error creating default settings:', createError)
+        console.error('Error creating default preferences:', createError)
         return NextResponse.json({ error: createError.message }, { status: 500 })
       }
 
-      return NextResponse.json({ settings: newSettings })
+      return NextResponse.json({ settings: mapRowToSettings(newRow) })
     }
 
-    return NextResponse.json({ settings: data })
+    return NextResponse.json({ settings: mapRowToSettings(data) })
   } catch (error) {
     console.error('API Error:', error)
     return NextResponse.json(
@@ -84,41 +104,75 @@ export async function PUT(req: NextRequest) {
     const { supabase, user } = await getAuthenticatedClient(req)
     const body = await req.json()
 
-    const {
-      frequency,
-      push_enabled,
-      email_enabled
-    } = body
+    const { frequency, push_enabled, email_enabled } = body
 
     // Валидация
     const validFrequencies = ['disabled', 'gentle', 'aggressive', 'relentless']
     if (frequency && !validFrequencies.includes(frequency)) {
-      return NextResponse.json(
-        { error: 'Invalid frequency value' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid frequency value' }, { status: 400 })
     }
 
     const updateData: any = {}
-    if (frequency !== undefined) updateData.frequency = frequency
+    if (frequency !== undefined) updateData.engagement_frequency = frequency
     if (push_enabled !== undefined) updateData.push_enabled = push_enabled
     if (email_enabled !== undefined) updateData.email_enabled = email_enabled
 
-    updateData.updated_at = new Date().toISOString()
+    // Не трогаем updated_at напрямую — пусть триггер/БД обновляют, если настроено
 
     const { data, error } = await supabase
       .from('notification_preferences')
       .update(updateData)
       .eq('user_id', user.id)
-      .select()
+      .select('id, user_id, engagement_frequency, push_enabled, email_enabled, created_at, updated_at')
       .single()
 
     if (error) {
-      console.error('Error updating notification settings:', error)
+      const isDisabledRequested = frequency === 'disabled'
+      const enumError =
+        (error.message && error.message.toLowerCase().includes('enum')) ||
+        (error.details && error.details.toLowerCase().includes('enum'))
+
+      if (isDisabledRequested && enumError) {
+        // Фолбэк: выключаем каналы, оставляем текущую частоту в БД
+        const { data: fbData, error: fbErr } = await supabase
+          .from('notification_preferences')
+          .update({ push_enabled: false, email_enabled: false })
+          .eq('user_id', user.id)
+          .select('id, user_id, engagement_frequency, push_enabled, email_enabled, created_at, updated_at')
+          .single()
+
+        if (fbErr) {
+          console.error('Fallback update error:', fbErr)
+          return NextResponse.json({ error: fbErr.message }, { status: 500 })
+        }
+
+        const updated = {
+          id: fbData.id,
+          user_id: fbData.user_id,
+          frequency: 'disabled' as const,
+          push_enabled: fbData.push_enabled,
+          email_enabled: fbData.email_enabled,
+          created_at: fbData.created_at,
+          updated_at: fbData.updated_at,
+        }
+        return NextResponse.json({ settings: updated })
+      }
+
+      console.error('Error updating notification preferences:', error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ settings: data })
+    const updated = {
+      id: data.id,
+      user_id: data.user_id,
+      frequency: data.engagement_frequency,
+      push_enabled: data.push_enabled,
+      email_enabled: data.email_enabled,
+      created_at: data.created_at,
+      updated_at: data.updated_at,
+    }
+
+    return NextResponse.json({ settings: updated })
   } catch (error) {
     console.error('API Error:', error)
     return NextResponse.json(

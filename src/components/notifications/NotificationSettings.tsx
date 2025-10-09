@@ -11,7 +11,8 @@ import type { NotificationFrequency, NotificationFrequencyOption } from '@/types
 const NotificationSettings = () => {
     const { session, isReady } = UserAuth()
     const { settings, isLoading, error, updateSettings, subscribeToPush, unsubscribeFromPush } = useNotificationSettings()
-    const [isUpdating, setIsUpdating] = useState(false)
+    const [isUpdatingPush, setIsUpdatingPush] = useState(false)
+    const [isUpdatingFrequency, setIsUpdatingFrequency] = useState(false)
 
     const frequencyOptions: NotificationFrequencyOption[] = [
         {
@@ -41,36 +42,32 @@ const NotificationSettings = () => {
     ]
 
     const handleFrequencyChange = async (frequency: NotificationFrequency) => {
-        if (!settings || isUpdating) return
+        if (!settings || isUpdatingFrequency) return
 
         try {
-            setIsUpdating(true)
-            await updateSettings({ frequency })
+            setIsUpdatingFrequency(true)
+            // Включаем текущий push_enabled, чтобы сервер не перетирал его из БД
+            await updateSettings({ frequency, push_enabled: settings.push_enabled })
         } catch (err) {
             console.error('Failed to update frequency:', err)
         } finally {
-            setIsUpdating(false)
+            setIsUpdatingFrequency(false)
         }
     }
 
     const handlePushToggle = async (enabled: boolean) => {
-        if (!settings || isUpdating) return
+        if (!settings || isUpdatingPush) return
 
         try {
-            setIsUpdating(true)
-            if (enabled) {
-                const success = await subscribeToPush()
-                if (!success) {
-                    // Handle subscription failure
-                    console.error('Failed to subscribe to push notifications')
-                }
-            } else {
-                await unsubscribeFromPush()
+            setIsUpdatingPush(true)
+            const success = enabled ? await subscribeToPush() : await unsubscribeFromPush()
+            if (!success) {
+                console.error('Failed to toggle push notifications')
             }
         } catch (err) {
             console.error('Failed to toggle push notifications:', err)
         } finally {
-            setIsUpdating(false)
+            setIsUpdatingPush(false)
         }
     }
 
@@ -162,12 +159,29 @@ const NotificationSettings = () => {
                     <h3 className="font-medium text-secondary-black">Push Notifications</h3>
                     <p className="text-sm text-gray-600">Receive notifications on this device</p>
                 </div>
-                <Switch
-                    checked={settings.push_enabled}
-                    onCheckedChange={handlePushToggle}
-                    disabled={isUpdating}
-                    className="data-[state=checked]:bg-primary"
-                />
+                <div className="relative">
+                    <Switch
+                        checked={settings.push_enabled}
+                        onCheckedChange={handlePushToggle}
+                        disabled={isUpdatingPush}
+                        aria-label="Toggle push notifications"
+                        className="
+                            peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full 
+                            border border-primary bg-background transition-colors px-0.5
+                            data-[state=checked]:bg-background data-[state=unchecked]:bg-background
+                            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+                            disabled:cursor-not-allowed disabled:opacity-50
+                        "
+                        thumbClassName="hidden"
+                    />
+                    {/* Overlay-«шарик» с симметричными отступами как в ThemeSwitcher */}
+                    <div
+                        className={`
+                            pointer-events-none absolute top-0.5 left-0.5 size-5 rounded-full shadow transition-transform duration-200
+                            ${settings.push_enabled ? 'bg-primary translate-x-5' : 'bg-gray-300 dark:bg-neutral-500 translate-x-0'}
+                        `}
+                    />
+                </div>
             </div>
 
             {/* Frequency Settings */}
@@ -179,12 +193,12 @@ const NotificationSettings = () => {
                             key={option.value}
                             onClick={() => handleFrequencyChange(option.value)}
                             className={`
-                                p-4 rounded-lg border-2 cursor-pointer transition-all duration-200
+                                p-4 rounded-lg border-2 transition-all duration-200
                                 ${settings.frequency === option.value
                                     ? 'border-primary bg-primary/5'
                                     : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                                 }
-                                ${isUpdating ? 'opacity-50 cursor-not-allowed' : ''}
+                                ${isUpdatingFrequency ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
                             `}
                         >
                             <div className="flex items-center gap-3">
@@ -200,7 +214,11 @@ const NotificationSettings = () => {
                                 {settings.frequency === option.value && (
                                     <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center">
                                         <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                            <path
+                                                fillRule="evenodd"
+                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                clipRule="evenodd"
+                                            />
                                         </svg>
                                     </div>
                                 )}

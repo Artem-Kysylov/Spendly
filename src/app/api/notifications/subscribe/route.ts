@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: subscriptionError.message }, { status: 500 })
     }
 
-    // Обновляем настройки пользователя
+    // Обновляем настройки пользователя (таблица notification_preferences)
     const { error: settingsError } = await supabase
       .from('notification_preferences')
       .update({ push_enabled: true })
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 
     if (settingsError) {
       console.error('Error updating push settings:', settingsError)
-      // Не возвращаем ошибку, так как подписка уже сохранена
+      // Подписка сохранена, так что ошибку не пробрасываем
     }
 
     return NextResponse.json({ success: true })
@@ -114,7 +114,7 @@ export async function DELETE(req: NextRequest) {
       }
     }
 
-    // Обновляем настройки пользователя
+    // Обновляем настройки пользователя (таблица notification_preferences)
     const { error: settingsError } = await supabase
       .from('notification_preferences')
       .update({ push_enabled: false })
@@ -122,7 +122,6 @@ export async function DELETE(req: NextRequest) {
 
     if (settingsError) {
       console.error('Error updating push settings:', settingsError)
-      // Не возвращаем ошибку, так как подписка уже удалена
     }
 
     return NextResponse.json({ success: true })

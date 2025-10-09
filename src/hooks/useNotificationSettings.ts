@@ -67,11 +67,15 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
     const updateSettings = useCallback(async (updates: Partial<NotificationSettings>) => {
         if (!session?.user?.id || !settings) return
 
+        const prev = settings
         try {
             const token = await getAuthToken()
             if (!token) {
                 throw new Error('No auth token available')
             }
+
+            // Оптимистично обновляем UI
+            setSettings({ ...prev, ...updates })
 
             const response = await fetch('/api/notifications/preferences', {
                 method: 'PUT',
@@ -84,11 +88,12 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
 
             if (!response.ok) {
                 const errorData = await response.json()
+                // Откат при ошибке
+                setSettings(prev)
                 throw new Error(errorData.error || 'Failed to update settings')
             }
 
             const { settings: updatedSettings } = await response.json()
-            console.log('Settings updated via API:', updatedSettings)
             setSettings(updatedSettings)
         } catch (err) {
             console.error('Error updating notification settings:', err)
@@ -97,8 +102,16 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
     }, [session?.user?.id, settings, getAuthToken])
 
     const subscribeToPush = useCallback(async (): Promise<boolean> => {
+        // Optimistic on
+        const prev = settings
+        if (settings) {
+            setSettings({ ...settings, push_enabled: true })
+        }
+
+        // Проверка поддержки
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
             console.warn('Push notifications not supported')
+            if (prev) setSettings(prev)
             return false
         }
 
@@ -106,6 +119,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
             const permission = await Notification.requestPermission()
             if (permission !== 'granted') {
                 console.warn('Push notification permission denied')
+                if (prev) setSettings(prev)
                 return false
             }
 
@@ -117,10 +131,10 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
 
             const token = await getAuthToken()
             if (!token) {
+                if (prev) setSettings(prev)
                 throw new Error('No auth token available')
             }
 
-            // Отправляем подписку на сервер через API
             const response = await fetch('/api/notifications/subscribe', {
                 method: 'POST',
                 headers: {
@@ -132,24 +146,26 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
 
             if (!response.ok) {
                 const errorData = await response.json()
+                if (prev) setSettings(prev)
                 throw new Error(errorData.error || 'Failed to save push subscription')
             }
 
             console.log('Push subscription saved successfully')
-            
-            // Обновляем локальные настройки
-            if (settings) {
-                setSettings({ ...settings, push_enabled: true })
-            }
-            
             return true
         } catch (err) {
             console.error('Error subscribing to push notifications:', err)
+            if (prev) setSettings(prev)
             return false
         }
     }, [getAuthToken, settings])
 
     const unsubscribeFromPush = useCallback(async (): Promise<boolean> => {
+        // Optimistic off
+        const prev = settings
+        if (settings) {
+            setSettings({ ...settings, push_enabled: false })
+        }
+
         try {
             const registration = await navigator.serviceWorker.ready
             const subscription = await registration.pushManager.getSubscription()
@@ -159,10 +175,10 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
                 
                 const token = await getAuthToken()
                 if (!token) {
+                    if (prev) setSettings(prev)
                     throw new Error('No auth token available')
                 }
 
-                // Удаляем подписку с сервера через API
                 const response = await fetch('/api/notifications/subscribe', {
                     method: 'DELETE',
                     headers: {
@@ -174,20 +190,17 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
 
                 if (!response.ok) {
                     const errorData = await response.json()
+                    if (prev) setSettings(prev)
                     throw new Error(errorData.error || 'Failed to remove push subscription')
                 }
 
                 console.log('Push subscription removed successfully')
             }
 
-            // Обновляем локальные настройки
-            if (settings) {
-                setSettings({ ...settings, push_enabled: false })
-            }
-            
             return true
         } catch (err) {
             console.error('Error unsubscribing from push notifications:', err)
+            if (prev) setSettings(prev)
             return false
         }
     }, [getAuthToken, settings])
