@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Switch } from '@/components/ui/switch'
 import { useNotificationSettings } from '@/hooks/useNotificationSettings'
 import { UserAuth } from '@/context/AuthContext'
@@ -11,8 +11,8 @@ import type { NotificationFrequency, NotificationFrequencyOption } from '@/types
 const NotificationSettings = () => {
     const { session, isReady } = UserAuth()
     const { settings, isLoading, error, updateSettings, subscribeToPush, unsubscribeFromPush } = useNotificationSettings()
-    const [isUpdatingPush, setIsUpdatingPush] = useState(false)
     const [isUpdatingFrequency, setIsUpdatingFrequency] = useState(false)
+    const [isUpdatingPush, setIsUpdatingPush] = useState(false)
 
     const frequencyOptions: NotificationFrequencyOption[] = [
         {
@@ -55,18 +55,40 @@ const NotificationSettings = () => {
         }
     }
 
+    // Автоматический сброс состояния загрузки через 15 секунд
+    useEffect(() => {
+        if (isUpdatingPush) {
+            const timeout = setTimeout(() => {
+                console.warn('Force resetting isUpdatingPush state due to timeout')
+                setIsUpdatingPush(false)
+            }, 15000)
+            
+            return () => clearTimeout(timeout)
+        }
+    }, [isUpdatingPush])
+
     const handlePushToggle = async (enabled: boolean) => {
         if (!settings || isUpdatingPush) return
 
         try {
             setIsUpdatingPush(true)
-            const success = enabled ? await subscribeToPush() : await unsubscribeFromPush()
+            
+            // Добавляем таймаут для защиты от залипания
+            const timeoutPromise = new Promise<boolean>((_, reject) => {
+                setTimeout(() => reject(new Error('Operation timeout')), 10000) // 10 секунд
+            })
+            
+            const operationPromise = enabled ? subscribeToPush() : unsubscribeFromPush()
+            
+            const success = await Promise.race([operationPromise, timeoutPromise])
+            
             if (!success) {
                 console.error('Failed to toggle push notifications')
             }
         } catch (err) {
             console.error('Failed to toggle push notifications:', err)
         } finally {
+            // Принудительно сбрасываем состояние загрузки
             setIsUpdatingPush(false)
         }
     }

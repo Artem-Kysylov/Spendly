@@ -1,29 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Получение клиента с аутентификацией пользователя
+// Функция для получения аутентифицированного клиента
 async function getAuthenticatedClient(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
-  if (!authHeader?.startsWith('Bearer ')) {
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new Error('Missing or invalid authorization header')
   }
 
-  const token = authHeader.substring(7)
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  const token = authHeader.split(' ')[1]
+  
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-  })
-
-  // Проверяем аутентификацию
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const { data: { user }, error } = await supabase.auth.getUser(token)
+  
   if (error || !user) {
-    throw new Error('User not authenticated')
+    throw new Error('Invalid or expired token')
   }
 
   return { supabase, user }
@@ -44,15 +39,16 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Сохраняем подписку в базе данных
+    // Сохраняем подписку в базе данных (обновленное название таблицы)
     const { error: subscriptionError } = await supabase
-      .from('push_subscriptions')
+      .from('notification_subscriptions')
       .upsert({
         user_id: user.id,
         endpoint: subscription.endpoint,
-        p256dh: subscription.keys?.p256dh,
-        auth: subscription.keys?.auth,
-        user_agent: req.headers.get('user-agent') || 'Unknown'
+        p256dh_key: subscription.keys?.p256dh,
+        auth_key: subscription.keys?.auth,
+        user_agent: req.headers.get('user-agent') || 'Unknown',
+        is_active: true
       })
 
     if (subscriptionError) {
@@ -68,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     if (settingsError) {
       console.error('Error updating push settings:', settingsError)
-      // Подписка сохранена, так что ошибку не пробрасываем
+      // Не возвращаем ошибку, так как подписка уже сохранена
     }
 
     return NextResponse.json({ success: true })
@@ -90,26 +86,26 @@ export async function DELETE(req: NextRequest) {
     const { endpoint } = body
 
     if (endpoint) {
-      // Удаляем конкретную подписку
+      // Деактивируем конкретную подписку
       const { error } = await supabase
-        .from('push_subscriptions')
-        .delete()
+        .from('notification_subscriptions')
+        .update({ is_active: false })
         .eq('user_id', user.id)
         .eq('endpoint', endpoint)
 
       if (error) {
-        console.error('Error removing push subscription:', error)
+        console.error('Error deactivating push subscription:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
       }
     } else {
-      // Удаляем все подписки пользователя
+      // Деактивируем все подписки пользователя
       const { error } = await supabase
-        .from('push_subscriptions')
-        .delete()
+        .from('notification_subscriptions')
+        .update({ is_active: false })
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('Error removing all push subscriptions:', error)
+        console.error('Error deactivating all push subscriptions:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
       }
     }

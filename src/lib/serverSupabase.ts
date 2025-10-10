@@ -12,3 +12,4 @@ export const getServerSupabaseClient = () => {
     auth: { persistSession: false, autoRefreshToken: false },
   })
 }
+
