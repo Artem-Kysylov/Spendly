@@ -69,13 +69,14 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
 
         const prev = settings
         try {
+            // Оптимистичное обновление UI
+            setSettings({ ...prev, ...updates })
+
             const token = await getAuthToken()
             if (!token) {
+                setSettings(prev)
                 throw new Error('No auth token available')
             }
-
-            // Оптимистично обновляем UI
-            setSettings({ ...prev, ...updates })
 
             const response = await fetch('/api/notifications/preferences', {
                 method: 'PUT',
@@ -83,18 +84,21 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(updates)
+                body: JSON.stringify({
+                    frequency: updates.frequency ?? prev.frequency,
+                    push_enabled: updates.push_enabled ?? prev.push_enabled,
+                    email_enabled: updates.email_enabled ?? prev.email_enabled
+                })
             })
 
             if (!response.ok) {
-                const errorData = await response.json()
-                // Откат при ошибке
+                const errorData = await response.json().catch(() => ({}))
                 setSettings(prev)
                 throw new Error(errorData.error || 'Failed to update settings')
             }
 
-            const { settings: updatedSettings } = await response.json()
-            setSettings(updatedSettings)
+            const { settings: updated } = await response.json()
+            setSettings(updated as NotificationSettings)
         } catch (err) {
             console.error('Error updating notification settings:', err)
             throw err

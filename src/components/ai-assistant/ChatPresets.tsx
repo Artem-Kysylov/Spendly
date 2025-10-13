@@ -42,13 +42,13 @@ const presets: ChatPreset[] = [
 export const ChatPresets = ({ onSelectPreset }: ChatPresetsProps) => {
     return (
         <div className="space-y-2">
-            <p className="text-xs font-medium text-white mb-3 sticky top-0 bg-black py-1">Quick questions:</p>
+            <p className="text-xs font-medium text-secondary-black dark:text-white mb-3 sticky top-0 bg-white dark:bg-black py-1">Quick questions:</p>
             <div className="grid grid-cols-1 gap-2">
                 {presets.map((preset) => (
                     <button
                         key={preset.id}
                         onClick={() => onSelectPreset(preset.prompt)}
-                        className="w-full text-left px-3 py-2.5 text-xs bg-gray-800 hover:bg-gray-700 text-white rounded-full transition-all duration-200 border border-gray-700 touch-manipulation"
+                        className="w-full text-left px-3 py-2.5 text-xs bg-primary/10 hover:bg-primary/40 text-primary rounded-full transition-all duration-200 border border-primary touch-manipulation"
                     >
                         {preset.title}
                     </button>

@@ -1,28 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-
-// Функция для получения аутентифицированного клиента
-async function getAuthenticatedClient(req: NextRequest) {
-  const authHeader = req.headers.get('authorization')
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new Error('Missing or invalid authorization header')
-  }
-
-  const token = authHeader.split(' ')[1]
-  
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-
-  const { data: { user }, error } = await supabase.auth.getUser(token)
-  
-  if (error || !user) {
-    throw new Error('Invalid or expired token')
-  }
-
-  return { supabase, user }
-}
+import { getAuthenticatedClient } from '@/lib/serverSupabase'
 
 // POST /api/notifications/subscribe - подписка на push-уведомления
 export async function POST(req: NextRequest) {

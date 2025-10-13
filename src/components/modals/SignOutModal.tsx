@@ -16,14 +16,14 @@ const SignOutModal = ({ title, text, onClose, signOut }: SignOutModalProps) => {
 
   return (
     <Dialog open={true} onOpenChange={(o) => { if (!o) onClose() }}>
-      <DialogContent>
+      <DialogContent className="bg-white dark:bg-card border border-gray-200 dark:border-border">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
+          <DialogTitle className="text-secondary-black dark:text-white">{title}</DialogTitle>
         </DialogHeader>
-        <p className="py-4">{text}</p>
+        <p className="py-4 text-secondary-black dark:text-gray-300">{text}</p>
         <DialogFooter>
           <div className="flex gap-2">
-            <Button text='Cancel' variant="ghost" onClick={onClose}/>
+            <Button text='Cancel' variant="ghost" onClick={onClose} className="text-primary" />
             <Button text='Sign Out' variant="default" onClick={handleSignOut}/>
           </div>
         </DialogFooter>

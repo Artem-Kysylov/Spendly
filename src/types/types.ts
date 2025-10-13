@@ -96,15 +96,17 @@ export interface MainBudgetModalProps {
 }
 
 export interface TextInputProps {
-    type: 'text' | 'number',
-    placeholder: string,
+    type: 'text' | 'number' | 'password',
+    placeholder?: string,
     value: string,
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
+    onChange: (value: string) => void | ((e: React.ChangeEvent<HTMLInputElement>) => void),
     onInput?: (e: React.ChangeEvent<HTMLInputElement>) => void,
     disabled?: boolean,
     min?: string,
     step?: string,
-    className?: string, // allow custom styles (e.g., bg-muted for modal)
+    className?: string,
+    label?: string,
+    error?: string,
 }
 
 export interface RadioButtonProps {

@@ -32,10 +32,16 @@ export const AuthContextProvider = ({ children }: {children:React.ReactNode}) =>
     
         const {
           data: { subscription },
-        }: { data: { subscription: Subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-          setSession(session);
-          // Apply theme from user metadata when session changes
-          applyUserThemePreference(session)
+        }: { data: { subscription: Subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+          // Обновляем session только для значимых auth-событий
+          if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+            setSession(session)
+          }
+
+          // Применение темы при входе и обновлении токена (метаданные уже применяются локально)
+          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            applyUserThemePreference(session)
+          }
         })
     
         return () => {
