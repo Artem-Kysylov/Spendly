@@ -28,8 +28,8 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
     setSelectedDate(new Date())
   }
 
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.target.value = e.target.value.replace(/[^A-Za-z\s]/g, '')
+  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
+    e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-z\s]/g, '')
   }
 
   // Handle date selection
@@ -94,7 +94,7 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
               side="bottom"
               sideOffset={4}
             >
-              <div className="p-4 bg-white rounded-lg shadow-lg border border-gray-200">
+              <div className="p-4 bg-popover rounded-lg shadow-lg border border-border">
                 {/* Кастомная навигация */}
                 <div className="flex justify-between items-center mb-4">
                   <button

@@ -11,6 +11,8 @@ import { Eye, EyeOff } from 'lucide-react'
 import Image from 'next/image'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import Link from 'next/link'
+import AvatarUpload from '@/components/ui-elements/AvatarUpload'
+import { supabase } from '@/lib/supabaseClient'
 
 export default function AuthPage() {
     const { 
@@ -36,7 +38,44 @@ export default function AuthPage() {
     const [toast, setToast] = useState<{ text: string, type: 'success' | 'error' } | null>(null)
     const [rememberMe, setRememberMe] = useState(false)
     const [showPwd, setShowPwd] = useState(false)
+    const [signupAvatarBlob, setSignupAvatarBlob] = useState<Blob | null>(null)
+    const [signupAvatarPreview, setSignupAvatarPreview] = useState<string | null>(null)
+    const [signupUploadedAvatarUrl, setSignupUploadedAvatarUrl] = useState<string | null>(null)
 
+    // Генерация динамической “инициал‑аватарки”: круг 256×256, бренд‑цвет, буква
+    const generateInitialAvatar = async (seedText: string): Promise<Blob> => {
+        const canvas = document.createElement('canvas')
+        canvas.width = 256
+        canvas.height = 256
+        const ctx = canvas.getContext('2d')
+        if (!ctx) throw new Error('Canvas not supported')
+
+        const isDark = document.documentElement.classList.contains('dark')
+        const brandColor = isDark ? '#818CF8' : '#4F46E5' // indigo-400 для dark, indigo-600 для light
+        const letter = (seedText?.trim()?.charAt(0) || 'S').toUpperCase()
+
+        // Фон-круг
+        ctx.fillStyle = brandColor
+        ctx.beginPath()
+        ctx.arc(128, 128, 128, 0, Math.PI * 2)
+        ctx.fill()
+
+        // Буква
+        ctx.fillStyle = '#FFFFFF'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.font = 'bold 120px system-ui, -apple-system, Segoe UI, Roboto, sans-serif'
+        ctx.fillText(letter, 128, 128)
+
+        const blob: Blob = await new Promise((resolve, reject) => {
+            canvas.toBlob((b) => {
+                if (!b) return reject(new Error('Failed to create avatar blob'))
+                resolve(b)
+            }, 'image/webp', 0.9)
+        })
+
+        return blob
+    }
     const showError = (text: string) => {
         setToast({ text, type: 'error' })
         setTimeout(() => setToast(null), 3000)
@@ -81,11 +120,67 @@ export default function AuthPage() {
     const onEmailSignUp = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!pwdCheck.all) return
-        const { error } = await signUpWithPassword(email, password)
+
+        // выполняем регистрацию
+        const { data, error } = await signUpWithPassword(email, password)
         if (error) {
             showError(error.message || 'Sign up failed')
             return
         }
+
+        try {
+            // готовим blob: либо выбранный пользователем, либо fallback-инициал
+            let avatarBlob: Blob | null = signupAvatarBlob
+            if (!avatarBlob) {
+                avatarBlob = await generateInitialAvatar(email)
+            }
+
+            // если есть blob — загружаем и сохраняем в user_metadata
+            if (avatarBlob) {
+                let userId = data?.user?.id ?? null
+                if (!userId) {
+                    const { data: userData } = await supabase.auth.getUser()
+                    userId = userData?.user?.id ?? null
+                }
+
+                if (userId) {
+                    const ext = avatarBlob.type === 'image/webp' ? 'webp' : 'jpg'
+                    const fileName = `${userId}-${Date.now()}.${ext}`
+                    const filePath = `avatars/${fileName}`
+
+                    const { error: uploadError } = await supabase.storage
+                        .from('user-avatars')
+                        .upload(filePath, avatarBlob, {
+                            contentType: avatarBlob.type,
+                            cacheControl: '3600',
+                            upsert: false,
+                        })
+
+                    if (uploadError) {
+                        showError(uploadError.message || 'Failed to upload avatar')
+                    } else {
+                        const { data: urlData } = supabase.storage
+                            .from('user-avatars')
+                            .getPublicUrl(filePath)
+
+                        const publicUrl = urlData.publicUrl
+                        setSignupUploadedAvatarUrl(publicUrl)
+
+                        // STEP 7: сохраняем avatar_url в user_metadata и обновляем сессию
+                        const { error: updateError } = await supabase.auth.updateUser({
+                            data: { avatar_url: publicUrl }
+                        })
+                        if (updateError) {
+                            showError(updateError.message || 'Failed to save avatar to profile')
+                        }
+                        // AuthContext теперь ловит USER_UPDATED и сам обновит session
+                    }
+                }
+            }
+        } catch (err: any) {
+            showError(err?.message || 'Failed to process avatar upload')
+        }
+
         if (rememberMe) {
             localStorage.setItem('auth:rememberMe', '1')
             localStorage.setItem('auth:rememberedEmail', email)
@@ -237,28 +332,23 @@ export default function AuthPage() {
                                         </button>
                                     </div>
 
-                                    <div className="text-xs space-y-1">
-                                        <div className={`flex items-center gap-2 ${pwdCheck.len ? 'text-green-600' : 'text-gray-400'}`}>
-                                            <span>{pwdCheck.len ? '✓' : '○'}</span>
-                                            <span>At least 6 characters</span>
-                                        </div>
-                                        <div className={`flex items-center gap-2 ${pwdCheck.lower ? 'text-green-600' : 'text-gray-400'}`}>
-                                            <span>{pwdCheck.lower ? '✓' : '○'}</span>
-                                            <span>One lowercase letter</span>
-                                        </div>
-                                        <div className={`flex items-center gap-2 ${pwdCheck.upper ? 'text-green-600' : 'text-gray-400'}`}>
-                                            <span>{pwdCheck.upper ? '✓' : '○'}</span>
-                                            <span>One uppercase letter</span>
-                                        </div>
-                                        <div className={`flex items-center gap-2 ${pwdCheck.digit ? 'text-green-600' : 'text-gray-400'}`}>
-                                            <span>{pwdCheck.digit ? '✓' : '○'}</span>
-                                            <span>One number</span>
-                                        </div>
-                                        <div className={`flex items-center gap-2 ${pwdCheck.symbol ? 'text-green-600' : 'text-gray-400'}`}>
-                                            <span>{pwdCheck.symbol ? '✓' : '○'}</span>
-                                            <span>One special character</span>
-                                        </div>
+                                    <div className="flex justify-center py-2">
+                                        <AvatarUpload
+                                            mode="pre-signup"
+                                            showRemoveButton
+                                            onProcessed={({ blob, previewUrl }) => {
+                                                setSignupAvatarBlob(blob)
+                                                setSignupAvatarPreview(previewUrl)
+                                            }}
+                                            onClear={() => {
+                                                setSignupAvatarBlob(null)
+                                                setSignupAvatarPreview(null)
+                                            }}
+                                        />
                                     </div>
+                                    <p className="text-xs text-gray-500 text-center">
+                                        Accepted: image files up to 5MB. Square crop to 256×256. WebP/JPEG.
+                                    </p>
 
                                     <Button
                                         type="submit"

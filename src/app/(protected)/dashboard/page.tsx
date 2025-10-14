@@ -14,6 +14,9 @@ import Spinner from '@/components/ui-elements/Spinner'
 import MainBudgetModal from '@/components/modals/MainBudgetModal'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
 import { ChartsContainer } from '@/components/charts/ChartsContainer'
+import Button from '@/components/ui-elements/Button'
+import TransactionModal from '@/components/modals/TransactionModal'
+import { Plus } from 'lucide-react'
 
 // Import hooks 
 import useModal from '@/hooks/useModal'
@@ -32,6 +35,7 @@ const Dashboard = () => {
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
   const [refreshCounters, setRefreshCounters] = useState<number>(0) 
   const { isModalOpen, openModal, closeModal } = useModal()
+  const { isModalOpen: isAddOpen, openModal: openAddModal, closeModal: closeAddModal } = useModal()
 
   // Проверяем наличие бюджета
   const { isLoading: isBudgetChecking } = useCheckBudget(session?.user?.id)
@@ -168,6 +172,12 @@ const Dashboard = () => {
             <h1 className="text-[35px] font-semibold text-secondary-black">
               Welcome <span className="text-primary">{session?.user?.user_metadata?.name}👋</span>
             </h1>
+            <Button
+              text="Add Transaction"
+              variant="primary"
+              onClick={openAddModal}
+              icon={<Plus size={16} className="text-white" />}
+            />
           </div>
           <div className="mt-[30px] px-5 flex flex-col gap-5">
             <Counters onIconClick={handleIconClick} refreshTrigger={refreshCounters} />
@@ -202,6 +212,15 @@ const Dashboard = () => {
             )}
           </div>
           {isModalOpen && <MainBudgetModal title="Edit main budget" onSubmit={handleTransactionSubmit} onClose={closeModal} />}
+          {isAddOpen && (
+            <TransactionModal
+              title="Add Transaction"
+              onClose={closeAddModal}
+              onSubmit={(message, type) => {
+                handleTransactionSubmit(message, type)
+              }}
+            />
+          )}
         </>
       )}
     </div>

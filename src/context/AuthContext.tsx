@@ -34,7 +34,7 @@ export const AuthContextProvider = ({ children }: {children:React.ReactNode}) =>
           data: { subscription },
         }: { data: { subscription: Subscription } } = supabase.auth.onAuthStateChange((event, session) => {
           // Обновляем session только для значимых auth-событий
-          if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED') {
+          if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
             setSession(session)
           }
 

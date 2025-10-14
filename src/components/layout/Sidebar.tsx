@@ -9,6 +9,12 @@ import { LayoutDashboard, CreditCard, Wallet, Settings } from 'lucide-react'
 const Sidebar = () => {
     const { session } = UserAuth()
     const pathname = usePathname()
+    const displayName =
+      session?.user?.user_metadata?.full_name ||
+      session?.user?.user_metadata?.name ||
+      session?.user?.email ||
+      'U'
+    const initial = displayName.charAt(0).toUpperCase()
 
     const navigationItems = [
         {
@@ -92,7 +98,9 @@ const Sidebar = () => {
                             />
                         </div>
                     ) : (
-                        <Settings className={`h-5 w-5 ${pathname === '/user-settings' ? 'text-primary' : ''}`} />
+                        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 bg-indigo-600 dark:bg-indigo-400 flex items-center justify-center">
+                            <span className="text-white text-sm font-semibold">{initial}</span>
+                        </div>
                     )}
                     <span>User Settings</span>
                 </Link>

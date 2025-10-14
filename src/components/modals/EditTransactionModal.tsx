@@ -114,13 +114,13 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
                                         <CalendarIcon className="h-4 w-4 opacity-50" />
                                     </button>
                                 </PopoverTrigger>
-                                <PopoverContent 
-                                    className="w-auto p-0 border-0 shadow-lg" 
+                                <PopoverContent
                                     align="start"
                                     side="bottom"
                                     sideOffset={4}
+                                    className="w-auto p-0 border-0 shadow-lg"
                                 >
-                                    <div className="p-4 bg-white rounded-lg shadow-lg border border-gray-200">
+                                    <div className="p-4 bg-popover rounded-lg shadow-lg border border-border">
                                         {/* Кастомная навигация */}
                                         <div className="flex justify-between items-center mb-4">
                                             <button

@@ -126,8 +126,8 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
     }
   }
 
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.target.value = e.target.value.replace(/[^A-Za-z\s]/g, '')
+  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
+    e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-z\s]/g, '')
   }
 
   // Handler for budget selection change
@@ -211,7 +211,7 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
                   side="bottom"
                   sideOffset={4}
                 >
-                  <div className="p-4 bg-white rounded-lg shadow-lg border border-gray-200">
+                  <div className="p-4 bg-popover rounded-lg shadow-lg border border-border">
                     <div className="flex justify-between items-center mb-4">
                       <button
                         type="button"

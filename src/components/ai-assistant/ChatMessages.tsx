@@ -24,6 +24,12 @@ export const ChatMessages = ({ messages, isTyping }: ChatMessagesProps) => {
 
     // Получаем аватар пользователя
     const userAvatar = session?.user?.user_metadata?.avatar_url
+    const displayName =
+      session?.user?.user_metadata?.full_name ||
+      session?.user?.user_metadata?.name ||
+      session?.user?.email ||
+      'U'
+    const userInitial = displayName.charAt(0).toUpperCase()
 
     return (
         <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent">
@@ -59,15 +65,18 @@ export const ChatMessages = ({ messages, isTyping }: ChatMessagesProps) => {
                     </div>
 
                     {message.role === 'user' && (
-                        <div className="w-7 h-7 bg-gray-300 dark:bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm overflow-hidden">
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm overflow-hidden">
                             {userAvatar ? (
                                 <img 
                                     src={userAvatar} 
                                     alt="User avatar" 
                                     className="w-full h-full object-cover rounded-full"
+                                    referrerPolicy="no-referrer"
                                 />
                             ) : (
-                                <User className="w-4 h-4 text-secondary-black dark:text-white" />
+                                <div className="w-full h-full bg-indigo-600 dark:bg-indigo-400 flex items-center justify-center">
+                                    <span className="text-white text-xs font-semibold">{userInitial}</span>
+                                </div>
                             )}
                         </div>
                     )}
