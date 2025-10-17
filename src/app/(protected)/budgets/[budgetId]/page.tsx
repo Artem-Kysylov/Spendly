@@ -345,7 +345,7 @@ const BudgetDetails = () => {
   }
 
   return (
-    <div className='mt-[30px] px-5'>
+    <div className='mt-[30px] px-5 overflow-x-hidden'>
       {toastMessage && (
         <ToastMessage text={toastMessage.text} type={toastMessage.type} />
       )}
@@ -353,8 +353,8 @@ const BudgetDetails = () => {
         onDeleteClick={openDeleteModal}
         onEditClick={openEditModal}
       />
-      <div className='flex items-stretch justify-between gap-[20px] mb-[30px]'>
-        <div className='w-1/2'>
+      <div className='flex flex-col md:flex-row items-stretch justify-between gap-[20px] mb-[30px]'>
+        <div className='w-full md:w-1/2 max-w-full'>
           <BudgetDetailsInfo 
             id={id}
             emoji={budgetDetails.emoji}
@@ -363,7 +363,7 @@ const BudgetDetails = () => {
             type={budgetDetails.type}
           />
         </div>
-        <div className='w-1/2'>
+        <div className='w-full md:w-1/2 max-w-full'>
           <BudgetDetailsForm 
             onSubmit={handleTransactionSubmit}
             isSubmitting={isSubmitting}

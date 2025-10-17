@@ -31,7 +31,7 @@ const BudgetProgressBar = ({ spentAmount, totalAmount, type, className }: Budget
   }
 
   return (
-    <div className={cn("w-full flex flex-col gap-1", className)}>
+    <div className={cn("w-full flex flex-col gap-2", className)}>
       {/* Прогресс бар */}
       <div className={cn(
         "relative h-2.5 w-full overflow-hidden rounded-full transition-colors duration-300",
@@ -47,7 +47,6 @@ const BudgetProgressBar = ({ spentAmount, totalAmount, type, className }: Budget
           }}
         />
       </div>
-      
       {/* Информация о прогрессе */}
       <div className="flex justify-between text-xs text-gray-700 dark:text-white">
         <span className="font-medium">${spentAmount.toFixed(0)} spent</span>

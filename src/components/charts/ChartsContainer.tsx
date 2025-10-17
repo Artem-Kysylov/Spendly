@@ -21,20 +21,24 @@ interface ChartsContainerProps {
   currency?: string
 }
 
-export const ChartsContainer: React.FC<ChartsContainerProps> = ({
-  initialFilters = {
-    period: 'Week',
-    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 7),
-    endDate: new Date(),
-    dataType: 'Expenses',
-    selectedMonth: new Date().getMonth() + 1,
-    selectedYear: new Date().getFullYear(),
-  },
-  showFilters = true,
-  showToggleControls: _showToggleControls = true,
-  showExportControls: _showExportControls = true,
-  currency = 'USD',
-}) => {
+const DEFAULT_FILTERS: ChartFiltersType = {
+  period: 'Week',
+  startDate: new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 7),
+  endDate: new Date(),
+  dataType: 'Expenses',
+  selectedMonth: new Date().getMonth() + 1,
+  selectedYear: new Date().getFullYear(),
+}
+
+export const ChartsContainer = (
+  {
+    initialFilters = DEFAULT_FILTERS,
+    showFilters = true,
+    showToggleControls = true,
+    showExportControls = true,
+    currency = 'USD',
+  }: ChartsContainerProps = {}
+) => {
   const [filters, setFilters] = useState<ChartFiltersType>(initialFilters)
 
   // Инициализация видимости графиков (на будущее), читаем из localStorage
@@ -120,7 +124,7 @@ export const ChartsContainer: React.FC<ChartsContainerProps> = ({
       )}
 
       {(chartVisibility.bar || chartVisibility.line) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch">
+        <div className="grid grid-cols-1 gap-4 md:gap-6 items-stretch">
           {/* Bar chart */}
           {chartVisibility.bar && (
             <div className="transition-all duration-300 ease-in-out">

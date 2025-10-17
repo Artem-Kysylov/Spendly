@@ -8,7 +8,7 @@ import BudgetProgressBar from '../ui-elements/BudgetProgressBar'
 // Import types 
 import { BudgetDetailsProps } from '../../types/types'
 
-const BudgetDetailsInfo = ({ id, emoji, name, amount, type }: BudgetDetailsProps) => {
+function BudgetDetailsInfo({ id, emoji, name, amount, type }: BudgetDetailsProps) {
   const { session } = UserAuth()
   const [spentAmount, setSpentAmount] = useState(0)
 
@@ -54,10 +54,10 @@ const BudgetDetailsInfo = ({ id, emoji, name, amount, type }: BudgetDetailsProps
   }, [id, session?.user?.id])
 
   return (
-    <div className='flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg h-full bg-card p-[20px]'>
-      <span className='text-[25px]'>{emoji}</span>
-      <h1 className='text-secondary-black dark:text-white text-[25px] font-semibold'>{name}</h1>
-      <p className='text-secondary-black dark:text-white text-[25px] font-semibold'>${amount}</p>
+    <div className='flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg h-full bg-card p-[20px] w-full max-w-full overflow-hidden'>
+      <span className='text-[24px] sm:text-[25px]'>{emoji}</span>
+      <h1 className='text-secondary-black dark:text-white text-[20px] sm:text-[22px] md:text-[25px] font-semibold break-words text-center'>{name}</h1>
+      <p className='text-secondary-black dark:text-white text-[20px] sm:text-[22px] md:text-[25px] font-semibold break-words text-center'>${amount}</p>
       
       <div className="w-full mt-4">
         <BudgetProgressBar 

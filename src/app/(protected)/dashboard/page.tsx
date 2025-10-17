@@ -169,7 +169,7 @@ const Dashboard = () => {
             <ToastMessage text={toastMessage.text} type={toastMessage.type} />
           )}
           <div className="flex flex-col items-center gap-5 text-center mt-[30px] px-5 md:flex-row md:justify-between md:text-left">
-            <h1 className="text-[35px] font-semibold text-secondary-black">
+            <h1 className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black">
               Welcome <span className="text-primary">{session?.user?.user_metadata?.name}👋</span>
             </h1>
             <Button

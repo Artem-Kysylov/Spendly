@@ -129,7 +129,7 @@ const Transactions = () => {
       )}
       
       <div className="flex items-center justify-between mt-[30px] md:flex-row md:justify-between md:text-left">
-        <h1 className="text-[35px] font-semibold text-secondary-black">Transactions📉</h1>
+        <h1 className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black">Transactions📉</h1>
         <Button
           text="Add Transaction"
           variant="primary"
@@ -154,7 +154,7 @@ const Transactions = () => {
         isLoading={isChartLoading}
         currency="USD"
         height={240}
-        className="mb-6"
+        className="w-full mb-6"
       />
 
       {isLoading ? (

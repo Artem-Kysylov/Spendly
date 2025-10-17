@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { FloatingAIButton } from './index'
+import { FloatingAIButton } from './FloatingAIButton'
 import { AIChatWindow } from './AIChatWindow'
 import { useChat } from '@/hooks/useChat'
 

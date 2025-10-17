@@ -1,7 +1,9 @@
 'use client'
 
+// TopBar component
 import NotificationBell from '@/components/ui-elements/NotificationBell'
 import ThemeSwitcher from '@/components/ui-elements/ThemeSwitcher'
+import Image from 'next/image'
 
 const TopBar = () => {
     const currentDate = new Date().toLocaleDateString('en-US', {
@@ -12,14 +14,16 @@ const TopBar = () => {
     })
 
     return (
-        <header className="sticky top-0 z-40 bg-card backdrop-blur border-b">
-            <div className="mx-auto px-5 h-16 flex items-center justify-between">
-                {/* Current Date */}
-                <div className="text-sm text-foreground font-medium">
-                    {currentDate}
+        <header className="sticky top-0 z-40 bg-transparent">
+            <div className="mx-auto px-5 h-16 flex items-center">
+                {/* Left: Date (logo removed) */}
+                <div className="flex-1 flex items-center">
+                    <span className="text-xs sm:text-sm md:text-base text-foreground font-medium">
+                        {currentDate}
+                    </span>
                 </div>
-                {/* Notifications + Theme Switch */}
-                <div className="flex items-center gap-4">
+                {/* Right: Theme + Notifications */}
+                <div className="flex-1 flex items-center justify-end gap-4">
                     <ThemeSwitcher />
                     <NotificationBell count={99} />
                 </div>

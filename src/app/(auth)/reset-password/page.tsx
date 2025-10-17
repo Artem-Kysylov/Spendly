@@ -101,7 +101,7 @@ export default function ResetPasswordPage() {
               <Image src="/Spendly-logo.svg" alt="Spendly" width={120} height={32} priority />
             </div>
 
-            <h1 className="mt-6 mb-4 text-2xl font-semibold text-center">
+            <h1 className="mt-6 mb-4 text-xl sm:text-2xl font-semibold text-center">
               Set your new password
             </h1>
 

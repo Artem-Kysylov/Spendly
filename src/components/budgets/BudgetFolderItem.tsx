@@ -40,7 +40,7 @@ const BudgetFolderItem = ({ id, emoji, name, amount, type }: BudgetFolderItemPro
   }, [id, session?.user?.id])
 
   return (
-    <div className="flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg w-[335px] min-w-[335px] h-[200px] bg-card transition-opacity duration-300 hover:opacity-50 p-4">
+    <div className="flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg w-full sm:w-[335px] h-[200px] bg-card transition-opacity duration-300 hover:opacity-50 p-4">
       <span className="text-[28px]">{emoji}</span>
       <h3 className="text-foreground text-[16px] font-semibold">{name}</h3>
       <p className="text-foreground text-[18px] font-semibold">${amount}</p>

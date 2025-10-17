@@ -35,7 +35,8 @@ const Sidebar = () => {
     ]
 
     return (
-        <aside className="fixed left-0 top-0 h-full w-64 bg-card border-r border-border flex flex-col">
+        <aside className="hidden lg:flex fixed left-0 top-0 h-full w-64 bg-card border-r border-border flex flex-col">
+            {/* Header with logo */}
             <div className="h-[65px] px-6 border-b border-border flex items-center">
                 <Image 
                     src="/Spendly-logo.svg" 

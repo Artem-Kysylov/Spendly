@@ -14,13 +14,13 @@ const EmptyState = ({ title, description, buttonText, onButtonClick }: EmptyStat
   return (
     <div className="flex flex-col items-center justify-center gap-5 mt-[100px]">
       <img src="/illustration-no-transactions.svg" alt="empty-state" />
-        <h1 className="text-[35px] font-semibold text-secondary-black text-center">{title}</h1>
-        <p className="font-semibold text-secondary-black text-center">{description}</p>
-        <Button 
-          variant="primary"
-          text={buttonText}
-          onClick={onButtonClick} 
-        />
+      <h1 className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black text-center">{title}</h1>
+      <p className="font-semibold text-secondary-black text-center">{description}</p>
+      <Button 
+        variant="primary"
+        text={buttonText}
+        onClick={onButtonClick} 
+      />
     </div>  
   )
 }

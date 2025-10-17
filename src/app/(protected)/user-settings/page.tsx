@@ -38,8 +38,8 @@ export default function UserSettingsPage() {
                 <div className="w-full">
                     {/* Page Header */}
                     <div className="mt-[30px] mb-8">
-                        <h1 className="text-[35px] font-semibold text-secondary-black dark:text-white">User Settings ⚙️</h1>
-                        <p className="text-gray-600 dark:text-white mt-2">Manage your account settings and preferences</p>
+                        <h1 className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black dark:text-white">User Settings ⚙️</h1>
+                        <p className="text-sm sm:text-base text-gray-600 dark:text-white mt-2">Manage your account settings and preferences</p>
                     </div>
 
                     {/* Settings Content */}

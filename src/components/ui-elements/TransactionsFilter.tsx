@@ -19,15 +19,15 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`flex items-center gap-4 ${className}`}>
+    <div className={`flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-4 ${className}`}>
       {/* Type Selector */}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 w-full sm:w-auto">
         <label className="text-sm font-medium text-secondary-black dark:text-white">Type</label>
         <div className="relative">
           <Select
             value={transactionType}
             onChange={(e) => onTransactionTypeChange(e.target.value as 'Expenses' | 'Income')}
-            className="min-w-[140px] bg-white dark:bg-background text-black dark:text-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none border border-input"
+            className="w-full sm:min-w-[140px] bg-white dark:bg-background text-black dark:text-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none border border-input"
           >
             <option value="Expenses">Expense</option>
             <option value="Income">Income</option>
@@ -41,13 +41,13 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
       </div>
 
       {/* Date Period Selector */}
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1 w-full sm:w-auto">
         <label className="text-sm font-medium text-secondary-black dark:text-white">Date</label>
         <div className="relative">
           <Select
             value={datePeriod}
             onChange={(e) => onDatePeriodChange(e.target.value as 'Week' | 'Month')}
-            className="min-w-[140px] bg-white dark:bg-background text-black dark:text-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none border border-input"
+            className="w-full sm:min-w-[140px] bg-white dark:bg-background text-black dark:text-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none border border-input"
           >
             <option value="Week">Week</option>
             <option value="Month">Month</option>

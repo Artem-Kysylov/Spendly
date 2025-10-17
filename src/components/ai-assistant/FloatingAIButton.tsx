@@ -16,8 +16,8 @@ interface FloatingAIButtonProps {
   isOpen?: boolean
 }
 
-const FloatingAIButton: React.FC<FloatingAIButtonProps> = ({ 
-  onClick, 
+export const FloatingAIButton: React.FC<FloatingAIButtonProps> = ({
+  onClick,
   className,
   isOpen = false
 }) => {
@@ -28,8 +28,7 @@ const FloatingAIButton: React.FC<FloatingAIButtonProps> = ({
           <button
             onClick={onClick}
             className={cn(
-              // Базовые стили
-              "fixed bottom-6 right-6 z-50",
+              "fixed right-6 z-[50] bottom-[88px] lg:bottom-6",
               "w-14 h-14 rounded-full",
               "bg-primary text-primary-foreground",
               "shadow-lg shadow-primary/25",
@@ -81,5 +80,3 @@ const FloatingAIButton: React.FC<FloatingAIButtonProps> = ({
     </TooltipProvider>
   )
 }
-
-export default FloatingAIButton

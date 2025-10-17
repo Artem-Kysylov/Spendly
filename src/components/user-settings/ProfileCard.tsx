@@ -39,7 +39,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
           <div className="flex-shrink-0">
             {isGoogleUser ? (
               // Google пользователи - только отображение аватара
-              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700">
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}
@@ -60,7 +60,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
               <AvatarUpload
                 currentAvatarUrl={avatarUrl}
                 onAvatarUpdate={handleAvatarUpdate}
-                size="lg"
+                size="md"
+                className="w-20 h-20 sm:w-24 sm:h-24"
               />
             )}
           </div>

@@ -93,7 +93,7 @@ const Budgets = () => {
         <ToastMessage text={toastMessage.text} type={toastMessage.type} />
       )}
       <div className='flex flex-col items-start gap-[15px] mb-[30px]'>
-        <h1 className="text-[35px] font-semibold text-secondary-black">
+        <h1 className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black">
           Budgets💰
         </h1>
         <p>Let`s organize your budgets by folders</p>
@@ -104,7 +104,7 @@ const Budgets = () => {
           <Link  
             href={`/budgets/${folder.id}`} 
             key={folder.id}
-            className='cursor-pointer'
+            className='block w-full sm:w-[335px] cursor-pointer'
           >
             <BudgetFolderItem 
               key={folder.id}

@@ -41,7 +41,7 @@ export function DialogContent({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center"
+      className="fixed inset-0 z-[100] flex items-center justify-center"
       role="dialog"
       aria-modal="true"
       onClick={() => onOpenChange?.(false)}
@@ -49,7 +49,7 @@ export function DialogContent({
       <div className="fixed inset-0 bg-foreground/50 dark:bg-black/70 backdrop-blur-[1px]" />
       <div
         className={cn(
-          "relative z-10 w-[90vw] max-w-md rounded-lg border bg-white dark:bg-black p-6 text-foreground dark:text-white shadow-lg",
+          "relative z-10 w-[92vw] max-w-md max-h-[85vh] overflow-y-auto rounded-lg border bg-white dark:bg-black p-4 sm:p-6 text-foreground dark:text-white shadow-lg",
           className
         )}
         onClick={(e) => e.stopPropagation()}

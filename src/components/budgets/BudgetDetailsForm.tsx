@@ -41,8 +41,8 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
   }
 
   return (
-    <div className='w-full rounded-lg border border-border bg-card p-[20px] min-h-[300px] flex flex-col'>
-      <h3 className='text-secondary-black dark:text-white text-[25px] font-semibold text-center mb-[20px]'>Add new transaction📝</h3>
+    <div className='w-full max-w-full overflow-hidden rounded-lg border border-border bg-card p-[20px] min-h-[300px] flex flex-col'>
+      <h3 className='text-secondary-black dark:text-white text-[22px] sm:text-[24px] md:text-[25px] font-semibold text-center mb-[20px] break-words'>Add new transaction📝</h3>
       <form onSubmit={handleSubmit} className='flex flex-col gap-[20px] flex-1 justify-center'>
         <TextInput
           type="text"
@@ -89,7 +89,7 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
               </button>
             </PopoverTrigger>
             <PopoverContent 
-              className="w-auto p-0 border-0 shadow-lg" 
+              className="w-auto max-w-[calc(100vw-40px)] p-0 border-0 shadow-lg" 
               align="start"
               side="bottom"
               sideOffset={4}

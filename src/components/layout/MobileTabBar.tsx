@@ -1,0 +1,45 @@
+'use client'
+
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { LayoutDashboard, CreditCard, Wallet, Settings } from 'lucide-react'
+
+function MobileTabBar() {
+  const pathname = usePathname()
+
+  const items = [
+    { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { href: '/transactions', icon: CreditCard, label: 'Transactions' },
+    { href: '/budgets', icon: Wallet, label: 'Budgets' },
+    { href: '/user-settings', icon: Settings, label: 'Settings' },
+  ]
+
+  return (
+    <nav
+      className="fixed bottom-0 left-0 right-0 h-16 border-t border-border bg-white dark:bg-card lg:hidden z-50"
+      aria-label="Bottom navigation"
+    >
+      <ul className="h-full grid grid-cols-4">
+        {items.map(({ href, icon: Icon, label }) => {
+          const isActive = pathname === href
+          return (
+            <li key={href} className="flex items-center justify-center">
+              <Link
+                href={href}
+                aria-label={label}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex items-center justify-center h-full w-full transition-colors ${
+                  isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Icon className="h-6 w-6" />
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
+    </nav>
+  )
+}
+
+export default MobileTabBar
