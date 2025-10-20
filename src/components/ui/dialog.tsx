@@ -3,6 +3,7 @@
 import * as React from "react"
 import { createPortal } from "react-dom"
 import { cn } from "@/lib/utils"
+import { AnimatePresence, motion } from "motion/react"
 
 type DialogContextValue = {
   open: boolean
@@ -37,26 +38,44 @@ export function DialogContent({
   const { open, onOpenChange } = useDialog()
 
   if (typeof document === "undefined") return null
-  if (!open) return null
 
   return createPortal(
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center"
-      role="dialog"
-      aria-modal="true"
-      onClick={() => onOpenChange?.(false)}
-    >
-      <div className="fixed inset-0 bg-foreground/50 dark:bg-black/70 backdrop-blur-[1px]" />
-      <div
-        className={cn(
-          "relative z-10 w-[92vw] max-w-md max-h-[85vh] overflow-y-auto rounded-lg border bg-white dark:bg-black p-4 sm:p-6 text-foreground dark:text-white shadow-lg",
-          className
-        )}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {children}
-      </div>
-    </div>,
+    <AnimatePresence initial={false}>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-[100] flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => onOpenChange?.(false)}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <motion.div
+            className="fixed inset-0 bg-foreground/50 dark:bg-black/70 backdrop-blur-[1px] z-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+          />
+          <motion.div
+            className={cn(
+              // Токены вместо захардкоженных светлых/тёмных классов
+              "relative z-10 w-[92vw] max-w-md max-h-[85vh] overflow-y-auto rounded-lg border bg-card p-6 text-card-foreground shadow-lg",
+              className,
+            )}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ ease: "easeOut", duration: 0.4 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {children}
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
     document.body
   )
 }

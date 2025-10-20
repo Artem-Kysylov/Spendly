@@ -13,6 +13,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import Link from 'next/link'
 import AvatarUpload from '@/components/ui-elements/AvatarUpload'
 import { supabase } from '@/lib/supabaseClient'
+import { motion } from 'motion/react'
 
 export default function AuthPage() {
     const { 
@@ -207,16 +208,36 @@ export default function AuthPage() {
             className="auth-light min-h-screen bg-cover bg-center"
             style={{ backgroundImage: "url('/Sign up screen-bg.png')" }}
         >
-            <div className="container mx-auto flex min-h-screen items-center justify-center p-4">
-                <div className="w-full max-w-md rounded-[10px] border border-gray-200 bg-white text-gray-900 shadow-sm dark:bg-white dark:text-gray-900">
+            <motion.div 
+                className="container mx-auto flex min-h-screen items-center justify-center p-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+                <motion.div 
+                    className="w-full max-w-md rounded-[10px] border border-gray-200 bg-white text-gray-900 shadow-sm dark:bg-white dark:text-gray-900"
+                    initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+                >
                     <div className="p-6 sm:p-8">
-                        <div className="flex justify-center">
+                        <motion.div 
+                            className="flex justify-center"
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+                        >
                             <Image src="/Spendly-logo.svg" alt="Spendly" width={120} height={32} />
-                        </div>
+                        </motion.div>
 
-                        <h1 className="mt-6 mb-4 text-xl sm:text-2xl font-semibold text-center">
+                        <motion.h1 
+                            className="mt-6 mb-4 text-xl sm:text-2xl font-semibold text-center"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
+                        >
                             {activeTab === 'signin' ? 'Sign in' : 'Sign up'}
-                        </h1>
+                        </motion.h1>
 
                         <div className="w-full max-w-md space-y-6">
                             {/* Кнопка Google */}
@@ -362,8 +383,8 @@ export default function AuthPage() {
                             </Tabs>
                         </div>
                     </div>
-                </div>
-            </div>
+                </motion.div>
+            </motion.div>
         </div>
     )
 }

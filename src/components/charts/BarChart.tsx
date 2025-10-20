@@ -177,7 +177,7 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
               dataKey="amount"
               maxBarSize={48}
               radius={[4, 4, 0, 0]}
-              animationDuration={800}
+              animationDuration={1400}
             >
               {normalizedData.map((entry, index) => (
                 <Cell 

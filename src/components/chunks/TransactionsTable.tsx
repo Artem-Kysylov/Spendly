@@ -1,6 +1,7 @@
 // Imports 
 import { useState } from 'react'
 import { Trash, Pencil } from 'lucide-react'
+import { motion } from 'motion/react'
 
 // Import shadcn components
 import {
@@ -149,11 +150,26 @@ const TransactionsTable = ({
     }
 
     return (
-        <div className="relative mb-24">
+        <motion.div 
+            className="relative mb-24"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+        >
             {/* Мобильная версия - карточки */}
             <div className="lg:hidden space-y-3">
-                {pageItems.map((transaction) => (
-                    <div key={transaction.id} className="bg-card border border-border rounded-lg p-4 space-y-3">
+                {pageItems.map((transaction, index) => (
+                    <motion.div 
+                        key={transaction.id} 
+                        className="bg-card border border-border rounded-lg p-4 space-y-3"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ 
+                            duration: 0.5, 
+                            ease: "easeOut", 
+                            delay: index * 0.1 
+                        }}
+                    >
                         <div className="flex justify-between items-start">
                             <div className="flex-1">
                                 <h3 className="font-medium text-foreground">{transaction.title}</h3>
@@ -210,12 +226,17 @@ const TransactionsTable = ({
                                 </Button>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 ))}
             </div>
 
             {/* Десктопная версия - таблица */}
-            <div className="hidden lg:block w-full overflow-x-auto rounded-lg border border-border bg-card shadow-sm">
+            <motion.div 
+                className="hidden lg:block w-full overflow-x-auto rounded-lg border border-border bg-card shadow-sm"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+            >
                 <Table className="w-full">
                     <TableHeader className="border-b border-border">
                         <TableRow className="border-b border-border hover:bg-transparent">
@@ -229,7 +250,17 @@ const TransactionsTable = ({
                     </TableHeader>
                     <TableBody>
                         {pageItems.map((transaction, index) => (
-                            <TableRow key={transaction.id} className="border-b border-border hover:bg-muted/30">
+                            <motion.tr 
+                                key={transaction.id} 
+                                className="border-b border-border hover:bg-muted/30"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ 
+                                    duration: 0.5, 
+                                    ease: "easeOut", 
+                                    delay: 0.3 + (index * 0.1) 
+                                }}
+                            >
                                 <TableCell className="text-foreground">{transaction.title}</TableCell>
                                 <TableCell className="text-foreground">
                                     {transaction.category_emoji && transaction.category_name ? (
@@ -282,11 +313,11 @@ const TransactionsTable = ({
                                         </Button>
                                     </div>
                                 </TableCell>
-                            </TableRow>
+                            </motion.tr>
                         ))}
                     </TableBody>
                 </Table>
-            </div>
+            </motion.div>
 
             {/* Пагинация */}
             <div className="mt-4">
@@ -355,7 +386,7 @@ const TransactionsTable = ({
                     }}
                 />
             )}
-        </div>
+        </motion.div>
     )
 }
 

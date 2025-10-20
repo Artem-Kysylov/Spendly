@@ -7,6 +7,7 @@ import { QueryProvider } from "@/context/QueryProvider";
 import { ToastProvider } from '@/components/ui/use-toast'
 import { Toaster } from '@/components/ui/toaster'
 import ServiceWorkerRegistration from '@/components/notifications/ServiceWorkerRegistration'
+import { LazyMotion, domAnimation } from 'framer-motion'
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -103,18 +104,20 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
       </head>
-      <body className={montserrat.className}>
-        <QueryProvider>
-          <ToastProvider>
-            <AuthContextProvider>
-              <ThemeProvider>
-                {children}
-                <ServiceWorkerRegistration />
-              </ThemeProvider>
-            </AuthContextProvider>
-            <Toaster />
-          </ToastProvider>
-        </QueryProvider>
+      <body className={`${montserrat.className} transition-colors duration-300`}>
+        <LazyMotion features={domAnimation}>
+          <QueryProvider>
+            <ToastProvider>
+              <AuthContextProvider>
+                <ThemeProvider>
+                  {children}
+                  <ServiceWorkerRegistration />
+                </ThemeProvider>
+              </AuthContextProvider>
+              <Toaster />
+            </ToastProvider>
+          </QueryProvider>
+        </LazyMotion>
       </body>
     </html>
   )

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { motion } from 'motion/react'
 import { supabase } from '../../lib/supabaseClient'
 import { UserAuth } from '../../context/AuthContext'
 
@@ -54,19 +55,50 @@ function BudgetDetailsInfo({ id, emoji, name, amount, type }: BudgetDetailsProps
   }, [id, session?.user?.id])
 
   return (
-    <div className='flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg h-full bg-card p-[20px] w-full max-w-full overflow-hidden'>
-      <span className='text-[24px] sm:text-[25px]'>{emoji}</span>
-      <h1 className='text-secondary-black dark:text-white text-[20px] sm:text-[22px] md:text-[25px] font-semibold break-words text-center'>{name}</h1>
-      <p className='text-secondary-black dark:text-white text-[20px] sm:text-[22px] md:text-[25px] font-semibold break-words text-center'>${amount}</p>
+    <motion.div 
+      className='flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg h-full bg-card p-[20px] w-full max-w-full overflow-hidden'
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
+      <motion.span 
+        className='text-[24px] sm:text-[25px]'
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
+      >
+        {emoji}
+      </motion.span>
+      <motion.h1 
+        className='text-secondary-black dark:text-white text-[20px] sm:text-[22px] md:text-[25px] font-semibold break-words text-center'
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
+      >
+        {name}
+      </motion.h1>
+      <motion.p 
+        className='text-secondary-black dark:text-white text-[20px] sm:text-[22px] md:text-[25px] font-semibold break-words text-center'
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.4, ease: "easeOut" }}
+      >
+        ${amount}
+      </motion.p>
       
-      <div className="w-full mt-4">
+      <motion.div 
+        className="w-full mt-4"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}
+      >
         <BudgetProgressBar 
           spentAmount={spentAmount}
           totalAmount={amount}
           type={type}
         />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 

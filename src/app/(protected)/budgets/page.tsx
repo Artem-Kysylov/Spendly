@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { UserAuth } from '@/context/AuthContext'
 import Link from 'next/link'
+import { motion } from 'motion/react'
 
 // Import hooks 
 import useModal from '@/hooks/useModal'
@@ -92,31 +93,47 @@ const Budgets = () => {
       {toastMessage && (
         <ToastMessage text={toastMessage.text} type={toastMessage.type} />
       )}
-      <div className='flex flex-col items-start gap-[15px] mb-[30px]'>
-        <h1 className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black">
-          Budgets💰
-        </h1>
-        <p>Let`s organize your budgets by folders</p>
-      </div>
-      <div className='flex items-center justify-start gap-[20px] flex-wrap'>
-        <NewBudget onClick={openModal} />
-        {budgetFolders.map((folder) => (
-          <Link  
-            href={`/budgets/${folder.id}`} 
-            key={folder.id}
+      <motion.div
+        style={{ willChange: 'opacity' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.28 }}
+        className='flex items-center justify-start gap-[20px] flex-wrap'
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          style={{ willChange: 'opacity, transform' }}
+        >
+          <NewBudget onClick={openModal} />
+        </motion.div>
+
+        {budgetFolders.map((folder, index) => (
+          <motion.div 
+            key={folder.id} 
+            style={{ willChange: 'opacity, transform' }} 
             className='block w-full sm:w-[335px] cursor-pointer'
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              duration: 0.6, 
+              ease: "easeOut", 
+              delay: 0.1 + (index * 0.1) 
+            }}
           >
-            <BudgetFolderItem 
-              key={folder.id}
-              id={folder.id}
-              emoji={folder.emoji}
-              name={folder.name}
-              amount={folder.amount}
-              type={folder.type}
-            />
-          </Link>
+            <Link href={`/budgets/${folder.id}`}>
+              <BudgetFolderItem 
+                id={folder.id}
+                emoji={folder.emoji}
+                name={folder.name}
+                amount={folder.amount}
+                type={folder.type}
+              />
+            </Link>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
       {isModalOpen && (
         <NewBudgetModal

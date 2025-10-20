@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useRef, useState } from 'react'
+import { motion } from 'motion/react'
 import { ComparisonLineChart } from '@/components/charts'
 import { BarChart } from './BarChart'
 import { TransactionsFilter } from '@/components/ui-elements'
@@ -109,25 +110,53 @@ export const ChartsContainer = (
   const chartHeight = 240
 
   return (
-    <div className="space-y-4 md:space-y-6">
+    <motion.div 
+      className="space-y-4 md:space-y-6"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+    >
       {showFilters && (
         <>
-          <h2 className="text-[25px] font-semibold">Budgets Analytics</h2>
-          <TransactionsFilter
-            transactionType={filters.dataType}
-            onTransactionTypeChange={handleTransactionTypeChange}
-            datePeriod={filters.period}
-            onDatePeriodChange={handleDatePeriodChange}
-            className="mb-6"
-          />
+          <motion.h2 
+            className="text-[25px] font-semibold"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+          >
+            Budgets Analytics
+          </motion.h2>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+          >
+            <TransactionsFilter
+              transactionType={filters.dataType}
+              onTransactionTypeChange={handleTransactionTypeChange}
+              datePeriod={filters.period}
+              onDatePeriodChange={handleDatePeriodChange}
+              className="mb-6"
+            />
+          </motion.div>
         </>
       )}
 
       {(chartVisibility.bar || chartVisibility.line) && (
-        <div className="grid grid-cols-1 gap-4 md:gap-6 items-stretch">
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-stretch"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
+        >
           {/* Bar chart */}
           {chartVisibility.bar && (
-            <div className="transition-all duration-300 ease-in-out">
+            <motion.div 
+              className="transition-all duration-300 ease-in-out"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
+            >
               <BarChart
                 ref={barChartRef}
                 data={barChart.data}
@@ -146,12 +175,17 @@ export const ChartsContainer = (
                 showLegend={false}
                 className="w-full"
               />
-            </div>
+            </motion.div>
           )}
 
           {/* Line chart */}
           {chartVisibility.line && (
-            <div className="transition-all duration-300 ease-in-out">
+            <motion.div 
+              className="transition-all duration-300 ease-in-out"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.5 }}
+            >
               <ComparisonLineChart
                 ref={lineChartRef}
                 data={comparisonChart.data}
@@ -170,10 +204,10 @@ export const ChartsContainer = (
                 showLegend={false}
                 className="w-full"
               />
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   )
 }

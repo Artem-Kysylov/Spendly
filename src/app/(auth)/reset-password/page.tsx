@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { Input } from '@/components/ui/input'
 import Button from '@/components/ui-elements/Button'
 import { CheckCircle2, Eye, EyeOff } from 'lucide-react'
+import { motion } from 'motion/react'
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('')
@@ -94,16 +95,36 @@ export default function ResetPasswordPage() {
       className="min-h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/Sign up screen-bg.png')" }}
     >
-      <div className="container mx-auto flex min-h-screen items-center justify-center p-4">
-        <div className="w-full max-w-md rounded-[10px] border border-gray-200 bg-white text-gray-900 shadow-sm dark:bg-white dark:text-gray-900">
+      <motion.div 
+        className="container mx-auto flex min-h-screen items-center justify-center p-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+      >
+        <motion.div 
+          className="w-full max-w-md rounded-[10px] border border-gray-200 bg-white text-gray-900 shadow-sm dark:bg-white dark:text-gray-900"
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+        >
           <div className="p-6 sm:p-8">
-            <div className="flex justify-center">
+            <motion.div 
+              className="flex justify-center"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+            >
               <Image src="/Spendly-logo.svg" alt="Spendly" width={120} height={32} priority />
-            </div>
+            </motion.div>
 
-            <h1 className="mt-6 mb-4 text-xl sm:text-2xl font-semibold text-center">
+            <motion.h1 
+              className="mt-6 mb-4 text-xl sm:text-2xl font-semibold text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
+            >
               Set your new password
-            </h1>
+            </motion.h1>
 
             {stage === 'form' && (
               <form onSubmit={onSubmit} className="space-y-4" noValidate>
@@ -208,20 +229,39 @@ export default function ResetPasswordPage() {
             )}
 
             {stage === 'success' && (
-              <div className="flex flex-col items-center text-center space-y-4" aria-live="polite">
-                <CheckCircle2 className="h-14 w-14 text-emerald-500" aria-hidden="true" />
-                <h2 className="text-xl font-semibold">Password updated!</h2>
+              <motion.div 
+                className="flex flex-col items-center text-center space-y-4" 
+                aria-live="polite"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+                >
+                  <CheckCircle2 className="h-14 w-14 text-emerald-500" aria-hidden="true" />
+                </motion.div>
+                <motion.h2 
+                  className="text-xl font-semibold"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+                >
+                  Password updated!
+                </motion.h2>
                 <p className="text-sm text-gray-600">
                   Your password has been successfully updated. You will be redirected to the sign in page shortly.
                 </p>
                 <Link href="/" className="text-blue-600 hover:text-blue-700 underline text-sm">
                   Back to Sign in
                 </Link>
-              </div>
+              </motion.div>
             )}
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   )
 }

@@ -345,7 +345,7 @@ const BudgetDetails = () => {
   }
 
   return (
-    <div className='mt-[30px] px-5 overflow-x-hidden'>
+    <div className='mt-[30px] px-5'>
       {toastMessage && (
         <ToastMessage text={toastMessage.text} type={toastMessage.type} />
       )}

@@ -151,7 +151,7 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
                 strokeWidth: 2,
                 fill: 'hsl(var(--background))'
               }}
-              animationDuration={800}
+              animationDuration={1400}
               name="Amount"
             />
           </RechartsLineChart>

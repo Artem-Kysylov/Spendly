@@ -16,7 +16,8 @@ const SignOutModal = ({ title, text, onClose, signOut }: SignOutModalProps) => {
 
   return (
     <Dialog open={true} onOpenChange={(o) => { if (!o) onClose() }}>
-      <DialogContent className="bg-white dark:bg-card border border-gray-200 dark:border-border">
+      {/* Убираем захардкоженный светлый фон и серые бордеры */}
+      <DialogContent className="border">
         <DialogHeader>
           <DialogTitle className="text-secondary-black dark:text-white">{title}</DialogTitle>
         </DialogHeader>

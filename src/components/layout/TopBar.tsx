@@ -14,7 +14,7 @@ const TopBar = () => {
     })
 
     return (
-        <header className="sticky top-0 z-40 bg-transparent">
+        <header className="sticky top-0 z-40 bg-card border-b border-border transition-colors duration-300">
             <div className="mx-auto px-5 h-16 flex items-center">
                 {/* Left: Date (logo removed) */}
                 <div className="flex-1 flex items-center">

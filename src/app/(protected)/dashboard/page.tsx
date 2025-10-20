@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { UserAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 
 // Import components 
 import TransactionsTable from '@/components/chunks/TransactionsTable'
@@ -168,50 +169,73 @@ const Dashboard = () => {
           {toastMessage && (
             <ToastMessage text={toastMessage.text} type={toastMessage.type} />
           )}
-          <div className="flex flex-col items-center gap-5 text-center mt-[30px] px-5 md:flex-row md:justify-between md:text-left">
-            <h1 className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black">
+          <motion.div
+            className="flex flex-col items-center gap-5 text-center mt-[30px] px-5 md:flex-row md:justify-between md:text-left"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          >
+            <motion.h1 
+              className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+            >
               Welcome <span className="text-primary">{session?.user?.user_metadata?.name}👋</span>
-            </h1>
-            <Button
-              text="Add Transaction"
-              variant="primary"
-              onClick={openAddModal}
-              icon={<Plus size={16} className="text-white" />}
-            />
-          </div>
-          <div className="mt-[30px] px-5 flex flex-col gap-5">
-            <Counters onIconClick={handleIconClick} refreshTrigger={refreshCounters} />
-            
-            
-            <div className="mt-8">
-              <ChartsContainer 
-                showFilters={true}
-                currency="USD"
+            </motion.h1>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+            >
+              <Button
+                text="Add Transaction"
+                variant="primary"
+                onClick={openAddModal}
+                icon={<Plus size={16} className="text-white" />}
               />
-            </div>
-            
+            </motion.div>
+          </motion.div>
+
+          <motion.div
+            layout
+            style={{ willChange: 'transform' }}
+            className="mt-[30px] px-5 flex flex-col gap-5"
+          >
+            <Counters onIconClick={handleIconClick} refreshTrigger={refreshCounters} />
+
+            <motion.div layout style={{ willChange: 'transform' }} className="mt-8">
+              <ChartsContainer showFilters={true} currency="USD" />
+            </motion.div>
+
             {isLoading ? (
               <Spinner />
             ) : transactions.length === 0 ? (
-              <EmptyState 
+              <EmptyState
                 title="Don`t have any transactions yet?"
                 description="Create new by clicking this button"
                 buttonText="Add Transaction"
                 onButtonClick={() => router.push('/transactions')}
               />
             ) : (
-              <TransactionsTable 
-                transactions={transactions} 
-                onDeleteTransaction={handleDeleteTransaction}
-                deleteModalConfig={{
-                  title: "Delete transaction",
-                  text: "Are you sure you want to delete this transaction?"
-                }}
-                onEditTransaction={handleEditTransaction}
-              />
+              <motion.div layout style={{ willChange: 'transform' }}>
+                <TransactionsTable 
+                  transactions={transactions} 
+                  onDeleteTransaction={handleDeleteTransaction}
+                  deleteModalConfig={{ title: "Delete transaction", text: "Are you sure you want to delete this transaction?" }}
+                  onEditTransaction={handleEditTransaction}
+                />
+              </motion.div>
             )}
-          </div>
-          {isModalOpen && <MainBudgetModal title="Edit main budget" onSubmit={handleTransactionSubmit} onClose={closeModal} />}
+          </motion.div>
+          {/* модалки */}
+          {isModalOpen && (
+            <MainBudgetModal
+              title="Edit main budget"
+              onSubmit={handleTransactionSubmit}
+              onClose={closeModal}
+            />
+          )}
           {isAddOpen && (
             <TransactionModal
               title="Add Transaction"

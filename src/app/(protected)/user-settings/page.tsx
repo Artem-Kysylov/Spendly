@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'motion/react'
 import { UserAuth } from '@/context/AuthContext'
 import useModal from '@/hooks/useModal'
 import Button from "@/components/ui-elements/Button"
@@ -37,10 +38,29 @@ export default function UserSettingsPage() {
                 {/* был узкий контейнер: max-w-4xl mx-auto */}
                 <div className="w-full">
                     {/* Page Header */}
-                    <div className="mt-[30px] mb-8">
-                        <h1 className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black dark:text-white">User Settings ⚙️</h1>
-                        <p className="text-sm sm:text-base text-gray-600 dark:text-white mt-2">Manage your account settings and preferences</p>
-                    </div>
+                    <motion.div 
+                        className="mt-[30px] mb-8"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                    >
+                        <motion.h1 
+                            className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black dark:text-white"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+                        >
+                            User Settings ⚙️
+                        </motion.h1>
+                        <motion.p 
+                            className="text-sm sm:text-base text-gray-600 dark:text-white mt-2"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+                        >
+                            Manage your account settings and preferences
+                        </motion.p>
+                    </motion.div>
 
                     {/* Settings Content */}
                     <div className="space-y-6">

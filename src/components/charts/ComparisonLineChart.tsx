@@ -228,7 +228,7 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
                 strokeWidth: 2,
                 fill: 'hsl(var(--background))'
               }}
-              animationDuration={800}
+              animationDuration={1400}
               name={finalCurrentLabel}
             />
             
@@ -249,7 +249,7 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
                 strokeWidth: 2,
                 fill: 'hsl(var(--background))'
               }}
-              animationDuration={800}
+              animationDuration={1400}
               name={finalPreviousLabel}
             />
           </RechartsLineChart>

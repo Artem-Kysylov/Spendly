@@ -1,6 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react"
+import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 
 type Theme = "light" | "dark" | "system"
 
@@ -74,13 +75,41 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("theme-preference-updated", handler as EventListener)
   }, [])
 
+  const [overlayVisible, setOverlayVisible] = useState(false)
+  const [fadeKey, setFadeKey] = useState(0)
+  const prefersReduced = useReducedMotion()
+
   const value = useMemo<ThemeContextValue>(() => ({
     theme,
     resolvedTheme,
-    setTheme: (next: Theme) => setThemeState(next),
-  }), [theme, resolvedTheme])
+    setTheme: (next: Theme) => {
+      setThemeState(next)
+      if (!prefersReduced) {
+        setFadeKey((k) => k + 1)
+        setOverlayVisible(true)
+      }
+    },
+  }), [theme, resolvedTheme, prefersReduced])
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  return (
+    <ThemeContext.Provider value={value}>
+      {children}
+      <AnimatePresence>
+        {overlayVisible && !prefersReduced && (
+          <motion.div
+            key={fadeKey}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 1, 0] }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: 'easeOut', times: [0, 0.5, 1] }}
+            onAnimationComplete={() => setOverlayVisible(false)}
+            className="fixed inset-0 pointer-events-none z-[200]"
+            style={{ background: 'linear-gradient(rgba(0,0,0,0.06), rgba(0,0,0,0.06))', willChange: 'opacity' }}
+          />
+        )}
+      </AnimatePresence>
+    </ThemeContext.Provider>
+  )
 }
 
 export function useTheme() {

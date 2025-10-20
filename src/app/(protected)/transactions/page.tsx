@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 // Import hooks
 import useModal from '@/hooks/useModal'
@@ -128,7 +129,12 @@ const Transactions = () => {
         <ToastMessage text={toastMessage.text} type={toastMessage.type} />
       )}
       
-      <div className="flex items-center justify-between mt-[30px] md:flex-row md:justify-between md:text-left">
+      <motion.div
+        layout
+        transition={{ type: 'spring', stiffness: 220, damping: 26, mass: 0.9 }}
+        style={{ willChange: 'transform' }}
+        className="flex itemscenter justify-between mt-[30px] md:flex-row md:justify-between md:text-left"
+      >
         <h1 className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black">Transactions📉</h1>
         <Button
           text="Add Transaction"
@@ -136,26 +142,32 @@ const Transactions = () => {
           onClick={openModal}
           icon={<Plus size={16} className="text-white" />}
         />
-      </div>
+      </motion.div>
 
-      {/* Фильтр транзакций */}
-      <TransactionsFilter
-        transactionType={filters.dataType}
-        onTransactionTypeChange={(type) => handleFiltersChange({ transactionType: type })}
-        datePeriod={filters.period}
-        onDatePeriodChange={(period) => handleFiltersChange({ datePeriod: period })}
-        className="mb-4"
-      />
+      <motion.div layout style={{ willChange: 'transform' }}>
+        <TransactionsFilter
+          transactionType={filters.dataType}
+          onTransactionTypeChange={(type) => handleFiltersChange({ transactionType: type })}
+          datePeriod={filters.period}
+          onDatePeriodChange={(period) => handleFiltersChange({ datePeriod: period })}
+          className="mb-4"
+        />
+      </motion.div>
 
-      {/* Бар-чарт трат */}
-      <ExpensesBarChart
-        data={chartData}
-        filters={filters}
-        isLoading={isChartLoading}
-        currency="USD"
-        height={240}
-        className="w-full mb-6"
-      />
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut", delay: 0.4 }}
+      >
+        <ExpensesBarChart
+          data={chartData}
+          filters={filters}
+          isLoading={isChartLoading}
+          currency="USD"
+          height={240}
+          className="w-full mb-6"
+        />
+      </motion.div>
 
       {isLoading ? (
         <Spinner />
@@ -171,11 +183,17 @@ const Transactions = () => {
           onButtonClick={openModal}
         />
       ) : (
-        <TransactionsTable
-          transactions={filteredTransactions}
-          onDeleteTransaction={handleDeleteTransaction}
-          onEditTransaction={handleEditTransaction}
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: "easeOut", delay: 0.5 }}
+        >
+          <TransactionsTable
+            transactions={filteredTransactions}
+            onDeleteTransaction={handleDeleteTransaction}
+            onEditTransaction={handleEditTransaction}
+          />
+        </motion.div>
       )}
 
       {isModalOpen && (

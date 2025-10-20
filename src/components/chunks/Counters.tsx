@@ -2,6 +2,7 @@
 
 // Imports 
 import { useState, useEffect, useMemo, useRef } from 'react'
+import { motion } from 'motion/react'
 import { supabase } from '../../lib/supabaseClient' 
 import { UserAuth } from '../../context/AuthContext'
 import { Pencil } from 'lucide-react'
@@ -221,12 +222,32 @@ const TransactionsCounters = ({
     }
 
     return (
-        <div className="mb-8">
-            <Card className="bg-card border-border">
-                <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <motion.div 
+            className="mb-8"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+        >
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
+            >
+                <Card className="bg-card border-border">
+                    <CardContent className="p-6">
+                    <motion.div 
+                        className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+                    >
                         {/* Enhanced Budget Section */}
-                        <div className="group relative">
+                        <motion.div 
+                            className="group relative"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
+                        >
                             <div className="absolute top-3 right-3 cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" onClick={onIconClick}>
                                 <Pencil className="text-primary text-[18px] duration-300 hover:opacity-50"/>
                             </div>
@@ -267,10 +288,15 @@ const TransactionsCounters = ({
                                     </>
                                 )}
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Enhanced Expenses Section */}
-                        <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-red-500/40 p-4 hover:shadow-md transition-all duration-300">
+                        <motion.div 
+                            className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-red-500/40 p-4 hover:shadow-md transition-all duration-300"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
+                        >
                             <div className="flex items-center gap-2">
                                 <h3 className="text-lg text-red-700 text-center font-medium">Total Expenses</h3>
                                 {totalExpenses > budget && budget > 0 && (
@@ -289,10 +315,15 @@ const TransactionsCounters = ({
                                     </p>
                                 )}
                             </div>
-                        </div>
+                        </motion.div>
 
                         {/* Enhanced Income Section */}
-                        <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-green-500/40 p-4 hover:shadow-md transition-all duration-300">
+                        <motion.div 
+                            className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-green-500/40 p-4 hover:shadow-md transition-all duration-300"
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, ease: "easeOut", delay: 0.5 }}
+                        >
                             <h3 className="text-lg text-green-700 text-center font-medium">Total Income</h3>
                             <span className="text-[30px] font-bold text-green-700 text-center">
                                 {formatCurrency(totalIncome)}
@@ -304,11 +335,16 @@ const TransactionsCounters = ({
                                     Covers {incomeCoverage.toFixed(0)}% of expenses
                                 </p>
                             </div>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
 
                     {/* AI Suggestions inside the card */}
-                    <div className="flex items-center gap-3 mt-5">
+                    <motion.div 
+                        className="flex items-center gap-3 mt-5"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, ease: "easeOut", delay: 0.6 }}
+                    >
                         <div className="flex-1">
                           {tipLoading && (
                             <span className="text-black dark:text-white text-sm inline-flex items-center">
@@ -349,10 +385,11 @@ const TransactionsCounters = ({
                             </>
                           )}
                         </button>
-                    </div>
+                    </motion.div>
                 </CardContent>
             </Card>
-        </div>
+            </motion.div>
+        </motion.div>
     )
 }
 
