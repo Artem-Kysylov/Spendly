@@ -34,7 +34,8 @@ function useDialog() {
 export function DialogContent({
   className,
   children,
-}: React.HTMLAttributes<HTMLDivElement>) {
+  overlayClassName,
+}: React.HTMLAttributes<HTMLDivElement> & { overlayClassName?: string }) {
   const { open, onOpenChange } = useDialog()
 
   if (typeof document === "undefined") return null
@@ -53,7 +54,10 @@ export function DialogContent({
           transition={{ duration: 0.4 }}
         >
           <motion.div
-            className="fixed inset-0 bg-foreground/50 dark:bg-black/70 backdrop-blur-[1px] z-0"
+            className={cn(
+              "fixed inset-0 bg-foreground/50 dark:bg-black/70 backdrop-blur-[1px] z-0",
+              overlayClassName
+            )}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -61,7 +65,6 @@ export function DialogContent({
           />
           <motion.div
             className={cn(
-              // Токены вместо захардкоженных светлых/тёмных классов
               "relative z-10 w-[92vw] max-w-md max-h-[85vh] overflow-y-auto rounded-lg border bg-card p-6 text-card-foreground shadow-lg",
               className,
             )}

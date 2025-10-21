@@ -139,7 +139,7 @@ export default function UserSettingsPage() {
                                         <li>• Early access to new features</li>
                                     </ul>
                                     <div className="mt-5">
-                                        <Link href="/payments" className="inline-flex">
+                                        <Link href="/payment" className="inline-flex">
                                             <Button text="Upgrade to Pro" variant="primary" />
                                         </Link>
                                     </div>

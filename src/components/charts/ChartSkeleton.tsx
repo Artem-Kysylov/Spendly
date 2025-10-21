@@ -15,6 +15,10 @@ export const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
   showLegend = true,
   type = 'line'
 }) => {
+  // Детерминированные паттерны высот (без случайностей)
+  const lineHeights = [34, 58, 72, 46, 80, 38, 62]
+  const barHeights = [55, 80, 35, 65, 45]
+
   return (
     <Card className="w-full">
       <CardHeader>
@@ -43,7 +47,7 @@ export const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
                     <Skeleton 
                       key={i} 
                       className="w-8" 
-                      style={{ height: `${Math.random() * 60 + 20}%` }}
+                      style={{ height: `${lineHeights[i % lineHeights.length]}%` }}
                     />
                   ))}
                 </div>
@@ -62,7 +66,7 @@ export const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
                     <Skeleton 
                       key={i} 
                       className="flex-1" 
-                      style={{ height: `${Math.random() * 70 + 30}%` }}
+                      style={{ height: `${barHeights[i % barHeights.length]}%` }}
                     />
                   ))}
                 </div>

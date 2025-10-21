@@ -243,6 +243,7 @@ const TransactionsCounters = ({
                     >
                         {/* Enhanced Budget Section */}
                         <motion.div 
+                            style={{ willChange: 'opacity, transform' }}
                             className="group relative"
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -252,7 +253,7 @@ const TransactionsCounters = ({
                                 <Pencil className="text-primary text-[18px] duration-300 hover:opacity-50"/>
                             </div>
                             
-                            <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-primary/40 p-4 hover:shadow-md transition-all duration-300">
+                            <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-primary/40 p-4 hover:shadow-md transition-shadow duration-300">
                                 <div className="flex items-center gap-2">
                                     <h3 className="text-lg text-primary text-center font-medium">Total Budget</h3>
                                     {budgetStatus === 'exceeded' && <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">Exceeded</span>}
@@ -292,7 +293,8 @@ const TransactionsCounters = ({
 
                         {/* Enhanced Expenses Section */}
                         <motion.div 
-                            className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-red-500/40 p-4 hover:shadow-md transition-all duration-300"
+                            style={{ willChange: 'opacity, transform' }}
+                            className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-red-50 to-red-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-red-500/40 p-4 hover:shadow-md transition-shadow duration-300"
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
@@ -319,7 +321,8 @@ const TransactionsCounters = ({
 
                         {/* Enhanced Income Section */}
                         <motion.div 
-                            className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-green-500/40 p-4 hover:shadow-md transition-all duration-300"
+                            style={{ willChange: 'opacity, transform' }}
+                            className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-green-50 to-green-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-green-500/40 p-4 hover:shadow-md transition-shadow duration-300"
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.5 }}

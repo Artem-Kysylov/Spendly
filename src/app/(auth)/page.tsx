@@ -29,7 +29,8 @@ export default function AuthPage() {
 
     useEffect(() => {
         if (isReady && session) {
-            router.replace('/dashboard')
+            const completed = !!session.user?.user_metadata?.onboarding_completed
+            router.replace(completed ? '/dashboard' : '/onboarding')
         }
     }, [isReady, session, router])
 
@@ -97,12 +98,12 @@ export default function AuthPage() {
             showError(error.message || 'Google sign-in failed')
             return
         }
-        router.replace('/dashboard')
+        // Не редиректим вручную: после OAuth вернёмся и эффект решит маршрут
     }
 
     const onEmailSignIn = async (e: React.FormEvent) => {
         e.preventDefault()
-        const { error } = await signInWithPassword(email, password)
+        const { data, error } = await signInWithPassword(email, password)
         if (error) {
             showError(error.message || 'Invalid credentials')
             return
@@ -115,14 +116,20 @@ export default function AuthPage() {
             localStorage.removeItem('auth:rememberMe')
             localStorage.removeItem('auth:rememberedEmail')
         }
-        router.replace('/dashboard')
+        // Определяем целевой маршрут по метаданным пользователя
+        let completed = !!data?.user?.user_metadata?.onboarding_completed
+        if (completed === false && !data?.user) {
+            // На всякий случай достанем свежего пользователя из сессии
+            const { data: userData } = await supabase.auth.getUser()
+            completed = !!userData?.user?.user_metadata?.onboarding_completed
+        }
+        router.replace(completed ? '/dashboard' : '/onboarding')
     }
 
     const onEmailSignUp = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!pwdCheck.all) return
 
-        // выполняем регистрацию
         const { data, error } = await signUpWithPassword(email, password)
         if (error) {
             showError(error.message || 'Sign up failed')
@@ -186,7 +193,8 @@ export default function AuthPage() {
             localStorage.setItem('auth:rememberMe', '1')
             localStorage.setItem('auth:rememberedEmail', email)
         }
-        router.replace('/dashboard')
+        // Новый пользователь всегда идёт в онбординг
+        router.replace('/onboarding')
     }
 
     useEffect(() => {

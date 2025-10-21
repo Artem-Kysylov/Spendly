@@ -1,63 +1,99 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { Bell, X } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { useNotifications } from '@/hooks/useNotifications'
 import type { NotificationBellProps } from '@/types/types'
 
-const NotificationBell = ({ className = '', onClick }: NotificationBellProps) => {
+function NotificationBell({ className = '', onClick }: NotificationBellProps) {
     const { notifications, unreadCount, isLoading, error, markAsRead, markAllAsRead } = useNotifications()
     const [isOpen, setIsOpen] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
+    const triggerRef = useRef<HTMLButtonElement>(null)
+    const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 })
+    const DROPDOWN_WIDTH = 320 // w-80 ≈ 320px
 
-    // Закрытие dropdown при клике вне его
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                setIsOpen(false)
-            }
-        }
+    // Явный type guard для error (исправляет ts(18047))
+    const hasDbError = typeof error === 'string' &&
+        (error.includes('relation') || error.includes('table') || error.includes('does not exist'))
 
-        document.addEventListener('mousedown', handleClickOutside)
-        return () => document.removeEventListener('mousedown', handleClickOutside)
-    }, [])
-
-    const handleBellClick = () => {
-        setIsOpen(!isOpen)
-        onClick?.()
+    // Функция позиционирования — считает left от кнопки (исправляет ошибки на L19-28 и отсутствие updateDropdownPosition)
+    const updateDropdownPosition = () => {
+        if (!triggerRef.current) return
+        const rect = triggerRef.current.getBoundingClientRect()
+        const left = Math.max(8, Math.min(rect.right - DROPDOWN_WIDTH, window.innerWidth - DROPDOWN_WIDTH - 8))
+        setDropdownPosition({ top: rect.bottom + 8, left })
     }
 
+    // Эффект для обновления позиции (заменяет старый эффект с dropdownRef/right)
+    useEffect(() => {
+        if (!isOpen) return
+        updateDropdownPosition()
+        const onResizeOrScroll = () => updateDropdownPosition()
+        window.addEventListener('resize', onResizeOrScroll)
+        window.addEventListener('scroll', onResizeOrScroll, true)
+        return () => {
+            window.removeEventListener('resize', onResizeOrScroll)
+            window.removeEventListener('scroll', onResizeOrScroll, true)
+        }
+    }, [isOpen])
+
+    // Обработчик клика по уведомлению — внутри компонента (исправляет ts(2304) по markAsRead)
     const handleNotificationClick = async (notification: any) => {
         if (!notification.is_read) {
             await markAsRead(notification.id)
         }
     }
-
     const getNotificationIcon = (type: string) => {
         switch (type) {
-            case 'budget_alert':
-                return '⚠️'
-            case 'weekly_reminder':
-                return '📅'
-            case 'expense_warning':
-                return '💸'
-            case 'goal_achieved':
-                return '🎉'
-            default:
-                return '📢'
+            case 'budget_alert': return '⚠️'
+            case 'weekly_reminder': return '📅'
+            case 'expense_warning': return '💸'
+            case 'goal_achieved': return '🎉'
+            default: return '📢'
         }
     }
 
-    // Если есть ошибка, связанная с отсутствием таблиц, показываем колокольчик без функциональности
-    const hasDbError = error && (error.includes('relation') || error.includes('table') || error.includes('does not exist'))
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as Element
+            const insideTrigger = !!target.closest('.notification-bell-trigger')
+            const insideDropdown = !!target.closest('.notification-dropdown')
+            if (isOpen && !insideTrigger && !insideDropdown) {
+                setIsOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside)
+        return () => document.removeEventListener('mousedown', handleClickOutside)
+    }, [isOpen])
+
+    const handleBellClick = () => {
+        updateDropdownPosition()
+        setIsOpen(prev => !prev)
+        onClick?.()
+    }
+
+    useEffect(() => {
+        if (!isOpen) return
+        updateDropdownPosition()
+        const onResizeOrScroll = () => updateDropdownPosition()
+        window.addEventListener('resize', onResizeOrScroll)
+        window.addEventListener('scroll', onResizeOrScroll, true)
+        return () => {
+            window.removeEventListener('resize', onResizeOrScroll)
+            window.removeEventListener('scroll', onResizeOrScroll, true)
+        }
+    }, [isOpen])
 
     return (
         <div className={`relative ${className}`} ref={dropdownRef}>
             {/* Bell Icon with background */}
             <button
+                ref={triggerRef}
                 onClick={handleBellClick}
-                className="relative p-2 text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 rounded-full transition-all duration-200"
+                className="notification-bell-trigger relative p-2 text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 rounded-full transition-all duration-200"
                 aria-label="Notifications"
             >
                 <Bell className="w-6 h-6" />
@@ -68,9 +104,12 @@ const NotificationBell = ({ className = '', onClick }: NotificationBellProps) =>
                 )}
             </button>
 
-            {/* Dropdown */}
-            {isOpen && (
-                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-card rounded-lg shadow-lg border border-border dark:border-border z-[9999]">
+            {/* Dropdown — render via portal to escape stacking contexts */}
+            {isOpen && createPortal(
+                <div
+                    className="notification-dropdown fixed w-80 bg-white dark:bg-card rounded-lg shadow-lg border border-border dark:border-border z-[9999]"
+                    style={{ top: dropdownPosition.top, left: dropdownPosition.left }}
+                >
                     {/* Header */}
                     <div className="flex items-center justify-between p-4 border-b border-gray-100">
                         <h3 className="font-semibold text-secondary-black">Notifications</h3>
@@ -177,7 +216,8 @@ const NotificationBell = ({ className = '', onClick }: NotificationBellProps) =>
                             </button>
                         </div>
                     )}
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     )

@@ -12,8 +12,9 @@ export const useSignWithGoogle = () => {
     const handleGoogleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault()
         const { error } = await signInWithGoogle()
-        if(!error) {
-            router.push('/dashboard')
+        if (!error) {
+            // Редирект выполнит эффект на auth-странице после возврата из OAuth
+            return
         }        
     }
     return handleGoogleClick

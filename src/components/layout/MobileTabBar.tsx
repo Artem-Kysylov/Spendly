@@ -3,14 +3,11 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, CreditCard, Wallet, Settings } from 'lucide-react'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 
 function MobileTabBar() {
   const pathname = usePathname()
-  // prefers-reduced-motion (без сторонних хуков)
-  const prefersReduced =
-    typeof window !== 'undefined' &&
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const prefersReduced = useReducedMotion()
 
   // Премиум анимация с ease-out
   const navTransition = { duration: 0.5, ease: "easeOut" } as const

@@ -13,7 +13,7 @@ export const ChartDescription: React.FC<ChartDescriptionProps> = ({
   className = ""
 }) => {
   return (
-    <CardDescription className={`text-sm text-muted-foreground mt-1 ${className}`}>
+    <CardDescription suppressHydrationWarning className={`text-sm text-muted-foreground mt-1 ${className}`}>
       {children}
     </CardDescription>
   )

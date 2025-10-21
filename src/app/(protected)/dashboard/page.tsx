@@ -198,13 +198,21 @@ const Dashboard = () => {
           </motion.div>
 
           <motion.div
-            layout
-            style={{ willChange: 'transform' }}
+            style={{ willChange: 'opacity' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.28 }}
             className="mt-[30px] px-5 flex flex-col gap-5"
           >
             <Counters onIconClick={handleIconClick} refreshTrigger={refreshCounters} />
 
-            <motion.div layout style={{ willChange: 'transform' }} className="mt-8">
+            <motion.div
+              style={{ willChange: 'opacity' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.28 }}
+              className="mt-8"
+            >
               <ChartsContainer showFilters={true} currency="USD" />
             </motion.div>
 
@@ -218,7 +226,13 @@ const Dashboard = () => {
                 onButtonClick={() => router.push('/transactions')}
               />
             ) : (
-              <motion.div layout style={{ willChange: 'transform' }}>
+              <motion.div
+                style={{ willChange: 'opacity' }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.28 }}
+                className="mt-8"
+              >
                 <TransactionsTable 
                   transactions={transactions} 
                   onDeleteTransaction={handleDeleteTransaction}

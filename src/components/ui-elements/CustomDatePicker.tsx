@@ -15,6 +15,8 @@ interface CustomDatePickerProps {
   className?: string
 }
 
+const MAX_POPOVER_WIDTH = 360
+
 const CustomDatePicker = ({ 
   selectedDate, 
   onDateSelect, 
@@ -46,9 +48,13 @@ const CustomDatePicker = ({
     const update = () => {
       const rect = triggerRef.current?.getBoundingClientRect()
       if (rect) {
+        const clampedLeft = Math.min(
+          Math.max(8, rect.left),
+          window.innerWidth - 8 - MAX_POPOVER_WIDTH
+        )
         setPortalCoords({
           top: Math.min(rect.bottom + 8, window.innerHeight - 8),
-          left: Math.max(8, rect.left),
+          left: clampedLeft,
           width: rect.width,
         })
       }
@@ -85,7 +91,15 @@ const CustomDatePicker = ({
           onClick={() => {
             const rect = triggerRef.current?.getBoundingClientRect()
             if (rect) {
-              setPortalCoords({ top: rect.bottom + 8, left: rect.left, width: rect.width })
+              const clampedLeft = Math.min(
+                Math.max(8, rect.left),
+                window.innerWidth - 8 - MAX_POPOVER_WIDTH
+              )
+              setPortalCoords({
+                top: Math.min(rect.bottom + 8, window.innerHeight - 8),
+                left: clampedLeft,
+                width: rect.width
+              })
             }
             setIsDatePickerOpen(!isDatePickerOpen)
           }}
@@ -94,7 +108,7 @@ const CustomDatePicker = ({
         {isDatePickerOpen && createPortal(
           <div
             className="custom-date-picker-popover p-4 bg-white dark:bg-card rounded-lg shadow-lg border border-border dark:border-border z-[10000]"
-            style={{ position: 'fixed', top: portalCoords.top, left: portalCoords.left, minWidth: portalCoords.width }}
+            style={{ position: 'fixed', top: portalCoords.top, left: portalCoords.left }}
           >
             <div className="flex justify-between items-center mb-4">
               <button
@@ -136,7 +150,7 @@ const CustomDatePicker = ({
               disabled={disabled || ((date: Date) => date > new Date() || date < new Date("1900-01-01"))}
               initialFocus
               showOutsideDays={false}
-              className="w-full"
+              className="w-fit"
               classNames={{
                 months: "flex w-full flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                 month: "space-y-4 w-full",
