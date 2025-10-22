@@ -1,0 +1,18 @@
+{
+  "BudgetSetup": {
+    "title": "월 예산 설정",
+    "selectCountry": "국가 선택",
+    "selectCurrency": "통화 선택",
+    "customAmount": "사용자 금액",
+    "save": "저장",
+    "autodetected": "자동 감지",
+    "searchCountry": "국가 검색...",
+    "searchCurrency": "통화 검색...",
+    "clearSelection": "지우기"
+  },
+  "Settings": {
+    "language": "언어",
+    "selectLanguage": "언어 선택",
+    "saveLanguage": "언어 저장"
+  }
+}

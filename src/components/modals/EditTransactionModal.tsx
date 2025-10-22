@@ -78,15 +78,12 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
                         />
                         
                         {/* Date Picker */}
-                        <div className="flex flex-col gap-2">
-                            <label className="text-sm font-medium text-secondary-black dark:text-white">
-                                Pick up the date
-                            </label>
-                            <CustomDatePicker
-                                selectedDate={selectedDate}
-                                onDateSelect={setSelectedDate}
-                            />
-                        </div>
+                        <CustomDatePicker
+                            selectedDate={selectedDate}
+                            onDateSelect={setSelectedDate}
+                            label="Pick up the date"
+                        />
+
                         {allowTypeChange && (
                             <div className="flex gap-4">
                                 <RadioButton

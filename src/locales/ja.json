@@ -1,0 +1,18 @@
+{
+  "BudgetSetup": {
+    "title": "月額予算を設定",
+    "selectCountry": "国を選択",
+    "selectCurrency": "通貨を選択",
+    "customAmount": "カスタム金額",
+    "save": "保存",
+    "autodetected": "自動検出",
+    "searchCountry": "国を検索...",
+    "searchCurrency": "通貨を検索...",
+    "clearSelection": "クリア"
+  },
+  "Settings": {
+    "language": "言語",
+    "selectLanguage": "言語を選択",
+    "saveLanguage": "言語を保存"
+  }
+}

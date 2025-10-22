@@ -1,0 +1,18 @@
+{
+  "BudgetSetup": {
+    "title": "Set your monthly budget",
+    "selectCountry": "Select your country",
+    "selectCurrency": "Select your currency",
+    "customAmount": "Custom amount",
+    "save": "Save",
+    "autodetected": "Autodetected",
+    "searchCountry": "Search country...",
+    "searchCurrency": "Search currency...",
+    "clearSelection": "Clear"
+  },
+  "Settings": {
+    "language": "Language",
+    "selectLanguage": "Select language",
+    "saveLanguage": "Save language"
+  }
+}

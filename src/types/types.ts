@@ -127,7 +127,7 @@ export interface BudgetPresetProps {
 }
 
 export interface CreateMainBudgetProps {
-    onSubmit: (budget: string) => void;
+    onSubmit: (budget: string, locale?: import('./locale').UserLocaleSettings) => void;
 }
 
 export interface BudgetFolderItemProps {

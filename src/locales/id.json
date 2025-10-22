@@ -1,0 +1,18 @@
+{
+  "BudgetSetup": {
+    "title": "Tetapkan anggaran bulanan",
+    "selectCountry": "Negara Anda",
+    "selectCurrency": "Mata uang",
+    "customAmount": "Jumlah khusus",
+    "save": "Simpan",
+    "autodetected": "Terdeteksi otomatis",
+    "searchCountry": "Cari negara...",
+    "searchCurrency": "Cari mata uang...",
+    "clearSelection": "Bersihkan"
+  },
+  "Settings": {
+    "language": "Bahasa",
+    "selectLanguage": "Pilih bahasa",
+    "saveLanguage": "Simpan bahasa"
+  }
+}

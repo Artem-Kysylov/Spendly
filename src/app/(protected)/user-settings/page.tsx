@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { UserAuth } from '@/context/AuthContext'
 import useModal from '@/hooks/useModal'
@@ -13,6 +13,8 @@ import ThemeSwitcher from '@/components/ui-elements/ThemeSwitcher'
 import useIsPWAInstalled from '@/hooks/useIsPWAInstalled'
 import AppInstallModal from '@/components/modals/AppInstallModal'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabaseClient'
+import LanguageSelect from '@/components/ui-elements/locale/LanguageSelect'
 
 export default function UserSettingsPage() {
     const { signOut, session } = UserAuth()
@@ -31,6 +33,39 @@ export default function UserSettingsPage() {
     // Импортируем компоненты и хук
     const [isAppInstallModalOpen, setIsAppInstallModalOpen] = useState(false)
     const isPWAInstalled = useIsPWAInstalled()
+
+    // Language state (init from cookie or default 'en')
+    const [language, setLanguage] = useState<'en' | 'uk' | 'ru' | 'hi' | 'id' | 'ja' | 'ko'>('en')
+    const [isSavingLang, setIsSavingLang] = useState(false)
+
+    useEffect(() => {
+        if (typeof document !== 'undefined') {
+            const m = document.cookie.match(/(?:^|; )spendly_locale=([^;]+)/)
+            const cookieLang = m ? decodeURIComponent(m[1]) : null
+            if (cookieLang && ['en','uk','ru','hi','id','ja','ko'].includes(cookieLang)) {
+                setLanguage(cookieLang as any)
+                document.documentElement.lang = cookieLang
+            }
+        }
+    }, [])
+
+    async function handleLanguageChange(next: typeof language) {
+        setLanguage(next)
+        document.documentElement.lang = next
+        // set cookie 1 year
+        document.cookie = `spendly_locale=${encodeURIComponent(next)}; path=/; max-age=31536000; samesite=lax`
+        if (session?.user?.id) {
+            setIsSavingLang(true)
+            const { error } = await supabase
+                .from('users')
+                .update({ locale: next })
+                .eq('id', session.user.id)
+            setIsSavingLang(false)
+            if (error) {
+                console.error('Error saving locale:', error)
+            }
+        }
+    }
 
     return (
         <>
@@ -143,6 +178,26 @@ export default function UserSettingsPage() {
                                             <Button text="Upgrade to Pro" variant="primary" />
                                         </Link>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Language Section */}
+                        <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-lg font-semibold text-secondary-black dark:text-white">Language</h2>
+                                    <p className="text-sm text-gray-600 dark:text-white">Choose your interface language</p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <LanguageSelect
+                                        value={language}
+                                        onChange={(l) => handleLanguageChange(l)}
+                                        className="min-w-[180px]"
+                                    />
+                                    {isSavingLang ? (
+                                        <span className="text-xs text-muted-foreground">Saving…</span>
+                                    ) : null}
                                 </div>
                             </div>
                         </div>

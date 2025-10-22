@@ -1,0 +1,74 @@
+[
+  {
+    "code": "US",
+    "name": "United States",
+    "language": "en",
+    "currency": "USD",
+    "symbol": "$",
+    "default": true
+  },
+  {
+    "code": "UA",
+    "name": "Ukraine",
+    "language": "uk",
+    "currency": "UAH",
+    "symbol": "₴",
+    "default": true
+  },
+  {
+    "code": "GB",
+    "name": "United Kingdom",
+    "language": "en",
+    "currency": "GBP",
+    "symbol": "£"
+  },
+  {
+    "code": "CA",
+    "name": "Canada",
+    "language": "en",
+    "currency": "CAD",
+    "symbol": "$"
+  },
+  {
+    "code": "IN",
+    "name": "India",
+    "language": "hi",
+    "currency": "INR",
+    "symbol": "₹"
+  },
+  {
+    "code": "ID",
+    "name": "Indonesia",
+    "language": "id",
+    "currency": "IDR",
+    "symbol": "Rp"
+  },
+  {
+    "code": "JP",
+    "name": "Japan",
+    "language": "ja",
+    "currency": "JPY",
+    "symbol": "¥"
+  },
+  {
+    "code": "KR",
+    "name": "South Korea",
+    "language": "ko",
+    "currency": "KRW",
+    "symbol": "₩"
+  },
+  {
+    "code": "DE",
+    "name": "Germany",
+    "language": "en",
+    "currency": "EUR",
+    "symbol": "€"
+  },
+  {
+    "code": "ES",
+    "name": "Spain",
+    "language": "es",
+    "currency": "EUR",
+    "symbol": "€"
+  }
+]

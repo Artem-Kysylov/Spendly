@@ -10,6 +10,7 @@ import ToastMessage from '@/components/ui-elements/ToastMessage'
 
 // Import types
 import { ToastMessageProps } from '@/types/types'
+import type { UserLocaleSettings } from '@/types/locale'
 
 const AddNewBudget = () => {
   const { session } = UserAuth()
@@ -23,10 +24,26 @@ const AddNewBudget = () => {
     }, 3000)
   }
 
-  const handleCreateBudget = async (budget: string) => {
+  const handleCreateBudget = async (budget: string, locale?: UserLocaleSettings) => {
     try {
       if (!session?.user?.id) {
         throw new Error('User not authenticated')
+      }
+
+      if (locale) {
+        const { error: userErr } = await supabase
+          .from('users')
+          .update({
+            country: locale.country,
+            currency: locale.currency,
+            locale: locale.locale
+          })
+          .eq('id', session.user.id)
+
+        if (userErr) {
+          console.error('Error saving user locale settings:', userErr)
+          throw userErr
+        }
       }
 
       console.log('Creating main budget:', {

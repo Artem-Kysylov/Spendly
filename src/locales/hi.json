@@ -1,0 +1,18 @@
+{
+  "BudgetSetup": {
+    "title": "मासिक बजट सेट करें",
+    "selectCountry": "आपका देश",
+    "selectCurrency": "मुद्रा",
+    "customAmount": "अपनी राशि",
+    "save": "सेव करें",
+    "autodetected": "स्वतः-पहचान",
+    "searchCountry": "देश खोजें...",
+    "searchCurrency": "मुद्रा खोजें...",
+    "clearSelection": "हटाएँ"
+  },
+  "Settings": {
+    "language": "भाषा",
+    "selectLanguage": "भाषा चुनें",
+    "saveLanguage": "भाषा सेव करें"
+  }
+}

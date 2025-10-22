@@ -1,0 +1,18 @@
+{
+  "BudgetSetup": {
+    "title": "Встановіть місячний бюджет",
+    "selectCountry": "Ваша країна",
+    "selectCurrency": "Валюта",
+    "customAmount": "Своя сума",
+    "save": "Зберегти",
+    "autodetected": "Автовизначення",
+    "searchCountry": "Пошук країни...",
+    "searchCurrency": "Пошук валюти...",
+    "clearSelection": "Очистити"
+  },
+  "Settings": {
+    "language": "Мова",
+    "selectLanguage": "Виберіть мову",
+    "saveLanguage": "Зберегти мову"
+  }
+}

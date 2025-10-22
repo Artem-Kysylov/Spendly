@@ -122,15 +122,26 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
         try {
             const permission = await Notification.requestPermission()
             if (permission !== 'granted') {
-                console.warn('Push notification permission denied')
-                if (prev) setSettings(prev)
+                console.error('Permission for notifications was not granted.')
+                setSettings((prev) =>
+                    prev ? { ...prev, push_enabled: false } : prev
+                )
                 return false
             }
 
             const registration = await navigator.serviceWorker.ready
+            const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+            if (!vapidKey) {
+                console.error('VAPID public key not found.')
+                return false
+            }
+
+            const keyUint8 = urlBase64ToUint8Array(vapidKey)
+
+            // Вариант 1: передаём ArrayBuffer с явной типизацией
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
-                applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+                applicationServerKey: keyUint8.buffer as ArrayBuffer,
             })
 
             const token = await getAuthToken()
@@ -221,4 +232,16 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
         subscribeToPush,
         unsubscribeFromPush
     }
+}
+
+// Помощник: Base64Url → Uint8Array
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+    const raw = atob(base64)
+    const output = new Uint8Array(raw.length)
+    for (let i = 0; i < raw.length; i++) {
+        output[i] = raw.charCodeAt(i)
+    }
+    return output
 }
