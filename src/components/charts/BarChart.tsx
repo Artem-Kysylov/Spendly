@@ -8,6 +8,7 @@ import { formatCurrency, defaultChartColors } from '@/lib/chartUtils'
 import { CustomTooltip } from './CustomTooltip'
 import { BarChartProps } from '@/types/types'
 import { ChartDescription } from './ChartDescription'
+import { useTranslations } from 'next-intl'
 
 // BarChartComponent component (forwardRef)
 const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({ 
@@ -26,12 +27,14 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
   className = ""
 }, ref) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const tCharts = useTranslations('charts')
+  const resolvedTitle = title ?? tCharts('bar.titleByCategory')
 
   if (isLoading) {
     return (
       <Card className="w-full flex flex-col h-full">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+          <CardTitle className="text-lg font-semibold">{resolvedTitle}</CardTitle>
         </CardHeader>
         <CardContent className="flex-1" style={{ minHeight: height }}>
           <div className="flex items-center justify-center h-full">
@@ -91,106 +94,96 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
   }
 
   return (
-    <Card ref={ref} className={className}>
+    <Card className={className} ref={ref}>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
-        {description && (
-          <ChartDescription>{description}</ChartDescription>
-        )}
+        <CardTitle>{resolvedTitle}</CardTitle>
+        {description && <ChartDescription>{description}</ChartDescription>}
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={height}>
-          <RechartsBarChart
-            data={normalizedData}
-            layout={orientation === "horizontal" ? "vertical" : "horizontal"}
-            barCategoryGap="25%"
-            margin={{
-              top: 36,
-              right: 30,
-              left: orientation === "horizontal" ? 80 : 20,
-              bottom: 5,
-            }}
-          >
-            {showGrid && (
-              <CartesianGrid
-                strokeDasharray="4 4"
-                horizontal={true}
-                vertical={true}
-                stroke="hsl(var(--muted-foreground))"
-                opacity={0.18}
-              />
-            )}
-            
-            {orientation === "horizontal" ? (
-              <>
-                <XAxis 
-                  type="number"
-                  stroke="hsl(var(--muted-foreground))"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={formatYAxisLabel}
-                />
-                <YAxis 
-                  type="category"
-                  dataKey="category"
-                  stroke="hsl(var(--muted-foreground))"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={formatXAxisLabel}
-                  width={90}
-                />
-              </>
-            ) : (
-              <>
-                <XAxis 
-                  dataKey="category"
-                  stroke="hsl(var(--muted-foreground))"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={formatXAxisLabel}
-                  // Ровные подписи с эмодзи, меньше «воздуха» снизу
-                  height={28}
-                  tickMargin={4}
-                  interval={0}
-                />
-                <YAxis 
-                  stroke="hsl(var(--muted-foreground))"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={formatYAxisLabel}
-                />
-              </>
-            )}
-            
-            {showTooltip && (
-              <Tooltip 
-                content={<CustomTooltip currency={currency} />}
-                cursor={{ fill: 'hsl(var(--muted))', opacity: 0.1 }}
-              />
-            )}
-            
-            <Bar
-              dataKey="amount"
-              maxBarSize={48}
-              radius={[4, 4, 0, 0]}
-              animationDuration={1400}
+        <div style={{ width: '100%', height }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <RechartsBarChart
+              data={data}
+              layout={orientation === "horizontal" ? "vertical" : "horizontal"}
+              barCategoryGap="25%"
+              margin={{
+                top: 36,
+                right: 30,
+                left: orientation === "horizontal" ? 80 : 20,
+                bottom: 5,
+              }}
             >
-              {normalizedData.map((entry, index) => (
-                <Cell 
-                  key={`cell-${index}`} 
-                  fill={entry.fill}
-                  opacity={entry.opacity}
+              {showGrid && <CartesianGrid strokeDasharray="3 3" />}
+              {orientation === "horizontal" ? (
+                <>
+                  <XAxis 
+                    type="number"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={formatYAxisLabel}
+                  />
+                  <YAxis 
+                    type="category"
+                    dataKey="category"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={formatXAxisLabel}
+                    width={90}
+                  />
+                </>
+              ) : (
+                <>
+                  <XAxis 
+                    dataKey="category"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={formatXAxisLabel}
+                    // Ровные подписи с эмодзи, меньше «воздуха» снизу
+                    height={28}
+                    tickMargin={4}
+                    interval={0}
+                  />
+                  <YAxis 
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={formatYAxisLabel}
+                  />
+                </>
+              )}
+              
+              {showTooltip && (
+                <Tooltip 
+                  content={<CustomTooltip currency={currency} />}
+                  cursor={{ fill: 'hsl(var(--muted))', opacity: 0.1 }}
                 />
-              ))}
-            </Bar>
-          </RechartsBarChart>
-        </ResponsiveContainer>
+              )}
+              
+              <Bar
+                dataKey="amount"
+                maxBarSize={48}
+                radius={[4, 4, 0, 0]}
+                animationDuration={1400}
+              >
+                {normalizedData.map((entry, index) => (
+                  <Cell 
+                    key={`cell-${index}`} 
+                    fill={entry.fill}
+                    opacity={entry.opacity}
+                  />
+                ))}
+              </Bar>
+            </RechartsBarChart>
+          </ResponsiveContainer>
+        </div>
       </CardContent>
-
     </Card>
   )
 })

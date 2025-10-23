@@ -6,6 +6,7 @@ import { UserAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 
 // Import components 
 import TransactionsTable from '@/components/chunks/TransactionsTable'
@@ -38,6 +39,10 @@ const Dashboard = () => {
   const { isModalOpen, openModal, closeModal } = useModal()
   const { isModalOpen: isAddOpen, openModal: openAddModal, closeModal: closeAddModal } = useModal()
 
+  // Инициализация переводов (исправляет ошибки tTransactions/tCommon/tDashboard)
+  const tDashboard = useTranslations('dashboard')
+  const tTransactions = useTranslations('transactions')
+  const tCommon = useTranslations('common')
   // Проверяем наличие бюджета
   const { isLoading: isBudgetChecking } = useCheckBudget(session?.user?.id)
 
@@ -105,11 +110,10 @@ const Dashboard = () => {
       
       if (error) {
         console.error('Error deleting transaction:', error)
-        handleToastMessage('Error deleting transaction', 'error')
+        handleToastMessage(tTransactions('toast.deleteFailed'), 'error')
         return
       }
-      
-      handleToastMessage('Transaction deleted successfully', 'success')
+      handleToastMessage(tTransactions('toast.deleteSuccess'), 'success')
       // Pause before deleting data from the table
       setTimeout(() => {
         fetchTransactions()
@@ -117,7 +121,7 @@ const Dashboard = () => {
       }, 1000)
     } catch (error) {
       console.error('Unexpected error during deletion:', error)
-      handleToastMessage('An unexpected error occurred', 'error')
+      handleToastMessage(tCommon('unexpectedError'), 'error')
     }
   }
 
@@ -146,17 +150,16 @@ const Dashboard = () => {
 
       if (error) {
         console.error('Error updating transaction:', error)
-        handleToastMessage('Failed to update transaction', 'error')
+        handleToastMessage(tTransactions('toast.updateFailed'), 'error')
         return
       }
-
-      handleToastMessage('Transaction updated successfully!', 'success')
+      handleToastMessage(tTransactions('toast.updateSuccess'), 'success')
       await fetchTransactions()
       setRefreshCounters(prev => prev + 1) 
       window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
     } catch (e) {
       console.error('Unexpected error during update:', e)
-      handleToastMessage('An unexpected error occurred', 'error')
+      handleToastMessage(tCommon('unexpectedError'), 'error')
     }
   }
 
@@ -181,7 +184,7 @@ const Dashboard = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
             >
-              Welcome <span className="text-primary">{session?.user?.user_metadata?.name}👋</span>
+              {tDashboard('welcome', { name: session?.user?.user_metadata?.name ?? '' })}
             </motion.h1>
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -189,7 +192,7 @@ const Dashboard = () => {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
             >
               <Button
-                text="Add Transaction"
+                text={tTransactions('addTransaction')}
                 variant="primary"
                 onClick={openAddModal}
                 icon={<Plus size={16} className="text-white" />}
@@ -220,9 +223,9 @@ const Dashboard = () => {
               <Spinner />
             ) : transactions.length === 0 ? (
               <EmptyState
-                title="Don`t have any transactions yet?"
-                description="Create new by clicking this button"
-                buttonText="Add Transaction"
+                title={tTransactions('empty.title')}
+                description={tTransactions('empty.description')}
+                buttonText={tTransactions('addTransaction')}
                 onButtonClick={() => router.push('/transactions')}
               />
             ) : (
@@ -236,7 +239,10 @@ const Dashboard = () => {
                 <TransactionsTable 
                   transactions={transactions} 
                   onDeleteTransaction={handleDeleteTransaction}
-                  deleteModalConfig={{ title: "Delete transaction", text: "Are you sure you want to delete this transaction?" }}
+                  deleteModalConfig={{ 
+                    title: tDashboard('deleteModal.title'), 
+                    text: tDashboard('deleteModal.prompt') 
+                  }}
                   onEditTransaction={handleEditTransaction}
                 />
               </motion.div>
@@ -245,14 +251,14 @@ const Dashboard = () => {
           {/* модалки */}
           {isModalOpen && (
             <MainBudgetModal
-              title="Edit main budget"
+              title={tDashboard('mainBudget.editTitle')}
               onSubmit={handleTransactionSubmit}
               onClose={closeModal}
             />
           )}
           {isAddOpen && (
             <TransactionModal
-              title="Add Transaction"
+              title={tTransactions('modal.addTitle')}
               onClose={closeAddModal}
               onSubmit={(message, type) => {
                 handleTransactionSubmit(message, type)

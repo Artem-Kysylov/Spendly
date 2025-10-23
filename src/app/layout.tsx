@@ -8,6 +8,10 @@ import { ToastProvider } from '@/components/ui/use-toast'
 import { Toaster } from '@/components/ui/toaster'
 import ServiceWorkerRegistration from '@/components/notifications/ServiceWorkerRegistration'
 import { LazyMotion, domAnimation } from 'framer-motion'
+import { NextIntlClientProvider } from 'next-intl'
+import { cookies } from 'next/headers'
+import { loadMessages, DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
+
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -93,13 +97,22 @@ export const viewport: Viewport = {
   // interactiveWidget: 'resizes-visual',
 }
 
-export default function RootLayout({
+// делаем асинхронным для await loadMessages(...)
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const cookieStore = cookies()
+  const cookieLocale =
+    cookieStore.get('NEXT_LOCALE')?.value ||
+    cookieStore.get('spendly_locale')?.value ||
+    DEFAULT_LOCALE
+  const locale = isSupportedLanguage(cookieLocale || '') ? (cookieLocale as any) : DEFAULT_LOCALE
+  const messages = await loadMessages(locale)
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
@@ -109,10 +122,12 @@ export default function RootLayout({
           <QueryProvider>
             <ToastProvider>
               <AuthContextProvider>
-                <ThemeProvider>
-                  {children}
-                  <ServiceWorkerRegistration />
-                </ThemeProvider>
+                <NextIntlClientProvider locale={locale} messages={messages}>
+                  <ThemeProvider>
+                    {children}
+                    <ServiceWorkerRegistration />
+                  </ThemeProvider>
+                </NextIntlClientProvider>
               </AuthContextProvider>
               <Toaster />
             </ToastProvider>

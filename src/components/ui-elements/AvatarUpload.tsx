@@ -7,6 +7,7 @@ import { UserAuth } from '@/context/AuthContext'
 import Button from './Button'
 import Spinner from './Spinner'
 import { useAvatarProcessing } from '@/hooks/useAvatarProcessing'
+import { useTranslations } from 'next-intl'
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string | null
@@ -34,6 +35,9 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const { isProcessing, error: processingError, previewUrl, processFile, clear, progress, abort } = useAvatarProcessing()
+
+  const tErrors = useTranslations('errors')
+  const tProfile = useTranslations('profile')
 
   // Размеры в зависимости от пропа size
   const sizeClasses = {
@@ -67,12 +71,12 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
     if (!session?.user?.id) return
 
     if (!file.type.startsWith('image/')) {
-      setUploadError('Please select an image file')
+      setUploadError(tErrors('selectImageFile'))
       return
     }
 
     if (file.size > 5 * 1024 * 1024) {
-      setUploadError('File size must be less than 5MB')
+      setUploadError(tErrors('fileTooLarge5mb'))
       return
     }
 
@@ -108,7 +112,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
 
       onAvatarUpdate?.(avatarUrl)
     } catch (error: any) {
-      setUploadError(error.message || 'Failed to upload avatar')
+      setUploadError(error.message || tErrors('uploadAvatarFailed'))
     } finally {
       setIsUploading(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -132,7 +136,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
 
       onAvatarUpdate?.(null)
     } catch (error: any) {
-      setUploadError(error.message || 'Failed to remove avatar')
+      setUploadError(error.message || tErrors('removeAvatarFailed'))
     } finally {
       setIsUploading(false)
     }
@@ -155,7 +159,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         { (mode === 'pre-signup' ? previewUrl : currentAvatarUrl) ? (
           <img
             src={(mode === 'pre-signup' ? previewUrl! : currentAvatarUrl!) }
-            alt="User Avatar"
+            alt={tProfile('avatar.alt')}
             className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
@@ -178,7 +182,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
 
       <div className="flex gap-2">
         <Button
-          text={(mode === 'pre-signup' ? previewUrl : currentAvatarUrl) ? "Change Avatar" : "Upload Avatar"}
+          text={(mode === 'pre-signup' ? previewUrl : currentAvatarUrl) ? tProfile('avatar.change') : tProfile('avatar.upload')}
           variant="outline"
           onClick={triggerFileInput}
           disabled={isUploading || isProcessing}
@@ -187,7 +191,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         />
         { ((mode === 'pre-signup' ? !!previewUrl : !!currentAvatarUrl) && showRemoveButton) && (
           <Button
-            text="Cancel"
+            text={tProfile('avatar.cancel')}
             variant="outline"
             onClick={handleRemovePreSignup}
             disabled={isUploading}

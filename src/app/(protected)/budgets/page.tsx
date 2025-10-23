@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { UserAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 import { motion } from 'motion/react'
+import { useTranslations } from 'next-intl'
 
 // Import hooks 
 import useModal from '@/hooks/useModal'
@@ -26,6 +27,8 @@ const Budgets = () => {
   const [budgetFolders, setBudgetFolders] = useState<BudgetFolderItemProps[]>([])
   
   const { isModalOpen, openModal, closeModal } = useModal()
+  const tBudgets = useTranslations('budgets')
+  const tCommon = useTranslations('common')
 
   const fetchBudgetFolders = async () => {
     if (!session?.user?.id) return
@@ -39,7 +42,7 @@ const Budgets = () => {
 
       if (error) {
         console.error('Error fetching budget folders:', error)
-        handleToastMessage('Failed to load budget folders', 'error')
+        handleToastMessage(tBudgets('list.toast.failedLoad'), 'error')
         return
       }
 
@@ -48,7 +51,7 @@ const Budgets = () => {
       }
     } catch (error) {
       console.error('Error:', error)
-      handleToastMessage('An unexpected error occurred', 'error')
+      handleToastMessage(tCommon('unexpectedError'), 'error')
     }
   }
 
@@ -76,15 +79,15 @@ const Budgets = () => {
         })
 
       if (error) {
-        handleToastMessage('Failed to create budget', 'error')
+        handleToastMessage(tBudgets('list.toast.failedCreate'), 'error')
         return
       }
 
-      handleToastMessage('Budget created successfully', 'success')
+      handleToastMessage(tBudgets('list.toast.createSuccess'), 'success')
       closeModal()
       fetchBudgetFolders()
     } catch (error) {
-      handleToastMessage('An unexpected error occurred', 'error')
+      handleToastMessage(tCommon('unexpectedError'), 'error')
     }
   }
 
@@ -137,7 +140,7 @@ const Budgets = () => {
 
       {isModalOpen && (
         <NewBudgetModal
-          title="Create a new budget💸"
+          title={tBudgets('list.modal.createTitle')}
           onClose={() => {
             closeModal()
           }}

@@ -5,19 +5,20 @@ import React, { useEffect, useState } from 'react'
 import NotificationBell from '@/components/ui-elements/NotificationBell'
 import ThemeSwitcher from '@/components/ui-elements/ThemeSwitcher'
 import Image from 'next/image'
+import { useLocale } from 'next-intl'
 
 const TopBar = () => {
     const [currentDate, setCurrentDate] = useState<string>('')
-
+    const locale = useLocale()
     useEffect(() => {
-        const formatted = new Date().toLocaleDateString('en-US', {
+        const formatted = new Date().toLocaleDateString(locale, {
             weekday: 'long',
             year: 'numeric',
             month: 'long',
             day: 'numeric'
         })
         setCurrentDate(formatted)
-    }, [])
+    }, [locale])
 
     return (
         <header className="sticky top-0 z-40 bg-card border-b border-border transition-colors duration-300">

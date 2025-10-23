@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatCurrency, formatChartDate, generateComparisonTitle, generateComparisonLabels, generateComparisonDescription, formatPercentageChange } from '@/lib/chartUtils'
 import { ComparisonLineChartProps } from '@/types/types'
 import { ChartDescription } from './ChartDescription'
+import { useTranslations } from 'next-intl'
 
 // Custom tooltip for comparison chart
 const ComparisonTooltip = ({ active, payload, label, currency }: any) => {
@@ -57,6 +58,7 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
   percentageChange
 }, ref) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const tCharts = useTranslations('charts')
 
   // Генерируем динамический контент если не передан
   const dynamicTitle = title || (startDate && endDate ? generateComparisonTitle(startDate, endDate) : "Current vs Previous Period")
@@ -73,12 +75,12 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
     return (
       <Card ref={ref} className={`w-full ${className}`}>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">{dynamicTitle}</CardTitle>
-          <ChartDescription>{dynamicDescription}</ChartDescription>
+          <CardTitle className="text-lg font-semibold">{title || tCharts('comparison.defaultTitle')}</CardTitle>
+          {description && <ChartDescription>{description}</ChartDescription>}
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center h-[240px]">
-            <div className="text-muted-foreground">Loading chart data...</div>
+          <div className="flex items-center justify-center h-64">
+            <div className="text-muted-foreground">{tCharts('states.loadingData')}</div>
           </div>
         </CardContent>
       </Card>
@@ -258,6 +260,5 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
     </Card>
   )
 })
-
 ComparisonLineChartComponent.displayName = 'ComparisonLineChart'
 export const ComparisonLineChart = ComparisonLineChartComponent

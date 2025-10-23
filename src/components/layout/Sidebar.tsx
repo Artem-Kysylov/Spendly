@@ -5,10 +5,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, CreditCard, Wallet, Settings } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 const Sidebar = () => {
     const { session } = UserAuth()
     const pathname = usePathname()
+    const tLayout = useTranslations('layout')
     const displayName =
       session?.user?.user_metadata?.full_name ||
       session?.user?.user_metadata?.name ||
@@ -18,17 +20,17 @@ const Sidebar = () => {
 
     const navigationItems = [
         {
-            name: 'Dashboard',
+            name: tLayout('sidebar.dashboard'),
             href: '/dashboard',
             icon: LayoutDashboard,
         },
         {
-            name: 'Transactions',
+            name: tLayout('sidebar.transactions'),
             href: '/transactions',
             icon: CreditCard,
         },
         {
-            name: 'Budgets',
+            name: tLayout('sidebar.budgets'),
             href: '/budgets',
             icon: Wallet,
         },
@@ -40,7 +42,7 @@ const Sidebar = () => {
             <div className="h-[65px] px-6 border-b border-border flex items-center">
                 <Image 
                     src="/Spendly-logo.svg" 
-                    alt="Spendly Logo" 
+                    alt={tLayout('alt.logo')} 
                     width={90} 
                     height={30}
                     className="h-8 w-auto"
@@ -103,7 +105,7 @@ const Sidebar = () => {
                             <span className="text-white text-sm font-semibold">{initial}</span>
                         </div>
                     )}
-                    <span>User Settings</span>
+                    <span>{tLayout('sidebar.userSettings')}</span>
                 </Link>
             </div>
         </aside>

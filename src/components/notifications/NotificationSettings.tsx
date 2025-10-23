@@ -10,6 +10,7 @@ import type { NotificationFrequency, NotificationFrequencyOption, ToastMessagePr
 import ToastMessage from '@/components/ui-elements/ToastMessage'
 import Spinner from '@/components/ui-elements/Spinner'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useTranslations } from 'next-intl'
 
 const NotificationSettings = () => {
     const { session, isReady } = UserAuth()
@@ -17,30 +18,31 @@ const NotificationSettings = () => {
     const [isUpdatingFrequency, setIsUpdatingFrequency] = useState(false)
     const [isUpdatingPush, setIsUpdatingPush] = useState(false)
     const [toast, setToast] = useState<ToastMessageProps | null>(null)
+    const tN = useTranslations('notifications')
 
     const frequencyOptions: NotificationFrequencyOption[] = [
         {
             value: 'disabled',
-            label: "Don't send",
-            description: 'Turn off all reminders',
+            label: tN('frequency.disabled.label'),
+            description: tN('frequency.disabled.description'),
             emoji: '😴'
         },
         {
             value: 'gentle',
-            label: 'Gentle nudges',
-            description: '1-2 notifications daily',
+            label: tN('frequency.gentle.label'),
+            description: tN('frequency.gentle.description'),
             emoji: '🤗'
         },
         {
             value: 'aggressive',
-            label: 'Aggressive reminders',
-            description: '4-5 notifications daily',
+            label: tN('frequency.aggressive.label'),
+            description: tN('frequency.aggressive.description'),
             emoji: '😤'
         },
         {
             value: 'relentless',
-            label: 'Relentless',
-            description: "You'll feel it (10+ daily)",
+            label: tN('frequency.relentless.label'),
+            description: tN('frequency.relentless.description'),
             emoji: '🤯'
         }
     ]
@@ -101,15 +103,15 @@ const NotificationSettings = () => {
         return (
             <div>
                 <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-900 rounded-lg p-4">
-                    <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">Требуется аутентификация</h3>
+                    <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">{tN('authRequired.title')}</h3>
                     <p className="text-blue-700 dark:text-blue-300 text-sm mb-3">
-                        Для доступа к настройкам уведомлений необходимо войти в систему.
+                        {tN('authRequired.description')}
                     </p>
                     <button 
                         onClick={() => window.location.href = '/login'}
                         className="text-sm bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-800 dark:text-blue-100 px-3 py-1 rounded transition-colors"
                     >
-                        Войти в систему
+                        {tN('authRequired.signIn')}
                     </button>
                 </div>
             </div>
@@ -205,21 +207,21 @@ const NotificationSettings = () => {
                     {/* Push Notifications Toggle */}
                     <div className="flex items-center justify-between py-3 border-b border-border">
                         <div>
-                            <h3 className="font-medium text-foreground">Push Notifications</h3>
-                            <p className="text-sm text-muted-foreground">Receive notifications on this device</p>
+                            <h3 className="font-medium text-foreground">{tN('settings.push.title')}</h3>
+                            <p className="text-sm text-muted-foreground">{tN('settings.push.description')}</p>
                         </div>
                         <div className="relative">
                             <Switch
                                 checked={settings.push_enabled}
                                 onCheckedChange={handlePushToggle}
                                 disabled={isUpdatingPush}
-                                aria-label="Toggle push notifications"
+                                aria-label={tN('a11y.togglePush')}
                                 className="
-                                    peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full 
-                                    border border-primary bg-background transition-colors px-0.5
-                                    data-[state=checked]:bg-background data-[state=unchecked]:bg-background
-                                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
-                                    disabled:cursor-not-allowed disabled:opacity-50
+                                  peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full 
+                                  border border-primary bg-background transition-colors px-0.5
+                                  data-[state=checked]:bg-background data-[state=unchecked]:bg-background
+                                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+                                  disabled:cursor-not-allowed disabled:opacity-50
                                 "
                                 thumbClassName="hidden"
                             />

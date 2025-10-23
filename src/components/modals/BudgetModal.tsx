@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 
 // Import types
 import { BudgetModalProps } from '../../types/types'
+import { useTranslations } from 'next-intl'
 
 const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData, handleToastMessage }: BudgetModalProps) => {
     const [emojiIcon, setEmojiIcon] = useState(initialData?.emoji || '💰')
@@ -32,17 +33,19 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
         }
     }
 
+    const tModals = useTranslations('modals')
+    const tCommon = useTranslations('common')
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         if (!name.trim() || !amount) return
-
         try {
             await onSubmit(emojiIcon, name.trim(), parseFloat(amount), type)
             onClose()
         } catch (error) {
             console.error('Error in budget modal:', error)
             if (handleToastMessage) {
-                handleToastMessage('Failed to save budget folder', 'error')
+                handleToastMessage(tModals('budget.toast.saveFailed'), 'error')
             }
         }
     }
@@ -68,7 +71,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                             className="bg-[#F5F3FF] dark:bg-background text-primary text-[25px] w-[60px] h-[60px] flex items-center justify-center rounded-lg hover:opacity-50 transition-opacity duration-300 border-none"
                             onClick={() => setOpenEmojiPicker(true)}
                         />
-                        <span className='text-secondary-black dark:text-white'>Pick an emoji (optional)</span>
+                        <span className='text-secondary-black dark:text-white'>{tModals('budget.pickEmojiOptional')}</span>
                     </div>
                     <div className='absolute top-0 right-0'>
                         <EmojiPicker 
@@ -82,14 +85,14 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                         <TextInput
                             type="text"
-                            placeholder="Budget Folder Name"
+                            placeholder={tModals('budget.placeholder.name')}
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             disabled={isLoading}
                         />
                         <TextInput
                             type="text"
-                            placeholder="Amount(USD)"
+                            placeholder={tModals('budget.placeholder.amountUSD')}
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             onInput={handleInput}
@@ -97,7 +100,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                         />
                         <div className="flex gap-4">
                             <RadioButton
-                                title="Expense"
+                                title={tModals('budget.type.expense')}
                                 value="expense"
                                 currentValue={type}
                                 variant="expense"
@@ -105,7 +108,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                                 inactiveBgClassName="bg-background"
                             />
                             <RadioButton
-                                title="Income"
+                                title={tModals('budget.type.income')}
                                 value="income"
                                 currentValue={type}
                                 variant="income"
@@ -115,7 +118,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                         </div>
                         <DialogFooter className="justify-center sm:justify-center gap-4">
                             <Button
-                                text="Cancel"
+                                text={tCommon('cancel')}
                                 variant="ghost"
                                 className="text-primary"
                                 onClick={handleCancel}
@@ -123,7 +126,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                             />
                             <Button
                                 type="submit"
-                                text={isLoading ? 'Saving...' : 'Submit'}
+                                text={isLoading ? tCommon('saving') : tCommon('submit')}
                                 variant="primary"
                                 disabled={isLoading || !name.trim() || !amount}
                             />

@@ -11,11 +11,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 
 // Import types
 import { TransactionModalProps, BudgetFolderItemProps } from '../../types/types'
+import { useTranslations } from 'next-intl'
 
 // Component: TransactionModal
 const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) => {
   const { session } = UserAuth()
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const tModals = useTranslations('modals')
+  const tCommon = useTranslations('common')
 
   // State 
   const [transactionTitle, setTransactionTitle] = useState<string>('')
@@ -151,30 +154,28 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <TextInput
               type="text"
-              placeholder="Transaction Name"
+              placeholder={tModals('transaction.placeholder.title')}
               value={transactionTitle}
               onChange={(e) => setTransactionTitle(e.target.value)}
               onInput={handleInput}
             />
             <TextInput
               type="number"
-              placeholder="Amount(USD)"
+              placeholder={tModals('transaction.placeholder.amountUSD')}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
             />
-            
             {/* Date Picker */}
             <CustomDatePicker
               selectedDate={selectedDate}
               onDateSelect={setSelectedDate}
-              label="Pick up the date"
-              placeholder="Pick a date"
+              label={tModals('transaction.date.label')}
+              placeholder={tModals('transaction.date.placeholder')}
             />
-            
             {/* Budget Category Selection */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-secondary-black dark:text-white">
-                Choose budget category
+                {tModals('transaction.select.label')}
               </label>
               <div className="relative">
                 <select 
@@ -182,7 +183,7 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
                   onChange={handleBudgetChange}
                   className="h-[50px] px-[20px] pr-[40px] w-full rounded-md border border-input bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 appearance-none"
                 >
-                  <option value="uncategorized">📝 Unbudgeted</option>
+                  <option value="uncategorized">📝 {tModals('transaction.select.unbudgeted')}</option>
                   {budgetFolders.map((budget) => (
                     <option key={budget.id} value={budget.id}>
                       {budget.emoji} {budget.name}
@@ -200,7 +201,7 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
               {showSearch && (
                 <input
                   type="text"
-                  placeholder="Search budget..."
+                  placeholder={tModals('transaction.search.placeholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="h-[50px] px-[20px] w-full rounded-md border border-input bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
@@ -208,17 +209,17 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
               )}
               
               {isBudgetsLoading && (
-                <p className="text-sm text-gray-500">Loading budgets...</p>
+                <p className="text-sm text-gray-500">{tModals('transaction.loadingBudgets')}</p>
               )}
               
               {searchQuery && filteredBudgets.length === 0 && !isBudgetsLoading && (
-                <p className="text-sm text-gray-500">No results found</p>
+                <p className="text-sm text-gray-500">{tModals('transaction.noResults')}</p>
               )}
             </div>
 
             <div className="flex gap-4">
               <RadioButton
-                title="Expense"
+                title={tModals('transaction.type.expense')}
                 value="expense"
                 currentValue={type}
                 variant="expense"
@@ -226,7 +227,7 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
                 disabled={isTypeDisabled}
               />
               <RadioButton
-                title="Income"
+                title={tModals('transaction.type.income')}
                 value="income"
                 currentValue={type}
                 variant="income"
@@ -244,14 +245,14 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
             
             <DialogFooter className="justify-center sm:justify-center gap-4">
               <Button
-                text="Cancel"
+                text={tCommon('cancel')}
                 variant="ghost"
                 className="text-primary"
                 onClick={onClose}
               />
               <Button
                 type="submit"
-                text="Submit"
+                text={tCommon('submit')}
                 variant="default"
                 disabled={isLoading}
                 isLoading={isLoading}

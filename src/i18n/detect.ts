@@ -39,12 +39,31 @@ function pickNavigatorLanguage(): Language | null {
 
 async function fetchGeoIP(timeoutMs = 2500): Promise<GeoIPResponse | null> {
   try {
+    // Try session cache first
+    if (typeof window !== 'undefined' && 'sessionStorage' in window) {
+      const cached = sessionStorage.getItem('spendly_geoip_cache')
+      if (cached) {
+        try {
+          return JSON.parse(cached) as GeoIPResponse
+        } catch {}
+      }
+    }
+
     const controller = new AbortController()
     const id = setTimeout(() => controller.abort(), timeoutMs)
     const res = await fetch('https://ipapi.co/json/', { signal: controller.signal })
     clearTimeout(id)
     if (!res.ok) return null
-    return await res.json()
+    const json = await res.json()
+
+    // Save to session cache
+    if (typeof window !== 'undefined' && 'sessionStorage' in window) {
+      try {
+        sessionStorage.setItem('spendly_geoip_cache', JSON.stringify(json))
+      } catch {}
+    }
+
+    return json
   } catch {
     return null
   }

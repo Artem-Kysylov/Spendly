@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import Button from '@/components/ui-elements/Button'
 import { CheckCircle2, Eye, EyeOff } from 'lucide-react'
 import { motion } from 'motion/react'
+import { useTranslations } from 'next-intl'
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState('')
@@ -21,6 +22,7 @@ export default function ResetPasswordPage() {
   
   const router = useRouter()
   const searchParams = useSearchParams()
+  const tReset = useTranslations('resetPassword')
 
   useEffect(() => {
     // Проверяем наличие токена в URL
@@ -123,18 +125,17 @@ export default function ResetPasswordPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
             >
-              Set your new password
+              {tReset('title')}
             </motion.h1>
 
             {stage === 'form' && (
               <form onSubmit={onSubmit} className="space-y-4" noValidate>
                 <p className="text-sm text-gray-600">
-                  Enter your new password below. Make sure it meets all the requirements.
+                  {tReset('instructions')}
                 </p>
-
                 <div>
                   <label htmlFor="password" className="mb-1 block text-sm font-medium">
-                    New Password
+                    {tReset('label.password')}
                   </label>
                   <div className="relative">
                     <Input
@@ -143,47 +144,38 @@ export default function ResetPasswordPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      placeholder="Enter new password"
+                      placeholder={tReset('placeholder.password')}
                       className="pr-10"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-900"
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                    {/* aria-label оставляем без локализации */}
                   </div>
                 </div>
-
                 {/* Требования к паролю */}
                 <div className="text-xs space-y-1">
                   <div className={`flex items-center gap-2 ${pwdCheck.len ? 'text-green-600' : 'text-gray-400'}`}>
                     <span>{pwdCheck.len ? '✓' : '○'}</span>
-                    <span>At least 6 characters</span>
+                    <span>{tReset('requirements.minimumChars')}</span>
                   </div>
                   <div className={`flex items-center gap-2 ${pwdCheck.lower ? 'text-green-600' : 'text-gray-400'}`}>
                     <span>{pwdCheck.lower ? '✓' : '○'}</span>
-                    <span>One lowercase letter</span>
+                    <span>{tReset('requirements.lowercase')}</span>
                   </div>
                   <div className={`flex items-center gap-2 ${pwdCheck.upper ? 'text-green-600' : 'text-gray-400'}`}>
                     <span>{pwdCheck.upper ? '✓' : '○'}</span>
-                    <span>One uppercase letter</span>
+                    <span>{tReset('requirements.uppercase')}</span>
                   </div>
                   <div className={`flex items-center gap-2 ${pwdCheck.digit ? 'text-green-600' : 'text-gray-400'}`}>
                     <span>{pwdCheck.digit ? '✓' : '○'}</span>
-                    <span>One number</span>
+                    <span>{tReset('requirements.number')}</span>
                   </div>
                   <div className={`flex items-center gap-2 ${pwdCheck.symbol ? 'text-green-600' : 'text-gray-400'}`}>
                     <span>{pwdCheck.symbol ? '✓' : '○'}</span>
-                    <span>One special character</span>
+                    <span>{tReset('requirements.special')}</span>
                   </div>
                 </div>
-
                 <div>
                   <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium">
-                    Confirm Password
+                    {tReset('label.confirmPassword')}
                   </label>
                   <div className="relative">
                     <Input
@@ -192,17 +184,10 @@ export default function ResetPasswordPage() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
-                      placeholder="Confirm new password"
+                      placeholder={tReset('placeholder.confirmPassword')}
                       className="pr-10"
                     />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-900"
-                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                    {/* aria-label оставляем без локализации */}
                   </div>
                 </div>
 
@@ -216,13 +201,13 @@ export default function ResetPasswordPage() {
                   type="submit"
                   variant="primary"
                   className="w-full"
-                  text={isSubmitting ? 'Updating password...' : 'Update password'}
+                  text={isSubmitting ? tReset('states.updating') : tReset('buttons.update')}
                   disabled={!isPasswordValid || password !== confirmPassword || isSubmitting}
                 />
 
                 <div className="text-center">
                   <Link href="/" className="text-blue-600 hover:text-blue-700 underline text-sm">
-                    Back to Sign in
+                    {tReset('buttons.backToSignIn')}
                   </Link>
                 </div>
               </form>
@@ -255,7 +240,7 @@ export default function ResetPasswordPage() {
                   Your password has been successfully updated. You will be redirected to the sign in page shortly.
                 </p>
                 <Link href="/" className="text-blue-600 hover:text-blue-700 underline text-sm">
-                  Back to Sign in
+                  {tReset('buttons.backToSignIn')}
                 </Link>
               </motion.div>
             )}

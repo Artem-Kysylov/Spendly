@@ -6,11 +6,14 @@ import { supabase } from '@/lib/supabaseClient'
 import { UserAuth } from '@/context/AuthContext'
 import CreateMainBudget from '@/components/budgets/CreateMainBudget'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
+import { useTranslations } from 'next-intl'
 
 export default function Page() {
   const { session, isReady } = UserAuth()
   const router = useRouter()
   const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
+  const tSetupBudget = useTranslations('setup.budget')
+  const tCommon = useTranslations('common')
 
   useEffect(() => {
     if (isReady && !session) {
@@ -20,14 +23,14 @@ export default function Page() {
 
   const onSubmit = async (budget: string) => {
     if (!session?.user?.id) {
-      setToast({ text: 'Please sign in to save a budget', type: 'error' })
+      setToast({ text: tSetupBudget('toast.signInRequired'), type: 'error' })
       return
     }
 
     try {
       const amount = Number(budget)
       if (!amount || amount <= 0) {
-        setToast({ text: 'Enter a valid budget amount', type: 'error' })
+        setToast({ text: tSetupBudget('toast.invalidAmount'), type: 'error' })
         return
       }
 
@@ -43,16 +46,16 @@ export default function Page() {
         .select()
 
       if (error) {
-        setToast({ text: 'Failed to save budget. Try again.', type: 'error' })
+        setToast({ text: tSetupBudget('toast.saveFailed'), type: 'error' })
         return
       }
 
-      setToast({ text: 'Budget saved successfully!', type: 'success' })
+      setToast({ text: tSetupBudget('toast.saveSuccess'), type: 'success' })
       // Переход к дашборду с пустым состоянием (по задумке он будет после онбординга)
       router.push('/dashboard')
     } catch (error) {
       console.error('Error saving budget:', error)
-      setToast({ text: 'An unexpected error occurred. Please try again.', type: 'error' })
+      setToast({ text: tCommon('unexpectedError'), type: 'error' })
     }
   }
 

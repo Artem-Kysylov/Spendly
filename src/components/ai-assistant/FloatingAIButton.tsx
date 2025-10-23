@@ -5,6 +5,7 @@ import React from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 
 // Import components 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -21,6 +22,7 @@ export const FloatingAIButton: React.FC<FloatingAIButtonProps> = ({
   className,
   isOpen = false
 }) => {
+  const tAI = useTranslations('assistant')
   return (
     <TooltipProvider>
       <Tooltip>
@@ -51,7 +53,7 @@ export const FloatingAIButton: React.FC<FloatingAIButtonProps> = ({
               
               className
             )}
-            aria-label={isOpen ? "Close AI Assistant" : "Ask Spendly Pal"}
+            aria-label={isOpen ? tAI('buttons.close') : tAI('buttons.ask')}
           >
             <div className="relative w-6 h-6 flex items-center justify-center">
               <Image  
@@ -59,9 +61,9 @@ export const FloatingAIButton: React.FC<FloatingAIButtonProps> = ({
                 alt="Sparkles"
                 width={24}
                 height={24} 
-              className={cn(
-                "absolute transition-all duration-300 ease-in-out",
-                isOpen ? "opacity-0 rotate-90 scale-75" : "opacity-100 rotate-0 scale-100"
+                className={cn(
+                  "absolute transition-all duration-300 ease-in-out",
+                  isOpen ? "opacity-0 rotate-90 scale-75" : "opacity-100 rotate-0 scale-100"
                 )} />
               <X 
                 size={24} 
@@ -74,7 +76,7 @@ export const FloatingAIButton: React.FC<FloatingAIButtonProps> = ({
           </button>
         </TooltipTrigger>
         <TooltipContent side="left" className="font-medium">
-          {isOpen ? "Close AI Assistant" : "Ask Spendly Pal"}
+          {isOpen ? tAI('buttons.close') : tAI('buttons.ask')}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

@@ -25,6 +25,7 @@ import type { EditTransactionPayload } from '@/types/types'
 // Component
 import { supabase } from '@/lib/supabaseClient'
 import { UserAuth } from '@/context/AuthContext'
+import { useTranslations } from 'next-intl'
 
 const Transactions = () => {
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
@@ -58,6 +59,8 @@ const Transactions = () => {
   }
 
   const { session } = UserAuth()
+  const t = useTranslations('transactions')
+  const tCommon = useTranslations('common')
   const handleDeleteTransaction = async (id: string) => {
     if (!session?.user?.id || !id) return
 
@@ -70,17 +73,16 @@ const Transactions = () => {
 
       if (error) {
         console.error('Error deleting transaction:', error)
-        handleToastMessage('Failed to delete transaction. Please try again.', 'error')
+        handleToastMessage(t('toast.deleteFailed'), 'error')
         return
       }
-
-      handleToastMessage('Transaction deleted successfully', 'success')
+      handleToastMessage(t('toast.deleteSuccess'), 'success')
       setTimeout(() => {
         refetch()
       }, 1000)
     } catch (error) {
       console.error('Error:', error)
-      handleToastMessage('An unexpected error occurred', 'error')
+      handleToastMessage(tCommon('unexpectedError'), 'error')
     }
   }
 
@@ -89,12 +91,12 @@ const Transactions = () => {
       // Логика редактирования будет обработана в хуке или здесь
       // Пока используем простой рефетч
       await refetch()
-      handleToastMessage('Transaction updated successfully!', 'success')
+      handleToastMessage(t('toast.updateSuccess'), 'success')
       // Обновим прогресс бары бюджетов, если открыты соответствующие виджеты
       window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
     } catch (e) {
       console.error('Unexpected error during update:', e)
-      handleToastMessage('An unexpected error occurred', 'error')
+      handleToastMessage(tCommon('unexpectedError'), 'error')
     }
   }
 
@@ -117,7 +119,7 @@ const Transactions = () => {
     return (
       <div className="flex flex-col gap-6 px-5">
         <div className="flex items-center justify-center mt-[30px]">
-          <div className="text-destructive">Error: {error}</div>
+          <div className="text-destructive">{tCommon('errorLabel')}: {String(error)}</div>
         </div>
       </div>
     )
@@ -135,9 +137,11 @@ const Transactions = () => {
         style={{ willChange: 'transform' }}
         className="flex itemscenter justify-between mt-[30px] md:flex-row md:justify-between md:text-left"
       >
-        <h1 className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black">Transactions📉</h1>
+        <h1 className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black">
+          {t('title')}
+        </h1>
         <Button
-          text="Add Transaction"
+          text={t('addTransaction')}
           variant="primary"
           onClick={openModal}
           icon={<Plus size={16} className="text-white" />}
@@ -173,13 +177,13 @@ const Transactions = () => {
         <Spinner />
       ) : filteredTransactions.length === 0 && allTransactions.length > 0 ? (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">No transactions found for the selected filters</p>
+          <p className="text-muted-foreground">{t('empty.filtered')}</p>
         </div>
       ) : allTransactions.length === 0 ? (
         <EmptyState
-          title="No transactions yet"
-          description="Start by adding your first transaction"
-          buttonText="Add Transaction"
+          title={t('empty.title')}
+          description={t('empty.description')}
+          buttonText={t('addTransaction')}
           onButtonClick={openModal}
         />
       ) : (
@@ -198,7 +202,7 @@ const Transactions = () => {
 
       {isModalOpen && (
         <TransactionModal
-          title="Add Transaction"
+          title={t('modal.addTitle')}
           onClose={closeModal}
           onSubmit={(message, type) => {
             handleTransactionSubmit(message, type)

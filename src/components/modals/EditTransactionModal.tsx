@@ -6,6 +6,7 @@ import RadioButton from '../ui-elements/RadioButton'
 import CustomDatePicker from '../ui-elements/CustomDatePicker'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { EditTransactionModalProps } from '../../types/types'
+import { useTranslations } from 'next-intl'
 
 const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, initialData, allowTypeChange = true }: EditTransactionModalProps) => {
     const [localTitle, setLocalTitle] = useState(initialData.title || '')
@@ -18,7 +19,7 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
         if (inputRef.current) inputRef.current.focus()
     }, [])
 
-
+    const tCommon = useTranslations('common')
 
     const handleAmountInput = (e: React.FormEvent<HTMLInputElement>) => {
         const value = e.currentTarget.value
@@ -104,7 +105,7 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
                         )}
                         <DialogFooter className="justify-center sm:justify-center gap-4">
                             <Button
-                                text="Cancel"
+                                text={tCommon('cancel')}
                                 variant="ghost"
                                 className="text-primary"
                                 onClick={handleCancel}

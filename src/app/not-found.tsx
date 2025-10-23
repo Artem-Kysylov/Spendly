@@ -7,9 +7,11 @@ import { motion } from 'motion/react'
 
 // Import components
 import Button from '../components/ui-elements/Button'
+import { useTranslations } from 'next-intl'
 
 const NotFound = () => {
   const router = useRouter()
+  const tNotFound = useTranslations('notFound')
 
   const handleClick = () => {
     router.push('/')
@@ -24,7 +26,7 @@ const NotFound = () => {
     >
       <motion.img 
         src="/illustration-404.svg" 
-        alt="404"
+        alt={tNotFound('alt.illustration')}
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
@@ -43,7 +45,7 @@ const NotFound = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
       >
-        Sorry, this page does not exist
+        {tNotFound('title')}
       </motion.p>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -51,7 +53,7 @@ const NotFound = () => {
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
       >
         <Button
-          text='Go to the Home page'
+          text={tNotFound('button.goHome')}
           variant="primary"
           onClick={handleClick}
         />

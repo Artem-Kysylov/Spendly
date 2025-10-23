@@ -10,6 +10,7 @@ import { ChartFilters as ChartFiltersType, ChartPeriod } from '../../types/types
 
 // Import components 
 import { TransactionsFilter } from '../ui-elements'
+import { useTranslations } from 'next-intl'
 
 interface ChartFiltersProps {
   filters: ChartFiltersType
@@ -22,6 +23,7 @@ export const ChartFilters: React.FC<ChartFiltersProps> = ({
   onFiltersChange,
   isLoading = false
 }) => {
+  const tCharts = useTranslations('charts')
   const handlePeriodChange = (period: ChartPeriod) => {
     const now = new Date()
     let startDate = new Date()
@@ -85,7 +87,7 @@ export const ChartFilters: React.FC<ChartFiltersProps> = ({
     <Card className="w-full border-0 shadow-none rounded-none bg-transparent">
       <CardContent className="p-0">
         <div className="space-y-4">
-          <h2 className="text-[25px] font-semibold">Budgets Analytics</h2>
+          <h2 className="text-[25px] font-semibold">{tCharts('titles.analytics')}</h2>
 
           <div className="flex items-start flex-wrap gap-6">
             <TransactionsFilter
@@ -103,7 +105,7 @@ export const ChartFilters: React.FC<ChartFiltersProps> = ({
             {isLoading && (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <RefreshCw className="h-4 w-4 animate-spin" />
-                Loading...
+                {tCharts('states.loading')}
               </div>
             )}
           </div>

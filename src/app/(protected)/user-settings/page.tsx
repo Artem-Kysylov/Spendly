@@ -15,6 +15,7 @@ import AppInstallModal from '@/components/modals/AppInstallModal'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import LanguageSelect from '@/components/ui-elements/locale/LanguageSelect'
+import { useTranslations } from 'next-intl'
 
 export default function UserSettingsPage() {
     const { signOut, session } = UserAuth()
@@ -52,17 +53,32 @@ export default function UserSettingsPage() {
     async function handleLanguageChange(next: typeof language) {
         setLanguage(next)
         document.documentElement.lang = next
-        // set cookie 1 year
+        // Сразу ставим куки для мгновенного эффекта
         document.cookie = `spendly_locale=${encodeURIComponent(next)}; path=/; max-age=31536000; samesite=lax`
+        document.cookie = `NEXT_LOCALE=${encodeURIComponent(next)}; path=/; max-age=31536000; samesite=lax`
+
         if (session?.user?.id) {
             setIsSavingLang(true)
-            const { error } = await supabase
-                .from('users')
-                .update({ locale: next })
-                .eq('id', session.user.id)
-            setIsSavingLang(false)
-            if (error) {
-                console.error('Error saving locale:', error)
+            try {
+                const { data: { session: current } } = await supabase.auth.getSession()
+                const token = current?.access_token
+                if (!token) throw new Error('No auth token')
+                const resp = await fetch('/api/user/locale', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ locale: next })
+                })
+                if (!resp.ok) {
+                    const err = await resp.json()
+                    throw new Error(err.error || 'Failed to save locale')
+                }
+            } catch (e) {
+                console.error('Error saving locale:', e)
+            } finally {
+                setIsSavingLang(false)
             }
         }
     }
@@ -85,7 +101,7 @@ export default function UserSettingsPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
                         >
-                            User Settings ⚙️
+                            {tSettings('header.title')}
                         </motion.h1>
                         <motion.p 
                             className="text-sm sm:text-base text-gray-600 dark:text-white mt-2"
@@ -93,7 +109,7 @@ export default function UserSettingsPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
                         >
-                            Manage your account settings and preferences
+                            {tSettings('header.subtitle')}
                         </motion.p>
                     </motion.div>
 
@@ -105,8 +121,12 @@ export default function UserSettingsPage() {
                         <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">Appearance</h2>
-                                    <p className="text-sm text-gray-600 dark:text-white">Choose your theme preference</p>
+                                    <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">
+                                        {tSettings('appearance.title')}
+                                    </h2>
+                                    <p className="text-sm text-gray-600 dark:text-white">
+                                        {tSettings('appearance.description')}
+                                    </p>
                                 </div>
                                 <ThemeSwitcher />
                             </div>
@@ -115,8 +135,12 @@ export default function UserSettingsPage() {
                         {/* Notifications Section */}
                         <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
                             <div className="mb-6">
-                                <h2 className="text-lg font-semibold text-secondary-black mb-2 dark:text-white">Notifications</h2>
-                                <p className="text-gray-600 dark:text-white text-sm">Manage how and when you receive notifications</p>
+                                <h2 className="text-lg font-semibold text-secondary-black mb-2 dark:text-white">
+                                    {tSettings('notifications.title')}
+                                </h2>
+                                <p className="text-gray-600 dark:text-white text-sm">
+                                    {tSettings('notifications.description')}
+                                </p>
                             </div>
                             <NotificationSettings />
                         </div>
@@ -125,8 +149,12 @@ export default function UserSettingsPage() {
                         <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-secondary-black dark:text-white">Subscription</h2>
-                                    <p className="text-sm text-gray-600 dark:text-white">Compare plans and upgrade anytime</p>
+                                    <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
+                                        {tSettings('subscription.title')}
+                                    </h2>
+                                    <p className="text-sm text-gray-600 dark:text-white">
+                                        {tSettings('subscription.description')}
+                                    </p>
                                 </div>
                                 <span
                                     className={`text-xs px-2 py-1 rounded border ${
@@ -136,46 +164,58 @@ export default function UserSettingsPage() {
                                         : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-900'
                                     }`}
                                 >
-                                    Current plan: {(session?.user?.user_metadata?.isPro ||
+                                    {tSettings('subscription.currentPlan')}: {(session?.user?.user_metadata?.isPro ||
                                         (typeof window !== 'undefined' && localStorage.getItem('spendly_is_pro') === 'true'))
-                                        ? 'Pro' : 'Free'}
+                                        ? tPricing('pro') : tPricing('free')}
                                 </span>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Free */}
                                 <div className="rounded-lg border border-gray-200 dark:border-border p-5">
-                                    <h3 className="font-medium text-secondary-black dark:text-white">Free</h3>
-                                    <p className="text-sm text-gray-600 dark:text-white mt-1">Great to get started</p>
+                                    <h3 className="font-medium text-secondary-black dark:text-white">
+                                        {tPricing('free')}
+                                    </h3>
+                                    <p className="text-sm text-gray-600 dark:text-white mt-1">
+                                        {tPricing('free.short')}
+                                    </p>
                                     <div className="mt-4">
                                         <div className="text-2xl font-semibold text-secondary-black dark:text-white">$0</div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">per month</div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            {tPricing('perMonth')}
+                                        </div>
                                     </div>
                                     <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-white">
-                                        <li>• Track expenses and budgets</li>
-                                        <li>• Basic charts and insights</li>
-                                        <li>• Local device notifications</li>
+                                        <li>• {tPricing('free.features.track')}</li>
+                                        <li>• {tPricing('free.features.charts')}</li>
+                                        <li>• {tPricing('free.features.notifications')}</li>
                                     </ul>
                                 </div>
 
                                 {/* Pro */}
                                 <div className="rounded-lg border border-primary dark:border-primary p-5 bg-primary/5 dark:bg-primary/10">
-                                    <h3 className="font-medium text-secondary-black dark:text-white">Pro</h3>
-                                    <p className="text-sm text-gray-600 dark:text-white mt-1">Power features for growth</p>
+                                    <h3 className="font-medium text-secondary-black dark:text-white">
+                                        {tPricing('pro')}
+                                    </h3>
+                                    <p className="text-sm text-gray-600 dark:text-white mt-1">
+                                        {tPricing('pro.short')}
+                                    </p>
                                     <div className="mt-4">
                                         <div className="text-2xl font-semibold text-secondary-black dark:text-white">$5</div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">per month</div>
+                                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                                            {tPricing('perMonth')}
+                                        </div>
                                     </div>
                                     <ul className="mt-4 space-y-2 text-sm text-gray-800 dark:text-white">
-                                        <li>• Unlimited AI assistant usage</li>
-                                        <li>• Advanced charts and comparisons</li>
-                                        <li>• Priority support</li>
-                                        <li>• Custom goals and alerts</li>
-                                        <li>• Early access to new features</li>
+                                        <li>• {tPricing('pro.features.aiUnlimited')}</li>
+                                        <li>• {tPricing('pro.features.advancedCharts')}</li>
+                                        <li>• {tPricing('pro.features.prioritySupport')}</li>
+                                        <li>• {tPricing('pro.features.customGoals')}</li>
+                                        <li>• {tPricing('pro.features.earlyAccess')}</li>
                                     </ul>
                                     <div className="mt-5">
                                         <Link href="/payment" className="inline-flex">
-                                            <Button text="Upgrade to Pro" variant="primary" />
+                                            <Button text={tCTA('upgradeToPro')} variant="primary" />
                                         </Link>
                                     </div>
                                 </div>
@@ -186,8 +226,12 @@ export default function UserSettingsPage() {
                         <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-secondary-black dark:text-white">Language</h2>
-                                    <p className="text-sm text-gray-600 dark:text-white">Choose your interface language</p>
+                                    <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
+                                        {tSettings('language.title')}
+                                    </h2>
+                                    <p className="text-sm text-gray-600 dark:text-white">
+                                        {tSettings('language.description')}
+                                    </p>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <LanguageSelect
@@ -196,7 +240,9 @@ export default function UserSettingsPage() {
                                         className="min-w-[180px]"
                                     />
                                     {isSavingLang ? (
-                                        <span className="text-xs text-muted-foreground">Saving…</span>
+                                        <span className="text-xs text-muted-foreground">
+                                            {tCommon('saving')}
+                                        </span>
                                     ) : null}
                                 </div>
                             </div>
@@ -207,11 +253,15 @@ export default function UserSettingsPage() {
                             <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">App Controls</h2>
-                                        <p className="text-sm text-gray-600 dark:text-white">Install the app for a native experience</p>
+                                        <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">
+                                            {tSettings('appControls.title')}
+                                        </h2>
+                                        <p className="text-sm text-gray-600 dark:text-white">
+                                            {tSettings('appControls.description')}
+                                        </p>
                                     </div>
                                     <Button
-                                        text="Download the app"
+                                        text={tCTA('downloadApp')}
                                         variant="default"
                                         onClick={() => setIsAppInstallModalOpen(true)}
                                     />
@@ -222,15 +272,21 @@ export default function UserSettingsPage() {
                         <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
                             <div className="space-y-6">
                                 <div>
-                                    <h2 className="text-lg font-semibold text-secondary-black mb-4 dark:text-white">Account</h2>
+                                    <h2 className="text-lg font-semibold text-secondary-black mb-4 dark:text-white">
+                                        {tSettings('account.title')}
+                                    </h2>
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                                             <div>
-                                                <h3 className="font-medium text-secondary-black dark:text-white">Sign Out</h3>
-                                                <p className="text-sm text-gray-600 dark:text-white">Sign out of your account</p>
+                                                <h3 className="font-medium text-secondary-black dark:text-white">
+                                                    {tSettings('account.signOut.title')}
+                                                </h3>
+                                                <p className="text-sm text-gray-600 dark:text-white">
+                                                    {tSettings('account.signOut.description')}
+                                                </p>
                                             </div>
                                             <Button
-                                                text='Sign Out'
+                                                text={tCTA('signOut')}
                                                 variant="outline"
                                                 className="bg-transparent text-red-600 border-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 dark:hover:bg-red-600"
                                                 onClick={openSignOutModal}
@@ -271,3 +327,10 @@ export default function UserSettingsPage() {
         </>
     )
 }
+
+
+// Инициализация переводов
+const tSettings = useTranslations('userSettings')
+const tPricing = useTranslations('pricing')
+const tCTA = useTranslations('cta')
+const tCommon = useTranslations('common')

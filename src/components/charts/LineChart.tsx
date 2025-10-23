@@ -7,6 +7,7 @@ import { formatCurrency, formatChartDate } from '@/lib/chartUtils'
 import { CustomTooltip } from './CustomTooltip'
 import { LineChartProps } from '@/types/types'
 import { ChartDescription } from './ChartDescription'
+import { useTranslations } from 'next-intl'
 
 // LineChartComponent component (forwardRef)
 const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({ 
@@ -26,19 +27,21 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
   className = ""
 }, ref) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const tCharts = useTranslations('charts')
+  const resolvedTitle = title ?? tCharts('line.titleOverTime')
 
   if (isLoading) {
     return (
       <Card ref={ref} className={`w-full ${className}`}>
         <CardHeader>
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+          <CardTitle className="text-lg font-semibold">{resolvedTitle}</CardTitle>
           {description && (
             <ChartDescription>{description}</ChartDescription>
           )}
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-64">
-            <div className="text-muted-foreground">Loading chart data...</div>
+            <div className="text-muted-foreground">{tCharts('states.loadingData')}</div>
           </div>
         </CardContent>
       </Card>
@@ -91,7 +94,7 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
   return (
     <Card ref={ref} className={`w-full ${className}`}>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+        <CardTitle className="text-lg font-semibold">{resolvedTitle}</CardTitle>
         {description && (
           <ChartDescription>{description}</ChartDescription>
         )}

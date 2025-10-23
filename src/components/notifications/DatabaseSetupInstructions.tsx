@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Copy, Check, Database, AlertCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 const DatabaseSetupInstructions = () => {
     const [copied, setCopied] = useState(false)
@@ -106,7 +107,7 @@ $$ LANGUAGE 'plpgsql';`
         try {
             await navigator.clipboard.writeText(sqlScript)
             setCopied(true)
-            setTimeout(() => setCopied(false), 2000)
+            setTimeout(() => setCopied(false), 1200)
         } catch (err) {
             console.error('Failed to copy text: ', err)
         }

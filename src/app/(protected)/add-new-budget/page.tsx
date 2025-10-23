@@ -11,11 +11,13 @@ import ToastMessage from '@/components/ui-elements/ToastMessage'
 // Import types
 import { ToastMessageProps } from '@/types/types'
 import type { UserLocaleSettings } from '@/types/locale'
+import { useTranslations } from 'next-intl'
 
 const AddNewBudget = () => {
   const { session } = UserAuth()
   const router = useRouter()
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
+  const tBudgets = useTranslations('budgets')
 
   const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
     setToastMessage({ text, type })
@@ -30,19 +32,27 @@ const AddNewBudget = () => {
         throw new Error('User not authenticated')
       }
 
+      // Save locale settings via API route
       if (locale) {
-        const { error: userErr } = await supabase
-          .from('users')
-          .update({
+        const { data: { session: current } } = await supabase.auth.getSession()
+        const token = current?.access_token
+        if (!token) throw new Error('No auth token')
+        const resp = await fetch('/api/user/locale', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
             country: locale.country,
             currency: locale.currency,
             locale: locale.locale
           })
-          .eq('id', session.user.id)
-
-        if (userErr) {
-          console.error('Error saving user locale settings:', userErr)
-          throw userErr
+        })
+        if (!resp.ok) {
+          const err = await resp.json()
+          console.error('Error saving user locale settings:', err)
+          throw new Error(err.error || 'Failed to save locale settings')
         }
       }
 
@@ -71,14 +81,14 @@ const AddNewBudget = () => {
       }
 
       console.log('Main budget created successfully:', data)
-      handleToastMessage('Budget successfully created!', 'success')
+      handleToastMessage(tBudgets('list.toast.createSuccess'), 'success')
       // Redirect to Dashboard after 2 seconds
       setTimeout(() => {
         router.push('/dashboard')
       }, 2000)
     } catch (error: any) {
       console.error('Error creating budget:', error)
-      handleToastMessage(error.message || 'Error creating budget', 'error')
+      handleToastMessage(tBudgets('list.toast.failedCreate'), 'error')
     }
   }
 

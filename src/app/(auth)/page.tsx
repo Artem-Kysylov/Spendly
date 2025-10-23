@@ -14,6 +14,7 @@ import Link from 'next/link'
 import AvatarUpload from '@/components/ui-elements/AvatarUpload'
 import { supabase } from '@/lib/supabaseClient'
 import { motion } from 'motion/react'
+import { useTranslations } from 'next-intl'
 
 export default function AuthPage() {
     const { 
@@ -26,6 +27,8 @@ export default function AuthPage() {
         isSigningUp 
     } = UserAuth()
     const router = useRouter()
+
+    const tAuth = useTranslations('auth')
 
     useEffect(() => {
         if (isReady && session) {
@@ -244,7 +247,7 @@ export default function AuthPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
                         >
-                            {activeTab === 'signin' ? 'Sign in' : 'Sign up'}
+                            {activeTab === 'signin' ? tAuth('tabs.signin') : tAuth('tabs.signup')}
                         </motion.h1>
 
                         <div className="w-full max-w-md space-y-6">
@@ -252,7 +255,7 @@ export default function AuthPage() {
                             <Button
                                 variant="outline"
                                 className="w-full bg-white text-black border border-gray-300 hover:bg-gray-50"
-                                text="Sign in with Google"
+                                text={tAuth('buttons.google')}
                                 icon={<Image src="/google.svg" alt="Google" width={20} height={20} />}
                                 onClick={onGoogle}
                             />
@@ -271,8 +274,8 @@ export default function AuthPage() {
                               {/* TabsList / TabsTrigger / TabsContent — без изменений */}
                               <div className="flex justify-center">
                                 <TabsList>
-                                  <TabsTrigger value="signin">Sign in</TabsTrigger>
-                                  <TabsTrigger value="signup">Sign up</TabsTrigger>
+                                  <TabsTrigger value="signin">{tAuth('tabs.signin')}</TabsTrigger>
+                                  <TabsTrigger value="signup">{tAuth('tabs.signup')}</TabsTrigger>
                                 </TabsList>
                               </div>
 
@@ -311,7 +314,7 @@ export default function AuthPage() {
                                                 checked={rememberMe}
                                                 onChange={(e) => setRememberMe(e.target.checked)}
                                             />
-                                            <span className="text-sm text-secondary-black">Remember me</span>
+                                            <span className="text-sm text-secondary-black">{tAuth('labels.rememberMe')}</span>
                                         </label>
 
                                         <Link

@@ -5,6 +5,7 @@ import { ChatMessage } from '@/types/types'
 import { ChatMessages } from './ChatMessages'
 import { ChatInput } from './ChatInput'
 import { ChatPresets } from './ChatPresets'
+import { useTranslations } from 'next-intl'
 
 interface AIChatWindowProps {
     isOpen: boolean
@@ -38,6 +39,7 @@ export const AIChatWindow = ({
     pendingAction?: { title: string; amount: number; budget_folder_id: string | null; budget_name: string } | null
 }) => {
     if (!isOpen) return null
+  const tAI = useTranslations('assistant')
 
     return (
         <>
@@ -48,7 +50,7 @@ export const AIChatWindow = ({
                 <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-black lg:rounded-t-xl flex-shrink-0">
                   <div className="flex items-center space-x-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <h3 className="font-semibold text-secondary-black dark:text-white">Spendly Pal</h3>
+                    <h3 className="font-semibold text-secondary-black dark:text-white">{tAI('title')}</h3>
                   </div>
                   {/* Close button (mobile + desktop) */}
                   <button
@@ -64,7 +66,7 @@ export const AIChatWindow = ({
                     {/* Rate limit indicator */}
                     {isRateLimited && (
                         <div className="px-4 py-2 text-xs text-amber-700 bg-amber-50 border-t border-b border-amber-200 dark:text-amber-100 dark:bg-amber-900 dark:border-amber-800">
-                            Rate limit reached. Please wait a few seconds…
+                            {tAI('rateLimited')}
                         </div>
                     )}
                     {messages.length === 0 ? (
@@ -72,9 +74,9 @@ export const AIChatWindow = ({
                             {/* Welcome Message */}
                             <div className="p-4 text-center flex-shrink-0">
                                 <div className="text-3xl mb-3">✨</div>
-                                <h4 className="font-semibold text-secondary-black dark:text-white mb-2">Welcome to AI Assistant</h4>
+                                <h4 className="font-semibold text-secondary-black dark:text-white mb-2">{tAI('welcomeTitle')}</h4>
                                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
-                                    Ask me anything about your finances or choose a preset below
+                                    {tAI('welcomeDesc')}
                                 </p>
                             </div>
                             {/* Presets - Scrollable */}
@@ -89,17 +91,17 @@ export const AIChatWindow = ({
                     {/* Input */}
                     {hasPendingAction && !isTyping && (
                         <div className="px-4 py-3 border-t border-gray-200 bg-white dark:border-gray-800 dark:bg-black">
-                            <div className="text-sm font-semibold text-secondary-black dark:text-white mb-1">Confirm transaction</div>
+                            <div className="text-sm font-semibold text-secondary-black dark:text-white mb-1">{tAI('confirm.title')}</div>
                             {pendingAction && (
                                 <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">
                                     <div>
-                                        <span className="text-gray-500 dark:text-gray-400">Title:</span> {pendingAction.title}
+                                        <span className="text-gray-500 dark:text-gray-400">{tAI('confirm.fields.title')}:</span> {pendingAction.title}
                                     </div>
                                     <div>
-                                        <span className="text-gray-500 dark:text-gray-400">Budget:</span> {pendingAction.budget_name}
+                                        <span className="text-gray-500 dark:text-gray-400">{tAI('confirm.fields.budget')}:</span> {pendingAction.budget_name}
                                     </div>
                                     <div>
-                                        <span className="text-gray-500 dark:text-gray-400">Amount:</span> ${pendingAction.amount.toFixed(2)}
+                                        <span className="text-gray-500 dark:text-gray-400">{tAI('confirm.fields.amount')}:</span> ${pendingAction.amount.toFixed(2)}
                                     </div>
                                 </div>
                             )}
@@ -108,13 +110,13 @@ export const AIChatWindow = ({
                                     className="px-3 py-1 rounded bg-green-600 text-white text-sm"
                                     onClick={() => onConfirmAction(true)}
                                 >
-                                    Accept
+                                    {tAI('actions.accept')}
                                 </button>
                                 <button
                                     className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 text-secondary-black dark:text-white text-sm"
                                     onClick={() => onConfirmAction(false)}
                                 >
-                                    Decline
+                                    {tAI('actions.decline')}
                                 </button>
                             </div>
                         </div>

@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { Select } from '@/components/ui/select'
+import { useTranslations } from 'next-intl'
 
 export interface TransactionsFilterProps {
   transactionType: 'Expenses' | 'Income'
@@ -18,19 +19,24 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
   onDatePeriodChange,
   className = ''
 }) => {
+  const tTransactions = useTranslations('transactions.table')
+  const tModals = useTranslations('modals')
+  const tFilters = useTranslations('filters')
   return (
     <div className={`flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-4 ${className}`}>
       {/* Type Selector */}
       <div className="flex flex-col gap-1 w-full sm:w-auto">
-        <label className="text-sm font-medium text-secondary-black dark:text-white">Type</label>
+        <label className="text-sm font-medium text-secondary-black dark:text-white">
+          {tTransactions('headers.type')}
+        </label>
         <div className="relative">
           <Select
             value={transactionType}
             onChange={(e) => onTransactionTypeChange(e.target.value as 'Expenses' | 'Income')}
             className="w-full sm:min-w-[140px] bg-white dark:bg-background text-black dark:text-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none border border-input"
           >
-            <option value="Expenses">Expense</option>
-            <option value="Income">Income</option>
+            <option value="Expenses">{tModals('transaction.type.expense')}</option>
+            <option value="Income">{tModals('transaction.type.income')}</option>
           </Select>
           <div className="absolute inset-y-0 right-0 flex items-center pr-[16px] pointer-events-none text-black dark:text-white">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,15 +48,17 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
 
       {/* Date Period Selector */}
       <div className="flex flex-col gap-1 w-full sm:w-auto">
-        <label className="text-sm font-medium text-secondary-black dark:text-white">Date</label>
+        <label className="text-sm font-medium text-secondary-black dark:text-white">
+          {tTransactions('headers.date')}
+        </label>
         <div className="relative">
           <Select
             value={datePeriod}
             onChange={(e) => onDatePeriodChange(e.target.value as 'Week' | 'Month')}
             className="w-full sm:min-w-[140px] bg-white dark:bg-background text-black dark:text-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none border border-input"
           >
-            <option value="Week">Week</option>
-            <option value="Month">Month</option>
+            <option value="Week">{tFilters('options.week')}</option>
+            <option value="Month">{tFilters('options.month')}</option>
           </Select>
           <div className="absolute inset-y-0 right-0 flex items-center pr-[16px] pointer-events-none text-black dark:text-white">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

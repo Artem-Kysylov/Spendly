@@ -2,6 +2,7 @@
 
 import { useState, KeyboardEvent } from 'react'
 import { Send } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface ChatInputProps {
     onSendMessage: (content: string) => Promise<void>
@@ -12,6 +13,7 @@ interface ChatInputProps {
 
 export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort }: ChatInputProps) => {
     const [message, setMessage] = useState('')
+    const tAI = useTranslations('assistant')
 
     const handleSend = async () => {
         if (!message.trim() || disabled) return
@@ -35,17 +37,17 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort }: Chat
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Ask about your expenses..."
+                    placeholder={tAI('input.placeholder')}
                     disabled={(disabled ?? false) || (isThinking ?? false)}
                     rows={1}
-                    className="flex-1 resize-none border border-gray-300 bg-white text-secondary-black placeholder:text-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed h-10 dark:border-gray-700 dark:bg-black dark:text-white dark:placeholder:text-gray-400"
+                    className="flex-1 resize-none border border-gray-300 bg-white text-secondary-black placeholder:text-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed h-10 dark:border-gray-700 dark:bg-black dark:text-white"
                 />
                 <button
                     onClick={isThinking ? (onAbort ?? (() => {})) : handleSend}
                     disabled={isThinking ? false : (!message.trim() || !!disabled)}
                     className={`h-10 w-10 ${isThinking ? 'bg-error hover:bg-error/90' : 'bg-primary hover:bg-primary/90'} text-primary-foreground rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center flex-shrink-0`}
-                    aria-label={isThinking ? 'Abort' : 'Send'}
-                    title={isThinking ? 'Abort' : 'Send'}
+                    aria-label={isThinking ? tAI('actions.abort') : tAI('actions.send')}
+                    title={isThinking ? tAI('actions.abort') : tAI('actions.send')}
                 >
                     {isThinking ? (
                         <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">

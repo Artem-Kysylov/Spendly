@@ -8,21 +8,21 @@ import { Input } from '@/components/ui/input'
 import Button from '@/components/ui-elements/Button'
 import { CheckCircle2 } from 'lucide-react'
 import { motion } from 'motion/react'
+import { useTranslations } from 'next-intl'
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [stage, setStage] = useState<'form' | 'success'>('form')
+  const tForgot = useTranslations('forgotPassword')
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
-
-    // Базовая валидация email
     const isValid = /\S+@\S+\.\S+/.test(email)
     if (!isValid) {
-      setError('Please enter a valid email address')
+      setError(tForgot('error.invalidEmail'))
       return
     }
 
@@ -75,19 +75,17 @@ export default function ForgotPasswordPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
             >
-              Forgot your password
+              {tForgot('title')}
             </motion.h1>
 
             {stage === 'form' && (
               <form onSubmit={onSubmit} className="space-y-4" noValidate>
                 <p className="text-sm text-gray-600">
-                  Enter your email address and we’ll send you a link to reset your password.
-                  After sending, please check your inbox and the Spam folder.
+                  {tForgot('instructions')}
                 </p>
-
                 <div>
                   <label htmlFor="email" className="mb-1 block text-sm font-medium">
-                    Email
+                    {tForgot('label.email')}
                   </label>
                   <Input
                     id="email"
@@ -95,7 +93,7 @@ export default function ForgotPasswordPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    placeholder="you@example.com"
+                    placeholder={tForgot('placeholder.email')}
                   />
                 </div>
 
@@ -109,13 +107,13 @@ export default function ForgotPasswordPage() {
                   type="submit"
                   variant="primary"
                   className="w-full"
-                  text={isSubmitting ? 'Sending...' : 'Send reset link'}
+                  text={isSubmitting ? tForgot('states.sending') : tForgot('buttons.sendReset')}
                   disabled={isSubmitting}
                 />
 
                 <div className="text-center">
                   <Link href="/" className="text-blue-600 hover:text-blue-700 underline text-sm">
-                    Back to Sign in
+                    {tForgot('buttons.backToSignIn')}
                   </Link>
                 </div>
               </form>
@@ -142,14 +140,13 @@ export default function ForgotPasswordPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
                 >
-                  Check your email
+                  {tForgot('success.title')}
                 </motion.h2>
                 <p className="text-sm text-gray-600">
-                  If an account exists for this email, we’ve sent a password reset link.
-                  Please check your inbox and the Spam folder.
+                  {tForgot('success.description')}
                 </p>
                 <Link href="/" className="text-blue-600 hover:text-blue-700 underline text-sm">
-                  Back to Sign in
+                  {tForgot('buttons.backToSignIn')}
                 </Link>
               </motion.div>
             )}

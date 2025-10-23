@@ -24,14 +24,15 @@ import { BudgetDetailsProps, Transaction, ToastMessageProps } from '@/types/type
 import type { EditTransactionPayload } from '@/types/types'
 
 // Component: BudgetDetails
+import { useTranslations } from 'next-intl'
+// Компонент: BudgetDetails
 const BudgetDetails = () => {
   const { budgetId } = useParams<{ budgetId: string }>()
   const id = budgetId
 
   const router = useRouter()
-
   const { session } = UserAuth()
-  
+
   // States 
   const { isModalOpen: isDeleteModalOpen, openModal: openDeleteModal, closeModal: closeDeleteModal } = useModal()
   const { isModalOpen: isEditModalOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal()
@@ -47,6 +48,9 @@ const BudgetDetails = () => {
   })
   const [transactions, setTransactions] = useState<Transaction[]>([])
 
+  // Инициализация переводов
+  const tBudgets = useTranslations('budgets')
+  const tCommon = useTranslations('common')
   const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
     setToastMessage({ text, type })
     setTimeout(() => {
@@ -92,13 +96,12 @@ const BudgetDetails = () => {
 
       if (budgetError) {
         console.error('Error fetching budget type:', budgetError)
-        handleToastMessage('Failed to determine budget type', 'error')
+        handleToastMessage(tBudgets('details.toast.failedDetermineType'), 'error')
         return
       }
-
       if (!budgetData?.type) {
         console.error('Budget type is missing')
-        handleToastMessage('Budget type is missing', 'error')
+        handleToastMessage(tBudgets('details.toast.typeMissing'), 'error')
         return
       }
 
@@ -122,17 +125,16 @@ const BudgetDetails = () => {
 
       if (transactionError) {
         console.error('Error creating transaction:', transactionError)
-        handleToastMessage('Failed to add transaction. Please try again.', 'error')
+        handleToastMessage(tBudgets('details.toast.addFailed'), 'error')
         return
       }
 
-      handleToastMessage('Transaction added successfully!', 'success')
+      handleToastMessage(tBudgets('details.toast.addSuccess'), 'success')
       fetchTransactions()
-      // Trigger refresh of budget folder items to update progress bars
       window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
     } catch (error) {
       console.error('Error:', error)
-      handleToastMessage('An unexpected error occurred', 'error')
+      handleToastMessage(tCommon('unexpectedError'), 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -151,17 +153,17 @@ const BudgetDetails = () => {
 
       if (error) {
         console.error('Error deleting budget:', error)
-        handleToastMessage('Failed to delete budget. Please try again.', 'error')
+        handleToastMessage(tBudgets('details.toast.deleteFailed'), 'error')
         return
       }
 
-      handleToastMessage('Budget deleted successfully!', 'success')
+      handleToastMessage(tBudgets('details.toast.deleteSuccess'), 'success')
       setTimeout(() => {
         router.push('/budgets')
       }, 2000)
     } catch (error) {
       console.error('Error:', error)
-      handleToastMessage('An unexpected error occurred', 'error')
+      handleToastMessage(tCommon('unexpectedError'), 'error')
     } finally {
       setIsDeleting(false)
       closeDeleteModal()
@@ -181,16 +183,16 @@ const BudgetDetails = () => {
 
       if (error) {
         console.error('Error updating budget:', error)
-        handleToastMessage('Failed to update budget. Please try again.', 'error')
+        handleToastMessage(tBudgets('details.toast.updateFailed'), 'error')
         return
       }
 
-      handleToastMessage('Budget updated successfully!', 'success')
+      handleToastMessage(tBudgets('details.toast.updateSuccess'), 'success')
       closeEditModal()
       fetchBudgetDetails()
     } catch (error) {
       console.error('Error:', error)
-      handleToastMessage('An unexpected error occurred', 'error')
+      handleToastMessage(tCommon('unexpectedError'), 'error')
     } finally {
       setIsSubmitting(false)
     }
@@ -382,8 +384,8 @@ const BudgetDetails = () => {
 
       {isDeleteModalOpen && (
         <DeleteModal
-          title="Delete Budget"
-          text="Are you sure you want to delete this budget?"
+          title={tBudgets('details.deleteModal.title')}
+          text={tBudgets('details.deleteModal.text')}
           onClose={closeDeleteModal}
           onConfirm={handleDeleteBudget}
           isLoading={isDeleting}
@@ -391,7 +393,7 @@ const BudgetDetails = () => {
       )}
       {isEditModalOpen && (
         <BudgetModal
-          title="Edit Budget"
+          title={tBudgets('details.editModal.title')}
           onClose={closeEditModal}
           onSubmit={handleUpdateBudget}
           isLoading={isSubmitting}

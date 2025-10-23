@@ -3,6 +3,7 @@
 import Button from '@/components/ui-elements/Button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { CheckCircle2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 type AppInstallModalProps = {
   isOpen: boolean
@@ -18,11 +19,13 @@ const benefits = [
 ]
 
 const AppInstallModal = ({ isOpen, onClose }: AppInstallModalProps) => {
+  const tModals = useTranslations('modals')
+  const tCommon = useTranslations('common')
   return (
     <Dialog open={isOpen} onOpenChange={(o) => { if (!o) onClose() }}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="text-center">Get Spendly on your device</DialogTitle>
+          <DialogTitle className="text-center">{tModals('appInstall.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 mt-2">
@@ -40,7 +43,7 @@ const AppInstallModal = ({ isOpen, onClose }: AppInstallModalProps) => {
         </div>
 
         <DialogFooter className="justify-center sm:justify-center">
-          <Button text="Close" variant="ghost" className="text-primary" onClick={onClose} />
+          <Button text={tCommon('close')} variant="ghost" className="text-primary" onClick={onClose} />
         </DialogFooter>
       </DialogContent>
     </Dialog>

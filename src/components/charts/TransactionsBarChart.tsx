@@ -17,6 +17,7 @@ import { getLocalePreference, sanitizeTip, makeContextKey, getCachedTip, setCach
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CustomTooltip } from './CustomTooltip'
+import { useTranslations } from 'next-intl'
 
 // Types
 interface ExpensesBarData {
@@ -104,11 +105,15 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
     }
   }, [tip])
 
+  const tCharts = useTranslations('charts')
+  const resolvedTitle = title || tCharts('transactionsBar.title')
+  const resolvedEmpty = emptyMessage || tCharts('states.noExpensesData')
+
   if (isLoading) {
     return (
       <Card className={className} ref={ref}>
         <CardHeader>
-          <CardTitle>{title || "Expenses Chart"}</CardTitle>
+          <CardTitle>{resolvedTitle}</CardTitle>
           {description && <ChartDescription>{description}</ChartDescription>}
         </CardHeader>
         <CardContent>
@@ -140,12 +145,12 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
     return (
       <Card className={className} ref={ref}>
         <CardHeader>
-          <CardTitle>{title || "Expenses Chart"}</CardTitle>
+          <CardTitle>{resolvedTitle}</CardTitle>
           {description && <ChartDescription>{description}</ChartDescription>}
         </CardHeader>
         <CardContent>
           <div className="h-[240px] flex items-center justify-center">
-            <p className="text-muted-foreground">{emptyMessage}</p>
+            <p className="text-muted-foreground">{resolvedEmpty}</p>
           </div>
         </CardContent>
       </Card>
@@ -155,7 +160,7 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
   return (
     <Card className={className} ref={ref}>
       <CardHeader>
-        <CardTitle>{title || "Expenses Chart"}</CardTitle>
+        <CardTitle>{resolvedTitle}</CardTitle>
         {description && <ChartDescription>{description}</ChartDescription>}
       </CardHeader>
       <CardContent>
@@ -202,7 +207,7 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
           <div className="flex-1">
             {tipLoading && (
               <span className="text-black dark:text-white text-sm inline-flex items-center">
-                <span>💡 Thinking</span>
+                <span>💡 {tCharts('ai.thinking')}</span>
                 <span className="flex items-center gap-1 ml-2">
                   <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                   <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -214,30 +219,24 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
               <span className="text-black dark:text-white text-sm whitespace-pre-wrap">💡 {displayTip}</span>
             )}
             {!tipLoading && !displayTip && !tipError && (
-              <span className="text-black dark:text-white text-sm">💡 Get AI tips based on your data</span>
+              <span className="text-black dark:text-white text-sm">💡 {tCharts('ai.tips')}</span>
             )}
             {tipError && <p className="text-red-600 text-xs mt-1">{tipError}</p>}
-            {isRateLimited && <p className="text-yellow-600 text-xs mt-1">Rate limit reached. Try later.</p>}
           </div>
           <button
-            type="button"
             onClick={tipLoading ? abort : refreshTip}
             className={`text-sm font-medium px-4 py-2 rounded-md transition-colors flex items-center gap-2 ${tipLoading ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}
-            disabled={Date.now() < cooldownUntil}
+            disabled={isRateLimited}
           >
             {tipLoading ? (
               <>
-                <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="15" y1="9" x2="9" y2="15"></line>
-                  <line x1="9" y1="9" x2="15" y2="15"></line>
-                </svg>
-                <span>Stop</span>
+                <Image src="/stop.svg" alt="Stop" width={16} height={16} />
+                {tCharts('ai.stop')}
               </>
             ) : (
               <>
-                <Image src="/sparkles.svg" alt="Sparkles" width={16} height={16} />
-                <span>{Date.now() < cooldownUntil ? 'Please wait…' : 'Get AI Insight'}</span>
+                <Image src="/sparkles.svg" alt="Get AI Insight" width={16} height={16} />
+                {tCharts('ai.getInsight')}
               </>
             )}
           </button>

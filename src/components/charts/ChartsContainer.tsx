@@ -8,6 +8,7 @@ import { TransactionsFilter } from '@/components/ui-elements'
 import { useAllChartsData, useComparisonLineChartData } from '@/hooks/useChartData'
 import { formatCompactRange } from '@/lib/chartUtils'
 import type { ChartFilters as ChartFiltersType, ChartPeriod, ChartDataType } from '@/types/types'
+import { useTranslations } from 'next-intl'
 
 type ChartVisibility = {
   bar: boolean
@@ -41,6 +42,7 @@ export const ChartsContainer = (
   }: ChartsContainerProps = {}
 ) => {
   const [filters, setFilters] = useState<ChartFiltersType>(initialFilters)
+  const tCharts = useTranslations('charts')
 
   // Инициализация видимости графиков (на будущее), читаем из localStorage
   const [chartVisibility] = useState<ChartVisibility>(() => {
@@ -104,7 +106,7 @@ export const ChartsContainer = (
   }
 
   const getTypeLabel = (type: ChartDataType) =>
-    type === 'Expenses' ? 'Expenses' : 'Income'
+    type === 'Expenses' ? tCharts('labels.expenses') : tCharts('labels.income')
 
   // Единая высота графиков
   const chartHeight = 240
@@ -124,7 +126,7 @@ export const ChartsContainer = (
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
           >
-            Budgets Analytics
+            {tCharts('titles.analytics')}
           </motion.h2>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -159,8 +161,8 @@ export const ChartsContainer = (
               <BarChart
                 ref={barChartRef}
                 data={barChart.data}
-                title="Budgets Comparison"
-                description={`${getTypeLabel(filters.dataType)} for ${formatCompactRange(
+                title={tCharts('titles.comparisonBar')}
+                description={`${getTypeLabel(filters.dataType)} ${tCharts('labels.for')} ${formatCompactRange(
                   filters.startDate,
                   filters.endDate
                 )}`}

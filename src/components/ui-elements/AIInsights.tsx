@@ -1,6 +1,7 @@
 import React from 'react'
 import { Brain, Lightbulb, TrendingUp, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useTranslations } from 'next-intl'
 
 interface AIInsightsProps {
   totalExpenses: number
@@ -87,6 +88,8 @@ const AIInsights = ({
     return insights.slice(0, 2) // Показываем максимум 2 инсайта
   }
 
+  const tAssistant = useTranslations('assistant')
+
   const insights = generateInsights()
 
   if (insights.length === 0) return null
@@ -95,8 +98,12 @@ const AIInsights = ({
     <div className={cn("space-y-3", className)}>
       <div className="flex items-center gap-2 mb-4">
         <Brain className="w-5 h-5 text-purple-600" />
-        <h3 className="text-sm font-medium text-black dark:text-white">AI Insights</h3>
-        <span className="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full">Beta</span>
+        <h3 className="text-sm font-medium text-black dark:text-white">
+          {tAssistant('insights.title')}
+        </h3>
+        <span className="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full">
+          {tAssistant('insights.beta')}
+        </span>
       </div>
       
       {insights.map((insight, index) => {

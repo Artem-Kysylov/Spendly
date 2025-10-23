@@ -9,12 +9,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 
 // Import types 
 import { MainBudgetModalProps } from '../../types/types'
+import { useTranslations } from 'next-intl'
 
 // Component: TotalBudgetModal
 const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) => {
     const { session } = UserAuth()
     const dialogRef = useRef<HTMLDialogElement>(null)
-
+    const tModals = useTranslations('modals')
+    const tCommon = useTranslations('common')
     // State 
     const [amount, setAmount] = useState<string>('')
     const [isLoading, setIsLoading] = useState<boolean>(false)
@@ -114,7 +116,7 @@ const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) =>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <TextInput
                         type="number"
-                        placeholder="Amount(USD)"
+                        placeholder={tModals('mainBudget.placeholder.amountUSD')}
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         min="0"
@@ -122,14 +124,14 @@ const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) =>
                     />
                     <DialogFooter className="justify-center sm:justify-center">
                         <Button
-                            text="Cancel"
+                            text={tCommon('cancel')}
                             variant="ghost"
                             className="text-primary w-[218px]"
                             onClick={onClose}
                         />
                         <Button
                             type="submit"
-                            text="Save"
+                            text={tCommon('save')}
                             variant="default"
                             className="w-[218px]"
                             disabled={isLoading || !amount}

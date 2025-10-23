@@ -8,6 +8,7 @@ import Button from '@/components/ui-elements/Button'
 import FormInput from '@/components/ui-elements/FormInput'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
 import { Eye, EyeOff } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface EditProfileModalProps {
   isOpen: boolean
@@ -123,7 +124,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         }
       }
 
-      showToast('Profile updated successfully!', 'success')
+      showToast(tModals('editProfile.toast.updateSuccess'), 'success')
       onSuccess?.()
       
       // Reset password fields
@@ -140,7 +141,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
     } catch (error: any) {
       console.error('Error updating profile:', error)
-      showToast(error.message || 'Failed to update profile', 'error')
+      showToast(error.message || tModals('editProfile.toast.updateFailed'), 'error')
     } finally {
       setIsLoading(false)
     }
@@ -180,7 +181,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogTitle>{tModals('editProfile.title')}</DialogTitle>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -255,7 +256,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
             <DialogFooter className="gap-2">
               <Button
-                text="Cancel"
+                text={tCommon('cancel')}
                 onClick={handleClose}
                 variant="outline"
                 disabled={isLoading}
@@ -283,3 +284,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 }
 
 export default EditProfileModal
+
+const tModals = useTranslations('modals')
+const tCommon = useTranslations('common')
