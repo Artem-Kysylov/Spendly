@@ -1,38 +1,28 @@
 'use client'
 
-// Imports 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { UserAuth } from '@/context/AuthContext'
 import Link from 'next/link'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
-
-// Import hooks 
 import useModal from '@/hooks/useModal'
-
-// Import components 
 import NewBudget from '@/components/budgets/AddNewBudget'
 import NewBudgetModal from '@/components/modals/BudgetModal'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
 import BudgetFolderItem from '@/components/budgets/BudgetFolderItem'
-
-// Import types
 import { ToastMessageProps, BudgetFolderItemProps } from '@/types/types'
 
-// Component: Budgets
-const Budgets = () => {
+export default function BudgetsClient() {
   const { session } = UserAuth()
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
   const [budgetFolders, setBudgetFolders] = useState<BudgetFolderItemProps[]>([])
-  
   const { isModalOpen, openModal, closeModal } = useModal()
   const tBudgets = useTranslations('budgets')
   const tCommon = useTranslations('common')
 
   const fetchBudgetFolders = async () => {
     if (!session?.user?.id) return
-
     try {
       const { data, error } = await supabase
         .from('budget_folders')
@@ -45,10 +35,7 @@ const Budgets = () => {
         handleToastMessage(tBudgets('list.toast.failedLoad'), 'error')
         return
       }
-
-      if (data) {
-        setBudgetFolders(data)
-      }
+      if (data) setBudgetFolders(data)
     } catch (error) {
       console.error('Error:', error)
       handleToastMessage(tCommon('unexpectedError'), 'error')
@@ -61,9 +48,7 @@ const Budgets = () => {
 
   const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
     setToastMessage({ text, type })
-    setTimeout(() => {
-      setToastMessage(null)
-    }, 3000)
+    setTimeout(() => setToastMessage(null), 3000)
   }
 
   const handleBudgetSubmit = async (emoji: string, name: string, amount: number, type: 'expense' | 'income') => {
@@ -93,9 +78,8 @@ const Budgets = () => {
 
   return (
     <div className='mt-[30px] px-5'>
-      {toastMessage && (
-        <ToastMessage text={toastMessage.text} type={toastMessage.type} />
-      )}
+      {toastMessage && <ToastMessage text={toastMessage.text} type={toastMessage.type} />}
+
       <motion.div
         style={{ willChange: 'opacity' }}
         initial={{ opacity: 0 }}
@@ -119,11 +103,7 @@ const Budgets = () => {
             className='block w-full sm:w-[335px] cursor-pointer'
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ 
-              duration: 0.6, 
-              ease: "easeOut", 
-              delay: 0.1 + (index * 0.1) 
-            }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 + (index * 0.1) }}
           >
             <Link href={`/budgets/${folder.id}`}>
               <BudgetFolderItem 
@@ -141,40 +121,11 @@ const Budgets = () => {
       {isModalOpen && (
         <NewBudgetModal
           title={tBudgets('list.modal.createTitle')}
-          onClose={() => {
-            closeModal()
-          }}
+          onClose={closeModal}
           onSubmit={handleBudgetSubmit}
           handleToastMessage={handleToastMessage}
         />
       )}
     </div>
   )
-}
-
-export default Budgets
-
-import type { Metadata } from 'next'
-import { cookies } from 'next/headers'
-import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
-import { getTranslations } from 'next-intl/server'
-import BudgetsClient from './BudgetsClient'
-
-export default function BudgetsPage() {
-  return <BudgetsClient />
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  const cookieLocale =
-    cookies().get('NEXT_LOCALE')?.value ||
-    cookies().get('spendly_locale')?.value ||
-    DEFAULT_LOCALE
-
-  const locale = isSupportedLanguage(cookieLocale || '') ? (cookieLocale as any) : DEFAULT_LOCALE
-  const t = await getTranslations({ locale, namespace: 'pages.budgets.meta' })
-
-  return {
-    title: t('title'),
-    description: t('description')
-  }
 }

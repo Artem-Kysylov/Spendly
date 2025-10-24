@@ -17,9 +17,11 @@ const withPWA = require('next-pwa')({
   ],
 })
 
+const withNextIntl = require('next-intl/plugin')('./src/i18n/request.ts')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Простая конфигурация для стабильности
 }
 
-module.exports = withPWA(nextConfig)
+module.exports = withPWA(withNextIntl(nextConfig))

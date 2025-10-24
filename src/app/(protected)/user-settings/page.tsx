@@ -16,316 +16,29 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import LanguageSelect from '@/components/ui-elements/locale/LanguageSelect'
 import { useTranslations } from 'next-intl'
+import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
+import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
+import { getTranslations } from 'next-intl/server'
+import UserSettingsClient from './UserSettingsClient'
 
 export default function UserSettingsPage() {
-    const { signOut, session } = UserAuth()
-    const { isModalOpen: isSignOutModalOpen, openModal: openSignOutModal, closeModal: closeSignOutModal } = useModal()
-    const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false)
+  return <UserSettingsClient />
+}
 
-    const handleEditProfile = () => {
-        setIsEditProfileModalOpen(true)
-    }
+export async function generateMetadata(): Promise<Metadata> {
+  const cookieLocale =
+    cookies().get('NEXT_LOCALE')?.value ||
+    cookies().get('spendly_locale')?.value ||
+    DEFAULT_LOCALE
 
-    const handleEditProfileClose = () => {
-        setIsEditProfileModalOpen(false)
-    }
+  const locale = isSupportedLanguage(cookieLocale || '') ? (cookieLocale as any) : DEFAULT_LOCALE
+  const t = await getTranslations({ locale, namespace: 'pages.userSettings.meta' })
 
-    // Appearance & App Controls
-    // Импортируем компоненты и хук
-    const [isAppInstallModalOpen, setIsAppInstallModalOpen] = useState(false)
-    const isPWAInstalled = useIsPWAInstalled()
-
-    // Language state (init from cookie or default 'en')
-    const [language, setLanguage] = useState<'en' | 'uk' | 'ru' | 'hi' | 'id' | 'ja' | 'ko'>('en')
-    const [isSavingLang, setIsSavingLang] = useState(false)
-
-    useEffect(() => {
-        if (typeof document !== 'undefined') {
-            const m = document.cookie.match(/(?:^|; )spendly_locale=([^;]+)/)
-            const cookieLang = m ? decodeURIComponent(m[1]) : null
-            if (cookieLang && ['en','uk','ru','hi','id','ja','ko'].includes(cookieLang)) {
-                setLanguage(cookieLang as any)
-                document.documentElement.lang = cookieLang
-            }
-        }
-    }, [])
-
-    async function handleLanguageChange(next: typeof language) {
-        setLanguage(next)
-        document.documentElement.lang = next
-        // Сразу ставим куки для мгновенного эффекта
-        document.cookie = `spendly_locale=${encodeURIComponent(next)}; path=/; max-age=31536000; samesite=lax`
-        document.cookie = `NEXT_LOCALE=${encodeURIComponent(next)}; path=/; max-age=31536000; samesite=lax`
-
-        if (session?.user?.id) {
-            setIsSavingLang(true)
-            try {
-                const { data: { session: current } } = await supabase.auth.getSession()
-                const token = current?.access_token
-                if (!token) throw new Error('No auth token')
-                const resp = await fetch('/api/user/locale', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ locale: next })
-                })
-                if (!resp.ok) {
-                    const err = await resp.json()
-                    throw new Error(err.error || 'Failed to save locale')
-                }
-            } catch (e) {
-                console.error('Error saving locale:', e)
-            } finally {
-                setIsSavingLang(false)
-            }
-        }
-    }
-
-    return (
-        <>
-            <div className="flex flex-col gap-6 px-5 pb-[30px]">
-                {/* был узкий контейнер: max-w-4xl mx-auto */}
-                <div className="w-full">
-                    {/* Page Header */}
-                    <motion.div 
-                        className="mt-[30px] mb-8"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, ease: "easeOut" }}
-                    >
-                        <motion.h1 
-                            className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black dark:text-white"
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-                        >
-                            {tSettings('header.title')}
-                        </motion.h1>
-                        <motion.p 
-                            className="text-sm sm:text-base text-gray-600 dark:text-white mt-2"
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-                        >
-                            {tSettings('header.subtitle')}
-                        </motion.p>
-                    </motion.div>
-
-                    {/* Settings Content */}
-                    <div className="space-y-6">
-                        {/* Profile Section */}
-                        <ProfileCard onEditProfile={handleEditProfile} />
-                        {/* Appearance Section — перенесён под Profile */}
-                        <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">
-                                        {tSettings('appearance.title')}
-                                    </h2>
-                                    <p className="text-sm text-gray-600 dark:text-white">
-                                        {tSettings('appearance.description')}
-                                    </p>
-                                </div>
-                                <ThemeSwitcher />
-                            </div>
-                        </div>
-                        {/* остальные секции */}
-                        {/* Notifications Section */}
-                        <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
-                            <div className="mb-6">
-                                <h2 className="text-lg font-semibold text-secondary-black mb-2 dark:text-white">
-                                    {tSettings('notifications.title')}
-                                </h2>
-                                <p className="text-gray-600 dark:text-white text-sm">
-                                    {tSettings('notifications.description')}
-                                </p>
-                            </div>
-                            <NotificationSettings />
-                        </div>
-
-                        {/* Subscription Section */}
-                        <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
-                            <div className="flex items-center justify-between mb-4">
-                                <div>
-                                    <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
-                                        {tSettings('subscription.title')}
-                                    </h2>
-                                    <p className="text-sm text-gray-600 dark:text-white">
-                                        {tSettings('subscription.description')}
-                                    </p>
-                                </div>
-                                <span
-                                    className={`text-xs px-2 py-1 rounded border ${
-                                        (session?.user?.user_metadata?.isPro ||
-                                         (typeof window !== 'undefined' && localStorage.getItem('spendly_is_pro') === 'true'))
-                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-900'
-                                        : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-900'
-                                    }`}
-                                >
-                                    {tSettings('subscription.currentPlan')}: {(session?.user?.user_metadata?.isPro ||
-                                        (typeof window !== 'undefined' && localStorage.getItem('spendly_is_pro') === 'true'))
-                                        ? tPricing('pro') : tPricing('free')}
-                                </span>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Free */}
-                                <div className="rounded-lg border border-gray-200 dark:border-border p-5">
-                                    <h3 className="font-medium text-secondary-black dark:text-white">
-                                        {tPricing('free')}
-                                    </h3>
-                                    <p className="text-sm text-gray-600 dark:text-white mt-1">
-                                        {tPricing('free.short')}
-                                    </p>
-                                    <div className="mt-4">
-                                        <div className="text-2xl font-semibold text-secondary-black dark:text-white">$0</div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                                            {tPricing('perMonth')}
-                                        </div>
-                                    </div>
-                                    <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-white">
-                                        <li>• {tPricing('free.features.track')}</li>
-                                        <li>• {tPricing('free.features.charts')}</li>
-                                        <li>• {tPricing('free.features.notifications')}</li>
-                                    </ul>
-                                </div>
-
-                                {/* Pro */}
-                                <div className="rounded-lg border border-primary dark:border-primary p-5 bg-primary/5 dark:bg-primary/10">
-                                    <h3 className="font-medium text-secondary-black dark:text-white">
-                                        {tPricing('pro')}
-                                    </h3>
-                                    <p className="text-sm text-gray-600 dark:text-white mt-1">
-                                        {tPricing('pro.short')}
-                                    </p>
-                                    <div className="mt-4">
-                                        <div className="text-2xl font-semibold text-secondary-black dark:text-white">$5</div>
-                                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                                            {tPricing('perMonth')}
-                                        </div>
-                                    </div>
-                                    <ul className="mt-4 space-y-2 text-sm text-gray-800 dark:text-white">
-                                        <li>• {tPricing('pro.features.aiUnlimited')}</li>
-                                        <li>• {tPricing('pro.features.advancedCharts')}</li>
-                                        <li>• {tPricing('pro.features.prioritySupport')}</li>
-                                        <li>• {tPricing('pro.features.customGoals')}</li>
-                                        <li>• {tPricing('pro.features.earlyAccess')}</li>
-                                    </ul>
-                                    <div className="mt-5">
-                                        <Link href="/payment" className="inline-flex">
-                                            <Button text={tCTA('upgradeToPro')} variant="primary" />
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Language Section */}
-                        <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
-                                        {tSettings('language.title')}
-                                    </h2>
-                                    <p className="text-sm text-gray-600 dark:text-white">
-                                        {tSettings('language.description')}
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <LanguageSelect
-                                        value={language}
-                                        onChange={(l) => handleLanguageChange(l)}
-                                        className="min-w-[180px]"
-                                    />
-                                    {isSavingLang ? (
-                                        <span className="text-xs text-muted-foreground">
-                                            {tCommon('saving')}
-                                        </span>
-                                    ) : null}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* App Controls Section */}
-                        {!isPWAInstalled && (
-                            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">
-                                            {tSettings('appControls.title')}
-                                        </h2>
-                                        <p className="text-sm text-gray-600 dark:text-white">
-                                            {tSettings('appControls.description')}
-                                        </p>
-                                    </div>
-                                    <Button
-                                        text={tCTA('downloadApp')}
-                                        variant="default"
-                                        onClick={() => setIsAppInstallModalOpen(true)}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                        {/* Account Section */}
-                        <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
-                            <div className="space-y-6">
-                                <div>
-                                    <h2 className="text-lg font-semibold text-secondary-black mb-4 dark:text-white">
-                                        {tSettings('account.title')}
-                                    </h2>
-                                    <div className="space-y-4">
-                                        <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
-                                            <div>
-                                                <h3 className="font-medium text-secondary-black dark:text-white">
-                                                    {tSettings('account.signOut.title')}
-                                                </h3>
-                                                <p className="text-sm text-gray-600 dark:text-white">
-                                                    {tSettings('account.signOut.description')}
-                                                </p>
-                                            </div>
-                                            <Button
-                                                text={tCTA('signOut')}
-                                                variant="outline"
-                                                className="bg-transparent text-red-600 border-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 dark:hover:bg-red-600"
-                                                onClick={openSignOutModal}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Sign Out Modal */}
-            {isSignOutModalOpen && (
-                <SignOutModal 
-                    title="Sign Out"
-                    text="Are you sure you want to sign out?"
-                    onClose={closeSignOutModal}
-                    signOut={signOut}
-                />
-            )}
-
-            {/* Edit Profile Modal */}
-            <EditProfileModal
-                isOpen={isEditProfileModalOpen}
-                onClose={handleEditProfileClose}
-                onSuccess={() => {}}
-            />
-
-            {/* App Install Modal */}
-            {isAppInstallModalOpen && (
-                <AppInstallModal
-                    isOpen={isAppInstallModalOpen}
-                    onClose={() => setIsAppInstallModalOpen(false)}
-                />
-            )}
-        </>
-    )
+  return {
+    title: t('title'),
+    description: t('description')
+  }
 }
 
 
@@ -334,3 +47,15 @@ const tSettings = useTranslations('userSettings')
 const tPricing = useTranslations('pricing')
 const tCTA = useTranslations('cta')
 const tCommon = useTranslations('common')
+
+export async function generateMetadata(): Promise<import('next').Metadata> {
+  const [{ cookies }, { DEFAULT_LOCALE, isSupportedLanguage }, { getTranslations }] = await Promise.all([
+    import('next/headers'),
+    import('@/i18n/config'),
+    import('next-intl/server')
+  ])
+  const cookieLocale = cookies().get('NEXT_LOCALE')?.value || cookies().get('spendly_locale')?.value || DEFAULT_LOCALE
+  const locale = isSupportedLanguage(cookieLocale || '') ? (cookieLocale as any) : DEFAULT_LOCALE
+  const t = await getTranslations({ locale, namespace: 'pages.userSettings.meta' })
+  return { title: t('title'), description: t('description') }
+}

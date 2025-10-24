@@ -3,12 +3,8 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
-
-// Import hooks
 import useModal from '@/hooks/useModal'
 import { useTransactionsData } from '@/hooks/useTransactionsData'
-
-// Import components
 import Button from '@/components/ui-elements/Button'
 import Spinner from '@/components/ui-elements/Spinner'
 import TransactionsTable from '@/components/chunks/TransactionsTable'
@@ -17,27 +13,16 @@ import TransactionModal from '@/components/modals/TransactionModal'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
 import TransactionsFilter from '@/components/ui-elements/TransactionsFilter'
 import { ExpensesBarChart } from '@/components/charts/TransactionsBarChart'
-
-// Import types
 import { ToastMessageProps } from '@/types/types'
 import type { EditTransactionPayload } from '@/types/types'
-
-// Component
 import { supabase } from '@/lib/supabaseClient'
 import { UserAuth } from '@/context/AuthContext'
 import { useTranslations } from 'next-intl'
 
-import type { Metadata } from 'next'
-import { cookies } from 'next/headers'
-import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
-import { getTranslations } from 'next-intl/server'
-import TransactionsClient from './TransactionsClient'
-
-const Transactions = () => {
+export default function TransactionsClient() {
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
   const { isModalOpen, openModal, closeModal } = useModal()
 
-  // Используем новый хук для управления данными транзакций
   const {
     allTransactions,
     filteredTransactions,
@@ -67,6 +52,7 @@ const Transactions = () => {
   const { session } = UserAuth()
   const t = useTranslations('transactions')
   const tCommon = useTranslations('common')
+
   const handleDeleteTransaction = async (id: string) => {
     if (!session?.user?.id || !id) return
 
@@ -94,11 +80,8 @@ const Transactions = () => {
 
   const handleEditTransaction = async (payload: EditTransactionPayload) => {
     try {
-      // Логика редактирования будет обработана в хуке или здесь
-      // Пока используем простой рефетч
       await refetch()
       handleToastMessage(t('toast.updateSuccess'), 'success')
-      // Обновим прогресс бары бюджетов, если открыты соответствующие виджеты
       window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
     } catch (e) {
       console.error('Unexpected error during update:', e)
@@ -106,18 +89,10 @@ const Transactions = () => {
     }
   }
 
-  // Обработчик изменения фильтров
   const handleFiltersChange = (newFilters: { transactionType?: string; datePeriod?: string }) => {
     const updates: any = {}
-    
-    if (newFilters.transactionType) {
-      updates.dataType = newFilters.transactionType
-    }
-    
-    if (newFilters.datePeriod) {
-      updates.period = newFilters.datePeriod
-    }
-    
+    if (newFilters.transactionType) updates.dataType = newFilters.transactionType
+    if (newFilters.datePeriod) updates.period = newFilters.datePeriod
     updateFilters(updates)
   }
 
@@ -136,7 +111,7 @@ const Transactions = () => {
       {toastMessage && (
         <ToastMessage text={toastMessage.text} type={toastMessage.type} />
       )}
-      
+
       <motion.div
         layout
         transition={{ type: 'spring', stiffness: 220, damping: 26, mass: 0.9 }}
@@ -217,25 +192,4 @@ const Transactions = () => {
       )}
     </div>
   )
-}
-
-export default Transactions
-
-export default function TransactionsPage() {
-  return <TransactionsClient />
-}
-
-export async function generateMetadata(): Promise<Metadata> {
-  const cookieLocale =
-    cookies().get('NEXT_LOCALE')?.value ||
-    cookies().get('spendly_locale')?.value ||
-    DEFAULT_LOCALE
-
-  const locale = isSupportedLanguage(cookieLocale || '') ? (cookieLocale as any) : DEFAULT_LOCALE
-  const t = await getTranslations({ locale, namespace: 'pages.transactions.meta' })
-
-  return {
-    title: t('title'),
-    description: t('description')
-  }
 }

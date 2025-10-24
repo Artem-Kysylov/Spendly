@@ -1,70 +1,26 @@
-'use client'
+import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
+import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
+import { getTranslations } from 'next-intl/server'
+import BudgetSetupClient from './BudgetSetupClient'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabaseClient'
-import { UserAuth } from '@/context/AuthContext'
-import CreateMainBudget from '@/components/budgets/CreateMainBudget'
-import ToastMessage from '@/components/ui-elements/ToastMessage'
-import { useTranslations } from 'next-intl'
+export default function SetupBudgetPage() {
+  return <BudgetSetupClient />
+}
 
-export default function Page() {
-  const { session, isReady } = UserAuth()
-  const router = useRouter()
-  const [toast, setToast] = useState<{ text: string; type: 'success' | 'error' } | null>(null)
-  const tSetupBudget = useTranslations('setup.budget')
-  const tCommon = useTranslations('common')
+export async function generateMetadata(): Promise<Metadata> {
+  const cookieLocale =
+    cookies().get('NEXT_LOCALE')?.value ||
+    cookies().get('spendly_locale')?.value ||
+    DEFAULT_LOCALE
 
-  useEffect(() => {
-    if (isReady && !session) {
-      router.replace('/')
-    }
-  }, [isReady, session, router])
+  const locale = isSupportedLanguage(cookieLocale || '') ? (cookieLocale as any) : DEFAULT_LOCALE
+  const t = await getTranslations({ locale, namespace: 'pages.setup.budget.meta' })
 
-  const onSubmit = async (budget: string) => {
-    if (!session?.user?.id) {
-      setToast({ text: tSetupBudget('toast.signInRequired'), type: 'error' })
-      return
-    }
-
-    try {
-      const amount = Number(budget)
-      if (!amount || amount <= 0) {
-        setToast({ text: tSetupBudget('toast.invalidAmount'), type: 'error' })
-        return
-      }
-
-      const { error } = await supabase
-        .from('main_budget')
-        .upsert(
-          {
-            user_id: session.user.id,
-            amount,
-          },
-          { onConflict: 'user_id' }
-        )
-        .select()
-
-      if (error) {
-        setToast({ text: tSetupBudget('toast.saveFailed'), type: 'error' })
-        return
-      }
-
-      setToast({ text: tSetupBudget('toast.saveSuccess'), type: 'success' })
-      // Переход к дашборду с пустым состоянием (по задумке он будет после онбординга)
-      router.push('/dashboard')
-    } catch (error) {
-      console.error('Error saving budget:', error)
-      setToast({ text: tCommon('unexpectedError'), type: 'error' })
-    }
+  return {
+    title: t('title'),
+    description: t('description')
   }
-
-  return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      {toast && <ToastMessage text={toast.text} type={toast.type} />}
-      <CreateMainBudget onSubmit={onSubmit} />
-    </div>
-  )
 }
 
 

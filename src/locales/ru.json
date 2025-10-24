@@ -192,18 +192,59 @@
       "pushDisabled": "Push отключён",
       "pushStatusFailed": "Не удалось обновить статус push"
     },
-    "authRequired": {
-      "title": "Требуется аутентификация",
-      "description": "Войдите, чтобы получить доступ к настройкам уведомлений.",
-      "signIn": "Войти"
+    "meta": {
+      "app": {
+        "title": "Spendly — менеджер личных финансов",
+        "description": "Отслеживайте расходы, управляйте бюджетами и берите финансы под контроль с Spendly.",
+        "keywords": "финансы,бюджет,расходы,деньги,учёт,личные финансы"
+      }
     },
-    "a11y": {
-      "togglePush": "Переключить push‑уведомления"
+    "pages": {
+      "auth": {
+        "home": { "meta": { "title": "Вход или создание аккаунта", "description": "Управляйте финансами со Spendly." } },
+        "forgotPassword": { "meta": { "title": "Забыли пароль", "description": "Сбросьте пароль безопасно." } },
+        "resetPassword": { "meta": { "title": "Сброс пароля", "description": "Установите новый пароль для аккаунта." } }
+      },
+      "dashboard": { "meta": { "title": "Панель", "description": "Обзор бюджетов, транзакций и инсайтов." } },
+      "transactions": { "meta": { "title": "Транзакции", "description": "Просматривайте и управляйте транзакциями." } },
+      "budgets": { "meta": { "title": "Бюджеты", "description": "Создавайте и управляйте бюджетами." } },
+      "budgetDetails": {
+        "meta": {
+          "title": "Детали бюджета",
+          "description": "Информация и активность бюджета.",
+          "titleWithName": "{name} — Бюджет",
+          "descriptionWithName": "Детали и активность для «{name}»."
+        }
+      },
+      "addBudget": { "meta": { "title": "Новый бюджет", "description": "Создайте новый бюджет для учёта." } },
+      "userSettings": { "meta": { "title": "Настройки пользователя", "description": "Обновляйте предпочтения и уведомления." } },
+      "payment": { "meta": { "title": "Оплата", "description": "Обновление до Spendly Pro." } },
+      "onboarding": { "meta": { "title": "Онбординг", "description": "Настройте предпочтения и начните." } },
+      "setup": { "budget": { "meta": { "title": "Настройка бюджета", "description": "Выберите страну и валюту." } } },
+      "test": { "meta": { "title": "Тестовая страница", "description": "Песочница локализации и форматов." } },
+      "notFound": { "meta": { "title": "Страница не найдена", "description": "Запрошенная страница не существует." } }
     },
-    "dev": {
-      "sqlScript": "SQL‑скрипт",
-      "copy": "Копировать",
-      "copied": "Скопировано!"
+    "notifications": {
+      "api": {
+        "queueAdded": "Уведомление добавлено в очередь",
+        "subscriptionSaved": "Push-подписка сохранена",
+        "subscriptionRemoved": "Push-подписка удалена"
+      }
+    },
+    "errors": {
+      "auth.invalidAuthHeader": "Отсутствует или неверный заголовок авторизации",
+      "auth.notAuthenticated": "Пользователь не аутентифицирован",
+      "common.internalServerError": "Внутренняя ошибка сервера",
+      "notifications.titleRequired": "Требуются заголовок и сообщение",
+      "notifications.invalidAction": "Некорректное действие или отсутствуют параметры",
+      "notifications.fetchFailed": "Ошибка получения уведомлений",
+      "notifications.createFailed": "Ошибка создания уведомления",
+      "notifications.updateFailed": "Ошибка обновления уведомлений",
+      "notifications.queueAddFailed": "Ошибка добавления уведомления в очередь",
+      "notifications.queueFetchFailed": "Ошибка получения очереди уведомлений",
+      "notifications.subscriptionInvalid": "Требуется валидная push-подписка",
+      "notifications.subscriptionSaveFailed": "Ошибка сохранения push-подписки",
+      "notifications.deactivateFailed": "Ошибка деактивации push-подписки"
     }
   },
   "filters": {

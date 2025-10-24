@@ -14,5 +14,92 @@
     "language": "Мова",
     "selectLanguage": "Виберіть мову",
     "saveLanguage": "Зберегти мову"
+  },
+  "transactions.table": {
+    "headers.type": "Тип",
+    "headers.date": "Дата"
+  },
+  "modals": {
+    "transaction.type.expense": "Витрата",
+    "transaction.type.income": "Дохід",
+    "transaction.noResults": "Нічого не знайдено"
+  },
+  "assistant": {
+    "insights.title": "AI‑інсайти",
+    "insights.beta": "Бета"
+  },
+  "filters": {
+    "options": {
+      "week": "Тиждень",
+      "month": "Місяць"
+    }
+  },
+  "errors": {
+    "selectImageFile": "Будь ласка, виберіть файл зображення",
+    "fileTooLarge5mb": "Розмір файлу має бути менше 5 МБ",
+    "uploadAvatarFailed": "Не вдалося завантажити аватар",
+    "removeAvatarFailed": "Не вдалося видалити аватар"
+  },
+  "profile": {
+    "avatar": {
+      "upload": "Завантажити аватар",
+      "change": "Змінити аватар",
+      "cancel": "Скасувати",
+      "alt": "Аватар користувача"
+    }
+  },
+  "meta": {
+    "app": {
+      "title": "Spendly — менеджер особистих фінансів",
+      "description": "Відстежуйте витрати, керуйте бюджетами та контролюйте фінанси зі Spendly.",
+      "keywords": "фінанси,бюджет,витрати,гроші,облік,особисті фінанси"
+    }
+  },
+  "pages": {
+    "auth": {
+      "home": { "meta": { "title": "Вхід або створення акаунта", "description": "Керуйте фінансами зі Spendly." } },
+      "forgotPassword": { "meta": { "title": "Забули пароль", "description": "Безпечно скиньте пароль." } },
+      "resetPassword": { "meta": { "title": "Скидання пароля", "description": "Встановіть новий пароль." } }
+    },
+    "dashboard": { "meta": { "title": "Панель", "description": "Огляд бюджетів, транзакцій та інсайтів." } },
+    "transactions": { "meta": { "title": "Транзакції", "description": "Перегляд і керування транзакціями." } },
+    "budgets": { "meta": { "title": "Бюджети", "description": "Створення та керування бюджетами." } },
+    "budgetDetails": {
+      "meta": {
+        "title": "Деталі бюджету",
+        "description": "Інформація та активність бюджету.",
+        "titleWithName": "{name} — Бюджет",
+        "descriptionWithName": "Деталі та активність для «{name}»."
+      }
+    },
+    "addBudget": { "meta": { "title": "Новий бюджет", "description": "Створіть бюджет для обліку." } },
+    "userSettings": { "meta": { "title": "Налаштування користувача", "description": "Оновлюйте вподобання та сповіщення." } },
+    "payment": { "meta": { "title": "Оплата", "description": "Оновлення до Spendly Pro." } },
+    "onboarding": { "meta": { "title": "Онбординг", "description": "Налаштуйте вподобання та почніть." } },
+    "setup": { "budget": { "meta": { "title": "Налаштування бюджету", "description": "Виберіть країну та валюту." } } },
+    "test": { "meta": { "title": "Тестова сторінка", "description": "Пісочниця локалізації та форматів." } },
+    "notFound": { "meta": { "title": "Сторінку не знайдено", "description": "Запитаної сторінки не існує." } }
+  },
+  "notifications": {
+    "api": {
+      "queueAdded": "Сповіщення додано до черги",
+      "subscriptionSaved": "Push-підписку збережено",
+      "subscriptionRemoved": "Push-підписку видалено"
+    }
+  },
+  "errors": {
+    "auth.invalidAuthHeader": "Відсутній або некоректний заголовок авторизації",
+    "auth.notAuthenticated": "Користувач не автентифікований",
+    "common.internalServerError": "Внутрішня помилка сервера",
+    "notifications.titleRequired": "Потрібні заголовок і повідомлення",
+    "notifications.invalidAction": "Некоректна дія або відсутні параметри",
+    "notifications.fetchFailed": "Помилка отримання сповіщень",
+    "notifications.createFailed": "Помилка створення сповіщення",
+    "notifications.updateFailed": "Помилка оновлення сповіщень",
+    "notifications.queueAddFailed": "Помилка додавання в чергу",
+    "notifications.queueFetchFailed": "Помилка отримання черги сповіщень",
+    "notifications.subscriptionInvalid": "Потрібна валідна push-підписка",
+    "notifications.subscriptionSaveFailed": "Помилка збереження push-підписки",
+    "notifications.deactivateFailed": "Помилка деактивації push-підписки"
   }
 }

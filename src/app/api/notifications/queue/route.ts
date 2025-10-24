@@ -1,27 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/serverSupabase'
+import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
+import { getTranslations } from 'next-intl/server'
 
 // POST /api/notifications/queue - добавление уведомления в очередь
 export async function POST(req: NextRequest) {
   try {
     const { supabase, user } = await getAuthenticatedClient(req)
-    const body = await req.json()
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
+    const tNotifications = await getTranslations({ locale, namespace: 'notifications' })
 
-    const {
-      notification_type = 'general',
-      title,
-      message,
-      data = {},
-      action_url,
-      send_push = true,
-      send_email = false,
-      scheduled_for,
-      max_attempts = 3
-    } = body
+    const body = await req.json()
+    const { notification_type = 'general', title, message, data = {}, action_url, send_push = true, send_email = false, scheduled_for, max_attempts = 3 } = body
 
     if (!title || !message) {
       return NextResponse.json(
-        { error: 'Title and message are required' },
+        { error: tErrors('notifications.titleRequired') },
         { status: 400 }
       )
     }
@@ -48,7 +47,7 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error('Error adding notification to queue:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: tErrors('notifications.queueAddFailed') }, { status: 500 })
     }
 
     // Если уведомление не запланировано на будущее, можно сразу вызвать Edge Function
@@ -75,13 +74,18 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ 
       notification: queuedNotification,
-      message: 'Notification added to queue successfully'
+      message: tNotifications('api.queueAdded')
     }, { status: 201 })
 
   } catch (error) {
-    console.error('API Error:', error)
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: error instanceof Error ? error.message : tErrors('common.internalServerError') },
       { status: 500 }
     )
   }
@@ -91,6 +95,13 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const { supabase, user } = await getAuthenticatedClient(req)
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
+
     const { searchParams } = new URL(req.url)
     
     const status = searchParams.get('status')
@@ -111,15 +122,18 @@ export async function GET(req: NextRequest) {
 
     if (error) {
       console.error('Error fetching notification queue:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: tErrors('notifications.queueFetchFailed') }, { status: 500 })
     }
-
     return NextResponse.json({ notifications: data })
-
   } catch (error) {
-    console.error('API Error:', error)
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: error instanceof Error ? error.message : tErrors('common.internalServerError') },
       { status: 500 }
     )
   }

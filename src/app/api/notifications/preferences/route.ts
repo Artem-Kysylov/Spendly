@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
+import { getTranslations } from 'next-intl/server'
 
 // Получение клиента с аутентификацией пользователя
 async function getAuthenticatedClient(req: NextRequest) {
@@ -104,12 +106,19 @@ export async function PUT(req: NextRequest) {
     const { supabase, user } = await getAuthenticatedClient(req)
     const body = await req.json()
 
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
+
     const { frequency, push_enabled, email_enabled } = body
 
     // Валидация
     const validFrequencies = ['disabled', 'gentle', 'aggressive', 'relentless']
     if (frequency && !validFrequencies.includes(frequency)) {
-      return NextResponse.json({ error: 'Invalid frequency value' }, { status: 400 })
+      return NextResponse.json({ error: tErrors('notifications.invalidAction') }, { status: 400 })
     }
 
     const updateData: any = {}
@@ -175,8 +184,14 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ settings: updated })
   } catch (error) {
     console.error('API Error:', error)
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: error instanceof Error ? error.message : tErrors('common.internalServerError') },
       { status: 500 }
     )
   }

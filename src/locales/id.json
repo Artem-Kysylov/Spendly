@@ -13,6 +13,65 @@
   "Settings": {
     "language": "Bahasa",
     "selectLanguage": "Pilih bahasa",
-    "saveLanguage": "Simpan bahasa"
+    "saveLanguage": "Simpan bahasa",
+    "assistant": { "insights.title": "AI Insights", "insights.beta": "Beta" },
+    "filters": { "options": { "week": "Week", "month": "Month" } },
+    "modals": { "transaction.noResults": "No results found" },
+    "errors": {
+      "selectImageFile": "Please select an image file",
+      "fileTooLarge5mb": "File size must be less than 5MB",
+      "uploadAvatarFailed": "Failed to upload avatar",
+      "removeAvatarFailed": "Failed to remove avatar"
+    },
+    "profile": {
+      "avatar": {
+        "upload": "Upload Avatar",
+        "change": "Change Avatar",
+        "cancel": "Cancel",
+        "alt": "User Avatar"
+      }
+    }
+  },
+  "meta": { "app": { "title": "Spendly - Personal Finance Manager", "description": "Track expenses and manage budgets with Spendly.", "keywords": "finance,budget,expenses,money,tracking,personal finance" } },
+  "pages": {
+    "auth": {
+      "home": { "meta": { "title": "Sign In or Create Account", "description": "Manage your finances with Spendly." } },
+      "forgotPassword": { "meta": { "title": "Forgot Password", "description": "Reset your password securely." } },
+      "resetPassword": { "meta": { "title": "Reset Password", "description": "Set a new password for your account." } }
+    },
+    "dashboard": { "meta": { "title": "Dashboard", "description": "Overview of budgets and transactions." } },
+    "transactions": { "meta": { "title": "Transactions", "description": "Browse and manage your transactions." } },
+    "budgets": { "meta": { "title": "Budgets", "description": "Create and manage your budgets." } },
+    "budgetDetails": {
+      "meta": {
+        "title": "Budget Details",
+        "description": "View budget information and activity.",
+        "titleWithName": "{name} — Budget",
+        "descriptionWithName": "Details and activity for \"{name}\"."
+      }
+    },
+    "addBudget": { "meta": { "title": "Add New Budget", "description": "Create a new budget." } },
+    "userSettings": { "meta": { "title": "User Settings", "description": "Update account preferences." } },
+    "payment": { "meta": { "title": "Payment", "description": "Upgrade to Spendly Pro." } },
+    "onboarding": { "meta": { "title": "Onboarding", "description": "Set up preferences and get started." } },
+    "setup": { "budget": { "meta": { "title": "Budget Setup", "description": "Select country and currency." } } },
+    "test": { "meta": { "title": "Test Page", "description": "Localization playground." } },
+    "notFound": { "meta": { "title": "Page Not Found", "description": "The requested page does not exist." } }
+  },
+  "notifications": { "api": { "queueAdded": "Notification added to queue successfully", "subscriptionSaved": "Push subscription saved", "subscriptionRemoved": "Push subscription removed" } },
+  "errors": {
+    "auth.invalidAuthHeader": "Missing or invalid authorization header",
+    "auth.notAuthenticated": "User not authenticated",
+    "common.internalServerError": "Internal server error",
+    "notifications.titleRequired": "Title and message are required",
+    "notifications.invalidAction": "Invalid action or missing parameters",
+    "notifications.fetchFailed": "Error fetching notifications",
+    "notifications.createFailed": "Error creating notification",
+    "notifications.updateFailed": "Error updating notifications",
+    "notifications.queueAddFailed": "Error adding notification to queue",
+    "notifications.queueFetchFailed": "Error fetching notification queue",
+    "notifications.subscriptionInvalid": "Valid push subscription is required",
+    "notifications.subscriptionSaveFailed": "Error saving push subscription",
+    "notifications.deactivateFailed": "Error deactivating push subscription"
   }
 }

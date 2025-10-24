@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthenticatedClient } from '@/lib/serverSupabase'
+import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
+import { getTranslations } from 'next-intl/server'
 
 // POST /api/notifications/subscribe - подписка на push-уведомления
 export async function POST(req: NextRequest) {
@@ -7,11 +9,19 @@ export async function POST(req: NextRequest) {
     const { supabase, user } = await getAuthenticatedClient(req)
     const body = await req.json()
 
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
+    const tNotifications = await getTranslations({ locale, namespace: 'notifications' })
+
     const { subscription } = body
 
     if (!subscription || !subscription.endpoint) {
       return NextResponse.json(
-        { error: 'Valid push subscription is required' },
+        { error: tErrors('notifications.subscriptionInvalid') },
         { status: 400 }
       )
     }
@@ -30,7 +40,7 @@ export async function POST(req: NextRequest) {
 
     if (subscriptionError) {
       console.error('Error saving push subscription:', subscriptionError)
-      return NextResponse.json({ error: subscriptionError.message }, { status: 500 })
+      return NextResponse.json({ error: tErrors('notifications.subscriptionSaveFailed') }, { status: 500 })
     }
 
     // Обновляем настройки пользователя (таблица notification_preferences)
@@ -44,11 +54,17 @@ export async function POST(req: NextRequest) {
       // Не возвращаем ошибку, так как подписка уже сохранена
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, message: tNotifications('api.subscriptionSaved') })
   } catch (error) {
     console.error('API Error:', error)
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: error instanceof Error ? error.message : tErrors('common.internalServerError') },
       { status: 500 }
     )
   }
@@ -59,6 +75,14 @@ export async function DELETE(req: NextRequest) {
   try {
     const { supabase, user } = await getAuthenticatedClient(req)
     const body = await req.json()
+
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
+    const tNotifications = await getTranslations({ locale, namespace: 'notifications' })
 
     const { endpoint } = body
 
@@ -72,7 +96,7 @@ export async function DELETE(req: NextRequest) {
 
       if (error) {
         console.error('Error deactivating push subscription:', error)
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ error: tErrors('notifications.deactivateFailed') }, { status: 500 })
       }
     } else {
       // Деактивируем все подписки пользователя
@@ -97,11 +121,17 @@ export async function DELETE(req: NextRequest) {
       console.error('Error updating push settings:', settingsError)
     }
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true, message: tNotifications('api.subscriptionRemoved') })
   } catch (error) {
     console.error('API Error:', error)
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: error instanceof Error ? error.message : tErrors('common.internalServerError') },
       { status: 500 }
     )
   }

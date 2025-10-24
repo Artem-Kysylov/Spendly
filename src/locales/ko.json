@@ -13,6 +13,23 @@
   "Settings": {
     "language": "언어",
     "selectLanguage": "언어 선택",
-    "saveLanguage": "언어 저장"
+    "saveLanguage": "언어 저장",
+    "assistant": { "insights.title": "AI Insights", "insights.beta": "Beta" },
+    "filters": { "options": { "week": "Week", "month": "Month" } },
+    "modals": { "transaction.noResults": "No results found" },
+    "errors": {
+      "selectImageFile": "Please select an image file",
+      "fileTooLarge5mb": "File size must be less than 5MB",
+      "uploadAvatarFailed": "Failed to upload avatar",
+      "removeAvatarFailed": "Failed to remove avatar"
+    },
+    "profile": {
+      "avatar": {
+        "upload": "Upload Avatar",
+        "change": "Change Avatar",
+        "cancel": "Cancel",
+        "alt": "User Avatar"
+      }
+    }
   }
 }

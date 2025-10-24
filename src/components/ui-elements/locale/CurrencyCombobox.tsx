@@ -5,6 +5,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import { matchSorter } from 'match-sorter'
+import { useTranslations } from 'next-intl'
 
 type CurrencyItem = {
   code: string
@@ -72,17 +73,21 @@ export default function CurrencyCombobox({
 
   const selected = useMemo(() => items.find((c) => c.code === value), [items, value])
 
+  const tBudget = useTranslations('BudgetSetup')
+  const tModals = useTranslations('modals')
+  const placeholderText = placeholder ?? tBudget('searchCurrency')
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" className={className}>
-          {selected ? `${selected.code}${selected.symbol ? ` (${selected.symbol})` : ''}` : 'Select currency'}
+          {selected ? `${selected.code}${selected.symbol ? ` (${selected.symbol})` : ''}` : tBudget('selectCurrency')}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-[320px]">
         <Command>
           <CommandInput
-            placeholder={placeholder}
+            placeholder={placeholderText}
             value={query}
             onValueChange={(v) => {
               setQuery(v)
@@ -90,7 +95,7 @@ export default function CurrencyCombobox({
             }}
           />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>{tModals('transaction.noResults')}</CommandEmpty>
             <CommandGroup>
               {options.map((c) => (
                 <CommandItem

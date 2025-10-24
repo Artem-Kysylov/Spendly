@@ -250,6 +250,38 @@
       "month": "Month"
     }
   },
+  "meta": {
+    "app": {
+      "title": "Spendly - Personal Finance Manager",
+      "description": "Track your expenses, manage budgets, and take control of your finances with Spendly.",
+      "keywords": "finance,budget,expenses,money,tracking,personal finance"
+    }
+  },
+  "pages": {
+    "auth": {
+      "home": { "meta": { "title": "Sign In or Create Account", "description": "Manage your finances with Spendly." } },
+      "forgotPassword": { "meta": { "title": "Forgot Password", "description": "Reset your password securely." } },
+      "resetPassword": { "meta": { "title": "Reset Password", "description": "Set a new password for your account." } }
+    },
+    "dashboard": { "meta": { "title": "Dashboard", "description": "Overview of budgets, transactions, and insights." } },
+    "transactions": { "meta": { "title": "Transactions", "description": "Browse and manage all your transactions." } },
+    "budgets": { "meta": { "title": "Budgets", "description": "Create and manage your budgets." } },
+    "budgetDetails": {
+      "meta": {
+        "title": "Budget Details",
+        "description": "View budget information and activity.",
+        "titleWithName": "{name} — Budget",
+        "descriptionWithName": "Details and activity for \"{name}\"."
+      }
+    },
+    "addBudget": { "meta": { "title": "Add New Budget", "description": "Create a new budget to start tracking." } },
+    "userSettings": { "meta": { "title": "User Settings", "description": "Update account preferences and notifications." } },
+    "payment": { "meta": { "title": "Payment", "description": "Upgrade to Spendly Pro." } },
+    "onboarding": { "meta": { "title": "Onboarding", "description": "Set up your preferences and get started." } },
+    "setup": { "budget": { "meta": { "title": "Budget Setup", "description": "Select your country and currency." } } },
+    "test": { "meta": { "title": "Test Page", "description": "Playground for localization and formats." } },
+    "notFound": { "meta": { "title": "Page Not Found", "description": "The requested page does not exist." } }
+  },
   "notifications": {
     "bell": {
       "aria": "Notifications",
@@ -329,5 +361,25 @@
       "cancel": "Cancel",
       "alt": "User Avatar"
     }
+  },
+  "api": {
+    "queueAdded": "Notification added to queue successfully",
+    "subscriptionSaved": "Push subscription saved",
+    "subscriptionRemoved": "Push subscription removed"
+  },
+  "errors": {
+    "auth.invalidAuthHeader": "Missing or invalid authorization header",
+    "auth.notAuthenticated": "User not authenticated",
+    "common.internalServerError": "Internal server error",
+    "notifications.titleRequired": "Title and message are required",
+    "notifications.invalidAction": "Invalid action or missing parameters",
+    "notifications.fetchFailed": "Error fetching notifications",
+    "notifications.createFailed": "Error creating notification",
+    "notifications.updateFailed": "Error updating notifications",
+    "notifications.queueAddFailed": "Error adding notification to queue",
+    "notifications.queueFetchFailed": "Error fetching notification queue",
+    "notifications.subscriptionInvalid": "Valid push subscription is required",
+    "notifications.subscriptionSaveFailed": "Error saving push subscription",
+    "notifications.deactivateFailed": "Error deactivating push subscription"
   }
 }

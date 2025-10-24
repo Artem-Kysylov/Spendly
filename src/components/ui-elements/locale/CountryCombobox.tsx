@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command'
 import type { Country } from '@/types/locale'
 import { matchSorter } from 'match-sorter'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   value?: string
@@ -51,19 +52,22 @@ export default function CountryCombobox({
   }, [items, query])
 
   const selected = useMemo(() => items.find((c) => c.code === value), [items, value])
+  const tBudget = useTranslations('BudgetSetup')
+  const tModals = useTranslations('modals')
+  const placeholderText = placeholder ?? tBudget('searchCountry')
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" className={className}>
-          {selected ? `${selected.name} (${selected.code})` : 'Select country'}
-          {autodetected ? <span className="ml-2 text-muted-foreground text-xs">• Autodetected</span> : null}
+          {selected ? `${selected.name} (${selected.code})` : tBudget('selectCountry')}
+          {autodetected ? <span className="ml-2 text-muted-foreground text-xs">• {tBudget('autodetected')}</span> : null}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="p-0 w-[320px]">
         <Command>
           <CommandInput
-            placeholder={placeholder}
+            placeholder={placeholderText}
             value={query}
             onValueChange={(v) => {
               setQuery(v)
@@ -71,7 +75,7 @@ export default function CountryCombobox({
             }}
           />
           <CommandList>
-            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandEmpty>{tModals('transaction.noResults')}</CommandEmpty>
             <CommandGroup>
               {options.map((c) => (
                 <CommandItem

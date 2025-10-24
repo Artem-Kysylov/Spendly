@@ -1,105 +1,24 @@
-'use client';
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { UserAuth } from '@/context/AuthContext'
-import { supabase } from '@/lib/supabaseClient'
+import type { Metadata } from 'next'
+import { cookies } from 'next/headers'
+import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
+import { getTranslations } from 'next-intl/server'
+import AddNewBudgetClient from './AddNewBudgetClient'
 
-// Import components    
-import CreateMainBudget from '@/components/budgets/CreateMainBudget'
-import ToastMessage from '@/components/ui-elements/ToastMessage'
-
-// Import types
-import { ToastMessageProps } from '@/types/types'
-import type { UserLocaleSettings } from '@/types/locale'
-import { useTranslations } from 'next-intl'
-
-const AddNewBudget = () => {
-  const { session } = UserAuth()
-  const router = useRouter()
-  const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
-  const tBudgets = useTranslations('budgets')
-
-  const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
-    setToastMessage({ text, type })
-    setTimeout(() => {
-      setToastMessage(null)
-    }, 3000)
-  }
-
-  const handleCreateBudget = async (budget: string, locale?: UserLocaleSettings) => {
-    try {
-      if (!session?.user?.id) {
-        throw new Error('User not authenticated')
-      }
-
-      // Save locale settings via API route
-      if (locale) {
-        const { data: { session: current } } = await supabase.auth.getSession()
-        const token = current?.access_token
-        if (!token) throw new Error('No auth token')
-        const resp = await fetch('/api/user/locale', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            country: locale.country,
-            currency: locale.currency,
-            locale: locale.locale
-          })
-        })
-        if (!resp.ok) {
-          const err = await resp.json()
-          console.error('Error saving user locale settings:', err)
-          throw new Error(err.error || 'Failed to save locale settings')
-        }
-      }
-
-      console.log('Creating main budget:', {
-        user_id: session.user.id,
-        amount: Number(budget)
-      })
-
-      // Create new budget
-      const { data, error } = await supabase
-        .from('main_budget')
-        .upsert(
-          [
-            {
-              user_id: session.user.id,
-              amount: Number(budget)
-            }
-          ],
-          { onConflict: 'user_id' }
-        )
-        .select()
-
-      if (error) {
-        console.error('Error creating main budget:', error)
-        throw error
-      }
-
-      console.log('Main budget created successfully:', data)
-      handleToastMessage(tBudgets('list.toast.createSuccess'), 'success')
-      // Redirect to Dashboard after 2 seconds
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 2000)
-    } catch (error: any) {
-      console.error('Error creating budget:', error)
-      handleToastMessage(tBudgets('list.toast.failedCreate'), 'error')
-    }
-  }
-
-  return (
-    <div className='flex flex-col items-center justify-center h-screen'>
-      {toastMessage && (
-        <ToastMessage text={toastMessage.text} type={toastMessage.type} />
-      )}
-      <CreateMainBudget onSubmit={handleCreateBudget} />
-    </div>
-  )
+export default function AddNewBudgetPage() {
+  return <AddNewBudgetClient />
 }
 
-export default AddNewBudget
+export async function generateMetadata(): Promise<Metadata> {
+  const cookieLocale =
+    cookies().get('NEXT_LOCALE')?.value ||
+    cookies().get('spendly_locale')?.value ||
+    DEFAULT_LOCALE
+
+  const locale = isSupportedLanguage(cookieLocale || '') ? (cookieLocale as any) : DEFAULT_LOCALE
+  const t = await getTranslations({ locale, namespace: 'pages.addBudget.meta' })
+
+  return {
+    title: t('title'),
+    description: t('description')
+  }
+}

@@ -11,6 +11,7 @@ import { LazyMotion, domAnimation } from 'framer-motion'
 import { NextIntlClientProvider } from 'next-intl'
 import { cookies } from 'next/headers'
 import { loadMessages, DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
+import { getTranslations } from 'next-intl/server'
 
 
 const montserrat = Montserrat({
@@ -19,69 +20,59 @@ const montserrat = Montserrat({
   display: "swap", // Use 'swap' to avoid FOIT
 });
 
-export const metadata: Metadata = {
-  title: "Spendly - Personal Finance Manager",
-  description: "Track your expenses, manage budgets, and take control of your finances with Spendly",
-  generator: "Next.js",
-  manifest: "/manifest.json",
-  keywords: ["finance", "budget", "expenses", "money", "tracking", "personal finance"],
-  authors: [
-    { name: "Spendly Team" }
-  ],
-  creator: "Spendly",
-  publisher: "Spendly",
-  formatDetection: {
-    email: false,
-    address: false,
-    telephone: false,
-  },
-  metadataBase: new URL("https://spendly.app"),
-  alternates: {
-    canonical: "/",
-  },
-  icons: {
-    icon: [
-      { url: '/icons/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
-      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-      { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-    ],
-    other: [
-      {
-        rel: 'mask-icon',
-        url: '/icons/icon-192x192.png',
-        color: '#3b82f6',
-      },
-    ],
-  },
-  openGraph: {
-    type: "website",
-    siteName: "Spendly",
-    title: {
-      default: "Spendly - Personal Finance Manager",
-      template: "%s | Spendly"
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = getRequestLocale()
+  const tMeta = await getTranslations({ locale, namespace: 'meta' })
+
+  const title = tMeta('app.title')
+  const description = tMeta('app.description')
+  const keywordsCsv = tMeta('app.keywords')
+  const keywords = (typeof keywordsCsv === 'string' ? keywordsCsv.split(',').map(s => s.trim()) : [])
+
+  return {
+    title,
+    description,
+    generator: "Next.js",
+    manifest: "/manifest.json",
+    keywords,
+    authors: [{ name: "Spendly Team" }],
+    creator: "Spendly",
+    publisher: "Spendly",
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
     },
-    description: "Track your expenses, manage budgets, and take control of your finances with Spendly",
-  },
-  twitter: {
-    card: "summary",
-    title: {
-      default: "Spendly - Personal Finance Manager",
-      template: "%s | Spendly"
+    metadataBase: new URL("https://spendly.app"),
+    alternates: { canonical: "/" },
+    icons: {
+      icon: [
+        { url: '/icons/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
+        { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+        { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+      ],
+      apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
+      other: [{ rel: 'mask-icon', url: '/icons/icon-192x192.png', color: '#3b82f6' }],
     },
-    description: "Track your expenses, manage budgets, and take control of your finances with Spendly",
-  },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "Spendly",
-  },
-  verification: {
-    google: "google-site-verification-token",
-  },
-};
+    openGraph: {
+      type: "website",
+      siteName: "Spendly",
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description,
+    },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "Spendly",
+    },
+    verification: { google: "google-site-verification-token" },
+  }
+}
 
 export const viewport: Viewport = {
   themeColor: [
@@ -103,12 +94,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-  const cookieStore = cookies()
-  const cookieLocale =
-    cookieStore.get('NEXT_LOCALE')?.value ||
-    cookieStore.get('spendly_locale')?.value ||
-    DEFAULT_LOCALE
-  const locale = isSupportedLanguage(cookieLocale || '') ? (cookieLocale as any) : DEFAULT_LOCALE
+  const locale = getRequestLocale()
   const messages = await loadMessages(locale)
 
   return (
@@ -136,4 +122,13 @@ export default async function RootLayout({
       </body>
     </html>
   )
+}
+
+function getRequestLocale() {
+  const cookieStore = cookies()
+  const cookieLocale =
+    cookieStore.get('NEXT_LOCALE')?.value ||
+    cookieStore.get('spendly_locale')?.value ||
+    DEFAULT_LOCALE
+  return isSupportedLanguage(cookieLocale || '') ? (cookieLocale as any) : DEFAULT_LOCALE
 }

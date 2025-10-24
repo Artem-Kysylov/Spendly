@@ -1,14 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSupabaseClient } from '@/lib/serverSupabase'
 import { createClient } from '@supabase/supabase-js'
+import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
+import { getTranslations } from 'next-intl/server'
 
-// Получение клиента с аутентификацией пользователя
 async function getAuthenticatedClient(req: NextRequest) {
+  const localeCookie =
+    req.cookies.get('NEXT_LOCALE')?.value ||
+    req.cookies.get('spendly_locale')?.value ||
+    DEFAULT_LOCALE
+  const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+  const tErrors = await getTranslations({ locale, namespace: 'errors' })
+
   const authHeader = req.headers.get('authorization')
   if (!authHeader?.startsWith('Bearer ')) {
-    throw new Error('Missing or invalid authorization header')
+    throw new Error(tErrors('auth.invalidAuthHeader'))
   }
-
   const token = authHeader.substring(7)
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -24,16 +30,17 @@ async function getAuthenticatedClient(req: NextRequest) {
   // Проверяем аутентификацию
   const { data: { user }, error } = await supabase.auth.getUser()
   if (error || !user) {
-    throw new Error('User not authenticated')
+    throw new Error(tErrors('auth.notAuthenticated'))
   }
-
-  return { supabase, user }
+  return { supabase, user, locale }
 }
 
-// GET /api/notifications - получение уведомлений пользователя
+// GET /api/notifications
 export async function GET(req: NextRequest) {
   try {
-    const { supabase, user } = await getAuthenticatedClient(req)
+    const { supabase, user, locale } = await getAuthenticatedClient(req)
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
+
     const { searchParams } = new URL(req.url)
     
     const limit = parseInt(searchParams.get('limit') || '20')
@@ -52,33 +59,37 @@ export async function GET(req: NextRequest) {
     }
 
     const { data, error } = await query
-
     if (error) {
       console.error('Error fetching notifications:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: tErrors('notifications.fetchFailed') }, { status: 500 })
     }
-
     return NextResponse.json({ notifications: data })
   } catch (error) {
-    console.error('API Error:', error)
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: error instanceof Error ? error.message : tErrors('common.internalServerError') },
       { status: 500 }
     )
   }
 }
 
-// POST /api/notifications - создание нового уведомления
+// POST /api/notifications
 export async function POST(req: NextRequest) {
   try {
-    const { supabase, user } = await getAuthenticatedClient(req)
-    const body = await req.json()
+    const { supabase, user, locale } = await getAuthenticatedClient(req)
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
 
+    const body = await req.json()
     const { title, message, type = 'info', metadata = {} } = body
 
     if (!title || !message) {
       return NextResponse.json(
-        { error: 'Title and message are required' },
+        { error: tErrors('notifications.titleRequired') },
         { status: 400 }
       )
     }
@@ -98,25 +109,31 @@ export async function POST(req: NextRequest) {
 
     if (error) {
       console.error('Error creating notification:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: tErrors('notifications.createFailed') }, { status: 500 })
     }
 
     return NextResponse.json({ notification: data }, { status: 201 })
   } catch (error) {
-    console.error('API Error:', error)
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: error instanceof Error ? error.message : tErrors('common.internalServerError') },
       { status: 500 }
     )
   }
 }
 
-// PATCH /api/notifications - массовое обновление уведомлений
+// PATCH /api/notifications
 export async function PATCH(req: NextRequest) {
   try {
-    const { supabase, user } = await getAuthenticatedClient(req)
-    const body = await req.json()
+    const { supabase, user, locale } = await getAuthenticatedClient(req)
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
 
+    const body = await req.json()
     const { action, notification_ids } = body
 
     if (action === 'mark_all_read') {
@@ -128,9 +145,8 @@ export async function PATCH(req: NextRequest) {
 
       if (error) {
         console.error('Error marking all as read:', error)
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ error: tErrors('notifications.updateFailed') }, { status: 500 })
       }
-
       return NextResponse.json({ success: true })
     }
 
@@ -143,20 +159,24 @@ export async function PATCH(req: NextRequest) {
 
       if (error) {
         console.error('Error marking notifications as read:', error)
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        return NextResponse.json({ error: tErrors('notifications.updateFailed') }, { status: 500 })
       }
-
       return NextResponse.json({ success: true })
     }
 
     return NextResponse.json(
-      { error: 'Invalid action or missing parameters' },
+      { error: tErrors('notifications.invalidAction') },
       { status: 400 }
     )
   } catch (error) {
-    console.error('API Error:', error)
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: error instanceof Error ? error.message : tErrors('common.internalServerError') },
       { status: 500 }
     )
   }
