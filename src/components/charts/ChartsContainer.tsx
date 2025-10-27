@@ -44,6 +44,10 @@ export const ChartsContainer = (
   const [filters, setFilters] = useState<ChartFiltersType>(initialFilters)
   const tCharts = useTranslations('charts')
 
+  // Добавляем производные ключи для локализации заголовка/описания
+  const periodKey = filters.period === 'Month' ? 'monthly' : 'weekly'
+  const typeKey = filters.dataType === 'Expenses' ? 'expenses' : 'income'
+
   // Инициализация видимости графиков (на будущее), читаем из localStorage
   const [chartVisibility] = useState<ChartVisibility>(() => {
     if (typeof window !== 'undefined') {
@@ -202,6 +206,10 @@ export const ChartsContainer = (
                 showGrid={true}
                 showTooltip={true}
                 showLegend={false}
+                currentPeriodLabel={tCharts('comparison.labels.current')}
+                previousPeriodLabel={tCharts('comparison.labels.previous')}
+                title={tCharts(`comparison.titles.${periodKey}`)}
+                description={tCharts(`comparison.descriptions.${periodKey}.${typeKey}`)}
                 className="w-full"
               />
             </motion.div>

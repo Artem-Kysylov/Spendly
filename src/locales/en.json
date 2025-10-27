@@ -112,6 +112,12 @@
     "details.toast.deleteSuccess": "Budget deleted successfully!",
     "details.toast.updateFailed": "Failed to update transaction",
     "details.toast.updateSuccess": "Transaction updated successfully!",
+    "list.card.createNew": "Create a New Budget",
+    "labels.spent": "spent",
+    "labels.left": "left",
+    "details.controls.goToBudgets": "Go to Budgets",
+    "details.controls.editBudget": "Edit budget",
+    "details.controls.deleteBudget": "Delete budget",
     "details.deleteModal.title": "Delete Budget",
     "details.deleteModal.text": "Are you sure you want to delete this budget?",
     "details.editModal.title": "Edit Budget"

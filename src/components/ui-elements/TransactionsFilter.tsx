@@ -20,6 +20,7 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
   className = ''
 }) => {
   const tTransactions = useTranslations('transactions.table')
+  const tCharts = useTranslations('charts')
   const tModals = useTranslations('modals')
   const tFilters = useTranslations('filters')
   return (
@@ -35,8 +36,8 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
             onChange={(e) => onTransactionTypeChange(e.target.value as 'Expenses' | 'Income')}
             className="w-full sm:min-w-[140px] bg-white dark:bg-background text-black dark:text-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none border border-input"
           >
-            <option value="Expenses">{tModals('transaction.type.expense')}</option>
-            <option value="Income">{tModals('transaction.type.income')}</option>
+            <option value="Expenses">{tCharts('labels.expenses')}</option>
+            <option value="Income">{tCharts('labels.income')}</option>
           </Select>
           <div className="absolute inset-y-0 right-0 flex items-center pr-[16px] pointer-events-none text-black dark:text-white">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

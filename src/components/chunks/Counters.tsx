@@ -30,6 +30,7 @@ import { useAISuggestions } from '@/hooks/useAISuggestions'
 import { buildCountersPrompt } from '@/lib/ai/promptBuilders'
 import { getLocalePreference, sanitizeTip, makeContextKey, getCachedTip, setCachedTip } from '@/lib/ai/tipUtils'
 import Image from 'next/image'
+import { useTranslations } from 'next-intl'
 
 // Component: TransactionsCounters
 const TransactionsCounters = ({ 
@@ -40,6 +41,8 @@ const TransactionsCounters = ({
   refreshTrigger?: number 
 }) => {
     const { session } = UserAuth()
+    const tDashboard = useTranslations('dashboard')
+    const tCharts = useTranslations('charts')
 
     // State for transactions and budget data
     const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -146,8 +149,16 @@ const TransactionsCounters = ({
     const incomeCoverage = calculateIncomeCoverage(totalIncome, totalExpenses)
 
     // Format differences
-    const expensesDifference = formatMonthlyDifference(previousMonthExpenses, totalExpenses)
-    const incomeDifference = formatMonthlyDifference(previousMonthIncome, totalIncome)
+    const expensesDifference = formatMonthlyDifference(
+      previousMonthExpenses, 
+      totalExpenses, 
+      { label: tCharts('comparison.vsLastMonth'), currency: 'USD' }
+    )
+    const incomeDifference = formatMonthlyDifference(
+      previousMonthIncome, 
+      totalIncome, 
+      { label: tCharts('comparison.vsLastMonth'), currency: 'USD' }
+    )
 
     // AI suggestions hook — moved before conditional return to maintain hook order
     const { text: tip, loading: tipLoading, error: tipError, isRateLimited, fetchSuggestion, abort } = useAISuggestions()
@@ -185,7 +196,7 @@ const TransactionsCounters = ({
       // Edge case: no data at all
       const noData = budget === 0 && totalExpenses === 0 && totalIncome === 0
       if (noData) {
-        setDisplayTip('Недостаточно данных для сравнения, попробуйте позже.')
+        setDisplayTip(tCharts('ai.noData'))
         return
       }
 
@@ -255,10 +266,24 @@ const TransactionsCounters = ({
                             
                             <div className="flex flex-col items-center justify-center gap-3 h-auto min-h-[140px] rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 dark:bg-none dark:bg-transparent dark:border dark:border-primary/40 p-4 hover:shadow-md transition-shadow duration-300">
                                 <div className="flex items-center gap-2">
-                                    <h3 className="text-lg text-primary text-center font-medium">Total Budget</h3>
-                                    {budgetStatus === 'exceeded' && <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">Exceeded</span>}
-                                    {budgetStatus === 'warning' && <span className="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full">Warning</span>}
-                                    {budgetStatus === 'not-set' && <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">Not Set</span>}
+                                    <h3 className="text-lg text-primary text-center font-medium">
+                                      {tDashboard('counters.totalBudget')}
+                                    </h3>
+                                    {budgetStatus === 'exceeded' && (
+                                      <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">
+                                        {tDashboard('counters.status.exceeded')}
+                                      </span>
+                                    )}
+                                    {budgetStatus === 'warning' && (
+                                      <span className="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full">
+                                        {tDashboard('counters.status.warning')}
+                                      </span>
+                                    )}
+                                    {budgetStatus === 'not-set' && (
+                                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                                        {tDashboard('counters.status.notSet')}
+                                      </span>
+                                    )}
                                 </div>
                                 
                                 <span className={`text-[30px] font-bold text-center ${
@@ -280,10 +305,10 @@ const TransactionsCounters = ({
                                         </div>
                                         <div className="text-center space-y-1">
                                             <p className="text-xs text-gray-700 dark:text-white font-medium">
-                                                {formatCurrency(remainingBudget)} remaining
+                                                {formatCurrency(remainingBudget)} {tDashboard('counters.remaining')}
                                             </p>
                                             <p className="text-xs text-gray-600 dark:text-white">
-                                                {budgetUsagePercentage.toFixed(1)}% used
+                                                {budgetUsagePercentage.toFixed(1)}% {tDashboard('counters.usedPercent')}
                                             </p>
                                         </div>
                                     </>
@@ -300,9 +325,13 @@ const TransactionsCounters = ({
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
                         >
                             <div className="flex items-center gap-2">
-                                <h3 className="text-lg text-red-700 text-center font-medium">Total Expenses</h3>
+                                <h3 className="text-lg text-red-700 text-center font-medium">
+                                  {tDashboard('counters.totalExpenses')}
+                                </h3>
                                 {totalExpenses > budget && budget > 0 && (
-                                    <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">Over Budget</span>
+                                    <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">
+                                      {tDashboard('counters.overBudget')}
+                                    </span>
                                 )}
                             </div>
                             <span className="text-[30px] font-bold text-red-700 text-center">
@@ -313,7 +342,7 @@ const TransactionsCounters = ({
                                 <p className="text-xs text-gray-600 dark:text-white">{expensesDifference}</p>
                                 {budget > 0 && (
                                     <p className="text-xs text-gray-600 dark:text-white">
-                                        {((totalExpenses / budget) * 100).toFixed(1)}% of budget
+                                        {((totalExpenses / budget) * 100).toFixed(1)}% {tDashboard('counters.ofBudget')}
                                     </p>
                                 )}
                             </div>
@@ -327,7 +356,11 @@ const TransactionsCounters = ({
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, ease: "easeOut", delay: 0.5 }}
                         >
-                            <h3 className="text-lg text-green-700 text-center font-medium">Total Income</h3>
+                            <div className="flex items-center gap-2">
+                                <h3 className="text-lg text-green-700 text-center font-medium">
+                                  {tDashboard('counters.totalIncome')}
+                                </h3>
+                            </div>
                             <span className="text-[30px] font-bold text-green-700 text-center">
                                 {formatCurrency(totalIncome)}
                             </span>
@@ -351,7 +384,7 @@ const TransactionsCounters = ({
                         <div className="flex-1">
                           {tipLoading && (
                             <span className="text-black dark:text-white text-sm inline-flex items-center">
-                              <span>💡 Thinking</span>
+                              <span>💡 {tCharts('ai.thinking')}</span>
                               <span className="flex items-center gap-1 ml-2">
                                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                                 <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -359,12 +392,14 @@ const TransactionsCounters = ({
                               </span>
                             </span>
                           )}
-                          {!tipLoading && displayTip && <span className="text-black dark:text-white text-sm whitespace-pre-wrap">💡 {displayTip}</span>}
+                          {!tipLoading && displayTip && (
+                            <span className="text-black dark:text-white text-sm whitespace-pre-wrap">💡 {displayTip}</span>
+                          )}
                           {!tipLoading && !displayTip && !tipError && (
-                            <span className="text-black dark:text-white text-sm">💡 Get AI tips based on your data</span>
+                            <span className="text-black dark:text-white text-sm">💡 {tCharts('ai.placeholder')}</span>
                           )}
                           {tipError && <p className="text-red-600 text-xs mt-1">{tipError}</p>}
-                          {isRateLimited && <p className="text-yellow-600 text-xs mt-1">Rate limit reached. Try later.</p>}
+                          {isRateLimited && <p className="text-yellow-600 text-xs mt-1">{tCharts('ai.rateLimited')}</p>}
                         </div>
                         <button
                           type="button"
@@ -379,12 +414,12 @@ const TransactionsCounters = ({
                                 <line x1="15" y1="9" x2="9" y2="15"></line>
                                 <line x1="9" y1="9" x2="15" y2="15"></line>
                               </svg>
-                              <span>Stop</span>
+                              <span>{tCharts('ai.stop')}</span>
                             </>
                           ) : (
                             <>
                               <Image src="/sparkles.svg" alt="Sparkles" width={16} height={16} />
-                              <span>{Date.now() < cooldownUntil ? 'Please wait…' : 'Get AI Insight'}</span>
+                              <span>{Date.now() < cooldownUntil ? tCharts('ai.wait') : tCharts('ai.getInsight')}</span>
                             </>
                           )}
                         </button>

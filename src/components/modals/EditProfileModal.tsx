@@ -22,6 +22,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
   onSuccess
 }) => {
   const { session } = UserAuth()
+  const tModals = useTranslations('modals')
+  const tCommon = useTranslations('common')
+
   const [isLoading, setIsLoading] = useState(false)
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
@@ -96,7 +99,6 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
     if (!validateForm()) return
 
     setIsLoading(true)
@@ -107,10 +109,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         const { error: emailError } = await supabase.auth.updateUser({
           email: formData.email
         })
-
-        if (emailError) {
-          throw emailError
-        }
+        if (emailError) throw emailError
       }
 
       // Update password if provided
@@ -118,15 +117,12 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         const { error: passwordError } = await supabase.auth.updateUser({
           password: formData.newPassword
         })
-
-        if (passwordError) {
-          throw passwordError
-        }
+        if (passwordError) throw passwordError
       }
 
       showToast(tModals('editProfile.toast.updateSuccess'), 'success')
       onSuccess?.()
-      
+
       // Reset password fields
       setFormData(prev => ({
         ...prev,
@@ -138,10 +134,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
       setTimeout(() => {
         handleClose()
       }, 1500)
-
     } catch (error: any) {
       console.error('Error updating profile:', error)
-      showToast(error.message || tModals('editProfile.toast.updateFailed'), 'error')
+      showToast(error?.message || tModals('editProfile.toast.updateFailed'), 'error')
     } finally {
       setIsLoading(false)
     }
@@ -159,12 +154,12 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     if (!isLoading) {
       onClose()
       // Reset form
-      setFormData(prev => ({
+      setFormData({
         email: session?.user?.email || '',
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
-      }))
+      })
       setErrors({
         email: '',
         currentPassword: '',
@@ -200,7 +195,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <div className="relative">
                 <FormInput
                   label="Current Password"
-                  type={showCurrentPassword ? "text" : "password"}
+                  type={showCurrentPassword ? 'text' : 'password'}
                   value={formData.currentPassword}
                   onChange={(value) => handleInputChange('currentPassword', value)}
                   error={errors.currentPassword}
@@ -219,7 +214,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <div className="relative">
                 <FormInput
                   label="New Password"
-                  type={showNewPassword ? "text" : "password"}
+                  type={showNewPassword ? 'text' : 'password'}
                   value={formData.newPassword}
                   onChange={(value) => handleInputChange('newPassword', value)}
                   error={errors.newPassword}
@@ -238,7 +233,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               <div className="relative">
                 <FormInput
                   label="Confirm New Password"
-                  type={showConfirmPassword ? "text" : "password"}
+                  type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword}
                   onChange={(value) => handleInputChange('confirmPassword', value)}
                   error={errors.confirmPassword}
@@ -262,7 +257,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 disabled={isLoading}
               />
               <Button
-                text={isLoading ? "Updating..." : "Update Profile"}
+                text={isLoading ? 'Updating...' : 'Update Profile'}
                 type="submit"
                 variant="primary"
                 disabled={isLoading}
@@ -284,6 +279,3 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 }
 
 export default EditProfileModal
-
-const tModals = useTranslations('modals')
-const tCommon = useTranslations('common')

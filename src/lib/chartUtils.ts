@@ -41,14 +41,16 @@ export const formatPercentage = (value: number, total: number): string => {
 // Форматирование дат для графиков
 export const formatChartDate = (dateString: string, period: 'day' | 'week' | 'month' | 'year'): string => {
   const date = new Date(dateString)
-  
+  const locale = typeof window !== 'undefined' && typeof navigator !== 'undefined' ? (navigator.language || 'en-US') : 'en-US'
   switch (period) {
     case 'day':
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-    case 'week':
-      return `Week ${getWeekNumber(date)}`
+      return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+    case 'week': {
+      const weekLabel = locale.startsWith('ru') ? 'Неделя' : 'Week'
+      return `${weekLabel} ${getWeekNumber(date)}`
+    }
     case 'month':
-      return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+      return date.toLocaleDateString(locale, { month: 'short', year: 'numeric' })
     case 'year':
       return date.getFullYear().toString()
     default:
@@ -110,22 +112,10 @@ export const customTooltipFormatter = (value: number, name: string): [string, st
 
 // Форматирование диапазона дат
 export const formatCompactRange = (startDate: Date, endDate: Date): string => {
-  const start = startDate.toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: 'numeric' 
-  })
-  
-  const end = endDate.toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: 'numeric',
-    year: startDate.getFullYear() !== endDate.getFullYear() ? 'numeric' : undefined
-  })
-  
-  if (start === end) {
-    return start
-  }
-  
-  return `${start} - ${end}`
+  const locale = typeof window !== 'undefined' && typeof navigator !== 'undefined' ? (navigator.language || 'en-US') : 'en-US'
+  const start = startDate.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
+  const end = endDate.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: startDate.getFullYear() !== endDate.getFullYear() ? 'numeric' : undefined })
+  return start === end ? start : `${start} - ${end}`
 }
 
 // Утилиты для сравнительных графиков
@@ -270,15 +260,17 @@ export const getAmountByDataType = (
 
 // Форматирование диапазона дат для отображения
 export const formatDateRange = (startDate: Date, endDate: Date): string => {
+  const locale =
+    typeof window !== 'undefined' && typeof navigator !== 'undefined'
+      ? (navigator.language || 'en-US')
+      : 'en-US'
   const options: Intl.DateTimeFormatOptions = { 
     year: 'numeric', 
     month: 'long', 
     day: 'numeric' 
   }
-  
-  const start = startDate.toLocaleDateString('en-US', options)
-  const end = endDate.toLocaleDateString('en-US', options)
-  
+  const start = startDate.toLocaleDateString(locale, options)
+  const end = endDate.toLocaleDateString(locale, options)
   return `${start} - ${end}`
 }
 
@@ -313,12 +305,16 @@ export const calculateIncomeCoverage = (income: number, expenses: number): numbe
 }
 
 // Форматирование разности с предыдущим месяцем
-export const formatMonthlyDifference = (current: number, previous: number): string => {
+export const formatMonthlyDifference = (
+  previous: number, 
+  current: number,
+  opts?: { label?: string; currency?: string }
+): string => {
+  const currency = opts?.currency ?? 'USD'
+  const label = opts?.label ?? 'vs last month'
   const difference = current - previous
   const isPositive = difference > 0
-  
-  if (difference === 0) return '±$0 vs last month'
-  
+  if (difference === 0) return `±${formatCurrency(0, currency)} ${label}`
   const sign = isPositive ? '+' : ''
-  return `${sign}$${Math.abs(difference).toFixed(0)} vs last month`
+  return `${sign}${formatCurrency(Math.abs(difference), currency)} ${label}`
 }

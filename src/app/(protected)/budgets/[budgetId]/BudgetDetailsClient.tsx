@@ -162,19 +162,26 @@ export default function BudgetDetailsClient() {
     }
   }
 
-  const handleUpdateBudget = async (emoji: string, name: string, amount: number) => {
+  const handleUpdateBudget = async (
+    emoji: string,
+    name: string,
+    amount: number,
+    type: 'expense' | 'income'
+  ) => {
     if (!session?.user?.id || !id) return
     try {
       setIsSubmitting(true)
       const { error } = await supabase
         .from('budget_folders')
-        .update({ emoji, name, amount })
+        .update({ emoji, name, amount, type })
         .eq('id', id)
         .eq('user_id', session.user.id)
+
       if (error) {
         handleToastMessage(tBudgets('details.toast.updateFailed'), 'error')
         return
       }
+
       handleToastMessage(tBudgets('details.toast.updateSuccess'), 'success')
       closeEditModal()
       fetchBudgetDetails()
@@ -186,6 +193,65 @@ export default function BudgetDetailsClient() {
     }
   }
 
+  const handleDeleteTransaction = async (transactionId: string) => {
+    if (!session?.user?.id || !transactionId) return
+    try {
+      const { error } = await supabase
+        .from('transactions')
+        .delete()
+        .eq('id', transactionId)
+        .eq('user_id', session.user.id)
+
+      if (error) {
+        console.error('Error deleting transaction:', error)
+        handleToastMessage(tCommon('unexpectedError'), 'error')
+        return
+      }
+
+      handleToastMessage(tBudgets('details.toast.deleteSuccess'), 'success')
+      await fetchTransactions()
+    } catch (error) {
+      console.error('Error:', error)
+      handleToastMessage(tCommon('unexpectedError'), 'error')
+    }
+  }
+
+  const handleEditTransaction = async (payload: EditTransactionPayload) => {
+    if (!session?.user?.id || !payload?.id) return
+    try {
+      const updates: Partial<EditTransactionPayload> & { created_at?: string } = {
+        title: payload.title,
+        amount: payload.amount,
+        type: payload.type
+      }
+      if (payload.budget_folder_id !== undefined) {
+        updates.budget_folder_id = payload.budget_folder_id
+      }
+      if (payload.created_at) {
+        updates.created_at = payload.created_at
+      }
+
+      const { error } = await supabase
+        .from('transactions')
+        .update(updates)
+        .eq('id', payload.id)
+        .eq('user_id', session.user.id)
+
+      if (error) {
+        console.error('Error updating transaction:', error)
+        handleToastMessage(tCommon('unexpectedError'), 'error')
+        return
+      }
+
+      handleToastMessage(tBudgets('details.toast.updateSuccess'), 'success')
+      await fetchTransactions()
+      window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
+    } catch (error) {
+      console.error('Unexpected error during update:', error)
+      handleToastMessage(tCommon('unexpectedError'), 'error')
+    }
+  }
+
   if (isLoading) {
     return <Spinner />
   }
@@ -194,41 +260,53 @@ export default function BudgetDetailsClient() {
     <div className="px-5 mt-[30px] space-y-6">
       {toastMessage && <ToastMessage text={toastMessage.text} type={toastMessage.type} />}
 
-      <BudgetDetailsInfo details={budgetDetails} />
+
       <BudgetDetailsControls
-        onDelete={openDeleteModal}
-        onEdit={openEditModal}
+        onDeleteClick={openDeleteModal}
+        onEditClick={openEditModal}
       />
-      <BudgetDetailsForm
-        isSubmitting={isSubmitting}
-        onSubmit={handleTransactionSubmit}
-      />
+      <div className="flex justify-between items-center gap-6">
+            <BudgetDetailsInfo
+              id={id}
+              emoji={budgetDetails.emoji}
+              name={budgetDetails.name}
+              amount={budgetDetails.amount}
+              type={budgetDetails.type}
+            />
+            <BudgetDetailsForm
+              isSubmitting={isSubmitting}
+              onSubmit={handleTransactionSubmit}
+            />
+      </div>
 
       <TransactionsTable
         transactions={transactions}
-        onDeleteTransaction={() => {}}
-        onEditTransaction={(payload: EditTransactionPayload) => {
-          console.log('Edit payload', payload)
-        }}
+        onDeleteTransaction={handleDeleteTransaction}
+        onEditTransaction={handleEditTransaction}
       />
 
       {isDeleteModalOpen && (
         <DeleteModal
-          title={tBudgets('details.modal.deleteTitle')}
+          title={tBudgets('details.deleteModal.title')}
+          text={tBudgets('details.deleteModal.text')}
           onClose={closeDeleteModal}
-          onDelete={handleDeleteBudget}
-          loading={isDeleting}
+          onConfirm={handleDeleteBudget}
+          isLoading={isDeleting}
         />
       )}
 
       {isEditModalOpen && (
         <BudgetModal
-          title={tBudgets('details.modal.editTitle')}
-          defaultEmoji={budgetDetails.emoji}
-          defaultName={budgetDetails.name}
-          defaultAmount={budgetDetails.amount}
+          title={tBudgets('details.editModal.title')}
+          initialData={{
+            emoji: budgetDetails.emoji,
+            name: budgetDetails.name,
+            amount: budgetDetails.amount,
+            type: budgetDetails.type,
+          }}
           onClose={closeEditModal}
           onSubmit={handleUpdateBudget}
+          isLoading={isSubmitting}
           handleToastMessage={handleToastMessage}
         />
       )}

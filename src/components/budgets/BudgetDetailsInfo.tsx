@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { supabase } from '../../lib/supabaseClient'
 import { UserAuth } from '../../context/AuthContext'
+import { useTranslations } from 'next-intl'
 
 // Import components
 import BudgetProgressBar from '../ui-elements/BudgetProgressBar'
@@ -12,6 +13,7 @@ import { BudgetDetailsProps } from '../../types/types'
 function BudgetDetailsInfo({ id, emoji, name, amount, type }: BudgetDetailsProps) {
   const { session } = UserAuth()
   const [spentAmount, setSpentAmount] = useState(0)
+  const tBudgets = useTranslations('budgets')
 
   const fetchSpentAmount = async () => {
     if (!session?.user?.id || !id) return
@@ -56,7 +58,7 @@ function BudgetDetailsInfo({ id, emoji, name, amount, type }: BudgetDetailsProps
 
   return (
     <motion.div 
-      className='flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg h-full bg-card p-[20px] w-full max-w-full overflow-hidden'
+      className='flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg min-h-[300px] bg-card p-[20px] w-full max-w-full overflow-hidden'
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
@@ -96,6 +98,8 @@ function BudgetDetailsInfo({ id, emoji, name, amount, type }: BudgetDetailsProps
           spentAmount={spentAmount}
           totalAmount={amount}
           type={type}
+          spentLabel={tBudgets('labels.spent')}
+          leftLabel={tBudgets('labels.left')}
         />
       </motion.div>
     </motion.div>

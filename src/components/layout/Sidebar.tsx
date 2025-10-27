@@ -18,19 +18,25 @@ const Sidebar = () => {
       'U'
     const initial = displayName.charAt(0).toUpperCase()
 
+    // Фолбэк: если ключ отсутствует, показываем читаемое значение
+    const tOr = (key: string, fallback: string): string => {
+      const val = tLayout(key as any)
+      return typeof val === 'string' && (val === key || val === `layout.${key}`) ? fallback : val
+    }
+
     const navigationItems = [
         {
-            name: tLayout('sidebar.dashboard'),
+            name: tOr('sidebar.dashboard', 'Dashboard'),
             href: '/dashboard',
             icon: LayoutDashboard,
         },
         {
-            name: tLayout('sidebar.transactions'),
+            name: tOr('sidebar.transactions', 'Transactions'),
             href: '/transactions',
             icon: CreditCard,
         },
         {
-            name: tLayout('sidebar.budgets'),
+            name: tOr('sidebar.budgets', 'Budgets'),
             href: '/budgets',
             icon: Wallet,
         },
@@ -42,7 +48,7 @@ const Sidebar = () => {
             <div className="h-[65px] px-6 border-b border-border flex items-center">
                 <Image 
                     src="/Spendly-logo.svg" 
-                    alt={tLayout('alt.logo')} 
+                    alt={tOr('alt.logo', 'Spendly Logo')} 
                     width={90} 
                     height={30}
                     className="h-8 w-auto"
@@ -105,7 +111,7 @@ const Sidebar = () => {
                             <span className="text-white text-sm font-semibold">{initial}</span>
                         </div>
                     )}
-                    <span>{tLayout('sidebar.userSettings')}</span>
+                    <span>{tOr('sidebar.userSettings', 'User Settings')}</span>
                 </Link>
             </div>
         </aside>

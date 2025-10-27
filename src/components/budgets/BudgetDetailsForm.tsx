@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
 import { motion } from 'motion/react'
-
 import { supabase } from '../../lib/supabaseClient'
 import { UserAuth } from '../../context/AuthContext'
 import TextInput from '../ui-elements/TextInput'
 import Button from '../ui-elements/Button'
 import CustomDatePicker from '../ui-elements/CustomDatePicker'
+import { useTranslations } from 'next-intl'
 
 
 // Import types
@@ -15,6 +15,8 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
   const [transactionTitle, setTransactionTitle] = useState<string>('')
   const [amount, setAmount] = useState<string>('')
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const tTransactions = useTranslations('transactions')
+  const tModals = useTranslations('modals')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -42,7 +44,7 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3 }}
       >
-        Add new transaction📝
+        {tTransactions('addTransaction')}
       </motion.h3>
       <motion.form 
         onSubmit={handleSubmit} 
@@ -51,6 +53,7 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.4 }}
       >
+        {/* Title */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -58,14 +61,14 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
         >
           <TextInput
             type="text"
-            placeholder="Transaction Name"
+            placeholder={tModals('transaction.placeholder.title')}
             value={transactionTitle}
             onChange={(e) => setTransactionTitle(e.target.value)}
             onInput={handleInput}
             disabled={isSubmitting}
           />    
         </motion.div>
-        
+        {/* Amount */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -73,13 +76,12 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
         >
           <TextInput
             type="number"
-            placeholder="Amount"
+            placeholder={tModals('transaction.placeholder.amountUSD')}
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
             disabled={isSubmitting}
           />
         </motion.div>
-        
         {/* Date Picker */}
         <motion.div 
           className="flex flex-col gap-2"
@@ -90,11 +92,11 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
           <CustomDatePicker
             selectedDate={selectedDate}
             onDateSelect={setSelectedDate}
-            label="Pick up the date"
-            placeholder="Pick a date"
+            label={tModals('transaction.date.label')}
+            placeholder={tModals('transaction.date.placeholder')}
           />
         </motion.div>
-        
+        {/* Submit */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -103,7 +105,7 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
           <Button
             type="submit"
             variant="primary"
-            text="Add new transaction"
+            text={tTransactions('addTransaction')}
             disabled={isSubmitting || !transactionTitle || !amount}
             isLoading={isSubmitting}
           />

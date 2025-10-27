@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
+import { useTranslations } from "next-intl"
 
 export interface PaginationProps {
   currentPage: number
@@ -25,7 +26,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
         >
-          Previous
+          {useTranslations('common')('pagination.previous')}
         </button>
 
         <ul className="flex items-center gap-2">
@@ -57,7 +58,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
         >
-          Next
+          {useTranslations('common')('pagination.next')}
         </button>
       </div>
     </nav>

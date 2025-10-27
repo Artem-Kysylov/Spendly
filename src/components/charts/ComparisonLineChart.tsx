@@ -61,8 +61,10 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
   const tCharts = useTranslations('charts')
 
   // Генерируем динамический контент если не передан
-  const dynamicTitle = title || (startDate && endDate ? generateComparisonTitle(startDate, endDate) : "Current vs Previous Period")
-  const dynamicDescription = description || (startDate && endDate ? generateComparisonDescription(startDate, endDate, dataType) : "Compare current period with previous period")
+  const dynamicTitle =
+    title || (startDate && endDate ? generateComparisonTitle(startDate, endDate) : tCharts('comparison.defaultTitle'))
+  const dynamicDescription =
+    description || (startDate && endDate ? generateComparisonDescription(startDate, endDate, dataType) : tCharts('comparison.defaultDescription'))
   
   const labels = startDate && endDate ? generateComparisonLabels(startDate, endDate) : { current: "Current", previous: "Previous" }
   const finalCurrentLabel = currentPeriodLabel || labels.current
@@ -112,7 +114,7 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center h-[240px]">
-            <div className="text-muted-foreground">No data available</div>
+            <div className="text-muted-foreground">{tCharts('states.noData')}</div>
           </div>
         </CardContent>
       </Card>

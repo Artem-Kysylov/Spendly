@@ -16,6 +16,7 @@ import Link from 'next/link'
 import { supabase } from '@/lib/supabaseClient'
 import LanguageSelect from '@/components/ui-elements/locale/LanguageSelect'
 import { useTranslations } from 'next-intl'
+import { useRouter } from 'next/navigation'
 
 export default function UserSettingsClient() {
   const { signOut, session } = UserAuth()
@@ -38,6 +39,7 @@ export default function UserSettingsClient() {
   // Language state (init from cookie or default 'en')
   const [language, setLanguage] = useState<'en' | 'uk' | 'ru' | 'hi' | 'id' | 'ja' | 'ko'>('en')
   const [isSavingLang, setIsSavingLang] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -53,9 +55,12 @@ export default function UserSettingsClient() {
   async function handleLanguageChange(next: typeof language) {
     setLanguage(next)
     document.documentElement.lang = next
-    // Сразу ставим куки для мгновенного эффекта
+    // Сразу ставим куки
     document.cookie = `spendly_locale=${encodeURIComponent(next)}; path=/; max-age=31536000; samesite=lax`
     document.cookie = `NEXT_LOCALE=${encodeURIComponent(next)}; path=/; max-age=31536000; samesite=lax`
+
+    // Мгновенно перерисовываем серверные компоненты с новыми сообщениями
+    router.refresh()
 
     if (session?.user?.id) {
       setIsSavingLang(true)

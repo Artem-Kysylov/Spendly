@@ -1,14 +1,18 @@
 import React from 'react'
 import { cn } from '@/lib/utils'
+import { formatCurrency } from '@/lib/chartUtils'
 
 interface BudgetProgressBarProps {
   spentAmount: number
   totalAmount: number
   type?: 'expense' | 'income'
   className?: string
+  spentLabel?: string
+  leftLabel?: string
+  currency?: string
 }
 
-const BudgetProgressBar = ({ spentAmount, totalAmount, type, className }: BudgetProgressBarProps) => {
+const BudgetProgressBar = ({ spentAmount, totalAmount, type, className, spentLabel, leftLabel, currency = 'USD' }: BudgetProgressBarProps) => {
   const percentage = totalAmount > 0 ? (spentAmount / totalAmount) * 100 : 0
   const remainingAmount = Math.max(totalAmount - spentAmount, 0)
   const budgetType: 'expense' | 'income' = type ?? 'expense'
@@ -49,8 +53,8 @@ const BudgetProgressBar = ({ spentAmount, totalAmount, type, className }: Budget
       </div>
       {/* Информация о прогрессе */}
       <div className="flex justify-between text-xs text-gray-700 dark:text-white">
-        <span className="font-medium">${spentAmount.toFixed(0)} spent</span>
-        <span>${remainingAmount.toFixed(0)} left</span>
+        <span className="font-medium">{formatCurrency(spentAmount, currency)} {spentLabel ?? 'spent'}</span>
+        <span>{formatCurrency(Math.max(totalAmount - spentAmount, 0), currency)} {leftLabel ?? 'left'}</span>
       </div>
     </div>
   )

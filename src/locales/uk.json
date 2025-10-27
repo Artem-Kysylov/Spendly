@@ -101,5 +101,16 @@
     "notifications.subscriptionInvalid": "Потрібна валідна push-підписка",
     "notifications.subscriptionSaveFailed": "Помилка збереження push-підписки",
     "notifications.deactivateFailed": "Помилка деактивації push-підписки"
+  },
+  "budgets": {
+    "list.card.createNew": "Створити бюджет",
+    "labels.spent": "витрачено",
+    "labels.left": "залишилось",
+    "details.controls.goToBudgets": "До бюджетів",
+    "details.controls.editBudget": "Редагувати бюджет",
+    "details.controls.deleteBudget": "Видалити бюджет",
+    "details.deleteModal.title": "Видалити бюджет",
+    "details.deleteModal.text": "Ви впевнені, що хочете видалити цей бюджет?",
+    "details.editModal.title": "Редагувати бюджет"
   }
 }
