@@ -171,7 +171,7 @@ export default function UserSettingsClient() {
                 >
                   {tSettings('subscription.currentPlan')}: {(session?.user?.user_metadata?.isPro ||
                     (typeof window !== 'undefined' && localStorage.getItem('spendly_is_pro') === 'true'))
-                    ? tPricing('pro') : tPricing('free')}
+                    ? tPricing('pro.label') : tPricing('free.label')}
                 </span>
               </div>
 
@@ -179,7 +179,7 @@ export default function UserSettingsClient() {
                 {/* Free */}
                 <div className="rounded-lg border border-gray-200 dark:border-border p-5">
                   <h3 className="font-medium text-secondary-black dark:text-white">
-                    {tPricing('free')}
+                    {tPricing('free.label')}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-white mt-1">
                     {tPricing('free.short')}
@@ -200,7 +200,7 @@ export default function UserSettingsClient() {
                 {/* Pro */}
                 <div className="rounded-lg border border-primary dark:border-primary p-5 bg-primary/5 dark:bg-primary/10">
                   <h3 className="font-medium text-secondary-black dark:text-white">
-                    {tPricing('pro')}
+                    {tPricing('pro.label')}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-white mt-1">
                     {tPricing('pro.short')}

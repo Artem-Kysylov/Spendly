@@ -1,9 +1,9 @@
+// Imports 
 import React from 'react'
 import { useTranslations } from 'next-intl'
 
 function AddNewBudget({ onClick }: { onClick: () => void }) {
   const tBudgets = useTranslations('budgets')
-
   return (
     <div
       onClick={onClick}

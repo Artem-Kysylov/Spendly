@@ -1,3 +1,4 @@
+// Импорт и компонент ProfileCard
 'use client'
 
 import React, { useState } from 'react'
@@ -7,6 +8,7 @@ import { UserAuth } from '@/context/AuthContext'
 import AvatarUpload from '@/components/ui-elements/AvatarUpload'
 import Button from '@/components/ui-elements/Button'
 import { format } from 'date-fns'
+import { useTranslations, useLocale } from 'next-intl'
 
 interface ProfileCardProps {
   onEditProfile?: () => void
@@ -17,6 +19,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
     session?.user?.user_metadata?.avatar_url || null
   )
+  const tProfile = useTranslations('userSettings.profile')
+  const locale = useLocale()
 
   const user = session?.user
   const isGoogleUser = user?.app_metadata?.provider === 'google'
@@ -31,7 +35,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-secondary-black dark:text-white">Profile</CardTitle>
+        <CardTitle className="text-lg font-semibold text-secondary-black dark:text-white">
+          {tProfile('title')}
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Avatar Section */}
@@ -78,7 +84,9 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
                 <div className="flex items-center gap-2 text-gray-600 dark:text-white mt-1">
                   <Calendar size={16} />
                   <span className="text-sm">
-                    Member since {format(createdAt, 'MMMM yyyy')}
+                    {tProfile('memberSince', {
+                      monthYear: new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(createdAt)
+                    })}
                   </span>
                 </div>
               )}
@@ -91,7 +99,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
                   ? 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300'
                   : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
               }`}>
-                {isGoogleUser ? 'Google Account' : 'Email Account'}
+                {isGoogleUser ? tProfile('googleAccount') : tProfile('emailAccount')}
               </span>
             </div>
           </div>
@@ -101,7 +109,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
         {!isGoogleUser && (
           <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
             <Button
-              text="Edit Profile"
+              text={tProfile('edit')}
               variant="outline"
               onClick={onEditProfile}
               icon={<Edit2 size={16} />}

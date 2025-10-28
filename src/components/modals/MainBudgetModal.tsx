@@ -107,38 +107,41 @@ const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) =>
         }
     }
 
+    // В компоненте TotalBudgetModal (MainBudgetModal)
     return (
         <Dialog open={true} onOpenChange={(o) => { if (!o) onClose() }}>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle className="text-center">{title}</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    <TextInput
-                        type="number"
-                        placeholder={tModals('mainBudget.placeholder.amountUSD')}
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        min="0"
-                        step="0.01"
-                    />
-                    <DialogFooter className="justify-center sm:justify-center">
-                        <Button
-                            text={tCommon('cancel')}
-                            variant="ghost"
-                            className="text-primary w-[218px]"
-                            onClick={onClose}
+                <div className="mt-[30px]">
+                    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                        <TextInput
+                            type="number"
+                            placeholder={tModals('mainBudget.placeholder.amountUSD')}
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                            min="0"
+                            step="0.01"
                         />
-                        <Button
-                            type="submit"
-                            text={tCommon('save')}
-                            variant="default"
-                            className="w-[218px]"
-                            disabled={isLoading || !amount}
-                            isLoading={isLoading}
-                        />
-                    </DialogFooter>
-                </form>
+                        <DialogFooter className="justify-center sm:justify-center">
+                            <Button
+                                text={tCommon('cancel')}
+                                variant="ghost"
+                                className="text-primary w-[218px]"
+                                onClick={onClose}
+                            />
+                            <Button
+                                type="submit"
+                                text={tCommon('save')}
+                                variant="default"
+                                className="w-[218px]"
+                                disabled={isLoading || !amount}
+                                isLoading={isLoading}
+                            />
+                        </DialogFooter>
+                    </form>
+                </div>
             </DialogContent>
         </Dialog>
     )

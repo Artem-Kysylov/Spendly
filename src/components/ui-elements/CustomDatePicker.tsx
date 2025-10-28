@@ -5,6 +5,9 @@ import { Calendar as CalendarIcon } from "lucide-react"
 import { Calendar } from "@/components/ui/calendar"
 import { cn } from "@/lib/utils"
 import Button from './Button'
+import { useLocale } from 'next-intl'
+import { enUS, ru, uk, id, ja, ko, hi } from 'date-fns/locale'
+import type { Locale as DateFnsLocale } from 'date-fns'
 
 interface CustomDatePickerProps {
   selectedDate: Date
@@ -75,6 +78,18 @@ const CustomDatePicker = ({
     }
   }
 
+  const localeCode = useLocale()
+  const dfLocaleMap: Record<string, DateFnsLocale> = {
+    en: enUS, 'en-US': enUS,
+    ru, 'ru-RU': ru,
+    uk, 'uk-UA': uk,
+    id, 'id-ID': id,
+    ja, 'ja-JP': ja,
+    ko, 'ko-KR': ko,
+    hi, 'hi-IN': hi,
+  }
+  const dfLocale = dfLocaleMap[localeCode] ?? enUS
+
   return (
     <div className={cn("flex flex-col gap-2 relative", className)}>
       {label && (
@@ -86,7 +101,7 @@ const CustomDatePicker = ({
         <Button
           variant="outline"
           className={cn("w-full justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}
-          text={selectedDate ? format(selectedDate, "PPP") : placeholder}
+          text={selectedDate ? format(selectedDate, "PPP", { locale: dfLocale }) : placeholder}
           icon={<CalendarIcon className="mr-2 h-4 w-4" />}
           onClick={() => {
             const rect = triggerRef.current?.getBoundingClientRect()
@@ -125,7 +140,7 @@ const CustomDatePicker = ({
                 </svg>
               </button>
               <div className="text-sm font-medium text-gray-900 dark:text-white">
-                {format(currentMonth, "MMMM yyyy")}
+                {format(currentMonth, "MMMM yyyy", { locale: dfLocale })}
               </div>
               <button
                 type="button"
@@ -151,6 +166,7 @@ const CustomDatePicker = ({
               initialFocus
               showOutsideDays={false}
               className="w-fit"
+              locale={dfLocale}
               classNames={{
                 months: "flex w-full flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
                 month: "space-y-4 w-full",

@@ -10,7 +10,6 @@ import { BudgetDetailsControlsProps } from '../../types/types'
 const BudgetDetailsControls = ({ onDeleteClick, onEditClick }: BudgetDetailsControlsProps) => {
   const router = useRouter()
   const tBudgets = useTranslations('budgets')
-
   return (
     <div className="flex flex-col sm:flex-row w-full max-w-full items-start sm:items-center sm:justify-between gap-3 sm:gap-4">
         <Button

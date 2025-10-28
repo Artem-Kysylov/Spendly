@@ -12,7 +12,7 @@ interface BudgetProgressBarProps {
   currency?: string
 }
 
-const BudgetProgressBar = ({ spentAmount, totalAmount, type, className, spentLabel, leftLabel, currency = 'USD' }: BudgetProgressBarProps) => {
+function BudgetProgressBar({ spentAmount, totalAmount, type, className, spentLabel, leftLabel, currency = 'USD' }: BudgetProgressBarProps) {
   const percentage = totalAmount > 0 ? (spentAmount / totalAmount) * 100 : 0
   const remainingAmount = Math.max(totalAmount - spentAmount, 0)
   const budgetType: 'expense' | 'income' = type ?? 'expense'
@@ -51,10 +51,14 @@ const BudgetProgressBar = ({ spentAmount, totalAmount, type, className, spentLab
           }}
         />
       </div>
-      {/* Информация о прогрессе */}
-      <div className="flex justify-between text-xs text-gray-700 dark:text-white">
-        <span className="font-medium">{formatCurrency(spentAmount, currency)} {spentLabel ?? 'spent'}</span>
-        <span>{formatCurrency(Math.max(totalAmount - spentAmount, 0), currency)} {leftLabel ?? 'left'}</span>
+      {/* Информация о прогрессе: метки под краями трека */}
+      <div className="grid grid-cols-2 text-xs text-gray-700 dark:text-white">
+        <span className="font-medium text-left justify-self-start">
+          {formatCurrency(spentAmount, currency)} {spentLabel ?? 'spent'}
+        </span>
+        <span className="text-right justify-self-end">
+          {formatCurrency(Math.max(totalAmount - spentAmount, 0), currency)} {leftLabel ?? 'left'}
+        </span>
       </div>
     </div>
   )

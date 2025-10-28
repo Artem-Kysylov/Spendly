@@ -33,16 +33,11 @@ import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 
 // Component: TransactionsCounters
-const TransactionsCounters = ({ 
-  onIconClick, 
-  refreshTrigger 
-}: { 
-  onIconClick: () => void
-  refreshTrigger?: number 
-}) => {
+function TransactionsCounters({ onIconClick, refreshTrigger }: { onIconClick: () => void; refreshTrigger?: number }) {
     const { session } = UserAuth()
     const tDashboard = useTranslations('dashboard')
     const tCharts = useTranslations('charts')
+    const tBudgets = useTranslations('budgets')
 
     // State for transactions and budget data
     const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -301,8 +296,11 @@ const TransactionsCounters = ({
                                                 totalAmount={budget}
                                                 type="expense"
                                                 className="text-xs"
+                                                spentLabel={tBudgets('labels.spent')}
+                                                leftLabel={tBudgets('labels.left')}
                                             />
                                         </div>
+                                        {/* Вернул как было: центрированный блок остатка/процента */}
                                         <div className="text-center space-y-1">
                                             <p className="text-xs text-gray-700 dark:text-white font-medium">
                                                 {formatCurrency(remainingBudget)} {tDashboard('counters.remaining')}
@@ -368,7 +366,7 @@ const TransactionsCounters = ({
                             <div className="text-center space-y-1">
                                 <p className="text-xs text-gray-600 dark:text-white">{incomeDifference}</p>
                                 <p className="text-xs text-gray-600 dark:text-white">
-                                    Covers {incomeCoverage.toFixed(0)}% of expenses
+                                    {tDashboard('counters.coversExpenses', { percent: incomeCoverage.toFixed(0) })}
                                 </p>
                             </div>
                         </motion.div>

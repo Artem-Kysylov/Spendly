@@ -58,7 +58,7 @@ function BudgetDetailsInfo({ id, emoji, name, amount, type }: BudgetDetailsProps
 
   return (
     <motion.div 
-      className='flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg min-h-[300px] bg-card p-[20px] w-full max-w-full overflow-hidden'
+      className='flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg min-h-[300px] h-full self-stretch bg-card p-[20px] w-full max-w-full overflow-hidden'
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}

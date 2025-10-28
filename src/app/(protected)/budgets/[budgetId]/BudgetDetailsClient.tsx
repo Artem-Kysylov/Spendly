@@ -265,18 +265,18 @@ export default function BudgetDetailsClient() {
         onDeleteClick={openDeleteModal}
         onEditClick={openEditModal}
       />
-      <div className="flex justify-between items-center gap-6">
-            <BudgetDetailsInfo
-              id={id}
-              emoji={budgetDetails.emoji}
-              name={budgetDetails.name}
-              amount={budgetDetails.amount}
-              type={budgetDetails.type}
-            />
-            <BudgetDetailsForm
-              isSubmitting={isSubmitting}
-              onSubmit={handleTransactionSubmit}
-            />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <BudgetDetailsInfo
+          id={id}
+          emoji={budgetDetails.emoji}
+          name={budgetDetails.name}
+          amount={budgetDetails.amount}
+          type={budgetDetails.type}
+        />
+        <BudgetDetailsForm
+          isSubmitting={isSubmitting}
+          onSubmit={handleTransactionSubmit}
+        />
       </div>
 
       <TransactionsTable

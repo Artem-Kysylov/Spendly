@@ -6,12 +6,7 @@ import { getTranslations } from 'next-intl/server'
 // POST /api/notifications/queue - добавление уведомления в очередь
 export async function POST(req: NextRequest) {
   try {
-    const { supabase, user } = await getAuthenticatedClient(req)
-    const localeCookie =
-      req.cookies.get('NEXT_LOCALE')?.value ||
-      req.cookies.get('spendly_locale')?.value ||
-      DEFAULT_LOCALE
-    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const { supabase, user, locale } = await getAuthenticatedClient(req)
     const tErrors = await getTranslations({ locale, namespace: 'errors' })
     const tNotifications = await getTranslations({ locale, namespace: 'notifications' })
 
@@ -94,12 +89,7 @@ export async function POST(req: NextRequest) {
 // GET /api/notifications/queue - получение статуса очереди уведомлений
 export async function GET(req: NextRequest) {
   try {
-    const { supabase, user } = await getAuthenticatedClient(req)
-    const localeCookie =
-      req.cookies.get('NEXT_LOCALE')?.value ||
-      req.cookies.get('spendly_locale')?.value ||
-      DEFAULT_LOCALE
-    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const { supabase, user, locale } = await getAuthenticatedClient(req)
     const tErrors = await getTranslations({ locale, namespace: 'errors' })
 
     const { searchParams } = new URL(req.url)

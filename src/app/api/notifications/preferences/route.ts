@@ -1,40 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getAuthenticatedClient } from '@/lib/serverSupabase'
 import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
 import { getTranslations } from 'next-intl/server'
-
-// Получение клиента с аутентификацией пользователя
-async function getAuthenticatedClient(req: NextRequest) {
-  const authHeader = req.headers.get('authorization')
-  if (!authHeader?.startsWith('Bearer ')) {
-    throw new Error('Missing or invalid authorization header')
-  }
-
-  const token = authHeader.substring(7)
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-  })
-
-  // Проверяем аутентификацию
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) {
-    throw new Error('User not authenticated')
-  }
-
-  return { supabase, user }
-}
 
 // GET /api/notifications/preferences - получение настроек уведомлений
 export async function GET(req: NextRequest) {
   try {
-    const { supabase, user } = await getAuthenticatedClient(req)
+    const { supabase, user, locale } = await getAuthenticatedClient(req)
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
 
     const { data, error } = await supabase
       .from('notification_preferences')
@@ -44,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     if (error && error.code !== 'PGRST116') {
       console.error('Error fetching notification preferences:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      return NextResponse.json({ error: tErrors('notifications.fetchFailed') }, { status: 500 })
     }
 
     const validFrequencies = ['disabled', 'gentle', 'aggressive', 'relentless'] as const
@@ -93,8 +66,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ settings: mapRowToSettings(data) })
   } catch (error) {
     console.error('API Error:', error)
+    const localeCookie =
+      req.cookies.get('NEXT_LOCALE')?.value ||
+      req.cookies.get('spendly_locale')?.value ||
+      DEFAULT_LOCALE
+    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+    const tErrors = await getTranslations({ locale, namespace: 'errors' })
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { error: error instanceof Error ? error.message : tErrors('common.internalServerError') },
       { status: 500 }
     )
   }
@@ -103,14 +82,9 @@ export async function GET(req: NextRequest) {
 // PUT /api/notifications/preferences - обновление настроек уведомлений
 export async function PUT(req: NextRequest) {
   try {
-    const { supabase, user } = await getAuthenticatedClient(req)
+    const { supabase, user, locale } = await getAuthenticatedClient(req)
     const body = await req.json()
 
-    const localeCookie =
-      req.cookies.get('NEXT_LOCALE')?.value ||
-      req.cookies.get('spendly_locale')?.value ||
-      DEFAULT_LOCALE
-    const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
     const tErrors = await getTranslations({ locale, namespace: 'errors' })
 
     const { frequency, push_enabled, email_enabled } = body

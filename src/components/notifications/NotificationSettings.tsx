@@ -19,6 +19,7 @@ const NotificationSettings = () => {
     const [isUpdatingPush, setIsUpdatingPush] = useState(false)
     const [toast, setToast] = useState<ToastMessageProps | null>(null)
     const tN = useTranslations('notifications')
+    const tCommon = useTranslations('common')
 
     const frequencyOptions: NotificationFrequencyOption[] = [
         {
@@ -53,10 +54,10 @@ const NotificationSettings = () => {
         try {
             setIsUpdatingFrequency(true)
             await updateSettings({ frequency, push_enabled: settings.push_enabled })
-            setToast({ text: 'Preferences saved', type: 'success' })
+            setToast({ text: tN('toasts.preferencesSaved'), type: 'success' })
         } catch (err) {
             console.error('Failed to update frequency:', err)
-            setToast({ text: 'Failed to save preferences', type: 'error' })
+            setToast({ text: tN('toasts.preferencesSaveFailed'), type: 'error' })
         } finally {
             setIsUpdatingFrequency(false)
         }
@@ -86,13 +87,13 @@ const NotificationSettings = () => {
             const success = await Promise.race([operationPromise, timeoutPromise])
 
             if (success) {
-                setToast({ text: enabled ? 'Push enabled' : 'Push disabled', type: 'success' })
+                setToast({ text: enabled ? tN('toasts.pushEnabled') : tN('toasts.pushDisabled'), type: 'success' })
             } else {
-                setToast({ text: 'Failed to update push status', type: 'error' })
+                setToast({ text: tN('toasts.pushStatusFailed'), type: 'error' })
             }
         } catch (err) {
             console.error('Failed to toggle push notifications:', err)
-            setToast({ text: 'Failed to update push status', type: 'error' })
+            setToast({ text: tN('toasts.pushStatusFailed'), type: 'error' })
         } finally {
             setIsUpdatingPush(false)
         }
@@ -179,7 +180,7 @@ const NotificationSettings = () => {
                 <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60 backdrop-blur-sm">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Spinner />
-                        <span>Saving changes...</span>
+                        <span>{tCommon('saving')}</span>
                     </div>
                 </div>
             )}
@@ -236,10 +237,10 @@ const NotificationSettings = () => {
 
                     {/* Frequency Settings */}
                     <div>
-                        <h3 className="font-medium text-foreground mb-4">Notification Frequency</h3>
+                        <h3 className="font-medium text-foreground mb-4">{tN('frequency.title')}</h3>
                         <div
                             role="radiogroup"
-                            aria-label="Notification frequency"
+                            aria-label={tN('frequency.aria')}
                             className="space-y-3"
                         >
                             {frequencyOptions.map((option) => (

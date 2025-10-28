@@ -70,4 +70,14 @@ export type NamespaceKeys = {
     | 'setup.budget.meta.title' | 'setup.budget.meta.description'
     | 'test.meta.title' | 'test.meta.description'
     | 'notFound.meta.title' | 'notFound.meta.description'
+  budgets:
+    | 'list.modal.createTitle' | 'list.card.createNew'
+    | 'list.toast.failedLoad' | 'list.toast.failedCreate' | 'list.toast.createSuccess'
+    | 'labels.spent' | 'labels.left'
+    | 'details.controls.goToBudgets' | 'details.controls.editBudget' | 'details.controls.deleteBudget'
+    | 'details.deleteModal.title' | 'details.deleteModal.text' | 'details.editModal.title'
+    | 'details.toast.failedDetermineType' | 'details.toast.typeMissing'
+    | 'details.toast.addFailed' | 'details.toast.addSuccess'
+    | 'details.toast.deleteFailed' | 'details.toast.deleteSuccess'
+    | 'details.toast.updateFailed' | 'details.toast.updateSuccess'
 }

@@ -4,11 +4,29 @@ export type Locale = 'ru' | 'en'
 
 export function getLocalePreference(): Locale {
   if (typeof window !== 'undefined') {
-    const lang = navigator.language?.toLowerCase() || 'ru'
-    if (lang.startsWith('ru')) return 'ru'
+    // Prefer cookies set by user settings
+    try {
+      const cookies = document.cookie.split(';').map(s => s.trim())
+      const find = (name: string) => {
+        const pref = cookies.find(c => c.startsWith(`${name}=`))
+        return pref ? decodeURIComponent(pref.split('=')[1]).toLowerCase() : null
+      }
+      const cookieLocale = find('spendly_locale') || find('NEXT_LOCALE')
+      if (cookieLocale) {
+        if (cookieLocale.startsWith('ru')) return 'ru'
+        return 'en'
+      }
+    } catch {}
+
+    // Fallback to browser languages
+    const langs = navigator.languages ?? [navigator.language]
+    for (const l of langs) {
+      const code = (l || '').toLowerCase()
+      if (code.startsWith('ru')) return 'ru'
+    }
     return 'en'
   }
-  return 'ru'
+  return 'en'
 }
 
 export function sanitizeTip(text: string, maxLen: number = 320): string {

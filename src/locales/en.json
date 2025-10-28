@@ -30,37 +30,47 @@
     "signOut": "Sign Out"
   },
   "pricing": {
-    "free": "Free",
-    "pro": "Pro",
-    "perMonth": "per month",
-    "free.short": "Great to get started",
-    "free.features.track": "Track expenses and budgets",
-    "free.features.charts": "Basic charts and insights",
-    "free.features.notifications": "Local device notifications",
-    "pro.short": "Power features for growth",
-    "pro.features.aiUnlimited": "Unlimited AI assistant usage",
-    "pro.features.advancedCharts": "Advanced charts and comparisons",
-    "pro.features.prioritySupport": "Priority support",
-    "pro.features.customGoals": "Custom goals and alerts",
-    "pro.features.earlyAccess": "Early access to new features"
+    "free": {
+      "label": "Free",
+      "short": "Great to get started",
+      "features": {
+        "track": "Track expenses and budgets",
+        "charts": "Basic charts and insights",
+        "notifications": "Local device notifications"
+      }
+    },
+    "pro": {
+      "label": "Pro",
+      "short": "Power features for growth",
+      "features": {
+        "aiUnlimited": "Unlimited AI assistant usage",
+        "advancedCharts": "Advanced charts and comparisons",
+        "prioritySupport": "Priority support",
+        "customGoals": "Custom goals and alerts",
+        "earlyAccess": "Early access to new features"
+      }
+    },
+    "perMonth": "per month"
   },
   "userSettings": {
-    "header.title": "User Settings ⚙️",
-    "header.subtitle": "Manage your account settings and preferences",
-    "appearance.title": "Appearance",
-    "appearance.description": "Choose your theme preference",
-    "notifications.title": "Notifications",
-    "notifications.description": "Manage how and when you receive notifications",
-    "subscription.title": "Subscription",
-    "subscription.description": "Compare plans and upgrade anytime",
-    "subscription.currentPlan": "Current plan",
-    "language.title": "Language",
-    "language.description": "Choose your interface language",
-    "appControls.title": "App Controls",
-    "appControls.description": "Install the app for a native experience",
-    "account.title": "Account",
-    "account.signOut.title": "Sign Out",
-    "account.signOut.description": "Sign out of your account"
+    "header": { "title": "User Settings ⚙️", "subtitle": "Manage your account settings and preferences" },
+    "profile": {
+      "title": "Profile",
+      "memberSince": "Member since {monthYear}",
+      "googleAccount": "Google Account",
+      "emailAccount": "Email Account",
+      "edit": "Edit Profile"
+    },
+    "appearance": { "title": "Appearance", "description": "Choose your theme preference" },
+    "notifications": { "title": "Notifications", "description": "Manage how and when you receive notifications" },
+    "subscription": { "title": "Subscription", "description": "Compare plans and upgrade anytime", "currentPlan": "Current plan" },
+    "language": { "title": "Language", "description": "Choose your interface language" },
+    "appControls": { "title": "App Controls", "description": "Install the app for a native experience" },
+    "account": {
+      "title": "Account",
+      "signOut": { "title": "Sign Out", "description": "Sign out of your account" }
+    },
+    "modals": { "signOut": { "title": "Sign out?", "text": "Are you sure you want to sign out?" } }
   },
   "payment": {
     "title": "Upgrade to Pro",
@@ -100,27 +110,47 @@
     "mainBudget.editTitle": "Edit main budget"
   },
   "budgets": {
-    "list.modal.createTitle": "Create a new budget💸",
-    "list.toast.failedLoad": "Failed to load budget folders",
-    "list.toast.failedCreate": "Failed to create budget",
-    "list.toast.createSuccess": "Budget created successfully",
-    "details.toast.failedDetermineType": "Failed to determine budget type",
-    "details.toast.typeMissing": "Budget type is missing",
-    "details.toast.addFailed": "Failed to add transaction. Please try again.",
-    "details.toast.addSuccess": "Transaction added successfully!",
-    "details.toast.deleteFailed": "Failed to delete budget. Please try again.",
-    "details.toast.deleteSuccess": "Budget deleted successfully!",
-    "details.toast.updateFailed": "Failed to update transaction",
-    "details.toast.updateSuccess": "Transaction updated successfully!",
-    "list.card.createNew": "Create a New Budget",
-    "labels.spent": "spent",
-    "labels.left": "left",
-    "details.controls.goToBudgets": "Go to Budgets",
-    "details.controls.editBudget": "Edit budget",
-    "details.controls.deleteBudget": "Delete budget",
-    "details.deleteModal.title": "Delete Budget",
-    "details.deleteModal.text": "Are you sure you want to delete this budget?",
-    "details.editModal.title": "Edit Budget"
+    "list": {
+      "modal": {
+        "createTitle": "Create a new budget💸"
+      },
+      "toast": {
+        "failedLoad": "Failed to load budget folders",
+        "failedCreate": "Failed to create budget",
+        "createSuccess": "Budget created successfully"
+      },
+      "card": {
+        "createNew": "Create a New Budget"
+      }
+    },
+    "labels": {
+      "spent": "spent",
+      "left": "left"
+    },
+    "details": {
+      "controls": {
+        "goToBudgets": "Go to Budgets",
+        "editBudget": "Edit budget",
+        "deleteBudget": "Delete budget"
+      },
+      "deleteModal": {
+        "title": "Delete Budget",
+        "text": "Are you sure you want to delete this budget?"
+      },
+      "editModal": {
+        "title": "Edit Budget"
+      },
+      "toast": {
+        "failedDetermineType": "Failed to determine budget type",
+        "typeMissing": "Budget type is missing",
+        "addFailed": "Failed to add transaction. Please try again.",
+        "addSuccess": "Transaction added successfully!",
+        "deleteFailed": "Failed to delete budget. Please try again.",
+        "deleteSuccess": "Budget deleted successfully!",
+        "updateFailed": "Failed to update transaction",
+        "updateSuccess": "Transaction updated successfully!"
+      }
+    }
   },
   "auth": {
     "tabs.signin": "Sign in",
@@ -175,28 +205,44 @@
     "alt.logo": "Spendly Logo"
   },
   "modals": {
-    "appInstall.title": "Get Spendly on your device",
-    "budget.pickEmojiOptional": "Pick an emoji (optional)",
-    "budget.placeholder.name": "Budget Folder Name",
-    "budget.placeholder.amountUSD": "Amount(USD)",
-    "budget.type.expense": "Expense",
-    "budget.type.income": "Income",
-    "budget.toast.saveFailed": "Failed to save budget folder",
-    "mainBudget.placeholder.amountUSD": "Amount(USD)",
-    "transaction.placeholder.title": "Transaction Name",
-    "transaction.placeholder.amountUSD": "Amount(USD)",
-    "transaction.date.label": "Pick up the date",
-    "transaction.date.placeholder": "Pick a date",
-    "transaction.select.label": "Choose budget category",
-    "transaction.select.unbudgeted": "Unbudgeted",
-    "transaction.search.placeholder": "Search budget...",
-    "transaction.loadingBudgets": "Loading budgets...",
-    "transaction.noResults": "No results found",
-    "transaction.type.expense": "Expense",
-    "transaction.type.income": "Income",
-    "editProfile.title": "Edit Profile",
-    "editProfile.toast.updateSuccess": "Profile updated successfully!",
-    "editProfile.toast.updateFailed": "Failed to update profile"
+    "appInstall": { "title": "Get Spendly on your device" },
+    "budget": {
+      "pickEmojiOptional": "Pick an emoji (optional)",
+      "placeholder": {
+        "name": "Budget Folder Name",
+        "amountUSD": "Amount(USD)"
+      },
+      "type": { "expense": "Expense", "income": "Income" },
+      "toast": { "saveFailed": "Failed to save budget folder" }
+    },
+    "mainBudget": {
+      "placeholder": { "amountUSD": "Amount(USD)" }
+    },
+    "transaction": {
+      "placeholder": {
+        "title": "Transaction Name",
+        "amountUSD": "Amount(USD)"
+      },
+      "date": {
+        "label": "Pick up the date",
+        "placeholder": "Pick a date"
+      },
+      "select": {
+        "label": "Choose budget category",
+        "unbudgeted": "Unbudgeted"
+      },
+      "search": { "placeholder": "Search budget..." },
+      "loadingBudgets": "Loading budgets...",
+      "noResults": "No results found",
+      "type": { "expense": "Expense", "income": "Income" }
+    },
+    "editProfile": {
+      "title": "Edit Profile",
+      "toast": {
+        "updateSuccess": "Profile updated successfully!",
+        "updateFailed": "Failed to update profile"
+      }
+    }
   },
   "setup": {
     "budget": {
@@ -289,52 +335,20 @@
     "notFound": { "meta": { "title": "Page Not Found", "description": "The requested page does not exist." } }
   },
   "notifications": {
-    "bell": {
-      "aria": "Notifications",
-      "title": "Notifications",
-      "markAllRead": "Mark all read",
-      "empty": {
-        "title": "No notifications yet",
-        "description": "We'll notify you when something important happens"
-      },
-      "viewAll": "View all notifications",
-      "setup": {
-        "title": "Set up the database to work with notifications",
-        "subtitle": "Go to settings for instructions"
-      }
-    },
-    "settings": {
-      "push": {
-        "title": "Push Notifications",
-        "description": "Receive notifications on this device"
-      }
-    },
+    "bell": { "aria": "Notifications", "title": "Notifications", "markAllRead": "Mark all read", "empty": { "title": "No notifications yet", "description": "We'll notify you when something important happens" }, "viewAll": "View all notifications", "setup": { "title": "Set up the database to work with notifications", "subtitle": "Go to settings for instructions" } },
+    "settings": { "push": { "title": "Push Notifications", "description": "Receive notifications on this device" } },
     "frequency": {
+      "title": "Notification Frequency",
+      "aria": "Notification frequency",
       "disabled": { "label": "Don't send", "description": "Turn off all reminders" },
       "gentle": { "label": "Gentle nudges", "description": "1-2 notifications daily" },
       "aggressive": { "label": "Aggressive reminders", "description": "4-5 notifications daily" },
       "relentless": { "label": "Relentless", "description": "You'll feel it (10+ daily)" }
     },
-    "toasts": {
-      "preferencesSaved": "Preferences saved",
-      "preferencesSaveFailed": "Failed to save preferences",
-      "pushEnabled": "Push enabled",
-      "pushDisabled": "Push disabled",
-      "pushStatusFailed": "Failed to update push status"
-    },
-    "authRequired": {
-      "title": "Authentication required",
-      "description": "Sign in to access notification settings.",
-      "signIn": "Sign in"
-    },
-    "a11y": {
-      "togglePush": "Toggle push notifications"
-    },
-    "dev": {
-      "sqlScript": "SQL Script",
-      "copy": "Copy",
-      "copied": "Copied!"
-    }
+    "toasts": { "preferencesSaved": "Preferences saved", "preferencesSaveFailed": "Failed to save preferences", "pushEnabled": "Push enabled", "pushDisabled": "Push disabled", "pushStatusFailed": "Failed to update push status" },
+    "authRequired": { "title": "Authentication required", "description": "Sign in to access notification settings.", "signIn": "Sign in" },
+    "a11y": { "togglePush": "Toggle push notifications" },
+    "dev": { "sqlScript": "SQL Script", "copy": "Copy", "copied": "Copied!" }
   },
   "settings": {
     "header.title": "User Settings ⚙️",

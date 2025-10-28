@@ -1,39 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getAuthenticatedClient } from '@/lib/serverSupabase'
 import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
 import { getTranslations } from 'next-intl/server'
-
-async function getAuthenticatedClient(req: NextRequest) {
-  const localeCookie =
-    req.cookies.get('NEXT_LOCALE')?.value ||
-    req.cookies.get('spendly_locale')?.value ||
-    DEFAULT_LOCALE
-  const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
-  const tErrors = await getTranslations({ locale, namespace: 'errors' })
-
-  const authHeader = req.headers.get('authorization')
-  if (!authHeader?.startsWith('Bearer ')) {
-    throw new Error(tErrors('auth.invalidAuthHeader'))
-  }
-  const token = authHeader.substring(7)
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    global: {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-  })
-
-  // Проверяем аутентификацию
-  const { data: { user }, error } = await supabase.auth.getUser()
-  if (error || !user) {
-    throw new Error(tErrors('auth.notAuthenticated'))
-  }
-  return { supabase, user, locale }
-}
 
 // GET /api/notifications
 export async function GET(req: NextRequest) {

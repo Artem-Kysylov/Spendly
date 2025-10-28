@@ -33,7 +33,7 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
 
   return (
     <motion.div 
-      className='w-full max-w-full rounded-lg border border-border bg-card p-[20px] min-h-[300px] flex flex-col'
+      className='w-full max-w-full rounded-lg border border-border bg-card p-[20px] min-h-[300px] h-full self-stretch flex flex-col'
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
@@ -54,17 +54,12 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
         transition={{ duration: 0.5, delay: 0.4 }}
       >
         {/* Title */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.5 }}
-        >
+        <motion.div>
           <TextInput
             type="text"
             placeholder={tModals('transaction.placeholder.title')}
             value={transactionTitle}
             onChange={(e) => setTransactionTitle(e.target.value)}
-            onInput={handleInput}
             disabled={isSubmitting}
           />    
         </motion.div>
