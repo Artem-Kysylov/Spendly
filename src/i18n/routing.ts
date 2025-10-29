@@ -15,6 +15,7 @@ export const routing = defineRouting({
     '/onboarding': '/onboarding',
     '/transactions': '/transactions',
     '/budgets': '/budgets',
+    '/add-new-budget': '/add-new-budget',
     '/budgets/[id]': '/budgets/[id]',
     '/setup/budget': '/setup/budget',
     '/user-settings': '/user-settings',

@@ -1,7 +1,7 @@
 'use client'
 
 import { UserAuth } from '@/context/AuthContext'
-import { usePathname } from 'next/navigation'
+import { usePathname } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
 import type { AppPathnames } from '@/i18n/routing'

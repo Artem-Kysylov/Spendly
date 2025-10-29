@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import { motion } from 'motion/react'
 import Button from '@/components/ui-elements/Button'
 import { useTranslations } from 'next-intl'

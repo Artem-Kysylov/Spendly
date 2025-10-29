@@ -1,8 +1,7 @@
 'use client'
 
 import { CreditCard, LayoutDashboard, Settings, Wallet } from 'lucide-react'
-import { usePathname } from 'next/navigation'
-import { Link } from '@/i18n/routing'
+import { usePathname, Link } from '@/i18n/routing'
 import type { AppPathnames } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'

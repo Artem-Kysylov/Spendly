@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { Link } from '@/i18n/routing'
 import { supabase } from '@/lib/supabaseClient'

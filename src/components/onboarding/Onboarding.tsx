@@ -7,7 +7,7 @@ import StepProgress from './StepProgress'
 import Controls from './Controls'
 import OnboardingStep from './OnboardingStep'
 import { steps as data } from './steps'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import { supabase } from '@/lib/supabaseClient'
 
 export default function Onboarding() {

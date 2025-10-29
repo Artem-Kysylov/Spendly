@@ -16,7 +16,7 @@ import { Link } from '@/i18n/routing'
 import { supabase } from '@/lib/supabaseClient'
 import LanguageSelect from '@/components/ui-elements/locale/LanguageSelect'
 import { useTranslations } from 'next-intl'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 
 export default function UserSettingsClient() {
   const { signOut, session } = UserAuth()

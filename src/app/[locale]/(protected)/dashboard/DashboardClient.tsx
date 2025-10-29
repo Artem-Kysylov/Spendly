@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { UserAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 

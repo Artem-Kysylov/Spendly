@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import { UserAuth } from '@/context/AuthContext'
 import Onboarding from '@/components/onboarding/Onboarding'
 
@@ -14,10 +14,6 @@ export default function OnboardingPageClient() {
       router.replace('/dashboard')
     }
   }, [isReady, session, router])
-
-  useEffect(() => {
-    document.documentElement.classList.remove('dark')
-  }, [])
 
   return (
     <div

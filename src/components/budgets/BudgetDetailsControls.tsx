@@ -1,5 +1,5 @@
 // Imports 
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import { Pencil, Trash } from 'lucide-react'
 // import components 
 import Button from '../ui-elements/Button'

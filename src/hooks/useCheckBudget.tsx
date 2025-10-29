@@ -1,7 +1,7 @@
 // Хук: useCheckBudget
 'use client';
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import { supabase } from '../lib/supabaseClient'
 
 const useCheckBudget = (userId: string | undefined) => {

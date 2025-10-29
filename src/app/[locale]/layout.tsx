@@ -99,28 +99,22 @@ export default async function RootLayout({
   const messages = await loadMessages(resolvedLocale)
 
   return (
-    <html lang={resolvedLocale} suppressHydrationWarning>
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#000000" />
-      </head>
-      <body className={`${montserrat.className} transition-colors duration-300`}>
-        <LazyMotion features={domAnimation}>
-          <QueryProvider>
-            <ToastProvider>
-              <AuthContextProvider>
-                <NextIntlClientProvider locale={resolvedLocale} messages={messages}>
-                  <ThemeProvider>
-                    {children}
-                    <ServiceWorkerRegistration />
-                  </ThemeProvider>
-                </NextIntlClientProvider>
-              </AuthContextProvider>
-              <Toaster />
-            </ToastProvider>
-          </QueryProvider>
-        </LazyMotion>
-      </body>
-    </html>
+    <div className={`${montserrat.className} transition-colors duration-300`}>
+      <LazyMotion features={domAnimation}>
+        <QueryProvider>
+          <ToastProvider>
+            <AuthContextProvider>
+              <NextIntlClientProvider locale={resolvedLocale} messages={messages}>
+                <ThemeProvider>
+                  {children}
+                  <ServiceWorkerRegistration />
+                </ThemeProvider>
+              </NextIntlClientProvider>
+            </AuthContextProvider>
+            <Toaster />
+          </ToastProvider>
+        </QueryProvider>
+      </LazyMotion>
+    </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import { UserAuth } from '@/context/AuthContext'
 import Button from '@/components/ui-elements/Button'
 import ToastMessage from '@/components/ui-elements/ToastMessage'

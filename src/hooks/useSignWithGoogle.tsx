@@ -2,7 +2,7 @@
 
 // Imports 
 import React from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import { UserAuth } from '../context/AuthContext' 
 
 export const useSignWithGoogle = () => {

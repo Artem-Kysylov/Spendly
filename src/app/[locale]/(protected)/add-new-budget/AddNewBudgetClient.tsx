@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/routing'
 import { UserAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import CreateMainBudget from '@/components/budgets/CreateMainBudget'
