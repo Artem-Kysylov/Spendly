@@ -1,15 +1,16 @@
 'use client'
 
 import { UserAuth } from '@/context/AuthContext'
-import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, CreditCard, Wallet, Settings } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { Link } from '@/i18n/routing'
+import type { AppPathnames } from '@/i18n/routing'
+import { LayoutDashboard, CreditCard, Wallet } from 'lucide-react'
+import Image from 'next/image'
 
 const Sidebar = () => {
-    const { session } = UserAuth()
     const pathname = usePathname()
+    const { session } = UserAuth()
     const tLayout = useTranslations('layout')
     const displayName =
       session?.user?.user_metadata?.full_name ||
@@ -24,7 +25,7 @@ const Sidebar = () => {
       return typeof val === 'string' && (val === key || val === `layout.${key}`) ? fallback : val
     }
 
-    const navigationItems = [
+    const navigationItems: { name: string; href: '/dashboard' | '/transactions' | '/budgets'; icon: any }[] = [
         {
             name: tOr('sidebar.dashboard', 'Dashboard'),
             href: '/dashboard',

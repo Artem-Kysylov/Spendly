@@ -10,26 +10,255 @@
     "searchCurrency": "통화 검색...",
     "clearSelection": "지우기"
   },
-  "Settings": {
+  "layout": {
+    "sidebar": {
+      "dashboard": "대시보드",
+      "transactions": "거래",
+      "budgets": "예산",
+      "userSettings": "사용자 설정"
+    },
+    "alt": { "logo": "Spendly 로고" }
+  },
+
+  "budgets": {
+    "list": {
+      "card": {
+        "createNew": "새 예산 만들기"
+      }
+    },
+    "labels": {
+      "spent": "지출",
+      "left": "남은"
+    }
+  },
+
+  "userSettings": {
     "language": "언어",
     "selectLanguage": "언어 선택",
-    "saveLanguage": "언어 저장",
-    "assistant": { "insights.title": "AI Insights", "insights.beta": "Beta" },
-    "filters": { "options": { "week": "Week", "month": "Month" } },
-    "modals": { "transaction.noResults": "No results found" },
-    "errors": {
-      "selectImageFile": "Please select an image file",
-      "fileTooLarge5mb": "File size must be less than 5MB",
-      "uploadAvatarFailed": "Failed to upload avatar",
-      "removeAvatarFailed": "Failed to remove avatar"
-    },
-    "profile": {
-      "avatar": {
-        "upload": "Upload Avatar",
-        "change": "Change Avatar",
-        "cancel": "Cancel",
-        "alt": "User Avatar"
+    "saveLanguage": "언어 저장"
+  },
+  "cta": {
+    "upgradeToPro": "Pro로 업그레이드",
+    "downloadApp": "앱 다운로드",
+    "signOut": "로그아웃"
+  },
+  "pricing": {
+    "free": {
+      "label": "무료",
+      "short": "시작하기에 적합",
+      "features": {
+        "track": "지출과 예산 추적",
+        "charts": "기본 차트와 인사이트",
+        "notifications": "로컬 기기 알림"
       }
+    },
+    "pro": {
+      "label": "프로",
+      "short": "성장을 위한 강력한 기능",
+      "features": {
+        "aiUnlimited": "AI 비서 무제한 사용",
+        "advancedCharts": "고급 차트와 비교",
+        "prioritySupport": "우선 지원",
+        "customGoals": "맞춤 목표와 알림"
+      }
+    },
+    "perMonth": "월"
+  },
+  "userSettings": {
+    "header": { "title": "사용자 설정⚙️", "subtitle": "계정 설정과 환경을 관리하세요" },
+    "profile": {
+      "title": "프로필",
+      "memberSince": "{monthYear}부터 회원",
+      "googleAccount": "Google 계정",
+      "emailAccount": "이메일 계정",
+      "edit": "프로필 편집"
+    },
+    "appearance": { "title": "모양", "description": "테마 선호도를 선택" },
+    "notifications": { "title": "알림", "description": "알림 받는 방식과 시점 관리" },
+    "subscription": { "title": "구독", "description": "플랜을 비교하고 언제든 업그레이드", "currentPlan": "현재 플랜" },
+    "language": { "title": "언어", "description": "인터페이스 언어 선택" },
+    "appControls": { "title": "앱 제어", "description": "네이티브 경험을 위해 앱 설치" },
+    "account": {
+      "title": "계정",
+      "signOut": { "title": "로그아웃", "description": "계정에서 로그아웃" }
+    },
+    "modals": { "signOut": { "title": "로그아웃하시겠어요?", "text": "정말 로그아웃하시겠습니까?" } }
+  },
+  "auth": {
+    "tabs": { "signin": "로그인", "signup": "가입하기" },
+    "buttons": { "google": "Google로 계속하기" },
+    "labels": { "rememberMe": "계정 기억하기" }
+  },
+  "assistant": {
+    "title": "AI 비서",
+    "rateLimited": "요청 제한에 도달했습니다. 잠시 후 다시 시도하세요.",
+    "welcomeTitle": "예산과 지출에 대해 무엇이든 물어보세요",
+    "welcomeDesc": "지출 분석, 절약 팁, 예산 계획을 도와드려요.",
+    "confirm": {
+      "title": "거래 세부정보 확인",
+      "fields": {
+        "title": "제목",
+        "budget": "예산",
+        "amount": "금액"
+      }
+    },
+    "actions": {
+      "accept": "확인",
+      "decline": "취소",
+      "abort": "중단",
+      "send": "보내기"
+    },
+    "buttons": {
+      "close": "닫기",
+      "ask": "AI에게 물어보기"
+    },
+    "input": {
+      "placeholder": "지출에 대해 물어보세요..."
+    },
+    "presets": {
+      "header": "빠른 질문:",
+      "showWeek": "이번 주 지출 내역 보여줘",
+      "saveMoney": "돈을 절약할 수 있는 방법은?",
+      "analyzePatterns": "내 지출 패턴 분석해줘",
+      "createBudgetPlan": "예산 계획 세워줘",
+      "showBiggest": "가장 큰 지출 내역 보여줘",
+      "compareMonths": "이번 달과 지난달 지출 비교해줘"
+    }
+  },
+  "common": {
+    "saving": "저장 중...",
+    "unexpectedError": "예기치 않은 오류가 발생했어요",
+    "errorLabel": "오류",
+    "cancel": "취소",
+    "save": "저장",
+    "submit": "제출",
+    "close": "닫기",
+    "pagination": { "previous": "이전", "next": "다음" }
+  },
+  "profile": { "avatar": { "upload": "아바타 업로드", "change": "아바타 변경", "cancel": "취소", "alt": "사용자 아바타" } },
+  "filters": { "options": { "week": "주", "month": "월" } },
+  "modals": { "transaction": { "noResults": "결과를 찾을 수 없습니다" } },
+  "payment": {
+    "title": "Pro로 업그레이드",
+    "subtitle": "필요에 맞는 플랜을 선택하세요. 결제는 Lemon Squeezy로 제공됩니다.",
+    "toastComingSoon": "결제는 곧 Lemon Squeezy를 통해 제공됩니다."
+  },
+  "notifications": {
+    "bell": {
+      "aria": "알림 열기",
+      "title": "알림",
+      "markAllRead": "모두 읽음 처리",
+      "viewAll": "모두 보기",
+      "setup": { "title": "알림 설정 필요", "subtitle": "데이터베이스 또는 구독 설정을 완료하세요" },
+      "empty": { "title": "알림이 없습니다", "description": "새 소식이 있으면 여기에서 볼 수 있어요" }
+    },
+    "settings": { "push": { "title": "푸시 알림", "description": "브라우저에서 푸시 알림 받기" } },
+    "frequency": {
+      "title": "알림 빈도",
+      "aria": "알림 빈도 선택",
+      "disabled": { "label": "사용 안 함", "description": "푸시 알림을 비활성화합니다" },
+      "gentle": { "label": "가볍게", "description": "가끔만 알림을 보냅니다" },
+      "aggressive": { "label": "자주", "description": "더 자주 알림을 보냅니다" },
+      "relentless": { "label": "매우 자주", "description": "가능하면 거의 항상 알림을 보냅니다" }
+    },
+    "toasts": {
+      "preferencesSaved": "알림 설정이 저장됐어요",
+      "preferencesSaveFailed": "설정 저장에 실패했어요",
+      "pushEnabled": "푸시 알림이 활성화됐어요",
+      "pushDisabled": "푸시 알림이 비활성화됐어요",
+      "pushStatusFailed": "푸시 상태 확인 실패"
+    },
+    "authRequired": { "title": "로그인이 필요합니다", "description": "알림을 사용하려면 먼저 로그인하세요", "signIn": "로그인" },
+    "a11y": { "togglePush": "푸시 알림 토글" }
+  },
+  "pages": {
+    "userSettings": { "meta": { "title": "사용자 설정", "description": "계정 환경설정을 업데이트합니다." } },
+    "payment": { "meta": { "title": "결제", "description": "Spendly Pro로 업그레이드" } }
+  },
+  "dashboard": {
+    "welcome": "Welcome {name}👋",
+    "modals": {
+      "deleteTransaction": { "title": "Delete transaction", "prompt": "Are you sure you want to delete this transaction?" },
+      "editMainBudget": { "title": "Edit main budget" }
+    },
+    "counters": {
+      "totalBudget": "총 예산",
+      "totalExpenses": "총 지출",
+      "totalIncome": "총 수입",
+      "labels": {
+        "spent": "사용됨",
+        "remaining": "남은 금액",
+        "used": "사용됨",
+        "vsLastMonth": "지난달 대비",
+        "coversExpenses": "지출을 {percent}% 충당"
+      }
+    }
+  },
+  "charts": {
+    "titles": { "analytics": "예산 분석", "comparisonBar": "예산 비교" },
+    "bar": { "titleByCategory": "Expenses by category" },
+    "line": { "titleOverTime": "Expenses over time" },
+    "labels": { "expenses": "지출", "income": "수입", "for": "대상" },
+    "states": { "loading": "Loading...", "loadingData": "Loading chart data...", "noData": "No data available", "noExpensesData": "No expenses data available" },
+    "transactionsBar": { "title": "Expenses Chart" },
+    "ai": { "thinking": "Thinking…", "tips": "Get AI tips based on your data", "stop": "Stop", "getInsight": "Get AI Insight", "placeholder": "Get AI insights based on your data", "wait": "Please wait…", "rateLimited": "Rate limit reached. Try again later.", "noData": "Not enough data to analyze" },
+    "comparison": {
+      "vsLastMonth": "지난달 대비",
+      "titles": {
+        "weekly": "주간 비교",
+        "monthly": "월간 비교"
+      },
+      "descriptions": {
+        "weekly": {
+          "expenses": "이번 주 지출을 지난주와 비교합니다.",
+          "income": "이번 주 수입을 지난주와 비교합니다."
+        },
+        "monthly": {
+          "expenses": "이번 달 지출을 지난달과 비교합니다.",
+          "income": "이번 달 수입을 지난달과 비교합니다."
+        }
+      },
+      "labels": {
+        "current": "이번 주",
+        "previous": "지난주"
+      }
+    },
+    "labels": {
+      "expenses": "지출",
+      "income": "수입",
+      "for": "대상"
+    }
+  },
+  "transactions": {
+    "title": "거래📉",
+    "empty": {
+      "filtered": "선택한 필터에 대한 거래가 없습니다."
+    },
+    "table": {
+      "headers": { "title": "거래명", "budget": "예산", "amount": "금액", "type": "유형", "date": "날짜", "actions": "작업" },
+      "unbudgeted": "예산 미지정",
+      "empty": { "default": "거래가 없습니다" },
+      "modal": { "deleteTitle": "거래 삭제", "deletePrompt": "이 거래를 삭제하시겠습니까?", "editTitle": "거래 편집" }
+    }
+  },
+  "errors": {
+    "selectImageFile": "이미지 파일을 선택해주세요.",
+    "fileTooLarge5mb": "파일이 너무 큽니다 (최대 5MB).",
+    "uploadAvatarFailed": "아바타 업로드에 실패했습니다.",
+    "removeAvatarFailed": "아바타 제거에 실패했습니다.",
+    "auth": { "invalidAuthHeader": "유효하지 않은 인증 헤더입니다.", "notAuthenticated": "인증되지 않았습니다." },
+    "common": { "internalServerError": "내부 서버 오류." },
+    "notifications": {
+      "titleRequired": "알림 제목이 필요합니다.",
+      "invalidAction": "잘못된 알림 작업입니다.",
+      "fetchFailed": "알림 가져오기 실패.",
+      "createFailed": "알림 생성 실패.",
+      "updateFailed": "알림 업데이트 실패.",
+      "queueAddFailed": "알림 대기열 추가 실패.",
+      "queueFetchFailed": "알림 대기열 가져오기 실패.",
+      "subscriptionInvalid": "알림 구독 데이터가 올바르지 않습니다.",
+      "subscriptionSaveFailed": "알림 구독 저장 실패.",
+      "deactivateFailed": "알림 비활성화 실패."
     }
   }
 }

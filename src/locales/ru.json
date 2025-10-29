@@ -301,22 +301,25 @@
     "fileTooLarge5mb": "Файл слишком большой (до 5 МБ)",
     "uploadAvatarFailed": "Не удалось загрузить аватар",
     "removeAvatarFailed": "Не удалось удалить аватар",
-
-    "auth.invalidAuthHeader": "Недействительный заголовок авторизации",
-    "auth.notAuthenticated": "Пользователь не аутентифицирован",
-
-    "common.internalServerError": "Внутренняя ошибка сервера",
-
-    "notifications.titleRequired": "Необходимо указать заголовок уведомления",
-    "notifications.invalidAction": "Некорректное действие",
-    "notifications.fetchFailed": "Не удалось получить уведомления",
-    "notifications.createFailed": "Не удалось создать уведомление",
-    "notifications.updateFailed": "Не удалось обновить уведомление",
-    "notifications.queueAddFailed": "Не удалось добавить задачу в очередь",
-    "notifications.queueFetchFailed": "Не удалось получить очередь уведомлений",
-    "notifications.subscriptionInvalid": "Некорректная подписка",
-    "notifications.subscriptionSaveFailed": "Не удалось сохранить подписку",
-    "notifications.deactivateFailed": "Не удалось отключить подписку"
+    "auth": {
+      "invalidAuthHeader": "Недействительный заголовок авторизации",
+      "notAuthenticated": "Пользователь не аутентифицирован"
+    },
+    "common": {
+      "internalServerError": "Внутренняя ошибка сервера"
+    },
+    "notifications": {
+      "titleRequired": "Необходимо указать заголовок уведомления",
+      "invalidAction": "Некорректное действие",
+      "fetchFailed": "Не удалось получить уведомления",
+      "createFailed": "Не удалось создать уведомление",
+      "updateFailed": "Не удалось обновить уведомление",
+      "queueAddFailed": "Не удалось добавить задачу в очередь",
+      "queueFetchFailed": "Не удалось получить очередь уведомлений",
+      "subscriptionInvalid": "Некорректная подписка",
+      "subscriptionSaveFailed": "Не удалось сохранить подписку",
+      "deactivateFailed": "Не удалось отключить подписку"
+    }
   },
 
   "profile": {
@@ -497,9 +500,12 @@
       "overBudget": "Превышение бюджета",
       "ofBudget": "от бюджета",
       "totalIncome": "Всего доходы",
-      "coversExpenses": "Покрывает {percent}% расходов",
       "spentLabel": "потрачено",
-      "leftLabel": "осталось"
+      "leftLabel": "осталось",
+      "labels": {
+        "vsLastMonth": "по сравнению с прошлым месяцем",
+        "coversExpenses": "Покрывает {percent}% расходов"
+      }
     }
   },
   "budgets": {
@@ -516,6 +522,7 @@
         "createNew": "Создать бюджет"
       }
     },
+    "usedPercent": "использовано",
     "labels": {
       "spent": "потрачено",
       "left": "осталось"

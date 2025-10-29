@@ -36,7 +36,7 @@ interface EnhancedTransactionsTableProps extends TransactionsTableProps {
   onTransactionUpdate?: () => void
 }
 
-const TransactionsTable = ({
+function TransactionsTable({
   transactions,
   onDeleteTransaction,
   deleteModalConfig,
@@ -47,7 +47,7 @@ const TransactionsTable = ({
   showFilters = false,
   emptyStateMessage,
   onTransactionUpdate
-}: EnhancedTransactionsTableProps) => {
+}: EnhancedTransactionsTableProps) {
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
 
@@ -59,7 +59,7 @@ const TransactionsTable = ({
   const { session } = UserAuth()
 
   // Инициализация переводов для таблицы транзакций
-  const tTable = useTranslations('transactions.table')
+  const tTransactions = useTranslations('transactions')
 
   // Пагинация
   const [currentPage, setCurrentPage] = useState<number>(1)
@@ -141,7 +141,7 @@ const TransactionsTable = ({
   }
 
   // Если нет транзакций, показываем сообщение
-  const effectiveEmptyMessage = emptyStateMessage ?? tTable('empty.default')
+  const effectiveEmptyMessage = emptyStateMessage ?? tTransactions('table.empty.default')
   if (transactions.length === 0) {
     return (
       <div className="text-center py-8 mb-24">
@@ -181,7 +181,7 @@ const TransactionsTable = ({
                       <span>{transaction.category_name}</span>
                     </>
                   ) : (
-                    <span className="italic">{tTable('unbudgeted')}</span>
+                    <span className="italic">{tTransactions('table.unbudgeted')}</span>
                   )}
                 </div>
               </div>
@@ -240,14 +240,12 @@ const TransactionsTable = ({
       >
         <Table className="w-full">
           <TableHeader className="border-b border-border">
-            <TableRow className="border-b border-border hover:bg-transparent">
-              <TableHead className="!text-[16px] font-semibold text-foreground">{tTable('headers.title')}</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-foreground">{tTable('headers.budget')}</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-foreground">{tTable('headers.amount')}</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-foreground">{tTable('headers.type')}</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-foreground">{tTable('headers.date')}</TableHead>
-              <TableHead className="!text-[16px] font-semibold text-foreground">{tTable('headers.actions')}</TableHead>
-            </TableRow>
+            <TableHead className="!text-[16px] font-semibold text-foreground">{tTransactions('table.headers.title')}</TableHead>
+            <TableHead className="!text-[16px] font-semibold text-foreground">{tTransactions('table.headers.budget')}</TableHead>
+            <TableHead className="!text-[16px] font-semibold text-foreground">{tTransactions('table.headers.amount')}</TableHead>
+            <TableHead className="!text-[16px] font-semibold text-foreground">{tTransactions('table.headers.type')}</TableHead>
+            <TableHead className="!text-[16px] font-semibold text-foreground">{tTransactions('table.headers.date')}</TableHead>
+            <TableHead className="!text-[16px] font-semibold text-foreground">{tTransactions('table.headers.actions')}</TableHead>
           </TableHeader>
           <TableBody>
             {pageItems.map((transaction, index) => (
@@ -270,7 +268,7 @@ const TransactionsTable = ({
                       <span>{transaction.category_name}</span>
                     </span>
                   ) : (
-                    <span className="text-muted-foreground italic">{tTable('unbudgeted')}</span>
+                    <span className="text-muted-foreground italic">{tTransactions('table.unbudgeted')}</span>
                   )}
                 </TableCell>
                 <TableCell className="text-foreground">${transaction.amount}</TableCell>
@@ -332,8 +330,8 @@ const TransactionsTable = ({
       {/* Delete modal */}
       {isModalOpen && selectedTransactionId && (
         <DeleteModal
-          title={deleteModalConfig?.title ?? tTable('modal.deleteTitle')}
-          text={deleteModalConfig?.text ?? tTable('modal.deletePrompt')}
+          title={deleteModalConfig?.title ?? tTransactions('table.modal.deleteTitle')}
+          text={deleteModalConfig?.text ?? tTransactions('table.modal.deletePrompt')}
           onClose={() => setIsModalOpen(false)}
           onConfirm={() => {
             if (selectedTransactionId) {
@@ -349,7 +347,7 @@ const TransactionsTable = ({
       {/* Edit modal */}
       {isEditOpen && editingTransaction && (
         <EditTransactionModal
-          title={tTable('modal.editTitle')}
+          title={tTransactions('table.modal.editTitle')}
           onClose={() => {
             setIsEditOpen(false)
             setEditingTransaction(null)

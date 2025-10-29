@@ -19,7 +19,7 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
   onDatePeriodChange,
   className = ''
 }) => {
-  const tTransactions = useTranslations('transactions.table')
+  const tTransactions = useTranslations('transactions')
   const tCharts = useTranslations('charts')
   const tModals = useTranslations('modals')
   const tFilters = useTranslations('filters')
@@ -28,7 +28,7 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
       {/* Type Selector */}
       <div className="flex flex-col gap-1 w-full sm:w-auto">
         <label className="text-sm font-medium text-secondary-black dark:text-white">
-          {tTransactions('headers.type')}
+          {tTransactions('table.headers.type')}
         </label>
         <div className="relative">
           <Select
@@ -50,7 +50,7 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
       {/* Date Period Selector */}
       <div className="flex flex-col gap-1 w-full sm:w-auto">
         <label className="text-sm font-medium text-secondary-black dark:text-white">
-          {tTransactions('headers.date')}
+          {tTransactions('table.headers.date')}
         </label>
         <div className="relative">
           <Select

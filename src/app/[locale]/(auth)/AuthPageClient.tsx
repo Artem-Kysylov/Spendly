@@ -10,11 +10,14 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Eye, EyeOff } from 'lucide-react'
 import Image from 'next/image'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
-import Link from 'next/link'
-import AvatarUpload from '@/components/ui-elements/AvatarUpload'
-import { supabase } from '@/lib/supabaseClient'
-import { motion } from 'motion/react'
+import { useToast } from "@/components/ui/use-toast"
+// Removed duplicate import of UserAuth
+import { useSignWithGoogle } from "@/hooks/useSignWithGoogle"
+import { Link } from '@/i18n/routing'
+import { supabase } from "@/lib/supabaseClient"
+import { motion } from "framer-motion"
 import { useTranslations } from 'next-intl'
+import { AvatarUpload } from '@/components/ui-elements'
 
 export default function AuthPageClient() {
   const { 
@@ -30,7 +33,7 @@ export default function AuthPageClient() {
   const tAuth = useTranslations('auth')
 
   useEffect(() => {
-    if (isReady && session) {
+    if (isReady && session && session.user && router) {
       const completed = !!session.user?.user_metadata?.onboarding_completed
       router.replace(completed ? '/dashboard' : '/onboarding')
     }
@@ -299,7 +302,7 @@ export default function AuthPageClient() {
                         <span className="text-sm text-secondary-black">{tAuth('labels.rememberMe')}</span>
                       </label>
 
-                      <Link href="/forgot-password" className="text-blue-600 hover:text-blue-700 underline text-sm">
+                      <Link href={{ pathname: '/forgot-password' }} className="text-blue-600 hover:text-blue-700 underline text-sm">
                         Forgot your password?
                       </Link>
                     </div>

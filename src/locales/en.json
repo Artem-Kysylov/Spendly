@@ -22,7 +22,11 @@
     "cancel": "Cancel",
     "save": "Save",
     "submit": "Submit",
-    "close": "Close"
+    "close": "Close",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
+    }
   },
   "cta": {
     "upgradeToPro": "Upgrade to Pro",
@@ -81,33 +85,58 @@
   "transactions": {
     "title": "Transactions📉",
     "addTransaction": "Add Transaction",
-    "empty.title": "No transactions yet",
-    "empty.description": "Start by adding your first transaction",
-    "empty.filtered": "No transactions found for the selected filters",
-    "modal.addTitle": "Add Transaction",
-    "toast.deleteFailed": "Failed to delete transaction. Please try again.",
-    "toast.deleteSuccess": "Transaction deleted successfully",
-    "toast.updateFailed": "Failed to update transaction",
-    "toast.updateSuccess": "Transaction updated successfully!"
-  },
-  "transactions.table": {
-    "headers.title": "Transaction Name",
-    "headers.budget": "Budgets",
-    "headers.amount": "Amount",
-    "headers.type": "Type",
-    "headers.date": "Date",
-    "headers.actions": "Actions",
-    "unbudgeted": "Unbudgeted",
-    "empty.default": "No transactions found",
-    "modal.deleteTitle": "Delete transaction",
-    "modal.deletePrompt": "Are you sure you want to delete this transaction?",
-    "modal.editTitle": "Edit transaction"
+    "empty": {
+      "title": "No transactions yet",
+      "description": "Start by adding your first transaction",
+      "filtered": "No transactions found for the selected filters"
+    },
+    "modal": { "addTitle": "Add Transaction" },
+    "toast": {
+      "deleteFailed": "Failed to delete transaction. Please try again.",
+      "deleteSuccess": "Transaction deleted successfully",
+      "updateFailed": "Failed to update transaction",
+      "updateSuccess": "Transaction updated successfully!"
+    },
+    "table": {
+      "headers": {
+        "title": "Transaction Name",
+        "budget": "Budgets",
+        "amount": "Amount",
+        "type": "Type",
+        "date": "Date",
+        "actions": "Actions"
+      },
+      "unbudgeted": "Unbudgeted",
+      "empty": { "default": "No transactions found" },
+      "modal": {
+        "deleteTitle": "Delete transaction",
+        "deletePrompt": "Are you sure you want to delete this transaction?",
+        "editTitle": "Edit transaction"
+      }
+    }
   },
   "dashboard": {
     "welcome": "Welcome {name}👋",
-    "deleteModal.title": "Delete transaction",
-    "deleteModal.prompt": "Are you sure you want to delete this transaction?",
-    "mainBudget.editTitle": "Edit main budget"
+    "deleteModal": {
+      "title": "Delete transaction",
+      "prompt": "Are you sure you want to delete this transaction?"
+    },
+    "mainBudget": { "editTitle": "Edit main budget" },
+    "counters": {
+      "totalBudget": "Total budget",
+      "totalExpenses": "Total expenses",
+      "totalIncome": "Total income",
+      "remaining": "remaining",
+      "usedPercent": "used",
+      "overBudget": "Over budget",
+      "status": {
+        "exceeded": "Exceeded",
+        "warning": "Warning",
+        "notSet": "Not set"
+      },
+      "ofBudget": "of budget",
+      "coversExpenses": "Covers expenses by {percent}%"
+    }
   },
   "budgets": {
     "list": {
@@ -153,56 +182,61 @@
     }
   },
   "auth": {
-    "tabs.signin": "Sign in",
-    "tabs.signup": "Sign up",
-    "labels.rememberMe": "Remember me",
-    "buttons.google": "Sign in with Google",
-    "buttons.signIn": "Sign in",
-    "buttons.signUp": "Sign up",
-    "states.signingIn": "Signing in...",
-    "states.creatingAccount": "Creating account..."
+    "tabs": { "signin": "Sign in", "signup": "Sign up" },
+    "labels": { "rememberMe": "Remember me" },
+    "buttons": { "google": "Sign in with Google", "signIn": "Sign in", "signUp": "Sign up" },
+    "states": { "signingIn": "Signing in...", "creatingAccount": "Creating account..." }
   },
   "forgotPassword": {
     "title": "Forgot your password",
     "instructions": "Enter your email address and we’ll send you a link to reset your password. After sending, please check your inbox and the Spam folder.",
-    "label.email": "Email",
-    "placeholder.email": "you@example.com",
-    "error.invalidEmail": "Please enter a valid email address",
-    "states.sending": "Sending...",
-    "buttons.sendReset": "Send reset link",
-    "buttons.backToSignIn": "Back to Sign in",
-    "success.title": "Check your email",
-    "success.description": "If an account exists for this email, we’ve sent a password reset link. Please check your inbox and the Spam folder."
+    "label": { "email": "Email" },
+    "placeholder": { "email": "you@example.com" },
+    "error": { "invalidEmail": "Please enter a valid email address" },
+    "states": { "sending": "Sending..." },
+    "buttons": { "sendReset": "Send reset link", "backToSignIn": "Back to Sign in" },
+    "success": {
+      "title": "Check your email",
+      "description": "If an account exists for this email, we’ve sent a password reset link. Please check your inbox and the Spam folder."
+    }
   },
   "resetPassword": {
     "title": "Set your new password",
     "instructions": "Enter your new password below. Make sure it meets all the requirements.",
-    "label.password": "New Password",
-    "placeholder.password": "Enter new password",
-    "requirements.minimumChars": "At least 6 characters",
-    "requirements.lowercase": "One lowercase letter",
-    "requirements.uppercase": "One uppercase letter",
-    "requirements.number": "One number",
-    "requirements.special": "One special character",
-    "label.confirmPassword": "Confirm Password",
-    "placeholder.confirmPassword": "Confirm new password",
-    "states.updating": "Updating password...",
-    "buttons.update": "Update password",
-    "buttons.backToSignIn": "Back to Sign in",
-    "success.title": "Password updated!",
-    "success.description": "Your password has been successfully updated. You will be redirected to the sign in page shortly."
+    "label": { "password": "New Password", "confirmPassword": "Confirm Password" },
+    "placeholder": { "password": "Enter new password", "confirmPassword": "Confirm new password" },
+    "requirements": {
+      "minimumChars": "At least 6 characters",
+      "lowercase": "One lowercase letter",
+      "uppercase": "One uppercase letter",
+      "number": "One number",
+      "special": "One special character"
+    },
+    "states": { "updating": "Updating password..." },
+    "buttons": { "update": "Update password", "backToSignIn": "Back to Sign in" },
+    "success": {
+      "title": "Password updated!",
+      "description": "Your password has been successfully updated. You will be redirected to the sign in page shortly."
+    }
   },
   "notFound": {
     "title": "Sorry, this page does not exist",
-    "button.goHome": "Go to the Home page",
-    "alt.illustration": "404 illustration"
+    "button": { "goHome": "Go to the Home page" },
+    "alt": { "illustration": "404 illustration" }
   },
   "layout": {
-    "sidebar.dashboard": "Dashboard",
-    "sidebar.transactions": "Transactions",
-    "sidebar.budgets": "Budgets",
-    "sidebar.userSettings": "User Settings",
-    "alt.logo": "Spendly Logo"
+    "sidebar": {
+      "dashboard": "Dashboard",
+      "transactions": "Transactions",
+      "budgets": "Budgets",
+      "charts": "Charts",
+      "assistant": "AI Assistant",
+      "settings": "Settings"
+    },
+    "navbar": {
+      "welcome": "Welcome",
+      "logout": "Log out"
+    }
   },
   "modals": {
     "appInstall": { "title": "Get Spendly on your device" },
@@ -246,10 +280,12 @@
   },
   "setup": {
     "budget": {
-      "toast.signInRequired": "Please sign in to save a budget",
-      "toast.invalidAmount": "Enter a valid budget amount",
-      "toast.saveFailed": "Failed to save budget. Try again.",
-      "toast.saveSuccess": "Budget saved successfully!"
+      "toast": {
+        "signInRequired": "Please sign in to save a budget",
+        "invalidAmount": "Enter a valid budget amount",
+        "saveFailed": "Failed to save budget. Try again.",
+        "saveSuccess": "Budget saved successfully!"
+      }
     }
   },
   "assistant": {
@@ -257,44 +293,93 @@
     "rateLimited": "Rate limit reached. Please wait a few seconds…",
     "welcomeTitle": "Welcome to AI Assistant",
     "welcomeDesc": "Ask me anything about your finances or choose a preset below",
-    "insights.title": "AI Insights",
-    "insights.beta": "Beta",
-    "confirm.title": "Confirm transaction",
-    "confirm.fields.title": "Title",
-    "confirm.fields.budget": "Budget",
-    "confirm.fields.amount": "Amount",
-    "actions.accept": "Accept",
-    "actions.decline": "Decline",
-    "actions.abort": "Abort",
-    "actions.send": "Send",
-    "buttons.close": "Close AI Assistant",
-    "buttons.ask": "Ask Spendly Pal",
-    "input.placeholder": "Ask about your expenses...",
-    "presets.header": "Quick questions:",
-    "presets.showWeek": "Show my expenses for this week",
-    "presets.saveMoney": "Where can I save money?",
-    "presets.analyzePatterns": "Analyze my spending patterns",
-    "presets.createBudgetPlan": "Create a budget plan",
-    "presets.showBiggest": "Show my biggest expenses",
-    "presets.compareMonths": "Compare this month vs last month"
+    "confirm": {
+      "title": "Confirm transaction",
+      "fields": {
+        "title": "Title",
+        "budget": "Budget",
+        "amount": "Amount"
+      }
+    },
+    "actions": {
+      "accept": "Accept",
+      "decline": "Decline",
+      "abort": "Abort",
+      "send": "Send"
+    },
+    "buttons": {
+      "close": "Close AI Assistant",
+      "ask": "Ask Spendly Pal"
+    },
+    "input": {
+      "placeholder": "Ask about your expenses..."
+    },
+    "presets": {
+      "header": "Quick questions:",
+      "showWeek": "Show my expenses for this week",
+      "saveMoney": "Where can I save money?",
+      "analyzePatterns": "Analyze my spending patterns",
+      "createBudgetPlan": "Create a budget plan",
+      "showBiggest": "Show my biggest expenses",
+      "compareMonths": "Compare this month vs last month"
+    },
+    "insights": {
+      "title": "AI Insights",
+      "beta": "Beta"
+    }
   },
   "charts": {
-    "titles.analytics": "Budgets Analytics",
-    "titles.comparisonBar": "Budgets Comparison",
-    "bar.titleByCategory": "Expenses by category",
-    "line.titleOverTime": "Expenses over time",
-    "states.loading": "Loading...",
-    "states.loadingData": "Loading chart data...",
-    "states.noData": "No data available",
-    "labels.expenses": "Expenses",
-    "labels.income": "Income",
-    "labels.for": "for",
-    "transactionsBar.title": "Expenses Chart",
-    "states.noExpensesData": "No expenses data available",
-    "ai.thinking": "Thinking",
-    "ai.tips": "Get AI tips based on your data",
-    "ai.stop": "Stop",
-    "ai.getInsight": "Get AI Insight"
+    "titles": {
+      "analytics": "Budgets Analytics",
+      "comparisonBar": "Budgets Comparison"
+    },
+    "bar": {
+      "titleByCategory": "Expenses by category"
+    },
+    "line": {
+      "titleOverTime": "Expenses over time"
+    },
+    "labels": {
+      "expenses": "Expenses",
+      "income": "Income",
+      "for": "for"
+    },
+    "states": {
+      "loading": "Loading...",
+      "loadingData": "Loading chart data...",
+      "noData": "No data available",
+      "noExpensesData": "No expenses data available"
+    },
+    "transactionsBar": {
+      "title": "Expenses Chart"
+    },
+    "ai": {
+      "thinking": "Thinking…",
+      "tips": "Get AI tips based on your data",
+      "stop": "Stop",
+      "getInsight": "Get AI Insight",
+      "placeholder": "Get AI insights based on your data",
+      "wait": "Please wait…",
+      "rateLimited": "Rate limit reached. Try again later.",
+      "noData": "Not enough data to analyze"
+    },
+    "comparison": {
+      "vsLastMonth": "vs last month",
+      "titles": {
+        "weekly": "Weekly comparison",
+        "monthly": "Monthly comparison"
+      },
+      "descriptions": {
+        "weekly": {
+          "expenses": "Compare this week's expenses to last week.",
+          "income": "Compare this week's income to last week."
+        },
+        "monthly": {
+          "expenses": "Compare this month's expenses to last month.",
+          "income": "Compare this month's income to last month."
+        }
+      }
+    }
   },
   "filters": {
     "options": {
@@ -350,56 +435,29 @@
     "a11y": { "togglePush": "Toggle push notifications" },
     "dev": { "sqlScript": "SQL Script", "copy": "Copy", "copied": "Copied!" }
   },
-  "settings": {
-    "header.title": "User Settings ⚙️",
-    "header.subtitle": "Manage your account settings and preferences",
-    "appearance.title": "Appearance",
-    "appearance.description": "Choose your theme preference",
-    "notifications.title": "Notifications",
-    "notifications.description": "Manage how and when you receive notifications",
-    "subscription.title": "Subscription",
-    "subscription.description": "Compare plans and upgrade anytime",
-    "subscription.currentPlan": "Current plan",
-    "language.title": "Language",
-    "language.description": "Choose your interface language",
-    "appControls.title": "App Controls",
-    "appControls.description": "Install the app for a native experience",
-    "account.title": "Account",
-    "account.signOut.title": "Sign Out",
-    "account.signOut.description": "Sign out of your account"
-  },
   "errors": {
-    "selectImageFile": "Please select an image file",
-    "fileTooLarge5mb": "File size must be less than 5MB",
-    "uploadAvatarFailed": "Failed to upload avatar",
-    "removeAvatarFailed": "Failed to remove avatar"
-  },
-  "profile": {
-    "avatar": {
-      "upload": "Upload Avatar",
-      "change": "Change Avatar",
-      "cancel": "Cancel",
-      "alt": "User Avatar"
+    "selectImageFile": "Please select an image file.",
+    "fileTooLarge5mb": "The file is too large (max 5 MB).",
+    "uploadAvatarFailed": "Failed to upload avatar.",
+    "removeAvatarFailed": "Failed to remove avatar.",
+    "auth": {
+      "invalidAuthHeader": "Invalid Authorization header.",
+      "notAuthenticated": "Not authenticated."
+    },
+    "common": {
+      "internalServerError": "Internal server error."
+    },
+    "notifications": {
+      "titleRequired": "Notification title is required.",
+      "invalidAction": "Invalid notification action.",
+      "fetchFailed": "Failed to fetch notifications.",
+      "createFailed": "Failed to create notification.",
+      "updateFailed": "Failed to update notification.",
+      "queueAddFailed": "Failed to add to notification queue.",
+      "queueFetchFailed": "Failed to fetch notification queue.",
+      "subscriptionInvalid": "Notification subscription data invalid.",
+      "subscriptionSaveFailed": "Failed to save notification subscription.",
+      "deactivateFailed": "Failed to deactivate notifications."
     }
-  },
-  "api": {
-    "queueAdded": "Notification added to queue successfully",
-    "subscriptionSaved": "Push subscription saved",
-    "subscriptionRemoved": "Push subscription removed"
-  },
-  "errors": {
-    "auth.invalidAuthHeader": "Missing or invalid authorization header",
-    "auth.notAuthenticated": "User not authenticated",
-    "common.internalServerError": "Internal server error",
-    "notifications.titleRequired": "Title and message are required",
-    "notifications.invalidAction": "Invalid action or missing parameters",
-    "notifications.fetchFailed": "Error fetching notifications",
-    "notifications.createFailed": "Error creating notification",
-    "notifications.updateFailed": "Error updating notifications",
-    "notifications.queueAddFailed": "Error adding notification to queue",
-    "notifications.queueFetchFailed": "Error fetching notification queue",
-    "notifications.subscriptionInvalid": "Valid push subscription is required",
-    "notifications.subscriptionSaveFailed": "Error saving push subscription",
-    "notifications.deactivateFailed": "Error deactivating push subscription"
   }
 }

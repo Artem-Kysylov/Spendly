@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { motion } from 'motion/react'
-import Button from '../components/ui-elements/Button'
+import Button from '@/components/ui-elements/Button'
 import { useTranslations } from 'next-intl'
 
 export default function NotFoundClient() {

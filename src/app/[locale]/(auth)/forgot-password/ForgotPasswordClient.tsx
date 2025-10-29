@@ -2,13 +2,15 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
-import { supabase } from '@/lib/supabaseClient'
 import { Input } from '@/components/ui/input'
-import Button from '@/components/ui-elements/Button'
-import { CheckCircle2 } from 'lucide-react'
-import { motion } from 'motion/react'
+import { Label } from '@/components/ui/label'
+import { useToast } from '@/components/ui/use-toast'
+import { Link } from '@/i18n/routing'
+import { supabase } from '@/lib/supabaseClient'
+import { motion } from 'framer-motion'
+import { CheckCircle2, ChevronLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import Button from '@/components/ui-elements/Button'
 
 export default function ForgotPasswordClient() {
   const [email, setEmail] = useState('')
@@ -104,7 +106,7 @@ export default function ForgotPasswordClient() {
                 />
 
                 <div className="text-center">
-                  <Link href="/" className="text-blue-600 hover:text-blue-700 underline text-sm">
+                  <Link href={{ pathname: '/' }} className="text-blue-600 hover:text-blue-700 underline text-sm">
                     {tForgot('buttons.backToSignIn')}
                   </Link>
                 </div>
@@ -129,7 +131,7 @@ export default function ForgotPasswordClient() {
                   {tForgot('success.title')}
                 </motion.h2>
                 <p className="text-sm text-gray-600">{tForgot('success.description')}</p>
-                <Link href="/" className="text-blue-600 hover:text-blue-700 underline text-sm">
+                <Link href={{ pathname: '/' }} className="text-blue-600 hover:text-blue-700 underline text-sm">
                   {tForgot('buttons.backToSignIn')}
                 </Link>
               </motion.div>

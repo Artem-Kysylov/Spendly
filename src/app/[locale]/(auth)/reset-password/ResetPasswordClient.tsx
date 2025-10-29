@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from '@/i18n/routing'
 import { supabase } from '@/lib/supabaseClient'
 import { Input } from '@/components/ui/input'
 import Button from '@/components/ui-elements/Button'
@@ -180,7 +180,7 @@ export default function ResetPasswordClient() {
                 />
 
                 <div className="text-center">
-                  <Link href="/" className="text-blue-600 hover:text-blue-700 underline text-sm">
+                  <Link href={{ pathname: '/' }} className="text-blue-600 hover:text-blue-700 underline text-sm">
                     {tReset('buttons.backToSignIn')}
                   </Link>
                 </div>

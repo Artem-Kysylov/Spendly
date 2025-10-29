@@ -12,7 +12,7 @@ import ProfileCard from '@/components/user-settings/ProfileCard'
 import ThemeSwitcher from '@/components/ui-elements/ThemeSwitcher'
 import useIsPWAInstalled from '@/hooks/useIsPWAInstalled'
 import AppInstallModal from '@/components/modals/AppInstallModal'
-import Link from 'next/link'
+import { Link } from '@/i18n/routing'
 import { supabase } from '@/lib/supabaseClient'
 import LanguageSelect from '@/components/ui-elements/locale/LanguageSelect'
 import { useTranslations } from 'next-intl'
@@ -219,7 +219,7 @@ export default function UserSettingsClient() {
                     <li>• {tPricing('pro.features.earlyAccess')}</li>
                   </ul>
                   <div className="mt-5">
-                    <Link href="/payment" className="inline-flex">
+                    <Link href={{ pathname: '/payment' }} className="inline-flex">
                       <Button text={tCTA('upgradeToPro')} variant="primary" />
                     </Link>
                   </div>

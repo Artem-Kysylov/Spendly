@@ -10,26 +10,247 @@
     "searchCurrency": "通貨を検索...",
     "clearSelection": "クリア"
   },
-  "Settings": {
+  "layout": {
+    "sidebar": {
+      "dashboard": "ダッシュボード",
+      "transactions": "取引",
+      "budgets": "予算",
+      "userSettings": "ユーザー設定"
+    },
+    "alt": { "logo": "Spendly ロゴ" }
+  },
+
+  "budgets": {
+    "list": {
+      "card": {
+        "createNew": "新しい予算を作成"
+      }
+    },
+    "labels": {
+      "spent": "支出",
+      "left": "残り"
+    }
+  },
+
+  "userSettings": {
     "language": "言語",
     "selectLanguage": "言語を選択",
-    "saveLanguage": "言語を保存",
-    "assistant": { "insights.title": "AI Insights", "insights.beta": "Beta" },
-    "filters": { "options": { "week": "Week", "month": "Month" } },
-    "modals": { "transaction.noResults": "No results found" },
-    "errors": {
-      "selectImageFile": "Please select an image file",
-      "fileTooLarge5mb": "File size must be less than 5MB",
-      "uploadAvatarFailed": "Failed to upload avatar",
-      "removeAvatarFailed": "Failed to remove avatar"
-    },
-    "profile": {
-      "avatar": {
-        "upload": "Upload Avatar",
-        "change": "Change Avatar",
-        "cancel": "Cancel",
-        "alt": "User Avatar"
+    "saveLanguage": "言語を保存"
+  },
+  "cta": {
+    "upgradeToPro": "Pro にアップグレード",
+    "downloadApp": "アプリをダウンロード",
+    "signOut": "サインアウト"
+  },
+  "pricing": {
+    "free": {
+      "label": "無料",
+      "short": "まずはここから",
+      "features": {
+        "track": "支出と予算を記録",
+        "charts": "基本的なチャートとインサイト",
+        "notifications": "ローカル通知"
       }
+    },
+    "pro": {
+      "label": "Pro",
+      "short": "成長のための強力な機能",
+      "features": {
+        "aiUnlimited": "AIアシスタント使い放題",
+        "advancedCharts": "高度なチャートと比較",
+        "prioritySupport": "優先サポート",
+        "customGoals": "カスタム目標とアラート",
+        "earlyAccess": "新機能への先行アクセス"
+      }
+    },
+    "perMonth": "月"
+  },
+  "userSettings": {
+    "header": { "title": "ユーザー設定⚙️", "subtitle": "アカウント設定と環境を管理します" },
+    "profile": {
+      "title": "プロフィール",
+      "memberSince": "{monthYear} からメンバー",
+      "googleAccount": "Googleアカウント",
+      "emailAccount": "メールアカウント",
+      "edit": "プロフィールを編集"
+    },
+    "appearance": { "title": "外観", "description": "テーマの好みを選択" },
+    "notifications": { "title": "通知", "description": "通知の受け取り方法とタイミングを管理" },
+    "subscription": { "title": "サブスクリプション", "description": "プランを比較していつでもアップグレード", "currentPlan": "現在のプラン" },
+    "language": { "title": "言語", "description": "インターフェース言語を選択" },
+    "appControls": { "title": "アプリ操作", "description": "ネイティブ体験のためにアプリをインストール" },
+    "account": {
+      "title": "アカウント",
+      "signOut": { "title": "サインアウト", "description": "アカウントからログアウト" }
+    },
+    "modals": { "signOut": { "title": "サインアウトしますか？", "text": "ログアウトしてもよろしいですか？" } }
+  },
+  "auth": {
+    "tabs": { "signin": "ログイン", "signup": "新規登録" },
+    "buttons": { "google": "Googleで続行" },
+    "labels": { "rememberMe": "ログイン情報を記憶" }
+  },
+  "assistant": {
+    "title": "AIアシスタント",
+    "rateLimited": "レート制限に達しました。しばらくしてからもう一度お試しください。",
+    "welcomeTitle": "AIアシスタントへようこそ",
+    "welcomeDesc": "あなたの財務について何でも聞いてください。または、以下のプリセットを選択してください。",
+    "confirm": {
+      "title": "取引内容の確認",
+      "fields": {
+        "title": "タイトル",
+        "budget": "予算",
+        "amount": "金額"
+      }
+    },
+    "actions": {
+      "accept": "確定",
+      "decline": "キャンセル",
+      "abort": "中止",
+      "send": "送信"
+    },
+    "buttons": {
+      "close": "閉じる",
+      "ask": "AIに質問"
+    },
+    "input": {
+      "placeholder": "AIへの質問を入力…"
+    },
+    "presets": {
+      "header": "すぐに試せる提案",
+      "showWeek": "今週の支出を表示",
+      "saveMoney": "節約のヒントを提案",
+      "analyzePatterns": "支出パターンを分析",
+      "createBudgetPlan": "今月の予算計画を作成",
+      "showBiggest": "支出の大きい項目を表示",
+      "compareMonths": "今月と先月を比較"
+    },
+    "insights": { "title": "AIインサイト", "beta": "ベータ版" }
+  },
+  "notFound": {
+    "title": "申し訳ありません、このページは存在しません",
+    "button": { "goHome": "ホームへ戻る" },
+    "alt": { "illustration": "404 イラスト" }
+  },
+  "filters": { "options": { "week": "週", "month": "月" } },
+  "modals": { "transaction": { "noResults": "結果が見つかりません" } },
+  "dashboard": {
+    "welcome": "ようこそ {name}様👋",
+    "modals": {
+      "deleteTransaction": { "title": "取引を削除", "prompt": "この取引を削除してもよろしいですか？" },
+      "editMainBudget": { "title": "メイン予算を編集" }
+    },
+    "counters": {
+      "totalBudget": "総予算",
+      "totalExpenses": "総支出",
+      "totalIncome": "総収入",
+      "labels": {
+        "spent": "使用済み",
+        "remaining": "残り",
+        "used": "使用済み",
+        "vsLastMonth": "先月比",
+        "coversExpenses": "支出を{percent}%カバー"
+      }
+    },
+    "budgets": {
+      "usedPercent": "使用済み",
+      "overBudget": "予算超過",
+      "status": { "exceeded": "超過", "warning": "警告", "notSet": "未設定" },
+      "ofBudget": "の予算",
+      "coversExpenses": "支出を{percent}%カバー"
     }
+  },
+  "notifications": {
+    "bell": { "aria": "通知", "title": "通知", "markAllRead": "すべて既読", "empty": { "title": "通知はまだありません", "description": "重要なことが起きたらお知らせします" }, "viewAll": "すべてを見る", "setup": { "title": "通知用データベースの設定", "subtitle": "設定画面へ移動して指示を確認" } },
+    "frequency": {
+      "title": "通知頻度",
+      "aria": "通知頻度",
+      "disabled": { "label": "送信しない", "description": "すべてのリマインダーをオフ" },
+      "gentle": { "label": "控えめ", "description": "1〜2 件/日" },
+      "aggressive": { "label": "積極的", "description": "4〜5 件/日" },
+      "relentless": { "label": "容赦なし", "description": "強め (10+ 件/日)" }
+    },
+    "toasts": { "preferencesSaved": "設定を保存しました", "preferencesSaveFailed": "設定の保存に失敗しました", "pushEnabled": "プッシュを有効化", "pushDisabled": "プッシュを無効化", "pushStatusFailed": "プッシュ状態の更新に失敗しました" }
+  },
+  "pages": {
+    "userSettings": { "meta": { "title": "ユーザー設定", "description": "アカウントの環境設定を更新" } },
+    "budgets": { "meta": { "title": "予算", "description": "予算を作成・管理します。" } },
+    "notFound": { "meta": { "title": "ページが見つかりません", "description": "要求されたページは存在しません。" } }
+  },
+  "charts": {
+    "titles": { "analytics": "予算分析", "comparisonBar": "予算の比較" },
+    "bar": { "titleByCategory": "Expenses by category" },
+    "line": { "titleOverTime": "Expenses over time" },
+    "labels": { "expenses": "支出", "income": "収入", "for": "対象" },
+    "states": { "loading": "Loading...", "loadingData": "Loading chart data...", "noData": "No data available", "noExpensesData": "No expenses data available" },
+    "transactionsBar": { "title": "Expenses Chart" },
+    "ai": { "thinking": "Thinking…", "tips": "Get AI tips based on your data", "stop": "Stop", "getInsight": "Get AI Insight", "placeholder": "Get AI insights based on your data", "wait": "Please wait…", "rateLimited": "Rate limit reached. Try again later.", "noData": "Not enough data to analyze" },
+    "comparison": {
+      "vsLastMonth": "先月比",
+      "titles": {
+        "weekly": "週間比較",
+        "monthly": "月間比較"
+      },
+      "descriptions": {
+        "weekly": {
+          "expenses": "今週の支出を先週と比較します。",
+          "income": "今週の収入を先週と比較します。"
+        },
+        "monthly": {
+          "expenses": "今月の支出を先月と比較します。",
+          "income": "今月の収入を先月と比較します。"
+        }
+      },
+      "labels": {
+        "current": "今週",
+        "previous": "先週"
+      }
+    },
+    "labels": {
+      "expenses": "支出",
+      "income": "収入",
+      "for": "対象"
+    }
+  },
+  "transactions": {
+    "title": "取引📉",
+    "addTransaction": "取引を追加",
+    "empty": {
+      "filtered": "選択したフィルターに一致する取引が見つかりません"
+    },
+    "table": {
+      "headers": { "title": "取引名", "budget": "予算", "amount": "金額", "type": "種類", "date": "日付", "actions": "操作" },
+      "unbudgeted": "未予算",
+      "empty": { "default": "取引が見つかりません" },
+      "modal": { "deleteTitle": "取引を削除", "deletePrompt": "この取引を削除してもよろしいですか？", "editTitle": "取引を編集" }
+    }
+  },
+  "errors": {
+    "selectImageFile": "Please select an image file.",
+    "fileTooLarge5mb": "The file is too large (max 5 MB).",
+    "uploadAvatarFailed": "Failed to upload avatar.",
+    "removeAvatarFailed": "Failed to remove avatar.",
+    "auth": { "invalidAuthHeader": "Invalid Authorization header.", "notAuthenticated": "Not authenticated." },
+    "common": { "internalServerError": "Internal server error." },
+    "notifications": { "titleRequired": "Notification title is required.", "invalidAction": "Invalid notification action.", "fetchFailed": "Failed to fetch notifications.", "createFailed": "Failed to create notification.", "updateFailed": "Failed to update notifications.", "queueAddFailed": "Failed to add to notification queue.", "queueFetchFailed": "Failed to fetch notification queue.", "subscriptionInvalid": "Notification subscription data invalid.", "subscriptionSaveFailed": "Failed to save notification subscription.", "deactivateFailed": "Failed to deactivate notifications." }
+  },
+  "profile": {
+    "avatar": {
+      "upload": "Upload Avatar",
+      "change": "Change Avatar",
+      "cancel": "Cancel",
+      "alt": "User Avatar"
+    }
+  },
+  "common": {
+    "saving": "保存中…",
+    "unexpectedError": "予期しないエラーが発生しました",
+    "errorLabel": "エラー",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "submit": "送信",
+    "close": "閉じる",
+    "internalServerError": "Internal server error.",
+    "pagination": { "previous": "前へ", "next": "次へ" }
   }
 }

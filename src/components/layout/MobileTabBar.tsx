@@ -1,11 +1,14 @@
 'use client'
 
-import Link from 'next/link'
+import { CreditCard, LayoutDashboard, Settings, Wallet } from 'lucide-react'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, CreditCard, Wallet, Settings } from 'lucide-react'
+import { Link } from '@/i18n/routing'
+import type { AppPathnames } from '@/i18n/routing'
+import { useTranslations } from 'next-intl'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 
-function MobileTabBar() {
+const MobileTabBar = () => {
+  const t = useTranslations('Sidenav')
   const pathname = usePathname()
   const prefersReduced = useReducedMotion()
 
@@ -19,7 +22,7 @@ function MobileTabBar() {
     exit: { opacity: 0, y: 20 },
   }
 
-  const items = [
+  const items: { href: '/dashboard' | '/transactions' | '/budgets' | '/user-settings'; icon: any; label: string }[] = [
     { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
     { href: '/transactions', icon: CreditCard, label: 'Transactions' },
     { href: '/budgets', icon: Wallet, label: 'Budgets' },

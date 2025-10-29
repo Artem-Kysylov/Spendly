@@ -20,8 +20,7 @@ const montserrat = Montserrat({
   display: "swap", // Use 'swap' to avoid FOIT
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = getRequestLocale()
+export async function generateMetadata({params: {locale}}: {params: {locale: string}}): Promise<Metadata> {
   const tMeta = await getTranslations({ locale, namespace: 'meta' })
 
   const title = tMeta('app.title')
@@ -91,14 +90,16 @@ export const viewport: Viewport = {
 // делаем асинхронным для await loadMessages(...)
 export default async function RootLayout({
   children,
+  params: {locale}
 }: {
-  children: React.ReactNode
+  children: React.ReactNode,
+  params: {locale: string}
 }) {
-  const locale = getRequestLocale()
-  const messages = await loadMessages(locale)
+  const resolvedLocale = isSupportedLanguage(locale) ? locale : DEFAULT_LOCALE
+  const messages = await loadMessages(resolvedLocale)
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={resolvedLocale} suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
@@ -108,7 +109,7 @@ export default async function RootLayout({
           <QueryProvider>
             <ToastProvider>
               <AuthContextProvider>
-                <NextIntlClientProvider locale={locale} messages={messages}>
+                <NextIntlClientProvider locale={resolvedLocale} messages={messages}>
                   <ThemeProvider>
                     {children}
                     <ServiceWorkerRegistration />
@@ -122,13 +123,4 @@ export default async function RootLayout({
       </body>
     </html>
   )
-}
-
-function getRequestLocale() {
-  const cookieStore = cookies()
-  const cookieLocale =
-    cookieStore.get('NEXT_LOCALE')?.value ||
-    cookieStore.get('spendly_locale')?.value ||
-    DEFAULT_LOCALE
-  return isSupportedLanguage(cookieLocale || '') ? (cookieLocale as any) : DEFAULT_LOCALE
 }

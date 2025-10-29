@@ -20,6 +20,7 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
     }, [])
 
     const tCommon = useTranslations('common')
+    const tModals = useTranslations('modals')
 
     const handleAmountInput = (e: React.FormEvent<HTMLInputElement>) => {
         const value = e.currentTarget.value
@@ -64,14 +65,14 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                         <TextInput
                             type="text"
-                            placeholder="Transaction title"
+                            placeholder={tModals('transaction.placeholder.title')}
                             value={localTitle}
                             onChange={(e) => setLocalTitle(e.target.value)}
                             disabled={isLoading}
                         />
                         <TextInput
-                            type="text"
-                            placeholder="Amount (USD)"
+                            type="number"
+                            placeholder={tModals('transaction.placeholder.amountUSD')}
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             onInput={handleAmountInput}
@@ -82,20 +83,21 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
                         <CustomDatePicker
                             selectedDate={selectedDate}
                             onDateSelect={setSelectedDate}
-                            label="Pick up the date"
+                            label={tModals('transaction.date.label')}
+                            placeholder={tModals('transaction.date.placeholder')}
                         />
 
                         {allowTypeChange && (
                             <div className="flex gap-4">
                                 <RadioButton
-                                    title="Expense"
+                                    title={tModals('transaction.type.expense')}
                                     value="expense"
                                     currentValue={type}
                                     variant="expense"
                                     onChange={(e) => setType(e.target.value as 'expense' | 'income')}
                                 />
                                 <RadioButton
-                                    title="Income"
+                                    title={tModals('transaction.type.income')}
                                     value="income"
                                     currentValue={type}
                                     variant="income"
@@ -113,9 +115,10 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
                             />
                             <Button
                                 type="submit"
-                                text={isLoading ? 'Saving...' : 'Save'}
+                                text={tCommon('save')}
                                 variant="primary"
                                 disabled={isLoading || !localTitle.trim() || !amount}
+                                isLoading={isLoading}
                             />
                         </DialogFooter>
                     </form>

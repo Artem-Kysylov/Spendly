@@ -3,7 +3,12 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { UserAuth } from '@/context/AuthContext'
-import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
+import { Link } from '@/i18n/routing'
+import { useBudgets } from '@/hooks/useBudgets'
+import { cn } from '@/lib/utils'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import useModal from '@/hooks/useModal'
@@ -105,7 +110,7 @@ export default function BudgetsClient() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 + (index * 0.1) }}
           >
-            <Link href={`/budgets/${folder.id}`}>
+            <Link href={{ pathname: '/budgets/[id]', params: { id: String(folder.id) } }}>
               <BudgetFolderItem 
                 id={folder.id}
                 emoji={folder.emoji}

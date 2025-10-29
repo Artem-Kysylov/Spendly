@@ -1,77 +1,241 @@
 {
-  "BudgetSetup": {
-    "title": "Tetapkan anggaran bulanan",
-    "selectCountry": "Negara Anda",
-    "selectCurrency": "Mata uang",
-    "customAmount": "Jumlah khusus",
-    "save": "Simpan",
-    "autodetected": "Terdeteksi otomatis",
-    "searchCountry": "Cari negara...",
-    "searchCurrency": "Cari mata uang...",
-    "clearSelection": "Bersihkan"
+  "layout": {
+    "sidebar": {
+      "dashboard": "Dasbor",
+      "transactions": "Transaksi",
+      "budgets": "Anggaran",
+      "userSettings": "Pengaturan Pengguna"
+    }
   },
-  "Settings": {
-    "language": "Bahasa",
-    "selectLanguage": "Pilih bahasa",
-    "saveLanguage": "Simpan bahasa",
-    "assistant": { "insights.title": "AI Insights", "insights.beta": "Beta" },
-    "filters": { "options": { "week": "Week", "month": "Month" } },
-    "modals": { "transaction.noResults": "No results found" },
-    "errors": {
-      "selectImageFile": "Please select an image file",
-      "fileTooLarge5mb": "File size must be less than 5MB",
-      "uploadAvatarFailed": "Failed to upload avatar",
-      "removeAvatarFailed": "Failed to remove avatar"
+  "cta": {
+    "upgradeToPro": "Tingkatkan ke Pro",
+    "downloadApp": "Unduh Aplikasi",
+    "signOut": "Keluar"
+  },
+  "pricing": {
+    "free": {
+      "label": "Gratis",
+      "short": "Fitur dasar untuk memulai",
+      "features": { "notifications": "Notifikasi dasar" }
     },
+    "pro": {
+      "label": "Pro",
+      "short": "Fitur bertenaga untuk berkembang",
+      "features": {
+        "aiUnlimited": "Penggunaan Asisten AI tanpa batas",
+        "advancedCharts": "Grafik dan perbandingan lanjutan",
+        "prioritySupport": "Dukungan prioritas",
+        "customGoals": "Tujuan dan peringatan kustom"
+      }
+    },
+    "perMonth": "per bulan"
+  },
+  "userSettings": {
+    "header": { "title": "Pengaturan Pengguna⚙️", "subtitle": "Kelola pengaturan akun dan preferensi Anda" },
     "profile": {
-      "avatar": {
-        "upload": "Upload Avatar",
-        "change": "Change Avatar",
-        "cancel": "Cancel",
-        "alt": "User Avatar"
+      "title": "Profil",
+      "memberSince": "Anggota sejak {monthYear}",
+      "googleAccount": "Akun Google",
+      "emailAccount": "Akun Email",
+      "edit": "Edit profil"
+    },
+    "appearance": { "title": "Tampilan", "description": "Pilih preferensi tema" },
+    "notifications": { "title": "Notifikasi", "description": "Kelola cara dan kapan Anda menerima notifikasi" },
+    "subscription": { "title": "Langganan", "description": "Bandingkan paket dan upgrade kapan saja", "currentPlan": "Paket saat ini" },
+    "language": { "title": "Bahasa", "description": "Pilih bahasa antarmuka" },
+    "appControls": { "title": "Kontrol Aplikasi", "description": "Instal aplikasi untuk pengalaman native" },
+    "account": {
+      "title": "Akun",
+      "signOut": { "title": "Keluar", "description": "Keluar dari akun Anda" }
+    },
+    "modals": { "signOut": { "title": "Keluar?", "text": "Anda yakin ingin keluar?" } }
+  },
+  "auth": {
+    "tabs": { "signin": "Masuk", "signup": "Daftar" },
+    "buttons": { "google": "Lanjutkan dengan Google" },
+    "labels": { "rememberMe": "Ingat saya" }
+  },
+  "assistant": {
+    "title": "Asisten AI",
+    "rateLimited": "Batas penggunaan tercapai. Coba lagi nanti.",
+    "welcomeTitle": "Tanyakan apa saja tentang anggaran Anda",
+    "welcomeDesc": "Saya dapat menganalisis pengeluaran, memberi saran, dan membuat rencana.",
+    "confirm": {
+      "title": "Konfirmasi detail transaksi",
+      "fields": {
+        "title": "Judul",
+        "budget": "Anggaran",
+        "amount": "Jumlah"
+      }
+    },
+    "actions": {
+      "accept": "Terima",
+      "decline": "Tolak",
+      "abort": "Batalkan",
+      "send": "Kirim"
+    },
+    "buttons": {
+      "close": "Tutup",
+      "ask": "Tanya AI"
+    },
+    "input": {
+      "placeholder": "Tulis pertanyaan untuk AI…"
+    },
+    "presets": {
+      "header": "Mulai dari saran siap pakai",
+      "showWeek": "Tampilkan pengeluaran minggu ini",
+      "saveMoney": "Cara hemat berdasarkan kebiasaan saya",
+      "analyzePatterns": "Analisis pola pengeluaran",
+      "createBudgetPlan": "Buat rencana anggaran bulan ini",
+      "showBiggest": "Kategori pengeluaran terbesar",
+      "compareMonths": "Bandingkan bulan ini dengan bulan lalu"
+    },
+    "insights": { "title": "Wawasan AI", "beta": "Beta" }
+  },
+  "notFound": {
+    "title": "Maaf, halaman ini tidak ada",
+    "button": { "goHome": "Pergi ke beranda" },
+    "alt": { "illustration": "Ilustrasi 404" }
+  },
+
+  "meta": {
+    "app": {
+      "title": "Spendly - Manajer Keuangan Pribadi",
+      "description": "Lacak pengeluaran dan kelola anggaran dengan Spendly.",
+      "keywords": "keuangan,anggaran,pengeluaran,uang,pelacakan,keuangan pribadi"
+    }
+  },
+
+  "pages": {
+    "auth": {
+      "home": { "meta": { "title": "Masuk atau Buat Akun", "description": "Kelola keuangan Anda dengan Spendly." } },
+      "forgotPassword": { "meta": { "title": "Lupa Kata Sandi", "description": "Atur ulang kata sandi Anda dengan aman." } },
+      "resetPassword": { "meta": { "title": "Atur Ulang Kata Sandi", "description": "Tetapkan kata sandi baru untuk akun Anda." } }
+    },
+    "budgetDetails": {
+      "meta": {
+        "title": "Detail Anggaran",
+        "description": "Lihat dan kelola detail anggaran Anda."
+      }
+    },
+    "dashboard": {
+      "meta": { "title": "Dasbor", "description": "Ringkasan anggaran dan aktivitas." },
+      "welcome": "Selamat datang {name}👋",
+      "counters": {
+        "totalBudget": "Total Anggaran",
+        "totalExpenses": "Total Pengeluaran",
+        "totalIncome": "Total Pendapatan",
+        "labels": {
+          "remaining": "Tersisa",
+          "coversExpenses": "Menutupi pengeluaran sebesar {percent}%",
+          "usedPercent": "digunakan"
+        }
+      }
+    },
+    "payment": { "meta": { "title": "Pembayaran", "description": "Pilih paket dan lakukan pembayaran." } },
+    "onboarding": { "meta": { "title": "Onboarding", "description": "Siapkan preferensi dan mulai." } },
+    "setup": { "budget": { "meta": { "title": "Pengaturan Anggaran", "description": "Pilih negara dan mata uang." } } },
+    "test": { "meta": { "title": "Halaman Tes", "description": "Playground lokalisasi." } },
+    "notFound": { "meta": { "title": "Halaman Tidak Ditemukan", "description": "Halaman yang diminta tidak ada." } }
+  },
+
+  "charts": {
+    "titles": { "analytics": "Analitik Anggaran", "comparisonBar": "Perbandingan Anggaran" },
+    "bar": { "titleByCategory": "Pengeluaran menurut kategori" },
+    "line": { "titleOverTime": "Pengeluaran dari waktu ke waktu" },
+    "labels": { "expenses": "Pengeluaran", "income": "Pendapatan", "for": "untuk" },
+    "states": { "loading": "Memuat...", "loadingData": "Memuat data grafik...", "noData": "Tidak ada data", "noExpensesData": "Tidak ada data pengeluaran" },
+    "transactionsBar": { "title": "Grafik Pengeluaran" },
+    "ai": { "thinking": "Berpikir…", "tips": "Dapatkan tips AI berdasarkan data Anda", "stop": "Hentikan", "getInsight": "Dapatkan Wawasan AI", "placeholder": "Dapatkan wawasan AI berdasarkan data Anda", "wait": "Mohon tunggu…", "rateLimited": "Batas laju tercapai. Coba lagi nanti.", "noData": "Data tidak cukup untuk dianalisis" },
+    "comparison": {
+      "vsLastMonth": "dibanding bulan lalu",
+      "titles": { "weekly": "Perbandingan mingguan", "monthly": "Perbandingan bulanan" },
+      "descriptions": {
+        "weekly": { "expenses": "Bandingkan pengeluaran minggu ini dengan minggu lalu.", "income": "Bandingkan pendapatan minggu ini dengan minggu lalu." },
+        "monthly": { "expenses": "Bandingkan pengeluaran bulan ini dengan bulan lalu.", "income": "Bandingkan pendapatan bulan ini dengan bulan lalu." }
+      },
+      "labels": {
+        "current": "Minggu ini",
+        "previous": "Minggu lalu"
       }
     }
   },
-  "meta": { "app": { "title": "Spendly - Personal Finance Manager", "description": "Track expenses and manage budgets with Spendly.", "keywords": "finance,budget,expenses,money,tracking,personal finance" } },
-  "pages": {
-    "auth": {
-      "home": { "meta": { "title": "Sign In or Create Account", "description": "Manage your finances with Spendly." } },
-      "forgotPassword": { "meta": { "title": "Forgot Password", "description": "Reset your password securely." } },
-      "resetPassword": { "meta": { "title": "Reset Password", "description": "Set a new password for your account." } }
+
+  "transactions": {
+    "title": "Transaksi📉",
+    "empty": {
+      "filtered": "Tidak ada transaksi yang ditemukan untuk filter yang dipilih"
     },
-    "dashboard": { "meta": { "title": "Dashboard", "description": "Overview of budgets and transactions." } },
-    "transactions": { "meta": { "title": "Transactions", "description": "Browse and manage your transactions." } },
-    "budgets": { "meta": { "title": "Budgets", "description": "Create and manage your budgets." } },
-    "budgetDetails": {
-      "meta": {
-        "title": "Budget Details",
-        "description": "View budget information and activity.",
-        "titleWithName": "{name} — Budget",
-        "descriptionWithName": "Details and activity for \"{name}\"."
+    "table": {
+      "headers": { "title": "Nama Transaksi", "budget": "Anggaran", "amount": "Jumlah", "type": "Jenis", "date": "Tanggal", "actions": "Aksi" },
+      "unbudgeted": "Tak beranggaran",
+      "empty": { "default": "Tidak ada transaksi" },
+      "modal": { "deleteTitle": "Hapus transaksi", "deletePrompt": "Anda yakin ingin menghapus transaksi ini?", "editTitle": "Edit transaksi" }
+    }
+  },
+
+  "budgets": {
+    "list": {
+      "card": {
+        "createNew": "Buat Anggaran Baru"
       }
     },
-    "addBudget": { "meta": { "title": "Add New Budget", "description": "Create a new budget." } },
-    "userSettings": { "meta": { "title": "User Settings", "description": "Update account preferences." } },
-    "payment": { "meta": { "title": "Payment", "description": "Upgrade to Spendly Pro." } },
-    "onboarding": { "meta": { "title": "Onboarding", "description": "Set up preferences and get started." } },
-    "setup": { "budget": { "meta": { "title": "Budget Setup", "description": "Select country and currency." } } },
-    "test": { "meta": { "title": "Test Page", "description": "Localization playground." } },
-    "notFound": { "meta": { "title": "Page Not Found", "description": "The requested page does not exist." } }
+    "labels": {
+      "spent": "Telah dibelanjakan",
+      "left": "Tersisa"
+    }
   },
-  "notifications": { "api": { "queueAdded": "Notification added to queue successfully", "subscriptionSaved": "Push subscription saved", "subscriptionRemoved": "Push subscription removed" } },
+
+  "notifications": {
+    "bell": { "aria": "Notifikasi", "title": "Notifikasi", "markAllRead": "Tandai semua terbaca", "empty": { "title": "Belum ada notifikasi", "description": "Kami akan memberi tahu saat sesuatu penting terjadi" }, "viewAll": "Lihat semua notifikasi", "setup": { "title": "Siapkan basis data untuk notifikasi", "subtitle": "Buka pengaturan untuk petunjuk" } },
+    "settings": { "push": { "title": "Notifikasi Push", "description": "Terima notifikasi di perangkat ini" } },
+    "frequency": {
+      "title": "Frekuensi Notifikasi",
+      "aria": "Frekuensi notifikasi",
+      "disabled": { "label": "Jangan kirim", "description": "Matikan semua pengingat" },
+      "gentle": { "label": "Pengingat ringan", "description": "1–2 notifikasi per hari" },
+      "aggressive": { "label": "Pengingat agresif", "description": "4–5 notifikasi per hari" },
+      "relentless": { "label": "Tanpa henti", "description": "Anda akan merasakannya (10+ per hari)" }
+    },
+    "toasts": { "preferencesSaved": "Preferensi disimpan", "preferencesSaveFailed": "Gagal menyimpan preferensi", "pushEnabled": "Push diaktifkan", "pushDisabled": "Push dinonaktifkan", "pushStatusFailed": "Gagal memperbarui status push" },
+    "authRequired": { "title": "Autentikasi diperlukan", "description": "Masuk untuk mengakses pengaturan notifikasi.", "signIn": "Masuk" },
+    "a11y": { "togglePush": "Alihkan notifikasi push" },
+    "dev": { "sqlScript": "Skrip SQL", "copy": "Salin", "copied": "Disalin!" },
+    "api": { "queueAdded": "Notifikasi berhasil ditambahkan ke antrean", "subscriptionSaved": "Langganan push disimpan", "subscriptionRemoved": "Langganan push dihapus" }
+  },
+
+  "filters": { "options": { "week": "Minggu", "month": "Bulan" } },
+
+  "modals": { "transaction": { "noResults": "Tidak ada hasil" } },
+
   "errors": {
-    "auth.invalidAuthHeader": "Missing or invalid authorization header",
-    "auth.notAuthenticated": "User not authenticated",
-    "common.internalServerError": "Internal server error",
-    "notifications.titleRequired": "Title and message are required",
-    "notifications.invalidAction": "Invalid action or missing parameters",
-    "notifications.fetchFailed": "Error fetching notifications",
-    "notifications.createFailed": "Error creating notification",
-    "notifications.updateFailed": "Error updating notifications",
-    "notifications.queueAddFailed": "Error adding notification to queue",
-    "notifications.queueFetchFailed": "Error fetching notification queue",
-    "notifications.subscriptionInvalid": "Valid push subscription is required",
-    "notifications.subscriptionSaveFailed": "Error saving push subscription",
-    "notifications.deactivateFailed": "Error deactivating push subscription"
+    "selectImageFile": "Silakan pilih file gambar",
+    "fileTooLarge5mb": "Ukuran file harus kurang dari 5MB",
+    "uploadAvatarFailed": "Gagal mengunggah avatar",
+    "removeAvatarFailed": "Gagal menghapus avatar",
+    "auth": { "invalidAuthHeader": "Header otorisasi hilang atau tidak valid", "notAuthenticated": "Pengguna tidak diautentikasi" },
+    "notifications": {
+      "titleRequired": "Judul dan pesan diperlukan",
+      "fetchFailed": "Terjadi kesalahan saat mengambil notifikasi",
+      "createFailed": "Terjadi kesalahan saat membuat notifikasi",
+      "updateFailed": "Terjadi kesalahan saat memperbarui notifikasi",
+      "queueAddFailed": "Terjadi kesalahan saat menambahkan notifikasi ke antrean",
+      "queueFetchFailed": "Terjadi kesalahan saat mengambil antrean notifikasi",
+      "subscriptionInvalid": "Langganan push yang valid diperlukan",
+      "subscriptionSaveFailed": "Terjadi kesalahan saat menyimpan langganan push",
+      "deactivateFailed": "Terjadi kesalahan saat menonaktifkan langganan push"
+    }
+  },
+
+  "common": {
+    "saving": "Menyimpan…",
+    "unexpectedError": "Terjadi kesalahan tak terduga",
+    "errorLabel": "Kesalahan",
+    "cancel": "Batal",
+    "save": "Simpan",
+    "submit": "Kirim",
+    "close": "Tutup",
+    "internalServerError": "Kesalahan server internal",
+    "pagination": { "previous": "Sebelumnya", "next": "Berikutnya" }
   }
 }

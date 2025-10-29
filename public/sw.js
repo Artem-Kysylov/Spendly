@@ -1,84 +1,106 @@
-const CACHE_NAME = 'spendly-v1'
-const urlsToCache = [
-  '/',
-  '/dashboard',
-  '/static/js/bundle.js',
-  '/static/css/main.css',
+const CACHE_NAME = 'spendly-v2'
+
+// Кешируем только реально существующие статические ассеты из /public
+const PRECACHE_ASSETS = [
+  '/manifest.json',
+  '/icons/favicon.ico',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
+  '/icons/apple-touch-icon.png',
+  '/Spendly-logo.svg',
+  '/illustration-404.svg',
+  '/sparkles.svg',
+  '/google.svg'
 ]
 
-// Install event
+// Install event: безопасно кешируем, не падаем на 404
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(urlsToCache))
-  )
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_NAME)
+    await Promise.allSettled(PRECACHE_ASSETS.map((url) => cache.add(url)))
+    // Сразу активируем новый SW
+    self.skipWaiting()
+  })())
 })
 
-// Fetch event
+// Activate: чистим старые кэши и забираем клиентов
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    const keys = await caches.keys()
+    await Promise.all(keys.map((key) => {
+      if (key !== CACHE_NAME) return caches.delete(key)
+    }))
+    await self.clients.claim()
+  })())
+})
+
+// Fetch: перехватываем только GET, только same-origin и только статические ассеты
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // Return cached version or fetch from network
-        return response || fetch(event.request)
-      })
-  )
+  const req = event.request
+  const url = new URL(req.url)
+
+  if (req.method !== 'GET') return
+  if (url.origin !== self.location.origin) return
+
+  const isStaticAsset =
+    url.pathname.startsWith('/icons/') ||
+    url.pathname === '/manifest.json' ||
+    url.pathname.endsWith('.svg')
+
+  if (!isStaticAsset) return
+
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME)
+    const cached = await cache.match(req)
+    const network = fetch(req).then((res) => {
+      if (res && res.ok) cache.put(req, res.clone())
+      return res
+    }).catch(() => cached)
+
+    return cached || network
+  })())
 })
 
-// Push event
+// Push event: используем существующие иконки
 self.addEventListener('push', (event) => {
-  const options = {
+  const baseOptions = {
     body: 'You have new financial insights!',
-    icon: '/icon-192x192.png',
-    badge: '/badge-72x72.png',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/icon-192x192.png',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),
       primaryKey: 1
     },
     actions: [
-      {
-        action: 'explore',
-        title: 'View Details',
-        icon: '/images/checkmark.png'
-      },
-      {
-        action: 'close',
-        title: 'Close',
-        icon: '/images/xmark.png'
-      }
+      { action: 'explore', title: 'View Details', icon: '/icons/icon-192x192.png' },
+      { action: 'close', title: 'Close', icon: '/icons/icon-192x192.png' }
     ]
   }
 
-  if (event.data) {
-    const data = event.data.json()
-    options.body = data.message || options.body
-    options.title = data.title || 'Spendly'
-    options.icon = data.icon || options.icon
-    options.data = { ...options.data, ...data }
-  }
+  const data = event.data ? event.data.json() : null
+  const options = data ? {
+    ...baseOptions,
+    body: data.message || baseOptions.body,
+    title: data.title || 'Spendly',
+    icon: data.icon || baseOptions.icon,
+    data: { ...baseOptions.data, ...data }
+  } : baseOptions
 
   event.waitUntil(
     self.registration.showNotification('Spendly', options)
   )
 })
 
-// Notification click event
+// Notification click: оставляем поведение
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
 
   if (event.action === 'explore') {
-    // Open the app
-    event.waitUntil(
-      clients.openWindow('/dashboard')
-    )
+    event.waitUntil(clients.openWindow('/dashboard'))
   } else if (event.action === 'close') {
-    // Just close the notification
     return
   } else {
-    // Default action - open the app
-    event.waitUntil(
-      clients.openWindow('/')
-    )
+    event.waitUntil(clients.openWindow('/'))
   }
 })

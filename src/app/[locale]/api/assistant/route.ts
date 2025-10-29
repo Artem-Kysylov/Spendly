@@ -1,6 +1,6 @@
 // Module: /api/assistant
 import { NextRequest } from 'next/server'
-import { aiResponse, executeTransaction, getCanonicalEmptyReply } from '@/app/actions/aiAssistant'
+import { aiResponse, executeTransaction, getCanonicalEmptyReply } from '@/app/[locale]/actions/aiAssistant'
 import { composeLLMPrompt } from '@/prompts/spendlyPal/composeLLMPrompt'
 import { PROMPT_VERSION } from '@/prompts/spendlyPal/promptVersion'
 import { prepareUserContext } from '@/lib/ai/context'

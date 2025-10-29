@@ -20,9 +20,6 @@ export class ChartCacheManager {
         queryKey: chartQueryKeys.transactions(filters)
       }),
       this.queryClient.invalidateQueries({
-        queryKey: chartQueryKeys.categories(filters)
-      }),
-      this.queryClient.invalidateQueries({
         queryKey: chartQueryKeys.aggregated(filters, filters.period)
       })
     ])
