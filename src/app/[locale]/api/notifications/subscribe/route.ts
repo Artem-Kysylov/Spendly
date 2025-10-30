@@ -19,39 +19,105 @@ export async function POST(req: NextRequest) {
 
     const { subscription } = body
 
-    if (!subscription || !subscription.endpoint) {
+    // Валидация входных данных
+    const endpoint: unknown = subscription?.endpoint
+    const p256dh: unknown = subscription?.keys?.p256dh
+    const auth: unknown = subscription?.keys?.auth
+
+    const isNonEmptyString = (v: unknown) => typeof v === 'string' && v.trim().length > 0
+    if (!isNonEmptyString(endpoint) || !isNonEmptyString(p256dh) || !isNonEmptyString(auth)) {
+      return NextResponse.json(
+        { error: tErrors('notifications.subscriptionInvalid') },
+        { status: 400 }
+      )
+    }
+    try {
+      // валидируем, что endpoint — корректный URL
+      new URL(endpoint as string)
+    } catch {
       return NextResponse.json(
         { error: tErrors('notifications.subscriptionInvalid') },
         { status: 400 }
       )
     }
 
-    // Сохраняем подписку в базе данных (обновленное название таблицы)
-    const { error: subscriptionError } = await supabase
-      .from('notification_subscriptions')
-      .upsert({
-        user_id: user.id,
-        endpoint: subscription.endpoint,
-        p256dh_key: subscription.keys?.p256dh,
-        auth_key: subscription.keys?.auth,
-        user_agent: req.headers.get('user-agent') || 'Unknown',
-        is_active: true
-      })
+    const userAgent = req.headers.get('user-agent') || 'Unknown'
 
-    if (subscriptionError) {
-      console.error('Error saving push subscription:', subscriptionError)
+    // Поиск существующей записи по (user_id, endpoint)
+    const { data: existing, error: existingErr } = await supabase
+      .from('notification_subscriptions')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('endpoint', endpoint as string)
+      .single()
+
+    let targetId: string | null = null
+
+    if (existingErr && (existingErr as any).code === 'PGRST116') {
+      // Нет записи — вставляем
+      const { data: inserted, error: insertErr } = await supabase
+        .from('notification_subscriptions')
+        .insert({
+          user_id: user.id,
+          endpoint: endpoint as string,
+          p256dh_key: p256dh as string,
+          auth_key: auth as string,
+          user_agent: userAgent,
+          is_active: true
+        })
+        .select('id')
+        .single()
+
+      if (insertErr) {
+        console.error('Error saving push subscription (insert):', insertErr)
+        return NextResponse.json({ error: tErrors('notifications.subscriptionSaveFailed') }, { status: 500 })
+      }
+      targetId = inserted.id
+    } else if (existingErr) {
+      console.error('Error querying subscription:', existingErr)
       return NextResponse.json({ error: tErrors('notifications.subscriptionSaveFailed') }, { status: 500 })
+    } else {
+      // Обновляем существующую запись
+      const { data: updated, error: updateErr } = await supabase
+        .from('notification_subscriptions')
+        .update({
+          p256dh_key: p256dh as string,
+          auth_key: auth as string,
+          user_agent: userAgent,
+          is_active: true
+        })
+        .eq('id', existing!.id)
+        .select('id')
+        .single()
+
+      if (updateErr) {
+        console.error('Error saving push subscription (update):', updateErr)
+        return NextResponse.json({ error: tErrors('notifications.subscriptionSaveFailed') }, { status: 500 })
+      }
+      targetId = updated.id
     }
 
-    // Обновляем настройки пользователя (таблица notification_preferences)
+    // Деактивируем дубликаты с тем же endpoint у этого пользователя
+    if (targetId) {
+      const { error: dupErr } = await supabase
+        .from('notification_subscriptions')
+        .update({ is_active: false })
+        .eq('user_id', user.id)
+        .eq('endpoint', endpoint as string)
+        .neq('id', targetId)
+
+      if (dupErr) {
+        console.warn('Duplicate deactivation warning:', dupErr)
+      }
+    }
+
+    // Обновляем настройки (включаем push)
     const { error: settingsError } = await supabase
       .from('notification_preferences')
       .update({ push_enabled: true })
       .eq('user_id', user.id)
-
     if (settingsError) {
       console.error('Error updating push settings:', settingsError)
-      // Не возвращаем ошибку, так как подписка уже сохранена
     }
 
     return NextResponse.json({ success: true, message: tNotifications('api.subscriptionSaved') })

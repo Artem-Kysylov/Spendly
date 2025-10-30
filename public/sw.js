@@ -65,7 +65,7 @@ self.addEventListener('fetch', (event) => {
 self.addEventListener('push', (event) => {
   const baseOptions = {
     body: 'You have new financial insights!',
-    icon: '/icons/icon-192x192.png',
+    icon: '/icons/icon-512x512.png',
     badge: '/icons/icon-192x192.png',
     vibrate: [100, 50, 100],
     data: {
@@ -79,28 +79,39 @@ self.addEventListener('push', (event) => {
   }
 
   const data = event.data ? event.data.json() : null
+  const title = (data && data.title) || 'Spendly'
   const options = data ? {
     ...baseOptions,
     body: data.message || baseOptions.body,
-    title: data.title || 'Spendly',
     icon: data.icon || baseOptions.icon,
     data: { ...baseOptions.data, ...data }
   } : baseOptions
 
   event.waitUntil(
-    self.registration.showNotification('Spendly', options)
+    self.registration.showNotification(title, options)
   )
 })
 
 // Notification click: оставляем поведение
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
+  const url = event.notification?.data?.url
 
   if (event.action === 'explore') {
-    event.waitUntil(clients.openWindow('/dashboard'))
+    event.waitUntil(clients.openWindow(url || '/dashboard'))
   } else if (event.action === 'close') {
     return
   } else {
-    event.waitUntil(clients.openWindow('/'))
+    event.waitUntil(clients.openWindow(url || '/'))
   }
+})
+
+// Автопереподписка: уведомляем страницы, чтобы клиент инициировал повторную подписку
+self.addEventListener('pushsubscriptionchange', (event) => {
+  event.waitUntil((async () => {
+    const allClients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+    for (const client of allClients) {
+      client.postMessage({ type: 'PUSH_SUBSCRIPTION_CHANGED' })
+    }
+  })())
 })

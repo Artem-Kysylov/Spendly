@@ -141,7 +141,6 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
 
             const keyUint8 = urlBase64ToUint8Array(vapidKey)
 
-            // Вариант 1: передаём ArrayBuffer с явной типизацией
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: keyUint8.buffer as ArrayBuffer,
@@ -241,10 +240,12 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
 function urlBase64ToUint8Array(base64String: string): Uint8Array {
     const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
     const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
-    const raw = atob(base64)
-    const output = new Uint8Array(raw.length)
-    for (let i = 0; i < raw.length; i++) {
-        output[i] = raw.charCodeAt(i)
+    const rawData = typeof window !== 'undefined'
+        ? window.atob(base64)
+        : Buffer.from(base64, 'base64').toString('binary')
+    const outputArray = new Uint8Array(rawData.length)
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i)
     }
-    return output
+    return outputArray
 }

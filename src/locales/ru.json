@@ -502,6 +502,7 @@
       "totalIncome": "Всего доходы",
       "spentLabel": "потрачено",
       "leftLabel": "осталось",
+      "coversExpenses": "Покрывает {percent}% расходов",
       "labels": {
         "vsLastMonth": "по сравнению с прошлым месяцем",
         "coversExpenses": "Покрывает {percent}% расходов"
