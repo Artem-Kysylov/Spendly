@@ -7,9 +7,8 @@ import { formatCurrency, formatChartDate } from '@/lib/chartUtils'
 import { CustomTooltip } from './CustomTooltip'
 import { LineChartProps } from '@/types/types'
 import { ChartDescription } from './ChartDescription'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
-// LineChartComponent component (forwardRef)
 const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({ 
   data,
   title = "Expenses over time",
@@ -29,6 +28,7 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const tCharts = useTranslations('charts')
   const resolvedTitle = title ?? tCharts('line.titleOverTime')
+  const localeCode = useLocale()
 
   if (isLoading) {
     return (
@@ -87,7 +87,7 @@ const LineChartComponent = forwardRef<HTMLDivElement, LineChartProps>(({
   // Format data for chart
   const chartData = data.map((item, index) => ({
     ...item,
-    formattedDate: formatChartDate(item.date, xPeriod),
+    formattedDate: formatChartDate(item.date, xPeriod, localeCode),
     opacity: hoveredIndex === null || hoveredIndex === index ? 1 : 0.6
   }))
 

@@ -325,7 +325,33 @@
     },
     "insights": {
       "title": "AI Insights",
-      "beta": "Beta"
+      "beta": "Beta",
+      "messages": {
+        "budgetExceeded": {
+          "title": "Budget Exceeded",
+          "message": "You've exceeded your budget by {over}. Consider reviewing your spending."
+        },
+        "budgetAlert": {
+          "title": "Budget Alert",
+          "message": "You've used {usedPercent}% of your budget. Monitor your spending carefully."
+        },
+        "risingExpenses": {
+          "title": "Rising Expenses",
+          "message": "Your expenses increased by {trend}% compared to last month."
+        },
+        "incomeGrowth": {
+          "title": "Income Growth",
+          "message": "Great! Your income increased by {trend}% from last month."
+        },
+        "negativeCashFlow": {
+          "title": "Negative Cash Flow",
+          "message": "Your expenses exceed your income this month. Consider reducing spending or increasing income."
+        },
+        "financialHealth": {
+          "title": "Financial Health",
+          "message": "Your finances look stable this month. Keep up the good work!"
+        }
+      }
     }
   },
   "charts": {

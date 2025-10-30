@@ -1,15 +1,18 @@
-'use client'
-
+// Хук: useNotificationSettings
+'use client';
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { UserAuth } from '@/context/AuthContext'
 import type { NotificationSettings, UseNotificationSettingsReturn } from '@/types/types'
+import { useLocale } from 'next-intl'
 
 export const useNotificationSettings = (): UseNotificationSettingsReturn => {
     const { session, isReady } = UserAuth()
     const [settings, setSettings] = useState<NotificationSettings | null>(null)
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const locale = useLocale()
+    const apiBase = `/${locale}/api/notifications`
 
     // Получение токена для API запросов
     const getAuthToken = useCallback(async () => {
@@ -41,7 +44,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
                 throw new Error('No auth token available')
             }
 
-            const response = await fetch('/api/notifications/preferences', {
+            const response = await fetch(`${apiBase}/preferences`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -49,8 +52,8 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
             })
 
             if (!response.ok) {
-                const errorData = await response.json()
-                throw new Error(errorData.error || 'Failed to fetch settings')
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error((errorData as any).error || 'Failed to fetch settings')
             }
 
             const { settings: fetchedSettings } = await response.json()
@@ -62,7 +65,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
         } finally {
             setIsLoading(false)
         }
-    }, [session?.user?.id, isReady, getAuthToken])
+    }, [session?.user?.id, isReady, getAuthToken, apiBase])
 
     const updateSettings = useCallback(async (updates: Partial<NotificationSettings>) => {
         if (!session?.user?.id || !settings) return
@@ -78,7 +81,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
                 throw new Error('No auth token available')
             }
 
-            const response = await fetch('/api/notifications/preferences', {
+            const response = await fetch(`${apiBase}/preferences`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -94,7 +97,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}))
                 setSettings(prev)
-                throw new Error(errorData.error || 'Failed to update settings')
+                throw new Error((errorData as any).error || 'Failed to update settings')
             }
 
             const { settings: updated } = await response.json()
@@ -103,7 +106,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
             console.error('Error updating notification settings:', err)
             throw err
         }
-    }, [session?.user?.id, settings, getAuthToken])
+    }, [session?.user?.id, settings, getAuthToken, apiBase])
 
     const subscribeToPush = useCallback(async (): Promise<boolean> => {
         // Optimistic on
@@ -150,7 +153,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
                 throw new Error('No auth token available')
             }
 
-            const response = await fetch('/api/notifications/subscribe', {
+            const response = await fetch(`${apiBase}/subscribe`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -160,9 +163,9 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
             })
 
             if (!response.ok) {
-                const errorData = await response.json()
+                const errorData = await response.json().catch(() => ({}))
                 if (prev) setSettings(prev)
-                throw new Error(errorData.error || 'Failed to save push subscription')
+                throw new Error((errorData as any).error || 'Failed to save push subscription')
             }
 
             console.log('Push subscription saved successfully')
@@ -172,7 +175,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
             if (prev) setSettings(prev)
             return false
         }
-    }, [getAuthToken, settings])
+    }, [getAuthToken, settings, apiBase])
 
     const unsubscribeFromPush = useCallback(async (): Promise<boolean> => {
         // Optimistic off
@@ -194,7 +197,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
                     throw new Error('No auth token available')
                 }
 
-                const response = await fetch('/api/notifications/subscribe', {
+                const response = await fetch(`${apiBase}/subscribe`, {
                     method: 'DELETE',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -204,9 +207,9 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
                 })
 
                 if (!response.ok) {
-                    const errorData = await response.json()
+                    const errorData = await response.json().catch(() => ({}))
                     if (prev) setSettings(prev)
-                    throw new Error(errorData.error || 'Failed to remove push subscription')
+                    throw new Error((errorData as any).error || 'Failed to remove push subscription')
                 }
 
                 console.log('Push subscription removed successfully')
@@ -218,7 +221,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
             if (prev) setSettings(prev)
             return false
         }
-    }, [getAuthToken, settings])
+    }, [getAuthToken, settings, apiBase])
 
     useEffect(() => {
         fetchSettings()

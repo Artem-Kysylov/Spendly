@@ -7,6 +7,7 @@ import { DeleteModalProps } from '../../types/types'
 // Import components 
 import Button from '../ui-elements/Button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { useTranslations } from 'next-intl'
 
 const DeleteModal = ({ title, text, onClose, onConfirm, isLoading = false }: DeleteModalProps) => {
   const dialogRef = useRef<HTMLDialogElement>(null)
@@ -27,6 +28,8 @@ const DeleteModal = ({ title, text, onClose, onConfirm, isLoading = false }: Del
     onConfirm()
   }
 
+  const tCommon = useTranslations('common')
+
   return (
     <Dialog open={true} onOpenChange={(o) => { if (!o) onClose() }}>
       <DialogContent>
@@ -38,13 +41,13 @@ const DeleteModal = ({ title, text, onClose, onConfirm, isLoading = false }: Del
           <form onSubmit={handleSubmit} className="flex gap-2">
             <Button 
               variant="ghost"
-              text='Cancel' 
+              text={tCommon('cancel')}
               onClick={onClose}
               disabled={isLoading}
             />
             <Button 
               variant="destructive"
-              text={isLoading ? 'Deleting...' : 'Delete'} 
+              text={isLoading ? tCommon('deleting') : tCommon('delete')}
               type="submit"
               disabled={isLoading}
             />

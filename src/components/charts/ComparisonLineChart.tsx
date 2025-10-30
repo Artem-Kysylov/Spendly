@@ -7,6 +7,7 @@ import { formatCurrency, formatChartDate, generateComparisonTitle, generateCompa
 import { ComparisonLineChartProps } from '@/types/types'
 import { ChartDescription } from './ChartDescription'
 import { useTranslations } from 'next-intl'
+import { useLocale } from 'next-intl'
 
 // Custom tooltip for comparison chart
 const ComparisonTooltip = ({ active, payload, label, currency }: any) => {
@@ -59,6 +60,7 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
 }, ref) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const tCharts = useTranslations('charts')
+  const localeCode = useLocale()
 
   // Генерируем динамический контент если не передан
   const dynamicTitle =
@@ -124,7 +126,7 @@ const ComparisonLineChartComponent = forwardRef<HTMLDivElement, ComparisonLineCh
   // Format data for chart
   const chartData = data.map((item, index) => ({
     ...item,
-    formattedDate: formatChartDate(item.date, xPeriod),
+    formattedDate: formatChartDate(item.date, xPeriod, localeCode),
     opacity: hoveredIndex === null || hoveredIndex === index ? 1 : 0.6
   }))
 

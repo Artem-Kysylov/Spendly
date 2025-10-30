@@ -14,7 +14,7 @@ import { TransactionModalProps, BudgetFolderItemProps } from '../../types/types'
 import { useTranslations } from 'next-intl'
 
 // Component: TransactionModal
-const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) => {
+function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
   const { session } = UserAuth()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const tModals = useTranslations('modals')
@@ -239,10 +239,9 @@ const TransactionModal = ({ title, onClose, onSubmit }: TransactionModalProps) =
             {/* Information text when disabled */}
             {isTypeDisabled && (
               <p className="text-xs text-gray-500 -mt-2">
-                Transaction type is automatically set based on selected budget category
+                {tModals('transaction.autoTypeInfo')}
               </p>
             )}
-            
             <DialogFooter className="justify-center sm:justify-center gap-4">
               <Button
                 text={tCommon('cancel')}

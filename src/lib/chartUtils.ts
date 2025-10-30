@@ -38,15 +38,48 @@ export const formatPercentage = (value: number, total: number): string => {
   return `${((value / total) * 100).toFixed(1)}%`
 }
 
+// Нормализация локали приложения к формату Intl
+const normalizeLocale = (code?: string): string => {
+  if (!code) return 'en-US'
+  const map: Record<string, string> = {
+    en: 'en-US',
+    ru: 'ru-RU',
+    uk: 'uk-UA',
+    id: 'id-ID',
+    ja: 'ja-JP',
+    ko: 'ko-KR',
+    hi: 'hi-IN',
+  }
+  return map[code] ?? code
+}
+
+const getWeekLabel = (locale: string): string => {
+  const base = locale.split('-')[0]
+  const labels: Record<string, string> = {
+    en: 'Week',
+    ru: 'Неделя',
+    uk: 'Тиждень',
+    id: 'Minggu',
+    ja: '週',
+    ko: '주',
+    hi: 'सप्ताह',
+  }
+  return labels[base] ?? 'Week'
+}
+
 // Форматирование дат для графиков
-export const formatChartDate = (dateString: string, period: 'day' | 'week' | 'month' | 'year'): string => {
+export const formatChartDate = (
+  dateString: string,
+  period: 'day' | 'week' | 'month' | 'year',
+  localeCode?: string
+): string => {
   const date = new Date(dateString)
-  const locale = typeof window !== 'undefined' && typeof navigator !== 'undefined' ? (navigator.language || 'en-US') : 'en-US'
+  const locale = normalizeLocale(localeCode)
   switch (period) {
     case 'day':
       return date.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
     case 'week': {
-      const weekLabel = locale.startsWith('ru') ? 'Неделя' : 'Week'
+      const weekLabel = getWeekLabel(locale)
       return `${weekLabel} ${getWeekNumber(date)}`
     }
     case 'month':
@@ -111,10 +144,18 @@ export const customTooltipFormatter = (value: number, name: string): [string, st
 }
 
 // Форматирование диапазона дат
-export const formatCompactRange = (startDate: Date, endDate: Date): string => {
-  const locale = typeof window !== 'undefined' && typeof navigator !== 'undefined' ? (navigator.language || 'en-US') : 'en-US'
+export const formatCompactRange = (
+  startDate: Date,
+  endDate: Date,
+  localeCode?: string
+): string => {
+  const locale = normalizeLocale(localeCode)
   const start = startDate.toLocaleDateString(locale, { month: 'short', day: 'numeric' })
-  const end = endDate.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: startDate.getFullYear() !== endDate.getFullYear() ? 'numeric' : undefined })
+  const end = endDate.toLocaleDateString(locale, {
+    month: 'short',
+    day: 'numeric',
+    year: startDate.getFullYear() !== endDate.getFullYear() ? 'numeric' : undefined
+  })
   return start === end ? start : `${start} - ${end}`
 }
 

@@ -1,7 +1,9 @@
+// Компонент AIInsights
 import React from 'react'
 import { Brain, Lightbulb, TrendingUp, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useTranslations } from 'next-intl'
+import { formatCurrency } from '../../lib/chartUtils'
 
 interface AIInsightsProps {
   totalExpenses: number
@@ -22,73 +24,68 @@ const AIInsights = ({
   incomeTrend,
   className 
 }: AIInsightsProps) => {
-  // Заглушка для AI-анализа - в будущем здесь будет реальная AI логика
+  const tAssistant = useTranslations('assistant')
+
   const generateInsights = () => {
     const insights = []
-    
-    // Анализ бюджета
+
     if (budget > 0) {
       const budgetUsage = (totalExpenses / budget) * 100
       if (budgetUsage > 100) {
         insights.push({
           type: 'warning' as const,
           icon: AlertTriangle,
-          title: 'Budget Exceeded',
-          message: `You've exceeded your budget by $${(totalExpenses - budget).toFixed(2)}. Consider reviewing your spending.`
+          title: tAssistant('insights.messages.budgetExceeded.title'),
+          message: tAssistant('insights.messages.budgetExceeded.message', { over: formatCurrency(totalExpenses - budget) })
         })
       } else if (budgetUsage > 80) {
         insights.push({
           type: 'warning' as const,
           icon: AlertTriangle,
-          title: 'Budget Alert',
-          message: `You've used ${budgetUsage.toFixed(1)}% of your budget. Monitor your spending carefully.`
+          title: tAssistant('insights.messages.budgetAlert.title'),
+          message: tAssistant('insights.messages.budgetAlert.message', { usedPercent: budgetUsage.toFixed(1) })
         })
       }
     }
-    
-    // Анализ трендов
+
     if (expensesTrend > 20) {
       insights.push({
         type: 'warning' as const,
         icon: TrendingUp,
-        title: 'Rising Expenses',
-        message: `Your expenses increased by ${expensesTrend.toFixed(1)}% compared to last month.`
+        title: tAssistant('insights.messages.risingExpenses.title'),
+        message: tAssistant('insights.messages.risingExpenses.message', { trend: expensesTrend.toFixed(1) })
       })
     }
-    
+
     if (incomeTrend > 10) {
       insights.push({
         type: 'positive' as const,
         icon: TrendingUp,
-        title: 'Income Growth',
-        message: `Great! Your income increased by ${incomeTrend.toFixed(1)}% from last month.`
+        title: tAssistant('insights.messages.incomeGrowth.title'),
+        message: tAssistant('insights.messages.incomeGrowth.message', { trend: incomeTrend.toFixed(1) })
       })
     }
-    
-    // Анализ баланса
+
     if (netBalance < 0) {
       insights.push({
         type: 'warning' as const,
         icon: AlertTriangle,
-        title: 'Negative Cash Flow',
-        message: 'Your expenses exceed your income this month. Consider reducing spending or increasing income.'
+        title: tAssistant('insights.messages.negativeCashFlow.title'),
+        message: tAssistant('insights.messages.negativeCashFlow.message')
       })
     }
-    
-    // Если нет предупреждений, добавляем позитивный инсайт
+
     if (insights.length === 0) {
       insights.push({
         type: 'positive' as const,
         icon: Lightbulb,
-        title: 'Financial Health',
-        message: 'Your finances look stable this month. Keep up the good work!'
+        title: tAssistant('insights.messages.financialHealth.title'),
+        message: tAssistant('insights.messages.financialHealth.message')
       })
     }
-    
-    return insights.slice(0, 2) // Показываем максимум 2 инсайта
-  }
 
-  const tAssistant = useTranslations('assistant')
+    return insights.slice(0, 2)
+  }
 
   const insights = generateInsights()
 

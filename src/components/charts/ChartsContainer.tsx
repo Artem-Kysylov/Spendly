@@ -8,7 +8,7 @@ import { TransactionsFilter } from '@/components/ui-elements'
 import { useAllChartsData, useComparisonLineChartData } from '@/hooks/useChartData'
 import { formatCompactRange } from '@/lib/chartUtils'
 import type { ChartFilters as ChartFiltersType, ChartPeriod, ChartDataType } from '@/types/types'
-import { useTranslations } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl'
 
 type ChartVisibility = {
   bar: boolean
@@ -43,6 +43,7 @@ export const ChartsContainer = (
 ) => {
   const [filters, setFilters] = useState<ChartFiltersType>(initialFilters)
   const tCharts = useTranslations('charts')
+  const localeCode = useLocale()
 
   // Добавляем производные ключи для локализации заголовка/описания
   const periodKey = filters.period === 'Month' ? 'monthly' : 'weekly'
@@ -168,7 +169,8 @@ export const ChartsContainer = (
                 title={tCharts('titles.comparisonBar')}
                 description={`${getTypeLabel(filters.dataType)} ${tCharts('labels.for')} ${formatCompactRange(
                   filters.startDate,
-                  filters.endDate
+                  filters.endDate,
+                  localeCode
                 )}`}
                 currency={currency}
                 isLoading={barChart.isLoading}

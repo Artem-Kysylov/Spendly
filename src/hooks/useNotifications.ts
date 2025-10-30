@@ -4,12 +4,15 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { UserAuth } from '@/context/AuthContext'
 import type { Notification, UseNotificationsReturn } from '@/types/types'
+import { useLocale } from 'next-intl'
 
 export const useNotifications = (): UseNotificationsReturn => {
     const { session } = UserAuth()
     const [notifications, setNotifications] = useState<Notification[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const locale = useLocale()
+    const apiBase = `/${locale}/api/notifications`
 
     // Получение токена для API запросов
     const getAuthToken = useCallback(async () => {
@@ -36,7 +39,7 @@ export const useNotifications = (): UseNotificationsReturn => {
                 unread_only: unreadOnly.toString()
             })
 
-            const response = await fetch(`/api/notifications?${params}`, {
+            const response = await fetch(`${apiBase}?${params}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -44,8 +47,8 @@ export const useNotifications = (): UseNotificationsReturn => {
             })
 
             if (!response.ok) {
-                const errorData = await response.json()
-                throw new Error(errorData.error || 'Failed to fetch notifications')
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error((errorData as any).error || 'Failed to fetch notifications')
             }
 
             const { notifications: fetchedNotifications } = await response.json()
@@ -56,7 +59,7 @@ export const useNotifications = (): UseNotificationsReturn => {
         } finally {
             setIsLoading(false)
         }
-    }, [session?.user?.id, getAuthToken])
+    }, [session?.user?.id, getAuthToken, apiBase])
 
     const markAsRead = useCallback(async (id: string) => {
         if (!session?.user?.id) return
@@ -67,7 +70,7 @@ export const useNotifications = (): UseNotificationsReturn => {
                 throw new Error('No auth token available')
             }
 
-            const response = await fetch('/api/notifications', {
+            const response = await fetch(`${apiBase}`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -80,8 +83,8 @@ export const useNotifications = (): UseNotificationsReturn => {
             })
 
             if (!response.ok) {
-                const errorData = await response.json()
-                throw new Error(errorData.error || 'Failed to mark notification as read')
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error((errorData as any).error || 'Failed to mark notification as read')
             }
 
             // Обновляем локальное состояние
@@ -95,7 +98,7 @@ export const useNotifications = (): UseNotificationsReturn => {
         } catch (err) {
             console.error('Error marking notification as read:', err)
         }
-    }, [session?.user?.id, getAuthToken])
+    }, [session?.user?.id, getAuthToken, apiBase])
 
     const markAllAsRead = useCallback(async () => {
         if (!session?.user?.id) return
@@ -106,7 +109,7 @@ export const useNotifications = (): UseNotificationsReturn => {
                 throw new Error('No auth token available')
             }
 
-            const response = await fetch('/api/notifications', {
+            const response = await fetch(`${apiBase}`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -118,8 +121,8 @@ export const useNotifications = (): UseNotificationsReturn => {
             })
 
             if (!response.ok) {
-                const errorData = await response.json()
-                throw new Error(errorData.error || 'Failed to mark all notifications as read')
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error((errorData as any).error || 'Failed to mark all notifications as read')
             }
 
             // Обновляем локальное состояние
@@ -129,7 +132,7 @@ export const useNotifications = (): UseNotificationsReturn => {
         } catch (err) {
             console.error('Error marking all notifications as read:', err)
         }
-    }, [session?.user?.id, getAuthToken])
+    }, [session?.user?.id, getAuthToken, apiBase])
 
     const createNotification = useCallback(async (notificationData: {
         title: string
@@ -145,7 +148,7 @@ export const useNotifications = (): UseNotificationsReturn => {
                 throw new Error('No auth token available')
             }
 
-            const response = await fetch('/api/notifications', {
+            const response = await fetch(`${apiBase}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -155,8 +158,8 @@ export const useNotifications = (): UseNotificationsReturn => {
             })
 
             if (!response.ok) {
-                const errorData = await response.json()
-                throw new Error(errorData.error || 'Failed to create notification')
+                const errorData = await response.json().catch(() => ({}))
+                throw new Error((errorData as any).error || 'Failed to create notification')
             }
 
             const { notification } = await response.json()
@@ -169,7 +172,7 @@ export const useNotifications = (): UseNotificationsReturn => {
             console.error('Error creating notification:', err)
             throw err
         }
-    }, [session?.user?.id, getAuthToken])
+    }, [session?.user?.id, getAuthToken, apiBase])
 
     const unreadCount = notifications.filter(n => !n.is_read).length
 

@@ -22,13 +22,31 @@
 
   "budgets": {
     "list": {
-      "card": {
-        "createNew": "새 예산 만들기"
-      }
+      "card": { "createNew": "새 예산 만들기" },
+      "modal": { "createTitle": "예산 만들기" }
     },
-    "labels": {
-      "spent": "지출",
-      "left": "남은"
+    "labels": { "spent": "지출", "left": "남은" },
+    "details": {
+      "controls": {
+        "goToBudgets": "예산으로 이동",
+        "editBudget": "예산 편집",
+        "deleteBudget": "예산 삭제"
+      },
+      "deleteModal": {
+        "title": "예산 삭제",
+        "text": "이 예산을 삭제하시겠습니까?"
+      },
+      "editModal": { "title": "예산 편집" },
+      "toast": {
+        "failedDetermineType": "예산 유형을 확인하지 못했어요",
+        "typeMissing": "예산 유형이 없습니다",
+        "addFailed": "거래 추가에 실패했어요. 다시 시도해 주세요.",
+        "addSuccess": "거래가 추가되었어요!",
+        "deleteFailed": "예산 삭제에 실패했어요. 다시 시도해 주세요.",
+        "deleteSuccess": "예산이 삭제되었어요!",
+        "updateFailed": "거래 업데이트에 실패했어요",
+        "updateSuccess": "거래가 업데이트되었어요!"
+      }
     }
   },
 
@@ -59,7 +77,8 @@
         "aiUnlimited": "AI 비서 무제한 사용",
         "advancedCharts": "고급 차트와 비교",
         "prioritySupport": "우선 지원",
-        "customGoals": "맞춤 목표와 알림"
+        "customGoals": "맞춤 목표와 알림",
+        "earlyAccess": "새 기능 조기 액세스"
       }
     },
     "perMonth": "월"
@@ -123,6 +142,36 @@
       "createBudgetPlan": "예산 계획 세워줘",
       "showBiggest": "가장 큰 지출 내역 보여줘",
       "compareMonths": "이번 달과 지난달 지출 비교해줘"
+    },
+    "insights": {
+      "title": "AI 인사이트",
+      "beta": "베타",
+      "messages": {
+        "budgetExceeded": {
+          "title": "예산 초과",
+          "message": "예산을 {over} 초과했습니다."
+        },
+        "budgetAlert": {
+          "title": "예산 사용 경고",
+          "message": "예산의 {usedPercent}%를 사용했습니다."
+        },
+        "risingExpenses": {
+          "title": "지출 증가",
+          "message": "지출이 {trend}% 증가했습니다."
+        },
+        "incomeGrowth": {
+          "title": "수입 증가",
+          "message": "수입이 {trend}% 증가했습니다."
+        },
+        "negativeCashFlow": {
+          "title": "현금 흐름이 음수",
+          "message": "지출이 수입을 초과하고 있어요. 조정이 필요합니다."
+        },
+        "financialHealth": {
+          "title": "건전한 재무 상태",
+          "message": "지출과 수입이 안정적으로 관리되고 있어요."
+        }
+      }
     }
   },
   "common": {
@@ -137,7 +186,61 @@
   },
   "profile": { "avatar": { "upload": "아바타 업로드", "change": "아바타 변경", "cancel": "취소", "alt": "사용자 아바타" } },
   "filters": { "options": { "week": "주", "month": "월" } },
-  "modals": { "transaction": { "noResults": "결과를 찾을 수 없습니다" } },
+  "modals": {
+    "appInstall": {
+      "title": "앱 설치"
+    },
+    "editProfile": {
+      "title": "프로필 편집",
+      "toast": {
+        "updateSuccess": "프로필이 업데이트되었어요!",
+        "updateFailed": "프로필 업데이트에 실패했어요. 다시 시도해 주세요."
+      }
+    },
+    "mainBudget": {
+      "placeholder": {
+        "amountUSD": "금액(USD)"
+      }
+    },
+    "budget": {
+      "toast": {
+        "saveFailed": "예산 저장에 실패했어요. 다시 시도해 주세요."
+      },
+      "pickEmojiOptional": "이모지 선택 (선택 사항)",
+      "placeholder": {
+        "name": "이름",
+        "amountUSD": "금액(USD)"
+      },
+      "type": {
+        "expense": "지출",
+        "income": "수입"
+      }
+    },
+    "transaction": {
+      "placeholder": {
+        "title": "제목",
+        "amountUSD": "금액(USD)"
+      },
+      "date": {
+        "label": "날짜",
+        "placeholder": "날짜 선택"
+      },
+      "select": {
+        "label": "예산 선택",
+        "unbudgeted": "예산 미지정"
+      },
+      "search": {
+        "placeholder": "예산 검색..."
+      },
+      "loadingBudgets": "예산 불러오는 중...",
+      "noResults": "결과를 찾을 수 없습니다",
+      "type": {
+        "expense": "지출",
+        "income": "수입"
+      },
+      "autoTypeInfo": "금액에 따라 지출/수입이 자동으로 결정됩니다."
+    }
+  },
   "payment": {
     "title": "Pro로 업그레이드",
     "subtitle": "필요에 맞는 플랜을 선택하세요. 결제는 Lemon Squeezy로 제공됩니다.",
@@ -176,32 +279,55 @@
     "payment": { "meta": { "title": "결제", "description": "Spendly Pro로 업그레이드" } }
   },
   "dashboard": {
-    "welcome": "Welcome {name}👋",
+    "welcome": "환영합니다 {name}👋",
+    "deleteModal": {
+      "title": "거래 삭제",
+      "prompt": "이 거래를 삭제하시겠습니까?"
+    },
+    "mainBudget": {
+      "editTitle": "메인 예산 편집"
+    },
     "modals": {
-      "deleteTransaction": { "title": "Delete transaction", "prompt": "Are you sure you want to delete this transaction?" },
-      "editMainBudget": { "title": "Edit main budget" }
+      "deleteTransaction": {
+        "title": "거래 삭제",
+        "prompt": "이 거래를 삭제하시겠습니까?"
+      },
+      "editMainBudget": { "title": "메인 예산 편집" }
     },
     "counters": {
       "totalBudget": "총 예산",
       "totalExpenses": "총 지출",
       "totalIncome": "총 수입",
-      "labels": {
-        "spent": "사용됨",
-        "remaining": "남은 금액",
-        "used": "사용됨",
-        "vsLastMonth": "지난달 대비",
-        "coversExpenses": "지출을 {percent}% 충당"
-      }
+      "remaining": "남은 금액",
+      "usedPercent": "사용됨",
+      "overBudget": "예산 초과",
+      "status": { "exceeded": "초과", "warning": "경고", "notSet": "미설정" },
+      "ofBudget": "예산 대비",
+      "coversExpenses": "지출을 {percent}% 충당"
     }
   },
   "charts": {
     "titles": { "analytics": "예산 분석", "comparisonBar": "예산 비교" },
-    "bar": { "titleByCategory": "Expenses by category" },
-    "line": { "titleOverTime": "Expenses over time" },
+    "bar": { "titleByCategory": "카테고리별 지출" },
+    "line": { "titleOverTime": "시간 경과에 따른 지출" },
     "labels": { "expenses": "지출", "income": "수입", "for": "대상" },
-    "states": { "loading": "Loading...", "loadingData": "Loading chart data...", "noData": "No data available", "noExpensesData": "No expenses data available" },
-    "transactionsBar": { "title": "Expenses Chart" },
-    "ai": { "thinking": "Thinking…", "tips": "Get AI tips based on your data", "stop": "Stop", "getInsight": "Get AI Insight", "placeholder": "Get AI insights based on your data", "wait": "Please wait…", "rateLimited": "Rate limit reached. Try again later.", "noData": "Not enough data to analyze" },
+    "states": {
+      "loading": "로딩 중...",
+      "loadingData": "차트 데이터 로딩 중...",
+      "noData": "데이터가 없습니다",
+      "noExpensesData": "지출 데이터가 없습니다"
+    },
+    "transactionsBar": { "title": "지출 차트" },
+    "ai": {
+      "thinking": "생각 중…",
+      "tips": "데이터를 기반으로 AI 팁 받기",
+      "stop": "중지",
+      "getInsight": "AI 인사이트 받기",
+      "placeholder": "데이터 기반 AI 인사이트 받기",
+      "wait": "잠시만 기다려 주세요…",
+      "rateLimited": "요청 한도에 도달했습니다. 나중에 다시 시도하세요.",
+      "noData": "분석할 데이터가 충분하지 않습니다"
+    },
     "comparison": {
       "vsLastMonth": "지난달 대비",
       "titles": {
@@ -231,7 +357,19 @@
   },
   "transactions": {
     "title": "거래📉",
+    "addTransaction": "거래 추가",
+    "modal": {
+      "addTitle": "거래 추가"
+    },
+    "toast": {
+      "deleteFailed": "거래 삭제에 실패했어요",
+      "deleteSuccess": "거래가 삭제되었어요",
+      "updateFailed": "거래 업데이트에 실패했어요",
+      "updateSuccess": "거래가 업데이트되었어요"
+    },
     "empty": {
+      "title": "거래가 없습니다",
+      "description": "아직 거래가 없어요. 새 거래를 추가해보세요.",
       "filtered": "선택한 필터에 대한 거래가 없습니다."
     },
     "table": {
