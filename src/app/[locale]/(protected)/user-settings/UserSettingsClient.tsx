@@ -16,7 +16,8 @@ import { Link } from '@/i18n/routing'
 import { supabase } from '@/lib/supabaseClient'
 import LanguageSelect from '@/components/ui-elements/locale/LanguageSelect'
 import { useTranslations } from 'next-intl'
-import { useRouter } from '@/i18n/routing'
+import { useRouter, usePathname } from '@/i18n/routing'
+import { useParams } from 'next/navigation'
 
 export default function UserSettingsClient() {
   const { signOut, session } = UserAuth()
@@ -40,6 +41,8 @@ export default function UserSettingsClient() {
   const [language, setLanguage] = useState<'en' | 'uk' | 'ru' | 'hi' | 'id' | 'ja' | 'ko'>('en')
   const [isSavingLang, setIsSavingLang] = useState(false)
   const router = useRouter()
+  const pathname = usePathname()
+  const params = useParams()
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -55,9 +58,11 @@ export default function UserSettingsClient() {
   async function handleLanguageChange(next: typeof language) {
     setLanguage(next)
     document.documentElement.lang = next
-    // Сразу ставим куки
     document.cookie = `spendly_locale=${encodeURIComponent(next)}; path=/; max-age=31536000; samesite=lax`
     document.cookie = `NEXT_LOCALE=${encodeURIComponent(next)}; path=/; max-age=31536000; samesite=lax`
+
+    // Переключаем локаль, оставаясь на странице настроек
+    router.replace({ pathname, params: params as any }, { locale: next })
 
     // Мгновенно перерисовываем серверные компоненты с новыми сообщениями
     router.refresh()
