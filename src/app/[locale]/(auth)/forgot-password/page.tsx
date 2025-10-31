@@ -1,5 +1,3 @@
-'use client'
-
 import { useState } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -13,15 +11,14 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import ForgotPasswordClient from './ForgotPasswordClient'
 
-export default function ForgotPasswordPage() {
+export default function Page() {
   return <ForgotPasswordClient />
 }
 
-export async function generateMetadata({params: {locale}}: {params: {locale: string}}): Promise<Metadata> {
+export async function generateMetadata({ params: { locale } }: { params: { locale: string } }): Promise<Metadata> {
   const t = await getTranslations({ locale, namespace: 'pages.auth.forgotPassword.meta' })
-
   return {
     title: t('title'),
-    description: t('description')
+    description: t('description'),
   }
 }

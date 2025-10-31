@@ -326,7 +326,7 @@
     "removeAvatarFailed": "Failed to remove avatar.",
     "auth": { "invalidAuthHeader": "Invalid Authorization header.", "notAuthenticated": "Not authenticated." },
     "common": { "internalServerError": "Internal server error." },
-    "notifications": { "titleRequired": "Notification title is required.", "invalidAction": "Invalid notification action.", "fetchFailed": "Failed to fetch notifications.", "createFailed": "Failed to create notification.", "updateFailed": "Failed to update notifications.", "queueAddFailed": "Failed to add to notification queue.", "queueFetchFailed": "Failed to fetch notification queue.", "subscriptionInvalid": "Notification subscription data invalid.", "subscriptionSaveFailed": "Failed to save notification subscription.", "deactivateFailed": "Failed to deactivate notifications." }
+    "notifications": { "titleRequired": "Notification title is required.", "invalidAction": "Invalid notification action.", "fetchFailed": "Failed to fetch notifications.", "createFailed": "Failed to create notification.", "updateFailed": "Failed to update notifications.", "queueAdded": "通知をキューに追加しました", "queueFetchFailed": "Failed to fetch notification queue.", "subscriptionInvalid": "Notification subscription data invalid.", "subscriptionSaveFailed": "Failed to save notification subscription.", "deactivateFailed": "Failed to deactivate notifications." }
   },
   "profile": {
     "avatar": {

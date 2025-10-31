@@ -20,6 +20,34 @@ export async function POST(req: NextRequest) {
       )
     }
 
+    const prefsResp = await supabase
+      .from('notification_preferences')
+      .select('quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone')
+      .eq('user_id', user.id)
+      .single()
+
+    const computeNextAllowedTime = (base: Date, pref: any) => {
+      if (!pref?.quiet_hours_enabled || !pref?.quiet_hours_start || !pref?.quiet_hours_end) return base
+      const [sh, sm] = String(pref.quiet_hours_start).split(':').map((x: string) => parseInt(x, 10))
+      const [eh, em] = String(pref.quiet_hours_end).split(':').map((x: string) => parseInt(x, 10))
+      const nowMin = base.getHours() * 60 + base.getMinutes()
+      const startMin = sh * 60 + sm
+      const endMin = eh * 60 + em
+      const inQuiet = startMin < endMin ? (nowMin >= startMin && nowMin < endMin) : (nowMin >= startMin || nowMin < endMin)
+      if (!inQuiet) return base
+      const next = new Date(base)
+      if (startMin < endMin) {
+        next.setHours(eh, em, 0, 0)
+      } else {
+        next.setDate(next.getDate() + (nowMin >= startMin ? 1 : 0))
+        next.setHours(eh, em, 0, 0)
+      }
+      return next
+    }
+
+    const baseTime = scheduled_for ? new Date(scheduled_for) : new Date()
+    const scheduledISO = computeNextAllowedTime(baseTime, prefsResp.data).toISOString()
+
     // Добавляем уведомление в очередь
     const { data: queuedNotification, error } = await supabase
       .from('notification_queue')
@@ -28,11 +56,11 @@ export async function POST(req: NextRequest) {
         notification_type,
         title,
         message,
-        data,
+        data, // Предполагается, что data содержит deepLink/tag/renotify/badge при необходимости
         action_url,
         send_push,
         send_email,
-        scheduled_for: scheduled_for ? new Date(scheduled_for).toISOString() : null,
+        scheduled_for: scheduledISO,
         status: 'pending',
         attempts: 0,
         max_attempts
@@ -41,37 +69,40 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (error) {
+      if (String((error as any).code) === '23505') {
+        // Дубликат — считаем добавленным
+        return NextResponse.json({
+          notification: null,
+          message: tNotifications('api.queueAdded')
+        }, { status: 201 })
+      }
       console.error('Error adding notification to queue:', error)
       return NextResponse.json({ error: tErrors('notifications.queueAddFailed') }, { status: 500 })
     }
 
-    // Если уведомление не запланировано на будущее, можно сразу вызвать Edge Function
-    if (!scheduled_for || new Date(scheduled_for) <= new Date()) {
+    // Если уведомление не запланировано на будущее — дергаем внутренний processor
+    if (!scheduled_for || new Date(scheduledISO) <= new Date()) {
       try {
-        // Вызываем Edge Function для немедленной обработки
-        const edgeFunctionUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/send-push-notifications`
-        const response = await fetch(edgeFunctionUrl, {
+        const processorUrl = `${req.nextUrl.origin}/${locale}/api/notifications/processor`
+        const response = await fetch(processorUrl, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+            'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY || ''}`,
             'Content-Type': 'application/json'
           }
         })
-
         if (!response.ok) {
-          console.warn('Edge Function call failed:', await response.text())
+          console.warn('Processor call failed:', await response.text())
         }
       } catch (edgeError) {
-        console.warn('Failed to trigger Edge Function:', edgeError)
-        // Не возвращаем ошибку, так как уведомление всё равно добавлено в очередь
+        console.warn('Failed to trigger internal processor:', edgeError)
       }
     }
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       notification: queuedNotification,
       message: tNotifications('api.queueAdded')
     }, { status: 201 })
-
   } catch (error) {
     const localeCookie =
       req.cookies.get('NEXT_LOCALE')?.value ||

@@ -7,6 +7,15 @@ export type TranslationNamespace =
   | 'errors' | 'profile' | 'payment' | 'userSettings'
   | 'meta' | 'pages'
 
+export type TranslationKeys =
+  | 'common' | 'layout' | 'BudgetSetup'
+  | 'assistant' | 'charts' | 'filters'
+  | 'transactions' | 'dashboard' | 'budgets'
+  | 'auth' | 'forgotPassword' | 'resetPassword'
+  | 'modals' | 'setup' | 'notifications'
+  | 'errors' | 'profile' | 'payment' | 'userSettings'
+  | 'meta' | 'pages'
+
 export type NamespaceKeys = {
   common: 'saving' | 'unexpectedError' | 'errorLabel' | 'cancel' | 'save' | 'submit' | 'close' | 'pagination.previous' | 'pagination.next'
   BudgetSetup: 'title' | 'selectCountry' | 'selectCurrency' | 'customAmount' | 'save' | 'autodetected' | 'searchCountry' | 'searchCurrency' | 'clearSelection'
@@ -105,4 +114,7 @@ export type NamespaceKeys = {
     | 'details.toast.addFailed' | 'details.toast.addSuccess'
     | 'details.toast.deleteFailed' | 'details.toast.deleteSuccess'
     | 'details.toast.updateFailed' | 'details.toast.updateSuccess'
+    | 'weekly.title' | 'weekly.body'
+    | 'push_subscribed' | 'push_failed' | 'permission_denied'
+    | 'budget_80' | 'budget_100'
 }

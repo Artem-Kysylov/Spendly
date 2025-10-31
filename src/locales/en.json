@@ -448,6 +448,12 @@
   "notifications": {
     "bell": { "aria": "Notifications", "title": "Notifications", "markAllRead": "Mark all read", "empty": { "title": "No notifications yet", "description": "We'll notify you when something important happens" }, "viewAll": "View all notifications", "setup": { "title": "Set up the database to work with notifications", "subtitle": "Go to settings for instructions" } },
     "settings": { "push": { "title": "Push Notifications", "description": "Receive notifications on this device" } },
+    "weekly": { "title": "Weekly Digest", "body": "Your weekly report is ready." },
+    "push_subscribed": "Push subscribed",
+    "push_failed": "Push subscription failed",
+    "permission_denied": "Notification permission denied",
+    "budget_80": "Budget usage reached 80%",
+    "budget_100": "Budget exceeded",
     "frequency": {
       "title": "Notification Frequency",
       "aria": "Notification frequency",
@@ -479,11 +485,7 @@
       "fetchFailed": "Failed to fetch notifications.",
       "createFailed": "Failed to create notification.",
       "updateFailed": "Failed to update notification.",
-      "queueAddFailed": "Failed to add to notification queue.",
-      "queueFetchFailed": "Failed to fetch notification queue.",
-      "subscriptionInvalid": "Notification subscription data invalid.",
-      "subscriptionSaveFailed": "Failed to save notification subscription.",
-      "deactivateFailed": "Failed to deactivate notifications."
+      "queueAdded": "Notification added to queue"
     }
   }
 }

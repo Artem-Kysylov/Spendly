@@ -110,7 +110,13 @@
       "pushDisabled": "Push выключен",
       "pushStatusFailed": "Не удалось обновить статус push"
     },
-    "api": { "subscriptionSaved": "Подписка сохранена", "subscriptionRemoved": "Подписка удалена", "queueAdded": "Задача на уведомление добавлена" }
+    "api": { "subscriptionSaved": "Подписка сохранена", "subscriptionRemoved": "Подписка удалена", "queueAdded": "Задача на уведомление добавлена" },
+    "weekly": { "title": "Еженедельный дайджест", "body": "Ваш недельный отчёт готов." },
+    "push_subscribed": "Push‑подписка активирована",
+    "push_failed": "Не удалось подписаться на push",
+    "permission_denied": "Браузер запретил показывать уведомления",
+    "budget_80": "Достигнут порог 80% бюджета",
+    "budget_100": "Бюджет превышен"
   },
 
   "assistant": {

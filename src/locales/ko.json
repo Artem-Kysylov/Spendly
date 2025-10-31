@@ -247,6 +247,7 @@
     "toastComingSoon": "결제는 곧 Lemon Squeezy를 통해 제공됩니다."
   },
   "notifications": {
+    "api": { "queueAdded": "알림이 큐에 추가되었습니다" },
     "bell": {
       "aria": "알림 열기",
       "title": "알림",

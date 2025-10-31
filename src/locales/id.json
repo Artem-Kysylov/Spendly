@@ -56,7 +56,13 @@
     },
     "notifications": {
       "title": "Notifikasi",
-      "description": "Kelola cara dan kapan Anda menerima notifikasi"
+      "description": "Kelola cara dan kapan Anda menerima notifikasi",
+      "weekly": { "title": "Ringkasan Mingguan", "body": "Laporan mingguan Anda siap." },
+      "push_subscribed": "Push diaktifkan",
+      "push_failed": "Gagal berlangganan push",
+      "permission_denied": "Izin notifikasi ditolak",
+      "budget_80": "Penggunaan anggaran mencapai 80%",
+      "budget_100": "Anggaran terlampaui"
     },
     "subscription": {
       "title": "Langganan",

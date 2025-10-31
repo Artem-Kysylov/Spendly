@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useLocale } from 'next-intl'
 
-const ServiceWorkerRegistration = () => {
+function ServiceWorkerRegistration() {
     const locale = useLocale()
 
     // Хелпер для VAPID
@@ -22,19 +22,23 @@ const ServiceWorkerRegistration = () => {
     }
 
     useEffect(() => {
-        // Регистрируем SW только в production и после полной загрузки страницы
-        if (process.env.NODE_ENV !== 'production') return
-
         if ('serviceWorker' in navigator) {
-            const onLoad = () => {
+            const registerSW = () => {
                 navigator.serviceWorker
-                    .register('/sw.js')
-                    .then((registration) => {
-                        console.log('SW registered: ', registration)
+                    .register('/sw.js', { scope: '/' })
+                    .then(async (registration) => {
+                        console.log('SW registered:', registration.scope, registration.active?.state)
+                        try { await registration.update() } catch {}
                     })
-                    .catch((registrationError) => {
-                        console.log('SW registration failed: ', registrationError)
+                    .catch((err) => {
+                        console.log('SW registration failed:', err)
                     })
+            }
+
+            if (document.readyState === 'complete') {
+                registerSW()
+            } else {
+                window.addEventListener('load', registerSW)
             }
 
             const resubscribe = async () => {
@@ -42,15 +46,13 @@ const ServiceWorkerRegistration = () => {
                     const registration = await navigator.serviceWorker.ready
                     const vapid = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
                     if (!vapid) return
-                    const applicationServerKey = urlBase64ToUint8Array(vapid)
+                    const applicationServerKey = urlBase64ToUint8Array(vapid).buffer as ArrayBuffer
 
-                    // создать/обновить подписку
                     const subscription = await registration.pushManager.subscribe({
                         userVisibleOnly: true,
                         applicationServerKey
                     })
 
-                    // сохранить на сервере от имени пользователя
                     const { data: { session } } = await supabase.auth.getSession()
                     const token = session?.access_token
                     if (!token) return
@@ -94,16 +96,16 @@ const ServiceWorkerRegistration = () => {
                 if (event?.data?.type === 'PUSH_SUBSCRIPTION_CHANGED') {
                     resubscribe()
                 }
+                if (event?.data?.type === 'DEVTOOLS_PUSH') {
+                    console.log('[Page] received DEVTOOLS_PUSH:', event.data.message)
+                }
             }
 
-            window.addEventListener('load', onLoad)
             navigator.serviceWorker.addEventListener('message', onMessage)
-
-            // Фоновая проверка после инициализации
             ensureActiveSubscription()
 
             return () => {
-                window.removeEventListener('load', onLoad)
+                window.removeEventListener('load', registerSW)
                 navigator.serviceWorker.removeEventListener('message', onMessage)
             }
         }

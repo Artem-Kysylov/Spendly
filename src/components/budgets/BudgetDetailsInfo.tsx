@@ -9,11 +9,15 @@ import BudgetProgressBar from '../ui-elements/BudgetProgressBar'
 
 // Import types 
 import { BudgetDetailsProps } from '../../types/types'
+import { useRouter } from 'next/router'
 
 function BudgetDetailsInfo({ id, emoji, name, amount, type }: BudgetDetailsProps) {
   const { session } = UserAuth()
   const [spentAmount, setSpentAmount] = useState(0)
   const tBudgets = useTranslations('budgets')
+  const tN = useTranslations('notifications')
+  const router = useRouter()
+  const percentage = amount > 0 ? (spentAmount / amount) * 100 : 0
 
   const fetchSpentAmount = async () => {
     if (!session?.user?.id || !id) return
@@ -87,7 +91,30 @@ function BudgetDetailsInfo({ id, emoji, name, amount, type }: BudgetDetailsProps
       >
         ${amount}
       </motion.p>
-      
+
+      {/* Inline warnings for expense budgets */}
+      {type === 'expense' && percentage >= 80 && (
+        <div className={`mt-3 p-3 rounded border ${percentage >= 100 ? 'bg-red-50 border-red-200 text-red-700' : 'bg-amber-50 border-amber-200 text-amber-700'}`}>
+          <div className="text-sm font-medium">
+            {percentage >= 100 ? tN('budget_100') : tN('budget_80')}
+          </div>
+          <div className="mt-2 flex gap-2">
+            <button
+              onClick={() => router.push('/transactions')}
+              className="text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20"
+            >
+              Сократить расходы
+            </button>
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+            >
+              Открыть отчёт
+            </button>
+          </div>
+        </div>
+      )}
+
       <motion.div 
         className="w-full mt-4"
         initial={{ opacity: 0, y: 20 }}

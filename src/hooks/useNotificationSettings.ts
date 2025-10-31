@@ -143,6 +143,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
 
             const subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
+                // Передаём ArrayBuffer (совместим с типом BufferSource)
                 applicationServerKey: keyUint8.buffer as ArrayBuffer,
             })
 

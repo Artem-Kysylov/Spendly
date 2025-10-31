@@ -7,10 +7,14 @@ import { formatDistanceToNow } from 'date-fns'
 import { useNotifications } from '@/hooks/useNotifications'
 import type { NotificationBellProps } from '@/types/types'
 import { useTranslations } from 'next-intl'
+import { useRouter } from '@/i18n/routing'
 
 function NotificationBell({ className = '', onClick }: NotificationBellProps) {
-  const { notifications, unreadCount, isLoading, error, markAsRead, markAllAsRead } = useNotifications()
+  const { notifications, unreadCount, isLoading, error, markAsRead, markAllAsRead, refetch } = useNotifications()
   const [isOpen, setIsOpen] = useState(false)
+  const router = useRouter()
+  const [pageOffset, setPageOffset] = useState(0)
+  const PAGE_SIZE = 10
   const dropdownRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 })
@@ -79,7 +83,8 @@ function NotificationBell({ className = '', onClick }: NotificationBellProps) {
 
   useEffect(() => {
       if (!isOpen) return
-      updateDropdownPosition()
+      // загружаем страницу уведомлений при открытом дропдауне
+      refetch(PAGE_SIZE, pageOffset)
       const onResizeOrScroll = () => updateDropdownPosition()
       window.addEventListener('resize', onResizeOrScroll)
       window.addEventListener('scroll', onResizeOrScroll, true)
@@ -87,7 +92,32 @@ function NotificationBell({ className = '', onClick }: NotificationBellProps) {
           window.removeEventListener('resize', onResizeOrScroll)
           window.removeEventListener('scroll', onResizeOrScroll, true)
       }
-  }, [isOpen])
+  }, [isOpen, pageOffset, refetch])
+
+  const handlePrevPage = async () => {
+    const nextOffset = Math.max(0, pageOffset - PAGE_SIZE)
+    setPageOffset(nextOffset)
+    await refetch(PAGE_SIZE, nextOffset)
+  }
+
+  const handleNextPage = async () => {
+    const nextOffset = pageOffset + PAGE_SIZE
+    setPageOffset(nextOffset)
+    await refetch(PAGE_SIZE, nextOffset)
+  }
+
+  const openBudget = async (notification: any) => {
+      const budgetId = notification?.metadata?.budget_id
+      if (budgetId) {
+          if (!notification.is_read) await markAsRead(notification.id)
+          router.push({ pathname: '/budgets/[id]', params: { id: String(budgetId) } })
+      }
+  }
+
+  const openReport = async (notification?: any) => {
+    if (notification && !notification.is_read) await markAsRead(notification.id)
+    router.push('/dashboard')
+  }
 
   return (
       <div className={`relative ${className}`} ref={dropdownRef}>
@@ -171,7 +201,7 @@ function NotificationBell({ className = '', onClick }: NotificationBellProps) {
                           </div>
                       ) : (
                           <div className="divide-y divide-gray-100">
-                              {notifications.slice(0, 10).map((notification) => (
+                              {notifications.map((notification) => (
                                   <div
                                       key={notification.id}
                                       onClick={() => handleNotificationClick(notification)}
@@ -202,6 +232,34 @@ function NotificationBell({ className = '', onClick }: NotificationBellProps) {
                                               <p className="text-xs text-gray-400 mt-2">
                                                   {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                                               </p>
+
+                                              {/* CTA buttons per type */}
+                                              <div className="mt-2 flex gap-2">
+                                                  {notification.type === 'budget_alert' && notification?.metadata?.budget_id && (
+                                                      <>
+                                                          <button
+                                                              onClick={(e) => { e.stopPropagation(); openBudget(notification) }}
+                                                              className="text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20"
+                                                          >
+                                                              Перейти в бюджет
+                                                          </button>
+                                                          <button
+                                                              onClick={(e) => { e.stopPropagation(); openReport(notification) }}
+                                                              className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                                          >
+                                                              Открыть отчёт
+                                                          </button>
+                                                      </>
+                                                  )}
+                                                  {notification.type === 'weekly_reminder' && (
+                                                      <button
+                                                          onClick={(e) => { e.stopPropagation(); openReport(notification) }}
+                                                          className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                                      >
+                                                          Открыть отчёт
+                                                      </button>
+                                                  )}
+                                              </div>
                                           </div>
                                       </div>
                                   </div>
@@ -210,11 +268,22 @@ function NotificationBell({ className = '', onClick }: NotificationBellProps) {
                       )}
                   </div>
 
-                  {/* Footer */}
-                  {!hasDbError && notifications.length > 10 && (
-                      <div className="p-3 border-t border-gray-100 text-center">
-                          <button className="text-sm text-primary hover:text-primary/80">
-                              {tNotifications('bell.viewAll')}
+                  {/* Footer: pagination */}
+                  {!hasDbError && (
+                      <div className="p-3 border-t border-gray-100 flex items-center justify-between">
+                          <button
+                              onClick={handlePrevPage}
+                              disabled={pageOffset === 0}
+                              className="text-sm text-primary disabled:text-gray-400 hover:text-primary/80"
+                          >
+                              Назад
+                          </button>
+                          <button
+                              onClick={handleNextPage}
+                              disabled={notifications.length < PAGE_SIZE}
+                              className="text-sm text-primary disabled:text-gray-400 hover:text-primary/80"
+                          >
+                              Вперёд
                           </button>
                       </div>
                   )}
