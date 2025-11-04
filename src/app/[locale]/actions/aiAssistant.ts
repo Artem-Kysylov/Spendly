@@ -57,6 +57,42 @@ export const executeTransaction = async (userId: string, payload: { title: strin
   return { ok: true, message: 'Transaction added successfully!' }
 }
 
+// CRUD для recurring_rules
+export const listRecurringRules = async (userId: string) => {
+  const supabase = getServerSupabaseClient()
+  const { data, error } = await supabase
+    .from('recurring_rules')
+    .select('id, user_id, title_pattern, budget_folder_id, avg_amount, cadence, next_due_date, active, created_at, updated_at')
+    .eq('user_id', userId)
+    .order('avg_amount', { ascending: false })
+
+  if (error) return [] as any[]
+  return (data || [])
+}
+
+export const upsertRecurringRule = async (userId: string, candidate: { title_pattern: string; budget_folder_id: string | null; avg_amount: number; cadence: 'weekly' | 'monthly'; next_due_date: string }) => {
+  const supabase = getServerSupabaseClient()
+  const payload = {
+    user_id: userId,
+    title_pattern: candidate.title_pattern,
+    budget_folder_id: candidate.budget_folder_id,
+    avg_amount: Number(candidate.avg_amount),
+    cadence: candidate.cadence,
+    next_due_date: candidate.next_due_date,
+    active: true,
+    updated_at: new Date().toISOString()
+  }
+  const { data, error } = await supabase
+    .from('recurring_rules')
+    .upsert(payload, { onConflict: 'user_id,title_pattern' })
+    .select()
+  if (error) {
+    return { ok: false, message: 'Failed to save recurring rule.' }
+  }
+  return { ok: true, message: 'Recurring rule saved.', id: data?.[0]?.id }
+}
+
+// Обёртка промпта для LLM (тон, секции и т.д.)
 export const composeLLMPrompt = (
   ctx: {
     budgets: Array<{ id: string; name: string; emoji?: string; type: 'expense' | 'income'; amount?: number }>;
@@ -64,7 +100,7 @@ export const composeLLMPrompt = (
     lastMonthTxs: any[];
   },
   userMessage: string,
-  opts?: { locale?: string; currency?: string; promptVersion?: string; maxChars?: number }
+  opts?: { locale?: string; currency?: string; promptVersion?: string; maxChars?: number; tone?: 'neutral' | 'friendly' | 'formal' | 'playful' }
 ): string => {
   // Thin wrapper: detect intent, compute aggregates via stats.ts, delegate formatting to promptBuilder
   const locale = opts?.locale || 'en-US'
@@ -111,7 +147,7 @@ export const composeLLMPrompt = (
   const top3ThisMonth = topExpenses(txsThisMonth, 3)
   const top3LastMonth = topExpenses(lastMonthTxs, 3)
 
-  const instructions = buildInstructions({ locale, currency, promptVersion: opts?.promptVersion || PROMPT_VERSION, intent: builderIntent })
+  const instructions = buildInstructions({ locale, currency, promptVersion: opts?.promptVersion || PROMPT_VERSION, intent: builderIntent, tone: opts?.tone })
 
   const weeklySection = buildWeeklySections({
     weekStartISO: weekStart.toISOString().slice(0, 10),
@@ -192,6 +228,28 @@ export const getCanonicalEmptyReply = (
   return { shouldBypass: false, message: '', period }
 }
 
+// Парсер подтверждения “сохрани как повторяющуюся”
+function parseSaveRecurringCommand(message: string, candidates?: Array<{ title_pattern: string; budget_folder_id: string | null; avg_amount: number; cadence: 'weekly' | 'monthly'; next_due_date: string; count: number }>): AIAction | null {
+  const text = (message || '').toLowerCase()
+  const trigger = ['сохрани как повтор', 'сохранить как повтор', 'сохранить подписк', 'да, сохрани как повтор', 'save as recurring', 'save recurring', 'save subscription']
+  if (!trigger.some(h => text.includes(h))) return null
+  if (!candidates || candidates.length === 0) return null
+
+  // Пытаемся сопоставить по содержимому сообщения
+  const matched = candidates.find(c => c.title_pattern && text.includes(c.title_pattern.toLowerCase()))
+  const picked = matched || candidates[0]
+  return {
+    type: 'save_recurring_rule',
+    payload: {
+      title_pattern: picked.title_pattern,
+      budget_folder_id: picked.budget_folder_id,
+      avg_amount: picked.avg_amount,
+      cadence: picked.cadence,
+      next_due_date: picked.next_due_date
+    }
+  }
+}
+
 // Основной обработчик запроса ИИ (без стрима — стрим делаем в API)
 export const aiResponse = async (req: AIRequest): Promise<AIResponse> => {
   const { userId, isPro = false, enableLimits = false, message, confirm = false, actionPayload } = req
@@ -212,8 +270,16 @@ export const aiResponse = async (req: AIRequest): Promise<AIResponse> => {
     return { kind: 'action', action, confirmText }
   }
 
+  // Подтверждение сохранения подписки
+  const saveRecurring = parseSaveRecurringCommand(message, ctx.recurringCandidates)
+  if (saveRecurring && saveRecurring.type === 'save_recurring_rule' && !confirm) {
+    const cp = saveRecurring.payload
+    const confirmText = `Confirm saving recurring rule "${cp.title_pattern}" (${cp.cadence}, ~$${cp.avg_amount.toFixed(2)}, next: ${cp.next_due_date})? Reply Yes/No.`
+    return { kind: 'action', action: saveRecurring, confirmText }
+  }
+
   if (confirm && actionPayload) {
-    const res = await executeTransaction(userId, actionPayload)
+    const res = await executeTransaction(userId, actionPayload as any)
     const suffix = res.ok ? 'We updated your charts.' : 'Please try again.'
     return { kind: 'message', message: `${res.message} ${suffix}`, model: 'gemini-2.5-flash' }
   }

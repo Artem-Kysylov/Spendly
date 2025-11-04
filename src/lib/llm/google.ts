@@ -99,6 +99,7 @@ export function streamGeminiText({ model, prompt, system, requestId }: StreamPar
       }
 
       const candidates = (json as any)?.candidates ?? []
+      // Диагностика (оставляем как было)
       if (debug) {
         try {
           const firstParts = candidates?.[0]?.content?.parts ?? []
@@ -121,24 +122,33 @@ export function streamGeminiText({ model, prompt, system, requestId }: StreamPar
         }
       }
 
-      let emitted = false
+      // Собираем весь текст кандидатов
+      let fullText = ''
       for (const c of candidates) {
         const parts = c?.content?.parts ?? []
         for (const p of parts) {
           const t = p?.text
           if (typeof t === 'string' && t.length > 0) {
-            controller.enqueue(t)
-            emitted = true
+            fullText += t
           }
         }
       }
 
-      if (!emitted) {
+      if (fullText.trim().length === 0) {
         const blockReason = (json as any)?.promptFeedback?.blockReason
         const candidatesCount = Array.isArray(candidates) ? candidates.length : 0
         controller.enqueue(
           `LLM provider returned empty text candidates.${blockReason ? ` Blocked: ${blockReason}.` : ''} Candidates: ${candidatesCount}.`
         )
+        controller.close()
+        return
+      }
+
+      // Поточная отдача: режем на чанки и отправляем с небольшой задержкой
+      const chunks = fullText.match(/.{1,80}/g) ?? [fullText]
+      for (const chunk of chunks) {
+        controller.enqueue(chunk)
+        await new Promise((r) => setTimeout(r, 35))
       }
       controller.close()
     }

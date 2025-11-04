@@ -290,68 +290,48 @@
   },
   "assistant": {
     "title": "Spendly Pal",
-    "rateLimited": "Rate limit reached. Please wait a few seconds…",
-    "welcomeTitle": "Welcome to AI Assistant",
-    "welcomeDesc": "Ask me anything about your finances or choose a preset below",
+    "welcomeTitle": "Meet Spendly Pal",
+    "welcomeDesc": "Your AI-powered financial assistant. Ask questions like \"What's my spending this month?\" or \"Add a new transaction.\"",
+    "rateLimited": "You've reached the rate limit for AI requests. Please try again in a few seconds.",
+    "input": {
+      "placeholder": "Message Spendly Pal..."
+    },
+    "actions": {
+      "send": "Send",
+      "abort": "Abort",
+      "accept": "Accept",
+      "decline": "Decline"
+    },
     "confirm": {
-      "title": "Confirm transaction",
+      "title": "Confirm action?",
       "fields": {
         "title": "Title",
         "budget": "Budget",
         "amount": "Amount"
       }
     },
-    "actions": {
-      "accept": "Accept",
-      "decline": "Decline",
-      "abort": "Abort",
-      "send": "Send"
+    "tone": {
+      "label": "Tone",
+      "select_label": "Choose AI assistant tone",
+      "options": {
+        "neutral": "Neutral",
+        "friendly": "Friendly",
+        "formal": "Formal",
+        "playful": "Playful"
+      }
     },
-    "buttons": {
-      "close": "Close AI Assistant",
-      "ask": "Ask Spendly Pal"
-    },
-    "input": {
-      "placeholder": "Ask about your expenses..."
+    "settings": {
+      "title": "Spendly Pal Tone",
+      "description": "Choose the response tone for your AI assistant."
     },
     "presets": {
-      "header": "Quick questions:",
-      "showWeek": "Show my expenses for this week",
-      "saveMoney": "Where can I save money?",
+      "header": "Quick suggestions",
+      "showWeek": "Show this week’s summary",
+      "saveMoney": "Suggest how to save money",
       "analyzePatterns": "Analyze my spending patterns",
       "createBudgetPlan": "Create a budget plan",
-      "showBiggest": "Show my biggest expenses",
-      "compareMonths": "Compare this month vs last month"
-    },
-    "insights": {
-      "title": "AI Insights",
-      "beta": "Beta",
-      "messages": {
-        "budgetExceeded": {
-          "title": "Budget Exceeded",
-          "message": "You've exceeded your budget by {over}. Consider reviewing your spending."
-        },
-        "budgetAlert": {
-          "title": "Budget Alert",
-          "message": "You've used {usedPercent}% of your budget. Monitor your spending carefully."
-        },
-        "risingExpenses": {
-          "title": "Rising Expenses",
-          "message": "Your expenses increased by {trend}% compared to last month."
-        },
-        "incomeGrowth": {
-          "title": "Income Growth",
-          "message": "Great! Your income increased by {trend}% from last month."
-        },
-        "negativeCashFlow": {
-          "title": "Negative Cash Flow",
-          "message": "Your expenses exceed your income this month. Consider reducing spending or increasing income."
-        },
-        "financialHealth": {
-          "title": "Financial Health",
-          "message": "Your finances look stable this month. Keep up the good work!"
-        }
-      }
+      "showBiggest": "Show biggest expenses",
+      "compareMonths": "Compare this month vs last"
     }
   },
   "charts": {

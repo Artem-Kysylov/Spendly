@@ -1,5 +1,6 @@
 import { Session } from '@supabase/supabase-js'
 import { ReactNode } from 'react'
+import type { AssistantTone } from './ai'
 
 export interface ButtonProps {
     text: ReactNode,
@@ -474,11 +475,18 @@ export interface UseChatReturn {
     hasPendingAction: boolean
     isRateLimited: boolean
     pendingActionPayload?: {
-        title: string
-        amount: number
+        title?: string
+        amount?: number
         budget_folder_id: string | null
-        budget_name: string
+        budget_name?: string
+        title_pattern?: string
+        avg_amount?: number
+        cadence?: 'weekly' | 'monthly'
+        next_due_date?: string
     } | null
+    // Новый: текущий тон и setter
+    assistantTone: AssistantTone
+    setAssistantTone: (tone: AssistantTone) => Promise<void> | void
 }
 
 // ===== NOTIFICATION TYPES =====

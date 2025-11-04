@@ -98,41 +98,41 @@
     "labels": { "rememberMe": "ログイン情報を記憶" }
   },
   "assistant": {
-    "title": "AIアシスタント",
-    "rateLimited": "レート制限に達しました。しばらくしてからもう一度お試しください。",
-    "welcomeTitle": "AIアシスタントへようこそ",
-    "welcomeDesc": "あなたの財務について何でも聞いてください。または、以下のプリセットを選択してください。",
+    "title": "Spendly Pal",
+    "welcomeTitle": "Spendly Palへようこそ",
+    "welcomeDesc": "AIを搭載した金融アシスタントです。「今月の支出はいくらですか？」や「新しい取引を追加してください」などの質問をしてください。",
+    "rateLimited": "AIリクエストのレート制限に達しました。数秒後に再試行してください。",
+    "input": {
+      "placeholder": "Spendly Palにメッセージを送信..."
+    },
+    "actions": {
+      "send": "送信",
+      "abort": "中止",
+      "accept": "承認",
+      "decline": "拒否"
+    },
     "confirm": {
-      "title": "取引内容の確認",
+      "title": "アクションを確認しますか？",
       "fields": {
         "title": "タイトル",
         "budget": "予算",
         "amount": "金額"
       }
     },
-    "actions": {
-      "accept": "確定",
-      "decline": "キャンセル",
-      "abort": "中止",
-      "send": "送信"
+    "tone": {
+      "label": "トーン",
+      "select_label": "AIアシスタントのトーンを選択",
+      "options": {
+        "neutral": "ニュートラル",
+        "friendly": "フレンドリー",
+        "formal": "フォーマル",
+        "playful": "遊び心"
+      }
     },
-    "buttons": {
-      "close": "閉じる",
-      "ask": "AIに質問"
-    },
-    "input": {
-      "placeholder": "AIへの質問を入力…"
-    },
-    "presets": {
-      "header": "すぐに試せる提案",
-      "showWeek": "今週の支出を表示",
-      "saveMoney": "節約のヒントを提案",
-      "analyzePatterns": "支出パターンを分析",
-      "createBudgetPlan": "今月の予算計画を作成",
-      "showBiggest": "支出の大きい項目を表示",
-      "compareMonths": "今月と先月を比較"
-    },
-    "insights": { "title": "AIインサイト", "beta": "ベータ版" }
+    "settings": {
+      "title": "Spendly Palのトーン",
+      "description": "AIアシスタントの応答トーンを選択してください。"
+    }
   },
   "notFound": {
     "title": "申し訳ありません、このページは存在しません",

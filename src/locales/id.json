@@ -7,13 +7,11 @@
       "userSettings": "Pengaturan Pengguna"
     }
   },
-
   "cta": {
     "upgradeToPro": "Tingkatkan ke Pro",
     "downloadApp": "Unduh Aplikasi",
     "signOut": "Keluar"
   },
-
   "pricing": {
     "free": {
       "label": "Gratis",
@@ -37,7 +35,6 @@
     },
     "perMonth": "per bulan"
   },
-
   "userSettings": {
     "header": {
       "title": "Pengaturan Pengguna⚙️",
@@ -57,7 +54,10 @@
     "notifications": {
       "title": "Notifikasi",
       "description": "Kelola cara dan kapan Anda menerima notifikasi",
-      "weekly": { "title": "Ringkasan Mingguan", "body": "Laporan mingguan Anda siap." },
+      "weekly": {
+        "title": "Ringkasan Mingguan",
+        "body": "Laporan mingguan Anda siap."
+      },
       "push_subscribed": "Push diaktifkan",
       "push_failed": "Gagal berlangganan push",
       "permission_denied": "Izin notifikasi ditolak",
@@ -91,7 +91,6 @@
       }
     }
   },
-
   "auth": {
     "tabs": {
       "signin": "Masuk",
@@ -104,32 +103,31 @@
       "rememberMe": "Ingat saya"
     }
   },
-
   "assistant": {
-    "title": "Asisten AI",
-    "rateLimited": "Batas penggunaan tercapai. Coba lagi nanti.",
-    "welcomeTitle": "Tanyakan apa saja tentang anggaran Anda",
-    "welcomeDesc": "Saya dapat menganalisis pengeluaran, memberi saran, dan membuat rencana.",
+    "title": "Spendly Pal",
+    "welcomeTitle": "Temui Spendly Pal",
+    "welcomeDesc": "Asisten keuangan bertenaga AI Anda. Ajukan pertanyaan seperti \"Berapa pengeluaran saya bulan ini?\" atau \"Tambahkan transaksi baru.\"",
+    "rateLimited": "Anda telah mencapai batas permintaan AI. Silakan coba lagi dalam beberapa detik.",
+    "input": {
+      "placeholder": "Pesan Spendly Pal..."
+    },
+    "actions": {
+      "send": "Kirim",
+      "abort": "Batalkan",
+      "accept": "Terima",
+      "decline": "Tolak"
+    },
     "confirm": {
-      "title": "Konfirmasi detail transaksi",
+      "title": "Konfirmasi tindakan?",
       "fields": {
         "title": "Judul",
         "budget": "Anggaran",
         "amount": "Jumlah"
       }
     },
-    "actions": {
-      "accept": "Terima",
-      "decline": "Tolak",
-      "abort": "Batalkan",
-      "send": "Kirim"
-    },
     "buttons": {
       "close": "Tutup AI Assistant",
       "ask": "Tanya AI"
-    },
-    "input": {
-      "placeholder": "Tulis pertanyaan untuk AI…"
     },
     "presets": {
       "header": "Mulai dari saran siap pakai",
@@ -143,9 +141,22 @@
     "insights": {
       "title": "Wawasan AI",
       "beta": "Beta"
+    },
+    "tone": {
+      "label": "Nada",
+      "select_label": "Pilih nada asisten AI",
+      "options": {
+        "neutral": "Netral",
+        "friendly": "Ramah",
+        "formal": "Formal",
+        "playful": "Main-main"
+      }
+    },
+    "settings": {
+      "title": "Nada Spendly Pal",
+      "description": "Pilih nada respons untuk asisten AI Anda."
     }
   },
-
   "notFound": {
     "title": "Maaf, halaman ini tidak ada",
     "button": {
@@ -155,7 +166,6 @@
       "illustration": "Ilustrasi 404"
     }
   },
-
   "meta": {
     "app": {
       "title": "Spendly - Manajer Keuangan Pribadi",
@@ -163,7 +173,6 @@
       "keywords": "keuangan,anggaran,pengeluaran,uang,pelacakan,keuangan pribadi"
     }
   },
-
   "pages": {
     "auth": {
       "home": {
@@ -230,7 +239,6 @@
       }
     }
   },
-
   "charts": {
     "titles": {
       "analytics": "Analitik Anggaran",
@@ -290,7 +298,6 @@
       "defaultDescription": "Bandingkan periode anggaran pilihan"
     }
   },
-
   "transactions": {
     "title": "Transaksi📉",
     "addTransaction": "Tambah Transaksi",
@@ -328,7 +335,6 @@
       }
     }
   },
-
   "dashboard": {
     "welcome": "Selamat datang {name}👋",
     "deleteModal": {
@@ -354,7 +360,6 @@
       "coversExpenses": "Menutupi pengeluaran sebesar {percent}%"
     }
   },
-
   "budgets": {
     "list": {
       "modal": {
@@ -398,7 +403,6 @@
       }
     }
   },
-
   "notifications": {
     "bell": {
       "aria": "Notifikasi",
@@ -466,14 +470,12 @@
       "subscriptionRemoved": "Langganan push dihapus"
     }
   },
-
   "filters": {
     "options": {
       "week": "Minggu",
       "month": "Bulan"
     }
   },
-
   "modals": {
     "appInstall": {
       "title": "Instal Aplikasi"
@@ -529,7 +531,6 @@
       }
     }
   },
-
   "errors": {
     "selectImageFile": "Silakan pilih file gambar",
     "fileTooLarge5mb": "Ukuran file harus kurang dari 5MB",
@@ -551,7 +552,6 @@
       "deactivateFailed": "Terjadi kesalahan saat menonaktifkan langganan push"
     }
   },
-
   "common": {
     "saving": "Menyimpan…",
     "unexpectedError": "Terjadi kesalahan tak terduga",

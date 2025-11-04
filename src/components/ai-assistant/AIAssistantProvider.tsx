@@ -18,6 +18,8 @@ const AIAssistantProvider: React.FC = () => {
     hasPendingAction,
     isRateLimited,
     pendingActionPayload,
+    assistantTone,
+    setAssistantTone,
   } = useChat()
 
   const handleAIButtonClick = () => {
@@ -45,6 +47,8 @@ const AIAssistantProvider: React.FC = () => {
         hasPendingAction={hasPendingAction}
         isRateLimited={isRateLimited}
         pendingAction={pendingActionPayload}
+        assistantTone={assistantTone}
+        onToneChange={setAssistantTone}
       />
     </>
   )

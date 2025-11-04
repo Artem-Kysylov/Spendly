@@ -9,9 +9,10 @@ export const composeLLMPrompt = (
     budgets: Array<{ id: string; name: string; emoji?: string; type: 'expense' | 'income'; amount?: number }>;
     lastTransactions: Array<{ title: string; amount: number; type: 'expense' | 'income'; budget_folder_id: string | null; created_at: string }>;
     lastMonthTxs: any[];
+    recurringCandidates?: Array<{ title_pattern: string; budget_folder_id: string | null; avg_amount: number; cadence: 'weekly' | 'monthly'; next_due_date: string; count: number }>
   },
   userMessage: string,
-  opts?: { locale?: string; currency?: string; promptVersion?: string; maxChars?: number }
+  opts?: { locale?: string; currency?: string; promptVersion?: string; maxChars?: number; tone?: 'neutral' | 'friendly' | 'formal' | 'playful' }
 ): string => {
   const locale = opts?.locale || 'en-US'
   const currency = (opts?.currency || 'USD').toUpperCase()
@@ -57,7 +58,7 @@ export const composeLLMPrompt = (
   const top3ThisMonth = topExpenses(txsThisMonth, 3)
   const top3LastMonth = topExpenses(lastMonthTxs, 3)
 
-  const instructions = buildInstructions({ locale, currency, promptVersion: opts?.promptVersion || PROMPT_VERSION, intent: builderIntent })
+  const instructions = buildInstructions({ locale, currency, promptVersion: opts?.promptVersion || PROMPT_VERSION, intent: builderIntent, tone: opts?.tone })
 
   const weeklySection = buildWeeklySections({
     weekStartISO: weekStart.toISOString().slice(0, 10),
@@ -92,12 +93,19 @@ export const composeLLMPrompt = (
     budgetNameById
   })
 
+  // Сводка подписок (если есть кандидаты)
+  const recurringSection =
+    (ctx.recurringCandidates && ctx.recurringCandidates.length > 0)
+      ? require('./promptBuilder').buildRecurringSummary({ candidates: ctx.recurringCandidates, currency })
+      : undefined
+
   return buildPrompt({
     budgets: ctx.budgets,
     instructions,
     weeklySection,
     monthlySection,
     userMessage,
-    maxChars: opts?.maxChars
+    maxChars: opts?.maxChars,
+    recurringSection
   })
 }

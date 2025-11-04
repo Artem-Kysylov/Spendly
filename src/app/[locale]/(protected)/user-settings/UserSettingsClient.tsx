@@ -18,6 +18,7 @@ import LanguageSelect from '@/components/ui-elements/locale/LanguageSelect'
 import { useTranslations } from 'next-intl'
 import { useRouter, usePathname } from '@/i18n/routing'
 import { useParams } from 'next/navigation'
+import ToneSettings from '@/components/ai-assistant/ToneSettings'
 
 export default function UserSettingsClient() {
   const { signOut, session } = UserAuth()
@@ -32,6 +33,7 @@ export default function UserSettingsClient() {
   const tPricing = useTranslations('pricing')
   const tCTA = useTranslations('cta')
   const tCommon = useTranslations('common')
+  const tAI = useTranslations('assistant')
 
   // Appearance & App Controls
   const [isAppInstallModalOpen, setIsAppInstallModalOpen] = useState(false)
@@ -230,6 +232,19 @@ export default function UserSettingsClient() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Assistant Tone Section */}
+            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
+                  {tAI('settings.title')}
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-white mt-1">
+                  {tAI('settings.description')}
+                </p>
+              </div>
+              <ToneSettings />
             </div>
 
             {/* Language Section */}

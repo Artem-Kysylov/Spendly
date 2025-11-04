@@ -1,6 +1,6 @@
 // Module: /api/assistant
 import { NextRequest } from 'next/server'
-import { aiResponse, executeTransaction, getCanonicalEmptyReply } from '@/app/[locale]/actions/aiAssistant'
+import { aiResponse, executeTransaction, getCanonicalEmptyReply, upsertRecurringRule } from '@/app/[locale]/actions/aiAssistant'
 import { composeLLMPrompt } from '@/prompts/spendlyPal/composeLLMPrompt'
 import { PROMPT_VERSION } from '@/prompts/spendlyPal/promptVersion'
 import { prepareUserContext } from '@/lib/ai/context'
@@ -128,6 +128,7 @@ function streamProviderWithUsage(
     period?: string;
     locale?: string;
     currency?: string;
+    tone?: 'neutral' | 'friendly' | 'formal' | 'playful';
   }
 ) {
   const encoder = new TextEncoder()
@@ -216,7 +217,8 @@ function streamProviderWithUsage(
       'X-Period': meta.period || 'unknown',
       'X-Locale': meta.locale || 'en-US',
       'X-Currency': meta.currency || 'USD',
-      'X-Bypass': 'false'
+      'X-Bypass': 'false',
+      'X-Tone': meta.tone || 'neutral',
     }
   })
 }
@@ -224,6 +226,8 @@ function streamProviderWithUsage(
 export async function POST(req: NextRequest) {
   const body = await req.json()
   const { userId, isPro = false, enableLimits = false, message, confirm = false, actionPayload } = body || {}
+  const actionType: 'add_transaction' | 'save_recurring_rule' | undefined = body?.actionType
+  const tone: 'neutral' | 'friendly' | 'formal' | 'playful' = (body?.tone || 'neutral')
 
   const requestId = (typeof crypto?.randomUUID === 'function' ? crypto.randomUUID() : `req_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`)
   const debug = (process.env.LLM_DEBUG === '1' || process.env.LLM_DEBUG === 'true')
@@ -268,6 +272,12 @@ export async function POST(req: NextRequest) {
 
   // Подтверждение — исполняем и отдаём JSON
   if (confirm && actionPayload) {
+    if (actionType === 'save_recurring_rule') {
+      const res = await upsertRecurringRule(userId, actionPayload)
+      return new Response(JSON.stringify({ kind: 'message', ok: res.ok, message: res.message, shouldRefetch: false }), {
+        headers: { 'Content-Type': 'application/json' }
+      })
+    }
     const res = await executeTransaction(userId, actionPayload)
     return new Response(JSON.stringify({ kind: 'message', ok: res.ok, message: res.message, shouldRefetch: res.ok }), {
       headers: { 'Content-Type': 'application/json' }
@@ -282,7 +292,7 @@ export async function POST(req: NextRequest) {
 
   // Реальный стрим от провайдера
   const ctx = await prepareUserContext(userId)
-  const promptRaw = composeLLMPrompt(ctx, safeMessage, { locale, currency, promptVersion: PROMPT_VERSION, maxChars: MAX_PROMPT })
+  const promptRaw = composeLLMPrompt(ctx, safeMessage, { locale, currency, promptVersion: PROMPT_VERSION, maxChars: MAX_PROMPT, tone })
   const prompt = typeof promptRaw === 'string' ? promptRaw : String(promptRaw ?? '')
 
   // Доп. диагностика: тип и первые 200 символов промпта
@@ -406,7 +416,18 @@ export async function POST(req: NextRequest) {
         system: systemForLLM,
         requestId
       })
-      return streamProviderWithUsage(stream, { requestId, userId, provider: 'openai', model, promptLength: prompt.length, intent, period: periodDetected, locale, currency })
+      return streamProviderWithUsage(stream, {
+        requestId,
+        userId,
+        provider: 'openai',
+        model,
+        promptLength: prompt.length,
+        intent,
+        period: periodDetected,
+        locale,
+        currency,
+        tone
+      })
     } else {
       const model = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash'
       const stream = streamGeminiText({
@@ -415,7 +436,18 @@ export async function POST(req: NextRequest) {
         system: systemForLLM,
         requestId
       })
-      return streamProviderWithUsage(stream, { requestId, userId, provider: 'gemini', model, promptLength: prompt.length, intent, period: periodDetected, locale, currency })
+      return streamProviderWithUsage(stream, {
+        requestId,
+        userId,
+        provider: 'gemini',
+        model,
+        promptLength: prompt.length,
+        intent,
+        period: periodDetected,
+        locale,
+        currency,
+        tone
+      })
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Unknown provider error'

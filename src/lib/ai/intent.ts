@@ -13,6 +13,12 @@ export const detectIntentFromMessage = (userMessage: string): Intent => {
     { intent: 'create_budget_plan', patterns: ['create a budget plan', 'budget plan', 'план бюджета', 'создай план бюджета'] },
     { intent: 'biggest_expenses', patterns: ['show my biggest expenses', 'biggest expenses', 'top expenses', 'largest expenses', 'крупные траты', 'самые большие расходы', 'топ расходов'] },
     { intent: 'compare_months', patterns: ['compare this month vs last month', 'this month vs last month', 'compare months', 'сравни этот месяц с прошлым', 'сравнение месяцев', 'этот месяц против прошлого'] },
+    { intent: 'show_recurring_charges', patterns: [
+      // RU
+      'подписк', 'повтор', 'ежемесячно', 'еженедельно',
+      // EN
+      'recurring', 'subscription', 'monthly', 'weekly'
+    ] },
   ]
 
   for (const p of presets) {

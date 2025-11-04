@@ -23,6 +23,8 @@ export type NamespaceKeys = {
     | 'confirm.fields.title' | 'confirm.fields.budget' | 'confirm.fields.amount'
     | 'actions.accept' | 'actions.decline' | 'actions.abort' | 'actions.send'
     | 'buttons.close' | 'buttons.ask' | 'input.placeholder'
+    | 'tone.label' | 'tone.select_label'
+    | 'tone.options.neutral' | 'tone.options.friendly' | 'tone.options.formal' | 'tone.options.playful'
     | 'presets.header' | 'presets.showWeek' | 'presets.saveMoney' | 'presets.analyzePatterns'
     | 'presets.createBudgetPlan' | 'presets.showBiggest' | 'presets.compareMonths'
     | 'insights.title' | 'insights.beta'

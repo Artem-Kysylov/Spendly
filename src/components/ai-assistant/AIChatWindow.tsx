@@ -25,7 +25,9 @@ export const AIChatWindow = ({
     onConfirmAction,
     hasPendingAction,
     isRateLimited,
-    pendingAction
+    pendingAction,
+    assistantTone,
+    onToneChange
 }: {
     isOpen: boolean
     messages: ChatMessage[]
@@ -36,14 +38,16 @@ export const AIChatWindow = ({
     onConfirmAction: (confirm: boolean) => Promise<void>
     hasPendingAction: boolean
     isRateLimited: boolean
-    pendingAction?: { title: string; amount: number; budget_folder_id: string | null; budget_name: string } | null
+    pendingAction?: { title?: string; amount?: number; budget_folder_id: string | null; budget_name?: string; title_pattern?: string; avg_amount?: number; cadence?: 'weekly' | 'monthly'; next_due_date?: string } | null
+    assistantTone: 'neutral' | 'friendly' | 'formal' | 'playful'
+    onToneChange: (tone: 'neutral' | 'friendly' | 'formal' | 'playful') => void | Promise<void>
 }) => {
     if (!isOpen) return null
-  const tAI = useTranslations('assistant')
+    const tAI = useTranslations('assistant')
 
     return (
         <>
-            <div className="fixed inset-x-0 bottom-36 top-0 z-[90] pt-safe pb-safe lg:pt-0 lg:pb-0 lg:bottom-20 lg:right-4 lg:top-auto lg:left-auto w-full lg:w-[450px] lg:h-[550px] animate-in slide-in-from-bottom-2 fade-in-0 duration-300">
+            <div className="fixed inset-x-0 bottom-36 top-0 z-[90] pt-safe pb-safe lg:pt-0 lg:pb-0 lg:bottom-20 lg:right-4 lg:top-auto lg:left-auto w-full lg:w-[450px] lg:h-[650px] animate-in slide-in-from-bottom-2 fade-in-0 duration-300">
               {/* Chat Window */}
               <div className="h-full bg-white text-secondary-black dark:bg-black dark:text-white lg:rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 flex flex-col">
                 {/* Header */}
@@ -94,15 +98,35 @@ export const AIChatWindow = ({
                             <div className="text-sm font-semibold text-secondary-black dark:text-white mb-1">{tAI('confirm.title')}</div>
                             {pendingAction && (
                                 <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">
-                                    <div>
-                                        <span className="text-gray-500 dark:text-gray-400">{tAI('confirm.fields.title')}:</span> {pendingAction.title}
-                                    </div>
-                                    <div>
-                                        <span className="text-gray-500 dark:text-gray-400">{tAI('confirm.fields.budget')}:</span> {pendingAction.budget_name}
-                                    </div>
-                                    <div>
-                                        <span className="text-gray-500 dark:text-gray-400">{tAI('confirm.fields.amount')}:</span> ${pendingAction.amount.toFixed(2)}
-                                    </div>
+                                    {pendingAction.title && (
+                                      <>
+                                        <div>
+                                            <span className="text-gray-500 dark:text-gray-400">{tAI('confirm.fields.title')}:</span> {pendingAction.title}
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-500 dark:text-gray-400">{tAI('confirm.fields.budget')}:</span> {pendingAction.budget_name}
+                                        </div>
+                                        <div>
+                                            <span className="text-gray-500 dark:text-gray-400">{tAI('confirm.fields.amount')}:</span> ${Number(pendingAction.amount ?? 0).toFixed(2)}
+                                        </div>
+                                      </>
+                                    )}
+                                    {!pendingAction.title && pendingAction.title_pattern && (
+                                      <>
+                                        <div>
+                                          <span className="text-gray-500 dark:text-gray-400">Pattern:</span> {pendingAction.title_pattern}
+                                        </div>
+                                        <div>
+                                          <span className="text-gray-500 dark:text-gray-400">Cadence:</span> {pendingAction.cadence}
+                                        </div>
+                                        <div>
+                                          <span className="text-gray-500 dark:text-gray-400">Avg amount:</span> ${Number(pendingAction.avg_amount ?? 0).toFixed(2)}
+                                        </div>
+                                        <div>
+                                          <span className="text-gray-500 dark:text-gray-400">Next due:</span> {pendingAction.next_due_date}
+                                        </div>
+                                      </>
+                                    )}
                                 </div>
                             )}
                             <div className="flex items-center gap-2">
@@ -131,6 +155,8 @@ export const AIChatWindow = ({
                                     disabled={isRateLimited}
                                     isThinking={isTyping}
                                     onAbort={onAbort}
+                                    assistantTone={assistantTone}
+                                    onToneChange={onToneChange}
                                 />
                             </div>
                         </div>
@@ -138,8 +164,6 @@ export const AIChatWindow = ({
                 </div>          {/* закрываем flex-1 контент */}
               </div>            {/* закрываем внутренний контейнер окна (h-full ...) */}
             </div>              {/* закрываем внешний fixed контейнер */}
-
-            {/* Убрали мобильную кнопку снизу, чтобы окно было над внешней кнопкой */}
         </>
     )
 }

@@ -4,6 +4,7 @@
 import { getServerSupabaseClient } from '@/lib/serverSupabase'
 import { getPreviousMonthRange } from '@/lib/dateUtils'
 import type { UserContext, BudgetFolder, Transaction } from '@/types/ai'
+import { findRecurringCandidates } from './recurring'
 
 export const prepareUserContext = async (userId: string): Promise<UserContext> => {
   const supabase = getServerSupabaseClient()
@@ -27,9 +28,14 @@ export const prepareUserContext = async (userId: string): Promise<UserContext> =
     return d >= start && d <= end
   })
 
+  // Фича‑флаг: включение памяти повторяющихся
+  const useRecurring = (process.env.USE_RECURRING_MEMORY === '1' || process.env.USE_RECURRING_MEMORY === 'true')
+  const recurringCandidates = useRecurring ? findRecurringCandidates((lastTransactions || []) as Transaction[], 120) : []
+
   return {
     budgets: (budgets || []) as BudgetFolder[],
     lastTransactions: (lastTransactions || []) as Transaction[],
     lastMonthTxs: lastMonthTxs as Transaction[],
+    recurringCandidates
   }
 }

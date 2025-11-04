@@ -109,69 +109,40 @@
     "labels": { "rememberMe": "계정 기억하기" }
   },
   "assistant": {
-    "title": "AI 비서",
-    "rateLimited": "요청 제한에 도달했습니다. 잠시 후 다시 시도하세요.",
-    "welcomeTitle": "예산과 지출에 대해 무엇이든 물어보세요",
-    "welcomeDesc": "지출 분석, 절약 팁, 예산 계획을 도와드려요.",
+    "title": "Spendly Pal",
+    "welcomeTitle": "Spendly Pal을 만나보세요",
+    "welcomeDesc": "AI 기반 금융 비서입니다. \"이번 달 지출이 얼마인가요?\" 또는 \"새 거래 추가\"와 같은 질문을 해보세요.",
+    "rateLimited": "AI 요청 제한에 도달했습니다. 몇 초 후에 다시 시도하세요.",
+    "input": {
+      "placeholder": "Spendly Pal에게 메시지 보내기..."
+    },
+    "actions": {
+      "send": "보내기",
+      "abort": "중단",
+      "accept": "수락",
+      "decline": "거절"
+    },
     "confirm": {
-      "title": "거래 세부정보 확인",
+      "title": "작업 확인?",
       "fields": {
         "title": "제목",
         "budget": "예산",
         "amount": "금액"
       }
     },
-    "actions": {
-      "accept": "확인",
-      "decline": "취소",
-      "abort": "중단",
-      "send": "보내기"
-    },
-    "buttons": {
-      "close": "닫기",
-      "ask": "AI에게 물어보기"
-    },
-    "input": {
-      "placeholder": "지출에 대해 물어보세요..."
-    },
-    "presets": {
-      "header": "빠른 질문:",
-      "showWeek": "이번 주 지출 내역 보여줘",
-      "saveMoney": "돈을 절약할 수 있는 방법은?",
-      "analyzePatterns": "내 지출 패턴 분석해줘",
-      "createBudgetPlan": "예산 계획 세워줘",
-      "showBiggest": "가장 큰 지출 내역 보여줘",
-      "compareMonths": "이번 달과 지난달 지출 비교해줘"
-    },
-    "insights": {
-      "title": "AI 인사이트",
-      "beta": "베타",
-      "messages": {
-        "budgetExceeded": {
-          "title": "예산 초과",
-          "message": "예산을 {over} 초과했습니다."
-        },
-        "budgetAlert": {
-          "title": "예산 사용 경고",
-          "message": "예산의 {usedPercent}%를 사용했습니다."
-        },
-        "risingExpenses": {
-          "title": "지출 증가",
-          "message": "지출이 {trend}% 증가했습니다."
-        },
-        "incomeGrowth": {
-          "title": "수입 증가",
-          "message": "수입이 {trend}% 증가했습니다."
-        },
-        "negativeCashFlow": {
-          "title": "현금 흐름이 음수",
-          "message": "지출이 수입을 초과하고 있어요. 조정이 필요합니다."
-        },
-        "financialHealth": {
-          "title": "건전한 재무 상태",
-          "message": "지출과 수입이 안정적으로 관리되고 있어요."
-        }
+    "tone": {
+      "label": "톤",
+      "select_label": "AI 비서 톤 선택",
+      "options": {
+        "neutral": "중립적",
+        "friendly": "친근한",
+        "formal": "격식있는",
+        "playful": "재치있게"
       }
+    },
+    "settings": {
+      "title": "Spendly Pal 톤",
+      "description": "AI 어시스턴트의 응답 톤을 선택하세요."
     }
   },
   "common": {

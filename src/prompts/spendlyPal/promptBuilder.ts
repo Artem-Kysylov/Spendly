@@ -7,6 +7,7 @@ import {
   EN_EMPTY_THIS_MONTH, EN_EMPTY_LAST_MONTH
 } from './canonicalPhrases'
 import { sanitizeTitle } from '@/lib/ai/commands'
+import type { AssistantTone } from '@/types/ai'
 
 type Budget = { id: string; name: string; emoji?: string; type: 'expense' | 'income'; amount?: number }
 type Transaction = { title: string; amount: number; type: 'expense' | 'income'; budget_folder_id: string | null; created_at: string }
@@ -23,7 +24,26 @@ export function currencySymbol(currency?: string): string {
   }
 }
 
-export function buildInstructions(opts: { locale?: string; currency?: string; intent?: 'unknown' | 'save_advice' | 'analyze_spending' | 'biggest_expenses' | 'compare_months'; promptVersion?: string; }): string {
+export function buildRecurringSummary(args: {
+  candidates: Array<{ title_pattern: string; avg_amount: number; cadence: 'weekly' | 'monthly'; next_due_date: string; count: number }>
+  currency?: string
+}): string {
+  const symbol = currencySymbol(args.currency)
+  if (!args.candidates || args.candidates.length === 0) {
+    return 'RecurringCharges:\nnone'
+  }
+  const top = args.candidates
+    .slice()
+    .sort((a, b) => b.avg_amount - a.avg_amount)
+    .slice(0, 7)
+    .map(c => {
+      const cad = c.cadence === 'weekly' ? 'weekly' : 'monthly'
+      return `${cad}: ${c.title_pattern} ~ ${symbol}${Number(c.avg_amount).toFixed(2)} | next: ${c.next_due_date} | count: ${c.count}`
+    })
+  return ['RecurringCharges:', ...top.map(x => `• ${x}`)].join('\n')
+}
+
+export function buildInstructions(opts: { locale?: string; currency?: string; intent?: 'unknown' | 'save_advice' | 'analyze_spending' | 'biggest_expenses' | 'compare_months'; promptVersion?: string; tone?: AssistantTone }): string {
   const locale = opts?.locale || 'en-US'
   const currency = (opts?.currency || 'USD').toUpperCase()
   const pv = opts?.promptVersion || PROMPT_VERSION
@@ -50,8 +70,23 @@ export function buildInstructions(opts: { locale?: string; currency?: string; in
           : 'If asked to compare months, compare totals for this and last month and state the difference.')
       : ''
 
+  const toneMapEn: Record<AssistantTone, string> = {
+    neutral: 'Use a neutral, straightforward tone.',
+    friendly: 'Use a friendly, encouraging tone.',
+    formal: 'Use a formal, professional tone.',
+    playful: 'Use a playful, upbeat tone.',
+  }
+  const toneMapRu: Record<AssistantTone, string> = {
+    neutral: 'Используй нейтральный, прямой тон.',
+    friendly: 'Используй дружелюбный, поддерживающий тон.',
+    formal: 'Используй формальный, профессиональный тон.',
+    playful: 'Используй игривый, позитивный тон.',
+  }
+  const toneDirective = opts.tone ? (isRu ? toneMapRu[opts.tone] : toneMapEn[opts.tone]) : ''
+
   return [
     'You are a helpful finance assistant.',
+    toneDirective,
     'Respond in the user’s language using concise natural sentences or short bullet points.',
     'Use only the data provided below. Do not invent transactions, merchants, categories, or amounts.',
     'Answer in plain text only. Do not use JSON, code fences, or markdown tables.',
@@ -59,6 +94,10 @@ export function buildInstructions(opts: { locale?: string; currency?: string; in
     `If the requested weekly period has "none", reply exactly: "${weeklyNone}" or "${weeklyNoneLast}".`,
     `If the requested monthly period has "none", reply exactly: "${monthlyNone}" or "${monthlyNoneLast}".`,
     'Include key numbers: totals, budget totals, and top expenses when relevant. You may add a short insight if helpful.',
+    // Краткая инструкция по оптимизации подписок
+    (isRu
+      ? 'Если показываешь подписки, предложи краткие советы по оптимизации: отмена редко используемых, объединение тарифов, проверка лишних сервисов.'
+      : 'If you list recurring charges, add brief optimization suggestions: cancel rarely used, consolidate plans, review unnecessary services.'),
     intentExtra,
     'Do not provide application instructions, onboarding, UI steps, or how-to guides unless explicitly asked.',
     `Currency: ${currency}. PromptVersion: ${pv}.`
@@ -175,6 +214,8 @@ export function buildPrompt(params: {
   monthlySection: string
   userMessage: string
   maxChars?: number
+  // Новое: секция подписок (необязательно)
+  recurringSection?: string
 }): string {
   const budgetsSummary = params.budgetsSummary ?? (params.budgets || [])
     .map(b => `${sanitizeTitle(b.name)} (${b.type})`)
@@ -186,6 +227,7 @@ export function buildPrompt(params: {
     `Known budgets: ${budgetsSummary || 'none'}.`,
     params.weeklySection,
     params.monthlySection,
+    params.recurringSection ? params.recurringSection : '',
     `User: ${params.userMessage}`
   ].join('\n')
 
