@@ -12,8 +12,13 @@ export default function PaymentClient() {
   const tPayment = useTranslations('payment')
   const tPricing = useTranslations('pricing')
   const tCTA = useTranslations('cta')
+  const CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL
 
   const handleUpgradeClick = () => {
+    if (CHECKOUT_URL) {
+      window.location.href = CHECKOUT_URL
+      return
+    }
     setToast({ text: tPayment('toastComingSoon'), type: 'success' })
     setTimeout(() => setToast(null), 3000)
   }
