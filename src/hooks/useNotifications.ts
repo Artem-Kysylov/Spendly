@@ -180,6 +180,33 @@ export const useNotifications = (): UseNotificationsReturn => {
         fetchNotifications()
     }, [fetchNotifications])
 
+    // NEW: daily recurring due check
+    useEffect(() => {
+        if (!session?.user?.id) return
+        const key = 'spendly_last_recurring_check'
+        const today = new Date().toISOString().slice(0, 10)
+        const last = typeof window !== 'undefined' ? localStorage.getItem(key) : null
+        if (last === today) return
+
+        ;(async () => {
+            try {
+                const token = await getAuthToken()
+                if (!token) return
+                await fetch(`${apiBase}/recurring`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                })
+                localStorage.setItem(key, today)
+                fetchNotifications()
+            } catch (err) {
+                console.warn('Recurring check failed', err)
+            }
+        })()
+    }, [session?.user?.id, apiBase, getAuthToken, fetchNotifications])
+
     // Real-time subscription для получения новых уведомлений
     useEffect(() => {
         if (!session?.user?.id) return

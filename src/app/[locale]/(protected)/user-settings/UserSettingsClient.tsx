@@ -19,6 +19,7 @@ import { useTranslations } from 'next-intl'
 import { useRouter, usePathname } from '@/i18n/routing'
 import { useParams } from 'next/navigation'
 import ToneSettings from '@/components/ai-assistant/ToneSettings'
+import RecurringRulesSettings from '@/components/user-settings/RecurringRulesSettings'
 
 export default function UserSettingsClient() {
   const { signOut, session } = UserAuth()
@@ -155,6 +156,19 @@ export default function UserSettingsClient() {
                 </p>
               </div>
               <NotificationSettings />
+            </div>
+
+            {/* Recurring Rules Section */}
+            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-secondary-black mb-2 dark:text-white">
+                  {tSettings('recurringRules.title')}
+                </h2>
+                <p className="text-gray-600 dark:text-white text-sm">
+                  {tSettings('recurringRules.description')}
+                </p>
+              </div>
+              <RecurringRulesSettings />
             </div>
 
             {/* Subscription Section */}

@@ -11,12 +11,14 @@ import { Select } from '@/components/ui/select'
 
 import { TransactionModalProps, BudgetFolderItemProps } from '../../types/types'
 import { useTranslations } from 'next-intl'
+import type { RecurringRule } from '@/types/ai'
 
 function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
   const { session } = UserAuth()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const tModals = useTranslations('modals')
   const tCommon = useTranslations('common')
+  const tTxn = useTranslations('transaction')
 
   const [transactionTitle, setTransactionTitle] = useState<string>('')
   const [amount, setAmount] = useState<string>('')
@@ -29,6 +31,22 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
   const [isBudgetsLoading, setIsBudgetsLoading] = useState<boolean>(false)
   const [isTypeDisabled, setIsTypeDisabled] = useState<boolean>(false)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+
+  // Автоподстановка: состояние правил и совпадения
+  const [recurringRules, setRecurringRules] = useState<RecurringRule[]>([])
+  const [matchedRule, setMatchedRule] = useState<RecurringRule | null>(null)
+  const [autoApplyKey, setAutoApplyKey] = useState<string | null>(null)
+  const [prevManual, setPrevManual] = useState<{ amount: string; budgetId: string; type: 'expense' | 'income' } | null>(null)
+
+  // Резервные строки для бейджа автозаполнения (если ключи лежат в другом неймспейсе)
+  const badgeByRuleText = (() => {
+    const s = tModals('transaction.ruleBadge.byRule')
+    return s === 'modals.transaction.ruleBadge.byRule' ? tTxn('ruleBadge.byRule') : s
+  })()
+  const badgeUndoText = (() => {
+    const s = tModals('transaction.ruleBadge.undo')
+    return s === 'modals.transaction.ruleBadge.undo' ? tTxn('ruleBadge.undo') : s
+  })()
 
   const fetchBudgetFolders = async () => {
     if (!session?.user?.id) return
@@ -60,11 +78,71 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
     }
   }, [session?.user?.id])
 
+  // Загрузка активных правил пользователя
+  useEffect(() => {
+    if (!session?.user?.id) return
+    ;(async () => {
+      const { data, error } = await supabase
+        .from('recurring_rules')
+        .select('id, user_id, title_pattern, budget_folder_id, avg_amount, cadence, next_due_date, active, created_at, updated_at')
+        .eq('user_id', session.user.id)
+        .eq('active', true)
+        .order('avg_amount', { ascending: false })
+      if (!error && data) setRecurringRules(data as RecurringRule[])
+    })()
+  }, [session?.user?.id])
+
   const filteredBudgets = budgetFolders.filter((budget) =>
     budget.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
   const showSearch = budgetFolders.length > 5
+
+  // Нормализация заголовка (совпадает с серверной логикой)
+  const normalizeTitle = (raw: string): string => {
+    const s = (raw || '').toLowerCase()
+    const stripped = s
+      .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')
+      .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+    return stripped.replace(/(?:^|\s)[#*]?\d{3,}\b/g, '').trim()
+  }
+
+  // Применение бюджета, синхронизация типа
+  const applyBudgetId = (budgetId: string) => {
+    setSelectedBudgetId(budgetId)
+    if (budgetId === 'unbudgeted') {
+      setIsTypeDisabled(false)
+    } else {
+      const selectedBudget = budgetFolders.find((budget) => budget.id === budgetId)
+      if (selectedBudget) {
+        setType(selectedBudget.type)
+        setIsTypeDisabled(true)
+      }
+    }
+  }
+
+  // Поиск совпадения по правилу и автозаполнение
+  useEffect(() => {
+    const norm = normalizeTitle(transactionTitle)
+    if (!norm) {
+      setMatchedRule(null)
+      setAutoApplyKey(null)
+      return
+    }
+    const rule = recurringRules.find((r) => normalizeTitle(r.title_pattern) === norm) || null
+    if (rule && autoApplyKey !== rule.title_pattern) {
+      setPrevManual({ amount, budgetId: selectedBudgetId, type })
+      setAmount(String(rule.avg_amount))
+      applyBudgetId(rule.budget_folder_id ?? 'unbudgeted')
+      setMatchedRule(rule)
+      setAutoApplyKey(rule.title_pattern)
+    } else if (!rule) {
+      setMatchedRule(null)
+      setAutoApplyKey(null)
+    }
+  }, [transactionTitle, recurringRules])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -124,6 +202,19 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
     }
   }
 
+  const handleUndoRule = () => {
+    if (!prevManual) {
+      setMatchedRule(null)
+      setAutoApplyKey(null)
+      return
+    }
+    setAmount(prevManual.amount)
+    applyBudgetId(prevManual.budgetId)
+    setType(prevManual.type)
+    setMatchedRule(null)
+    setAutoApplyKey(null)
+  }
+
   return (
     <Dialog open={true} onOpenChange={(o) => { if (!o) onClose() }}>
       <DialogContent>
@@ -140,6 +231,19 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
               onChange={(e) => setTransactionTitle(e.target.value)}
               onInput={handleInput}
             />
+            {matchedRule && (
+              <div className="flex items-center gap-2 text-xs">
+                <span className="px-2 py-1 rounded bg-muted text-muted-foreground">
+                  {badgeByRuleText}
+                </span>
+                <button type="button" onClick={handleUndoRule} className="text-primary underline">
+                  {badgeUndoText}
+                </button>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground italic">
+              {tModals('transaction.hintRecurring')}
+            </p>
             <TextInput
               type="number"
               placeholder={tModals('transaction.placeholder.amountUSD')}
@@ -162,12 +266,12 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
               <Select
                 value={selectedBudgetId}
                 onChange={handleBudgetChange}
-                className="bg-background text-foreground" // было: bg-background dark:bg-neutral-900
+                className="bg-background text-foreground"
               >
                 <option value="unbudgeted">{tModals('transaction.select.unbudgeted')}</option>
                 {filteredBudgets.map((b) => (
                   <option key={b.id} value={b.id}>
-                    {b.name}
+                    {b.emoji ? `${b.emoji} ${b.name}` : b.name}
                   </option>
                 ))}
               </Select>

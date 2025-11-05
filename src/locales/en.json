@@ -74,6 +74,39 @@
       "title": "Account",
       "signOut": { "title": "Sign Out", "description": "Sign out of your account" }
     },
+    "recurringRules": {
+      "title": "Recurring Rules",
+      "description": "Manage auto-detected subscriptions and recurring charges.",
+      "form": {
+        "title": { "label": "Title / pattern", "placeholder": "Title / pattern" },
+        "avgAmount": { "label": "Average amount", "placeholder": "Average amount" },
+        "cadence": {
+          "label": "Cadence",
+          "options": { "weekly": "weekly", "monthly": "monthly" }
+        },
+        "nextDue": { "label": "Next due", "placeholder": "Pick a date" },
+        "budget": { "label": "Budget", "unbudgeted": "Unbudgeted" },
+        "btn": { "add": "Add rule", "saving": "Saving…" }
+      },
+      "list": {
+        "loading": "Loading rules…",
+        "empty": "No rules yet. Add the first rule above.",
+        "next": "next",
+        "inBudget": "in budget",
+        "unbudgeted": "unbudgeted",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "fillTitleAndAmount": "Please fill in title and amount.",
+        "loadFailed": "Failed to load recurring rules.",
+        "saveFailed": "Failed to save rule.",
+        "updateFailed": "Failed to update rule.",
+        "deleteFailed": "Failed to delete rule."
+      }
+    },
     "modals": { "signOut": { "title": "Sign out?", "text": "Are you sure you want to sign out?" } }
   },
   "payment": {
@@ -268,7 +301,12 @@
       "search": { "placeholder": "Search budget..." },
       "loadingBudgets": "Loading budgets...",
       "noResults": "No results found",
-      "type": { "expense": "Expense", "income": "Income" }
+      "type": { "expense": "Expense", "income": "Income" },
+      "hintRecurring": "Tip: using consistent names helps recognize recurring payments.",
+      "ruleBadge": {
+        "byRule": "Auto-filled by rule",
+        "undo": "Undo"
+      }
     },
     "editProfile": {
       "title": "Edit Profile",
@@ -446,6 +484,11 @@
     "authRequired": { "title": "Authentication required", "description": "Sign in to access notification settings.", "signIn": "Sign in" },
     "a11y": { "togglePush": "Toggle push notifications" },
     "dev": { "sqlScript": "SQL Script", "copy": "Copy", "copied": "Copied!" }
+  },
+  "recurring": {
+    "dueTodayTitle": "Recurring due today: {name}",
+    "dueSoonTitle": "Recurring due soon: {name}",
+    "message": "Due {date}. Approx. {amount}."
   },
   "errors": {
     "selectImageFile": "Please select an image file.",

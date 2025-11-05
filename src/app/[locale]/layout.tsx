@@ -87,7 +87,6 @@ export const viewport: Viewport = {
   // interactiveWidget: 'resizes-visual',
 }
 
-// делаем асинхронным для await loadMessages(...)
 export default async function RootLayout({
   children,
   params: {locale}

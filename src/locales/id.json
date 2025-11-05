@@ -89,6 +89,57 @@
         "title": "Keluar?",
         "text": "Anda yakin ingin keluar?"
       }
+    },
+    "recurringRules": {
+      "title": "Aturan Berkala",
+      "description": "Kelola langganan terdeteksi otomatis dan biaya berulang.",
+      "form": {
+        "title": {
+          "label": "Nama / pola",
+          "placeholder": "Mis.: Netflix, Spotify, sewa"
+        },
+        "avgAmount": {
+          "label": "Jumlah (rata-rata)",
+          "placeholder": "Mis.: 599, 1200"
+        },
+        "cadence": {
+          "label": "Frekuensi",
+          "options": {
+            "weekly": "mingguan",
+            "monthly": "bulanan"
+          }
+        },
+        "nextDue": {
+          "label": "Jatuh tempo berikutnya",
+          "placeholder": "Pilih tanggal"
+        },
+        "budget": {
+          "label": "Anggaran",
+          "unbudgeted": "Tanpa anggaran"
+        },
+        "btn": {
+          "saving": "Menyimpan…",
+          "add": "Tambah aturan"
+        }
+      },
+      "list": {
+        "loading": "Memuat aturan…",
+        "empty": "Belum ada aturan. Tambahkan aturan pertama di atas.",
+        "next": "Pembayaran berikutnya:",
+        "inBudget": "dalam anggaran",
+        "unbudgeted": "tanpa anggaran",
+        "save": "Simpan",
+        "cancel": "Batal",
+        "edit": "Edit",
+        "delete": "Hapus"
+      },
+      "errors": {
+        "fillTitleAndAmount": "Harap isi nama dan jumlah.",
+        "loadFailed": "Gagal memuat aturan berkala.",
+        "saveFailed": "Gagal menyimpan aturan.",
+        "updateFailed": "Gagal memperbarui aturan.",
+        "deleteFailed": "Gagal menghapus aturan."
+      }
     }
   },
   "auth": {
@@ -197,375 +248,63 @@
     "budgetDetails": {
       "meta": {
         "title": "Detail Anggaran",
-        "description": "Lihat dan kelola detail anggaran Anda."
+        "description": "Lihat detail anggaran Anda."
       }
     },
-    "dashboard": {
+    "budgetOverview": {
       "meta": {
-        "title": "Dasbor",
-        "description": "Ringkasan anggaran dan aktivitas."
+        "title": "Ringkasan Anggaran",
+        "description": "Ringkasan total pengeluaran dan sisa anggaran."
       }
     },
-    "payment": {
+    "expenseList": {
       "meta": {
-        "title": "Pembayaran",
-        "description": "Pilih paket dan lakukan pembayaran."
+        "title": "Daftar Pengeluaran",
+        "description": "Lihat semua pengeluaran yang telah Anda catat."
       }
     },
-    "onboarding": {
+    "recurringRules": {
       "meta": {
-        "title": "Onboarding",
-        "description": "Siapkan preferensi dan mulai."
-      }
-    },
-    "setup": {
-      "budget": {
-        "meta": {
-          "title": "Pengaturan Anggaran",
-          "description": "Pilih negara dan mata uang."
-        }
-      }
-    },
-    "test": {
-      "meta": {
-        "title": "Halaman Tes",
-        "description": "Playground lokalisasi."
-      }
-    },
-    "notFound": {
-      "meta": {
-        "title": "Halaman Tidak Ditemukan",
-        "description": "Halaman yang diminta tidak ada."
-      }
-    }
-  },
-  "charts": {
-    "titles": {
-      "analytics": "Analitik Anggaran",
-      "comparisonBar": "Perbandingan Anggaran"
-    },
-    "bar": {
-      "titleByCategory": "Pengeluaran menurut kategori"
-    },
-    "line": {
-      "titleOverTime": "Pengeluaran dari waktu ke waktu"
-    },
-    "labels": {
-      "expenses": "Pengeluaran",
-      "income": "Pendapatan",
-      "for": "untuk"
-    },
-    "states": {
-      "loading": "Memuat...",
-      "loadingData": "Memuat data grafik...",
-      "noData": "Tidak ada data",
-      "noExpensesData": "Tidak ada data pengeluaran"
-    },
-    "transactionsBar": {
-      "title": "Grafik Pengeluaran"
-    },
-    "ai": {
-      "thinking": "Berpikir…",
-      "tips": "Dapatkan tips AI berdasarkan data Anda",
-      "stop": "Hentikan",
-      "getInsight": "Dapatkan Wawasan AI",
-      "placeholder": "Dapatkan wawasan AI berdasarkan data Anda",
-      "wait": "Mohon tunggu…",
-      "rateLimited": "Batas laju tercapai. Coba lagi nanti.",
-      "noData": "Data tidak cukup untuk dianalisis"
-    },
-    "comparison": {
-      "vsLastMonth": "dibanding bulan lalu",
-      "titles": {
-        "weekly": "Perbandingan mingguan",
-        "monthly": "Perbandingan bulanan"
-      },
-      "descriptions": {
-        "weekly": {
-          "expenses": "Bandingkan pengeluaran minggu ini dengan minggu lalu.",
-          "income": "Bandingkan pendapatan minggu ini dengan minggu lalu."
-        },
-        "monthly": {
-          "expenses": "Bandingkan pengeluaran bulan ini dengan bulan lalu.",
-          "income": "Bandingkan pendapatan bulan ini dengan bulan lalu."
-        }
-      },
-      "labels": {
-        "current": "Minggu ini",
-        "previous": "Minggu lalu"
-      },
-      "defaultTitle": "Perbandingan",
-      "defaultDescription": "Bandingkan periode anggaran pilihan"
-    }
-  },
-  "transactions": {
-    "title": "Transaksi📉",
-    "addTransaction": "Tambah Transaksi",
-    "empty": {
-      "title": "Belum ada transaksi",
-      "description": "Mulai dengan menambahkan transaksi pertama Anda",
-      "filtered": "Tidak ada transaksi yang ditemukan untuk filter yang dipilih"
-    },
-    "modal": {
-      "addTitle": "Tambah Transaksi"
-    },
-    "toast": {
-      "deleteFailed": "Gagal menghapus transaksi. Silakan coba lagi.",
-      "deleteSuccess": "Transaksi berhasil dihapus",
-      "updateFailed": "Gagal memperbarui transaksi",
-      "updateSuccess": "Transaksi berhasil diperbarui!"
-    },
-    "table": {
-      "headers": {
-        "title": "Nama Transaksi",
-        "budget": "Anggaran",
-        "amount": "Jumlah",
-        "type": "Jenis",
-        "date": "Tanggal",
-        "actions": "Aksi"
-      },
-      "unbudgeted": "Tak beranggaran",
-      "empty": {
-        "default": "Tidak ada transaksi"
-      },
-      "modal": {
-        "deleteTitle": "Hapus transaksi",
-        "deletePrompt": "Anda yakin ingin menghapus transaksi ini?",
-        "editTitle": "Edit transaksi"
-      }
-    }
-  },
-  "dashboard": {
-    "welcome": "Selamat datang {name}👋",
-    "deleteModal": {
-      "title": "Hapus transaksi",
-      "prompt": "Anda yakin ingin menghapus transaksi ini?"
-    },
-    "mainBudget": {
-      "editTitle": "Edit anggaran utama"
-    },
-    "counters": {
-      "totalBudget": "Total Anggaran",
-      "totalExpenses": "Total Pengeluaran",
-      "totalIncome": "Total Pendapatan",
-      "remaining": "Tersisa",
-      "usedPercent": "digunakan",
-      "overBudget": "Melebihi anggaran",
-      "status": {
-        "exceeded": "Terlampaui",
-        "warning": "Peringatan",
-        "notSet": "Belum diatur"
-      },
-      "ofBudget": "dari anggaran",
-      "coversExpenses": "Menutupi pengeluaran sebesar {percent}%"
-    }
-  },
-  "budgets": {
-    "list": {
-      "modal": {
-        "createTitle": "Buat anggaran baru💸"
-      },
-      "toast": {
-        "failedLoad": "Gagal memuat folder anggaran",
-        "failedCreate": "Gagal membuat anggaran",
-        "createSuccess": "Anggaran berhasil dibuat"
-      },
-      "card": {
-        "createNew": "Buat Anggaran Baru"
-      }
-    },
-    "labels": {
-      "spent": "Telah dibelanjakan",
-      "left": "Tersisa"
-    },
-    "details": {
-      "controls": {
-        "goToBudgets": "Ke Anggaran",
-        "editBudget": "Edit anggaran",
-        "deleteBudget": "Hapus anggaran"
-      },
-      "deleteModal": {
-        "title": "Hapus Anggaran",
-        "text": "Anda yakin ingin menghapus anggaran ini?"
-      },
-      "editModal": {
-        "title": "Edit Anggaran"
-      },
-      "toast": {
-        "failedDetermineType": "Gagal menentukan tipe anggaran",
-        "typeMissing": "Tipe anggaran tidak ada",
-        "addFailed": "Gagal menambahkan transaksi. Silakan coba lagi.",
-        "addSuccess": "Transaksi berhasil ditambahkan!",
-        "deleteFailed": "Gagal menghapus anggaran",
-        "deleteSuccess": "Anggaran berhasil dihapus",
-        "updateFailed": "Gagal memperbarui anggaran",
-        "updateSuccess": "Anggaran berhasil diperbarui!"
+        "title": "Aturan Berkala",
+        "description": "Kelola langganan otomatis dan biaya berulang."
       }
     }
   },
   "notifications": {
-    "bell": {
-      "aria": "Notifikasi",
-      "title": "Notifikasi",
-      "markAllRead": "Tandai semua terbaca",
-      "empty": {
-        "title": "Belum ada notifikasi",
-        "description": "Kami akan memberi tahu saat sesuatu penting terjadi"
-      },
-      "viewAll": "Lihat semua notifikasi",
-      "setup": {
-        "title": "Siapkan basis data untuk notifikasi",
-        "subtitle": "Buka pengaturan untuk petunjuk"
-      }
-    },
-    "settings": {
-      "push": {
-        "title": "Notifikasi Push",
-        "description": "Terima notifikasi di perangkat ini"
-      }
-    },
-    "frequency": {
-      "title": "Frekuensi Notifikasi",
-      "aria": "Frekuensi notifikasi",
-      "disabled": {
-        "label": "Jangan kirim",
-        "description": "Matikan semua pengingat"
-      },
-      "gentle": {
-        "label": "Pengingat ringan",
-        "description": "1–2 notifikasi per hari"
-      },
-      "aggressive": {
-        "label": "Pengingat agresif",
-        "description": "4–5 notifikasi per hari"
-      },
-      "relentless": {
-        "label": "Tanpa henti",
-        "description": "Anda akan merasakannya (10+ per hari)"
-      }
-    },
-    "toasts": {
-      "preferencesSaved": "Preferensi disimpan",
-      "preferencesSaveFailed": "Gagal menyimpan preferensi",
-      "pushEnabled": "Push diaktifkan",
-      "pushDisabled": "Push dinonaktifkan",
-      "pushStatusFailed": "Gagal memperbarui status push"
-    },
-    "authRequired": {
-      "title": "Autentikasi diperlukan",
-      "description": "Masuk untuk mengakses pengaturan notifikasi.",
-      "signIn": "Masuk"
-    },
-    "a11y": {
-      "togglePush": "Alihkan notifikasi push"
-    },
-    "dev": {
-      "sqlScript": "Skrip SQL",
-      "copy": "Salin",
-      "copied": "Disalin!"
-    },
-    "api": {
-      "queueAdded": "Notifikasi berhasil ditambahkan ke antrean",
-      "subscriptionSaved": "Langganan push disimpan",
-      "subscriptionRemoved": "Langganan push dihapus"
-    }
-  },
-  "filters": {
-    "options": {
-      "week": "Minggu",
-      "month": "Bulan"
+    "recurring": {
+      "dueTodayTitle": "Tagihan berkala jatuh tempo hari ini: {name}",
+      "dueSoonTitle": "Tagihan berkala jatuh tempo segera: {name}",
+      "message": "Jatuh tempo {date}. Perkiraan {amount}."
     }
   },
   "modals": {
-    "appInstall": {
-      "title": "Instal Aplikasi"
-    },
-    "budget": {
-      "pickEmojiOptional": "Pilih emoji (opsional)",
-      "placeholder": {
-        "name": "Nama anggaran",
-        "amountUSD": "Jumlah (USD)"
-      },
-      "type": {
-        "expense": "Pengeluaran",
-        "income": "Pendapatan"
-      },
-      "toast": {
-        "saveFailed": "Gagal menyimpan anggaran"
-      }
-    },
-    "mainBudget": {
-      "placeholder": {
-        "amountUSD": "Jumlah (USD)"
-      }
-    },
     "transaction": {
       "placeholder": {
         "title": "Nama transaksi",
         "amountUSD": "Jumlah (USD)"
       },
       "date": {
-        "label": "Tanggal",
+        "label": "Pilih tanggal",
         "placeholder": "Pilih tanggal"
       },
       "select": {
         "label": "Pilih kategori anggaran",
-        "unbudgeted": "Tak beranggaran"
+        "unbudgeted": "Tanpa Anggaran"
       },
       "search": {
         "placeholder": "Cari anggaran..."
       },
-      "loadingBudgets": "Memuat anggaran…",
-      "noResults": "Tidak ada hasil",
+      "loadingBudgets": "Memuat anggaran...",
+      "noResults": "Tidak ada hasil yang ditemukan.",
       "type": {
         "expense": "Pengeluaran",
-        "income": "Pendapatan"
+        "income": "Pemasukan"
       },
-      "autoTypeInfo": "Jenis transaksi dipilih otomatis berdasarkan kategori anggaran."
-    },
-    "editProfile": {
-      "title": "Edit Profil",
-      "toast": {
-        "updateSuccess": "Profil berhasil diperbarui!",
-        "updateFailed": "Gagal memperbarui profil"
+      "hintRecurring": "Tip: Gunakan nama yang konsisten untuk membantu mengidentifikasi pembayaran berulang.",
+      "ruleBadge": {
+        "byRule": "Diisi otomatis oleh aturan",
+        "undo": "Urungkan"
       }
-    }
-  },
-  "errors": {
-    "selectImageFile": "Silakan pilih file gambar",
-    "fileTooLarge5mb": "Ukuran file harus kurang dari 5MB",
-    "uploadAvatarFailed": "Gagal mengunggah avatar",
-    "removeAvatarFailed": "Gagal menghapus avatar",
-    "auth": {
-      "invalidAuthHeader": "Header otorisasi hilang atau tidak valid",
-      "notAuthenticated": "Pengguna tidak diautentikasi"
-    },
-    "notifications": {
-      "titleRequired": "Judul dan pesan diperlukan",
-      "fetchFailed": "Terjadi kesalahan saat mengambil notifikasi",
-      "createFailed": "Terjadi kesalahan saat membuat notifikasi",
-      "updateFailed": "Terjadi kesalahan saat memperbarui notifikasi",
-      "queueAddFailed": "Terjadi kesalahan saat menambahkan notifikasi ke antrean",
-      "queueFetchFailed": "Terjadi kesalahan saat mengambil antrean notifikasi",
-      "subscriptionInvalid": "Langganan push yang valid diperlukan",
-      "subscriptionSaveFailed": "Terjadi kesalahan saat menyimpan langganan push",
-      "deactivateFailed": "Terjadi kesalahan saat menonaktifkan langganan push"
-    }
-  },
-  "common": {
-    "saving": "Menyimpan…",
-    "unexpectedError": "Terjadi kesalahan tak terduga",
-    "errorLabel": "Kesalahan",
-    "cancel": "Batal",
-    "save": "Simpan",
-    "submit": "Kirim",
-    "close": "Tutup",
-    "delete": "Hapus",
-    "deleting": "Menghapus…",
-    "internalServerError": "Kesalahan server internal",
-    "pagination": {
-      "previous": "Sebelumnya",
-      "next": "Berikutnya"
     }
   }
 }

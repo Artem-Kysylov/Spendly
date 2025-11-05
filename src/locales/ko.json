@@ -17,15 +17,23 @@
       "budgets": "예산",
       "userSettings": "사용자 설정"
     },
-    "alt": { "logo": "Spendly 로고" }
+    "alt": {
+      "logo": "Spendly 로고"
+    }
   },
-
   "budgets": {
     "list": {
-      "card": { "createNew": "새 예산 만들기" },
-      "modal": { "createTitle": "예산 만들기" }
+      "card": {
+        "createNew": "새 예산 만들기"
+      },
+      "modal": {
+        "createTitle": "예산 만들기"
+      }
     },
-    "labels": { "spent": "지출", "left": "남은" },
+    "labels": {
+      "spent": "지출",
+      "left": "남은"
+    },
     "details": {
       "controls": {
         "goToBudgets": "예산으로 이동",
@@ -36,7 +44,9 @@
         "title": "예산 삭제",
         "text": "이 예산을 삭제하시겠습니까?"
       },
-      "editModal": { "title": "예산 편집" },
+      "editModal": {
+        "title": "예산 편집"
+      },
       "toast": {
         "failedDetermineType": "예산 유형을 확인하지 못했어요",
         "typeMissing": "예산 유형이 없습니다",
@@ -48,12 +58,6 @@
         "updateSuccess": "거래가 업데이트되었어요!"
       }
     }
-  },
-
-  "userSettings": {
-    "language": "언어",
-    "selectLanguage": "언어 선택",
-    "saveLanguage": "언어 저장"
   },
   "cta": {
     "upgradeToPro": "Pro로 업그레이드",
@@ -84,7 +88,10 @@
     "perMonth": "월"
   },
   "userSettings": {
-    "header": { "title": "사용자 설정⚙️", "subtitle": "계정 설정과 환경을 관리하세요" },
+    "header": {
+      "title": "사용자 설정⚙️",
+      "subtitle": "계정 설정과 환경을 관리하세요"
+    },
     "profile": {
       "title": "프로필",
       "memberSince": "{monthYear}부터 회원",
@@ -92,21 +99,52 @@
       "emailAccount": "이메일 계정",
       "edit": "프로필 편집"
     },
-    "appearance": { "title": "모양", "description": "테마 선호도를 선택" },
-    "notifications": { "title": "알림", "description": "알림 받는 방식과 시점 관리" },
-    "subscription": { "title": "구독", "description": "플랜을 비교하고 언제든 업그레이드", "currentPlan": "현재 플랜" },
-    "language": { "title": "언어", "description": "인터페이스 언어 선택" },
-    "appControls": { "title": "앱 제어", "description": "네이티브 경험을 위해 앱 설치" },
+    "appearance": {
+      "title": "모양",
+      "description": "테마 선호도를 선택"
+    },
+    "notifications": {
+      "title": "알림",
+      "description": "알림 받는 방식과 시점 관리"
+    },
+    "subscription": {
+      "title": "구독",
+      "description": "플랜을 비교하고 언제든 업그레이드",
+      "currentPlan": "현재 플랜"
+    },
+    "language": {
+      "title": "언어",
+      "description": "인터페이스 언어 선택"
+    },
+    "appControls": {
+      "title": "앱 제어",
+      "description": "네이티브 경험을 위해 앱 설치"
+    },
     "account": {
       "title": "계정",
-      "signOut": { "title": "로그아웃", "description": "계정에서 로그아웃" }
+      "signOut": {
+        "title": "로그아웃",
+        "description": "계정에서 로그아웃"
+      }
     },
-    "modals": { "signOut": { "title": "로그아웃하시겠어요?", "text": "정말 로그아웃하시겠습니까?" } }
+    "modals": {
+      "signOut": {
+        "title": "로그아웃하시겠어요?",
+        "text": "정말 로그아웃하시겠습니까?"
+      }
+    }
   },
   "auth": {
-    "tabs": { "signin": "로그인", "signup": "가입하기" },
-    "buttons": { "google": "Google로 계속하기" },
-    "labels": { "rememberMe": "계정 기억하기" }
+    "tabs": {
+      "signin": "로그인",
+      "signup": "가입하기"
+    },
+    "buttons": {
+      "google": "Google로 계속하기"
+    },
+    "labels": {
+      "rememberMe": "계정 기억하기"
+    }
   },
   "assistant": {
     "title": "Spendly Pal",
@@ -153,10 +191,25 @@
     "save": "저장",
     "submit": "제출",
     "close": "닫기",
-    "pagination": { "previous": "이전", "next": "다음" }
+    "pagination": {
+      "previous": "이전",
+      "next": "다음"
+    }
   },
-  "profile": { "avatar": { "upload": "아바타 업로드", "change": "아바타 변경", "cancel": "취소", "alt": "사용자 아바타" } },
-  "filters": { "options": { "week": "주", "month": "월" } },
+  "profile": {
+    "avatar": {
+      "upload": "아바타 업로드",
+      "change": "아바타 변경",
+      "cancel": "취소",
+      "alt": "사용자 아바타"
+    }
+  },
+  "filters": {
+    "options": {
+      "week": "주",
+      "month": "월"
+    }
+  },
   "modals": {
     "appInstall": {
       "title": "앱 설치"
@@ -209,7 +262,12 @@
         "expense": "지출",
         "income": "수입"
       },
-      "autoTypeInfo": "금액에 따라 지출/수입이 자동으로 결정됩니다."
+      "autoTypeInfo": "금액에 따라 지출/수입이 자동으로 결정됩니다.",
+      "hintRecurring": "팁: 동일한 이름을 사용하면 반복 결제를 인식하는 데 도움이 됩니다.",
+      "ruleBadge": {
+        "byRule": "규칙에 의해 자동으로 채워짐",
+        "undo": "실행 취소"
+      }
     }
   },
   "payment": {
@@ -218,23 +276,48 @@
     "toastComingSoon": "결제는 곧 Lemon Squeezy를 통해 제공됩니다."
   },
   "notifications": {
-    "api": { "queueAdded": "알림이 큐에 추가되었습니다" },
+    "api": {
+      "queueAdded": "알림이 큐에 추가되었습니다"
+    },
     "bell": {
       "aria": "알림 열기",
       "title": "알림",
       "markAllRead": "모두 읽음 처리",
       "viewAll": "모두 보기",
-      "setup": { "title": "알림 설정 필요", "subtitle": "데이터베이스 또는 구독 설정을 완료하세요" },
-      "empty": { "title": "알림이 없습니다", "description": "새 소식이 있으면 여기에서 볼 수 있어요" }
+      "setup": {
+        "title": "알림 설정 필요",
+        "subtitle": "데이터베이스 또는 구독 설정을 완료하세요"
+      },
+      "empty": {
+        "title": "알림이 없습니다",
+        "description": "새 소식이 있으면 여기에서 볼 수 있어요"
+      }
     },
-    "settings": { "push": { "title": "푸시 알림", "description": "브라우저에서 푸시 알림 받기" } },
+    "settings": {
+      "push": {
+        "title": "푸시 알림",
+        "description": "브라우저에서 푸시 알림 받기"
+      }
+    },
     "frequency": {
       "title": "알림 빈도",
       "aria": "알림 빈도 선택",
-      "disabled": { "label": "사용 안 함", "description": "푸시 알림을 비활성화합니다" },
-      "gentle": { "label": "가볍게", "description": "가끔만 알림을 보냅니다" },
-      "aggressive": { "label": "자주", "description": "더 자주 알림을 보냅니다" },
-      "relentless": { "label": "매우 자주", "description": "가능하면 거의 항상 알림을 보냅니다" }
+      "disabled": {
+        "label": "사용 안 함",
+        "description": "푸시 알림을 비활성화합니다"
+      },
+      "gentle": {
+        "label": "가볍게",
+        "description": "가끔만 알림을 보냅니다"
+      },
+      "aggressive": {
+        "label": "자주",
+        "description": "더 자주 알림을 보냅니다"
+      },
+      "relentless": {
+        "label": "매우 자주",
+        "description": "가능하면 거의 항상 알림을 보냅니다"
+      }
     },
     "toasts": {
       "preferencesSaved": "알림 설정이 저장됐어요",
@@ -243,12 +326,28 @@
       "pushDisabled": "푸시 알림이 비활성화됐어요",
       "pushStatusFailed": "푸시 상태 확인 실패"
     },
-    "authRequired": { "title": "로그인이 필요합니다", "description": "알림을 사용하려면 먼저 로그인하세요", "signIn": "로그인" },
-    "a11y": { "togglePush": "푸시 알림 토글" }
+    "authRequired": {
+      "title": "로그인이 필요합니다",
+      "description": "알림을 사용하려면 먼저 로그인하세요",
+      "signIn": "로그인"
+    },
+    "a11y": {
+      "togglePush": "푸시 알림 토글"
+    }
   },
   "pages": {
-    "userSettings": { "meta": { "title": "사용자 설정", "description": "계정 환경설정을 업데이트합니다." } },
-    "payment": { "meta": { "title": "결제", "description": "Spendly Pro로 업그레이드" } }
+    "userSettings": {
+      "meta": {
+        "title": "사용자 설정",
+        "description": "계정 환경설정을 업데이트합니다."
+      }
+    },
+    "payment": {
+      "meta": {
+        "title": "결제",
+        "description": "Spendly Pro로 업그레이드"
+      }
+    }
   },
   "dashboard": {
     "welcome": "환영합니다 {name}👋",
@@ -264,7 +363,9 @@
         "title": "거래 삭제",
         "prompt": "이 거래를 삭제하시겠습니까?"
       },
-      "editMainBudget": { "title": "메인 예산 편집" }
+      "editMainBudget": {
+        "title": "메인 예산 편집"
+      }
     },
     "counters": {
       "totalBudget": "총 예산",
@@ -273,23 +374,40 @@
       "remaining": "남은 금액",
       "usedPercent": "사용됨",
       "overBudget": "예산 초과",
-      "status": { "exceeded": "초과", "warning": "경고", "notSet": "미설정" },
+      "status": {
+        "exceeded": "초과",
+        "warning": "경고",
+        "notSet": "미설정"
+      },
       "ofBudget": "예산 대비",
       "coversExpenses": "지출을 {percent}% 충당"
     }
   },
   "charts": {
-    "titles": { "analytics": "예산 분석", "comparisonBar": "예산 비교" },
-    "bar": { "titleByCategory": "카테고리별 지출" },
-    "line": { "titleOverTime": "시간 경과에 따른 지출" },
-    "labels": { "expenses": "지출", "income": "수입", "for": "대상" },
+    "titles": {
+      "analytics": "예산 분석",
+      "comparisonBar": "예산 비교"
+    },
+    "bar": {
+      "titleByCategory": "카테고리별 지출"
+    },
+    "line": {
+      "titleOverTime": "시간 경과에 따른 지출"
+    },
+    "labels": {
+      "expenses": "지출",
+      "income": "수입",
+      "for": "대상"
+    },
     "states": {
       "loading": "로딩 중...",
       "loadingData": "차트 데이터 로딩 중...",
       "noData": "데이터가 없습니다",
       "noExpensesData": "지출 데이터가 없습니다"
     },
-    "transactionsBar": { "title": "지출 차트" },
+    "transactionsBar": {
+      "title": "지출 차트"
+    },
     "ai": {
       "thinking": "생각 중…",
       "tips": "데이터를 기반으로 AI 팁 받기",
@@ -320,11 +438,6 @@
         "current": "이번 주",
         "previous": "지난주"
       }
-    },
-    "labels": {
-      "expenses": "지출",
-      "income": "수입",
-      "for": "대상"
     }
   },
   "transactions": {
@@ -345,10 +458,23 @@
       "filtered": "선택한 필터에 대한 거래가 없습니다."
     },
     "table": {
-      "headers": { "title": "거래명", "budget": "예산", "amount": "금액", "type": "유형", "date": "날짜", "actions": "작업" },
+      "headers": {
+        "title": "거래명",
+        "budget": "예산",
+        "amount": "금액",
+        "type": "유형",
+        "date": "날짜",
+        "actions": "작업"
+      },
       "unbudgeted": "예산 미지정",
-      "empty": { "default": "거래가 없습니다" },
-      "modal": { "deleteTitle": "거래 삭제", "deletePrompt": "이 거래를 삭제하시겠습니까?", "editTitle": "거래 편집" }
+      "empty": {
+        "default": "거래가 없습니다"
+      },
+      "modal": {
+        "deleteTitle": "거래 삭제",
+        "deletePrompt": "이 거래를 삭제하시겠습니까?",
+        "editTitle": "거래 편집"
+      }
     }
   },
   "errors": {
@@ -356,8 +482,13 @@
     "fileTooLarge5mb": "파일이 너무 큽니다 (최대 5MB).",
     "uploadAvatarFailed": "아바타 업로드에 실패했습니다.",
     "removeAvatarFailed": "아바타 제거에 실패했습니다.",
-    "auth": { "invalidAuthHeader": "유효하지 않은 인증 헤더입니다.", "notAuthenticated": "인증되지 않았습니다." },
-    "common": { "internalServerError": "내부 서버 오류." },
+    "auth": {
+      "invalidAuthHeader": "유효하지 않은 인증 헤더입니다.",
+      "notAuthenticated": "인증되지 않았습니다."
+    },
+    "common": {
+      "internalServerError": "내부 서버 오류."
+    },
     "notifications": {
       "titleRequired": "알림 제목이 필요합니다.",
       "invalidAction": "잘못된 알림 작업입니다.",
@@ -369,6 +500,48 @@
       "subscriptionInvalid": "알림 구독 데이터가 올바르지 않습니다.",
       "subscriptionSaveFailed": "알림 구독 저장 실패.",
       "deactivateFailed": "알림 비활성화 실패."
+    }
+  },
+  "userSettings": {
+    "recurringRules": {
+      "title": "반복 규칙",
+      "description": "자동 감지된 구독 및 반복 결제를 관리하세요.",
+      "form": {
+        "title": { "label": "제목 / 패턴", "placeholder": "제목 / 패턴" },
+        "avgAmount": { "label": "평균 금액", "placeholder": "평균 금액" },
+        "cadence": {
+          "label": "주기",
+          "options": { "weekly": "매주", "monthly": "매월" }
+        },
+        "nextDue": { "label": "다음 결제일", "placeholder": "날짜 선택" },
+        "budget": { "label": "예산", "unbudgeted": "예산 미지정" },
+        "btn": { "add": "규칙 추가", "saving": "저장 중…" }
+      },
+      "list": {
+        "loading": "규칙 불러오는 중…",
+        "empty": "규칙이 없습니다. 위에서 첫 규칙을 추가하세요.",
+        "next": "다음",
+        "inBudget": "예산에 있음",
+        "unbudgeted": "예산 미지정",
+        "edit": "편집",
+        "delete": "삭제",
+        "save": "저장",
+        "cancel": "취소"
+      },
+      "errors": {
+        "fillTitleAndAmount": "제목과 금액을 입력하세요.",
+        "loadFailed": "반복 규칙을 불러오지 못했습니다.",
+        "saveFailed": "규칙 저장에 실패했습니다.",
+        "updateFailed": "규칙 업데이트에 실패했습니다.",
+        "deleteFailed": "규칙 삭제에 실패했습니다."
+      }
+    }
+  },
+  "notifications": {
+    "recurring": {
+      "dueTodayTitle": "오늘 예정된 정기결제: {name}",
+      "dueSoonTitle": "곧 예정된 정기결제: {name}",
+      "message": "마감 {date}. 약 {amount}."
     }
   }
 }

@@ -24,3 +24,18 @@ Risks and rollback:
 - If provider instability leads to frequent blocks: fallback to canonical or reduce prompt complexity.
 - Toggle AI_PROVIDER to switch providers quickly.
 - Disable limits by setting enableLimits=false for debugging, or reduce FREE_DAILY_LIMIT for stricter throttling.
+
+
+## Recurring Rules / DB
+
+- Ensure `pgcrypto` and `recurring_rules` exist (run SQL in Supabase SQL Editor).
+- RLS is required for client-side CRUD; policies enforce `user_id = auth.uid()`.
+- Unique key: `(user_id, title_pattern)`, so upsert will overwrite by pattern.
+- Client UI: see `src/components/user-settings/RecurringRulesSettings.tsx`.
+
+## Tests / Perf
+
+- Unit tests for recurring heuristics: `src/lib/ai/__tests__/recurring.test.ts`.
+- To set up a runner quickly: add Vitest and run `npm run test` (optional).
+- Health-check endpoint `/api/llm/health` logs duration and provider.
+- For perf, enable `LLM_DEBUG=1` and inspect SSE length, durations.
