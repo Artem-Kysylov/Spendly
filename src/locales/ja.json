@@ -261,7 +261,10 @@
       "meta": {
         "title": "支払い",
         "description": "プランを選択して支払い。"
-      }
+      },
+      "successTitle": "お支払い成功",
+      "successMessage": "Spendly Pro をサポートいただきありがとうございます！",
+      "goToDashboard": "ダッシュボードへ移動"
     },
     "onboarding": {
       "meta": {

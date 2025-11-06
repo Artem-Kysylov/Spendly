@@ -113,7 +113,10 @@
     "title": "Upgrade to Pro",
     "subtitle": "Choose the plan that fits your needs. Billing will be powered by Lemon Squeezy.",
     "toastComingSoon": "Payments are coming soon via Lemon Squeezy.",
-    "integrationComingSoon": "Lemon Squeezy integration — coming soon."
+    "integrationComingSoon": "Lemon Squeezy integration — coming soon.",
+    "successTitle": "Payment Successful",
+    "successMessage": "Thank you for supporting Spendly Pro!",
+    "goToDashboard": "Go to Dashboard"
   },
   "transactions": {
     "title": "Transactions📉",
@@ -422,7 +425,13 @@
           "expenses": "Compare this month's expenses to last month.",
           "income": "Compare this month's income to last month."
         }
-      }
+      },
+      "labels": {
+        "current": "Current",
+        "previous": "Previous"
+      },
+      "defaultTitle": "Comparison",
+      "defaultDescription": "Compare selected budget periods"
     }
   },
   "filters": {

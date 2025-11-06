@@ -261,7 +261,10 @@
       "meta": {
         "title": "Оплата",
         "description": "Выберите план и оплатите."
-      }
+      },
+      "successTitle": "Оплата успешна",
+      "successMessage": "Спасибо за поддержку Spendly Pro!",
+      "goToDashboard": "Перейти в дашборд"
     },
     "onboarding": {
       "meta": {

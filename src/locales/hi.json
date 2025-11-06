@@ -258,11 +258,14 @@
       }
     },
     "payment": {
-      "meta": {
-        "title": "भुगतान",
-        "description": "प्लान चुनें और भुगतान करें।"
-      }
-    },
+        "meta": {
+          "title": "भुगतान",
+          "description": "प्लान चुनें और भुगतान करें।"
+        },
+        "successTitle": "भुगतान सफल",
+        "successMessage": "Spendly Pro का समर्थन करने के लिए धन्यवाद!",
+        "goToDashboard": "डैशबोर्ड पर जाएँ"
+      },
     "onboarding": {
       "meta": {
         "title": "ऑनबोर्डिंग",

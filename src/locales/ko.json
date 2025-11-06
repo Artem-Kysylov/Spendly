@@ -273,7 +273,10 @@
   "payment": {
     "title": "Pro로 업그레이드",
     "subtitle": "필요에 맞는 플랜을 선택하세요. 결제는 Lemon Squeezy로 제공됩니다.",
-    "toastComingSoon": "결제는 곧 Lemon Squeezy를 통해 제공됩니다."
+    "toastComingSoon": "결제는 곧 Lemon Squeezy를 통해 제공됩니다.",
+    "successTitle": "결제 성공",
+    "successMessage": "Spendly Pro를 지원해주셔서 감사합니다!",
+    "goToDashboard": "대시보드로 이동"
   },
   "notifications": {
     "api": {

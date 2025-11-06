@@ -258,11 +258,14 @@
       }
     },
     "payment": {
-      "meta": {
-        "title": "Оплата",
-        "description": "Виберіть план та оплатіть."
-      }
-    },
+        "meta": {
+          "title": "Оплата",
+          "description": "Виберіть план та оплатіть."
+        },
+        "successTitle": "Оплата успішна",
+        "successMessage": "Дякуємо за підтримку Spendly Pro!",
+        "goToDashboard": "Перейти до дашборду"
+      },
     "onboarding": {
       "meta": {
         "title": "Онбординг",

@@ -33,7 +33,10 @@
         "earlyAccess": "Akses awal ke fitur baru"
       }
     },
-    "perMonth": "per bulan"
+    "perMonth": "per bulan",
+    "successTitle": "Pembayaran Berhasil",
+    "successMessage": "Terima kasih telah mendukung Spendly Pro!",
+    "goToDashboard": "Pergi ke Dasbor"
   },
   "userSettings": {
     "header": {
