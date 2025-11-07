@@ -10,30 +10,37 @@ interface BudgetProgressBarProps {
   spentLabel?: string
   leftLabel?: string
   currency?: string
+  accentColorHex?: string
 }
 
-function BudgetProgressBar({ spentAmount, totalAmount, type, className, spentLabel, leftLabel, currency = 'USD' }: BudgetProgressBarProps) {
+function BudgetProgressBar({ spentAmount, totalAmount, type, className, spentLabel, leftLabel, currency = 'USD', accentColorHex }: BudgetProgressBarProps) {
   const percentage = totalAmount > 0 ? (spentAmount / totalAmount) * 100 : 0
   const remainingAmount = Math.max(totalAmount - spentAmount, 0)
   const budgetType: 'expense' | 'income' = type ?? 'expense'
 
   // Определяем цвет прогресс бара с поддержкой темной темы
+  const isColoredCard = Boolean(accentColorHex)
+
   const getProgressColor = () => {
     if (percentage >= 100) {
       return budgetType === 'expense' ? 'bg-red-500' : 'bg-green-500'
     }
-    // Используем фирменный синий цвет для нормального состояния
-    return 'bg-primary'
+    // На цветных карточках оставляем стабильную заливку primary для контраста
+    return isColoredCard ? 'bg-primary' : 'bg-primary'
   }
 
   const getBackgroundColor = () => {
+    // На цветных карточках пустой трек — белый для лучшего контраста
+    if (isColoredCard) {
+      return 'bg-white'
+    }
     if (percentage >= 100) {
       return budgetType === 'expense' ? 'bg-red-100 dark:bg-red-900/20' : 'bg-green-100 dark:bg-green-900/20'
     }
-    // Используем светло-синий фон для нормального состояния с поддержкой темной темы
     return 'bg-blue-100 dark:bg-primary/20'
   }
 
+  const labelColorClass = isColoredCard ? 'text-black dark:text-black' : 'text-gray-700 dark:text-white'
   return (
     <div className={cn("w-full flex flex-col gap-2", className)}>
       {/* Прогресс бар */}
@@ -46,18 +53,16 @@ function BudgetProgressBar({ spentAmount, totalAmount, type, className, spentLab
             "h-full transition-all duration-500 ease-in-out rounded-full",
             getProgressColor()
           )}
-          style={{ 
-            width: `${Math.min(percentage, 100)}%`
-          }}
+          style={{ width: `${Math.min(percentage, 100)}%` }}
         />
       </div>
       {/* Информация о прогрессе: метки под краями трека */}
-      <div className="grid grid-cols-2 text-xs text-gray-700 dark:text-white">
+      <div className={cn("grid grid-cols-2 text-xs", labelColorClass)}>
         <span className="font-medium text-left justify-self-start">
-          {formatCurrency(spentAmount, currency)} {spentLabel ?? 'spent'}
+          {formatCurrency(spentAmount, currency)} {spentLabel ?? (budgetType === 'income' ? 'collected' : 'spent')}
         </span>
         <span className="text-right justify-self-end">
-          {formatCurrency(Math.max(totalAmount - spentAmount, 0), currency)} {leftLabel ?? 'left'}
+          {formatCurrency(remainingAmount, currency)} {leftLabel ?? (budgetType === 'income' ? 'left to goal' : 'left')}
         </span>
       </div>
     </div>

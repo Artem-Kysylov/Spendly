@@ -59,6 +59,7 @@ export type NamespaceKeys = {
     | 'counters.coversExpenses'
   modals: 'appInstall.title' | 'budget.pickEmojiOptional' | 'budget.placeholder.name' | 'budget.placeholder.amountUSD'
     | 'budget.type.expense' | 'budget.type.income' | 'budget.toast.saveFailed'
+    | 'budget.pickColor' | 'budget.color.none'
     | 'mainBudget.placeholder.amountUSD'
     | 'transaction.placeholder.title' | 'transaction.placeholder.amountUSD'
     | 'transaction.date.label' | 'transaction.date.placeholder'

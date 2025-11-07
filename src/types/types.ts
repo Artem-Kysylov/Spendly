@@ -138,6 +138,7 @@ export interface BudgetFolderItemProps {
     amount: number,
     spentAmount?: number,
     type: 'expense' | 'income',
+    color_code?: string | null
 }
 
 export interface BudgetDetailsInfoProps {
@@ -151,7 +152,8 @@ export interface BudgetDetailsProps {
     emoji: string,
     name: string,
     amount: number,
-    type: 'expense' | 'income'
+    type: 'expense' | 'income',
+    color_code?: string | null
 }
 
 export interface BudgetDetailsFormProps {
@@ -167,7 +169,7 @@ export interface BudgetDetailsControlsProps {
 export interface BudgetModalProps {
     title: string,
     onClose: () => void,
-    onSubmit: (emoji: string, name: string, amount: number, type: 'expense' | 'income') => Promise<void>,
+    onSubmit: (emoji: string, name: string, amount: number, type: 'expense' | 'income', color_code?: string | null) => Promise<void>,
     isLoading?: boolean,
     initialData?: BudgetDetailsProps,
     handleToastMessage?: (text: string, type: ToastMessageProps['type']) => void

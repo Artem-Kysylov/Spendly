@@ -20,6 +20,9 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
     const [openEmojiPicker, setOpenEmojiPicker] = useState(false)
     const inputRef = useRef<HTMLInputElement>(null)
 
+    // Новое: состояние пикера цвета и список доступных цветов
+    const [selectedColor, setSelectedColor] = useState<string | null>(initialData?.color_code ?? null)
+    const COLOR_OPTIONS: Array<string | null> = [null, 'FFA09A', '9CFFB4', '96CBFF', 'FFEE98', 'E0A3FF']
     useEffect(() => {
         if (inputRef.current) {
             inputRef.current.focus()
@@ -40,7 +43,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
         e.preventDefault()
         if (!name.trim() || !amount) return
         try {
-            await onSubmit(emojiIcon, name.trim(), parseFloat(amount), type)
+            await onSubmit(emojiIcon, name.trim(), parseFloat(amount), type, selectedColor)
             onClose()
         } catch (error) {
             console.error('Error in budget modal:', error)
@@ -55,6 +58,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
         setName(initialData?.name || '')
         setAmount(initialData?.amount?.toString() || '')
         setType(initialData?.type || 'expense')
+        setSelectedColor(initialData?.color_code ?? null)
         onClose()
     }
 
@@ -82,6 +86,31 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                             }}
                         />
                     </div>
+
+                    {/* Color picker: moved under emoji and centered */}
+                    <div className="flex flex-col items-center gap-2 mb-[20px]">
+                      <label className="text-sm font-medium text-secondary-black dark:text-white text-center">
+                        {tModals('budget.pickColor')}
+                      </label>
+                      <div className="flex items-center justify-center gap-3">
+                        {COLOR_OPTIONS.map((color, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => setSelectedColor(color)}
+                            aria-label={color ? `#${color}` : tModals('budget.color.none')}
+                            title={color ? `#${color}` : tModals('budget.color.none')}
+                            className={`w-8 h-8 rounded-full border ${selectedColor === color ? 'ring-2 ring-primary' : 'border-border'} flex items-center justify-center overflow-hidden`}
+                            style={{ backgroundColor: color ? `#${color}` : 'transparent' }}
+                          >
+                            {!color && (
+                              <span className="block w-9 h-[2px] rotate-45 bg-foreground dark:bg-white" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                         <TextInput
                             type="text"

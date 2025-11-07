@@ -80,22 +80,21 @@ export const useOptimizedBarChartData = (filters: ChartFilters): UseChartDataRet
   })
 
   // Агрегация по категориям из transactions
-  const categoryTotals = (transactions as TransactionData[]).reduce((acc: Record<string, { expenses: number; income: number; emoji?: string }>, t) => {
+  const categoryTotals = (transactions as TransactionData[]).reduce((acc: Record<string, { expenses: number; income: number; emoji?: string; color_code?: string | null }>, t) => {
     const folder = Array.isArray(t.budget_folders) ? t.budget_folders[0] : t.budget_folders
     const emoji = folder?.emoji ?? ''
     const name = folder?.name ?? 'Unbudgeted'
+    const color_code = folder?.color_code ?? null
     const categoryName = `${emoji} ${name}`.trim()
 
     if (!acc[categoryName]) {
-      acc[categoryName] = { expenses: 0, income: 0, emoji }
+      acc[categoryName] = { expenses: 0, income: 0, emoji, color_code }
     }
-
     if (t.type === 'expense') {
       acc[categoryName].expenses += t.amount ?? 0
     } else {
       acc[categoryName].income += t.amount ?? 0
     }
-
     return acc
   }, {})
 
@@ -107,7 +106,7 @@ export const useOptimizedBarChartData = (filters: ChartFilters): UseChartDataRet
       return {
         category,
         amount,
-        fill: colors[index % colors.length],
+        fill: totals.color_code ? `#${totals.color_code}` : colors[index % colors.length],
         emoji: totals.emoji
       }
     })

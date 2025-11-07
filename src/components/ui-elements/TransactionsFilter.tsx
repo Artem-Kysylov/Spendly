@@ -39,11 +39,7 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
             <option value="Expenses">{tCharts('labels.expenses')}</option>
             <option value="Income">{tCharts('labels.income')}</option>
           </Select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-[16px] pointer-events-none text-black dark:text-white">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
+          {/* Удалено: кастомный SVG‑чеврон */}
         </div>
       </div>
 
@@ -61,11 +57,7 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
             <option value="Week">{tFilters('options.week')}</option>
             <option value="Month">{tFilters('options.month')}</option>
           </Select>
-          <div className="absolute inset-y-0 right-0 flex items-center pr-[16px] pointer-events-none text-black dark:text-white">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
+          {/* Удалено: кастомный SVG‑чеврон */}
         </div>
       </div>
     </div>

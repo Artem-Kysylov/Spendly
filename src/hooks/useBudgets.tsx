@@ -9,6 +9,7 @@ interface Budget {
   emoji: string
   amount: number
   type: 'expense' | 'income'
+  color_code?: string | null
 }
 
 export const useBudgets = () => {
@@ -23,7 +24,7 @@ export const useBudgets = () => {
       setIsLoading(true)
       const { data, error } = await supabase
         .from('budget_folders')
-        .select('id, emoji, name, amount, type')
+        .select('id, emoji, name, amount, type, color_code')
         .eq('user_id', session.user.id)
         .order('name', { ascending: true })
 

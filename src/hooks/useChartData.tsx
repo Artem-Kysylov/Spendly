@@ -149,7 +149,7 @@ export const useBarChartData = (filters: ChartFilters): UseChartDataReturn<BarCh
         .select(`
           amount,
           type,
-          budget_folders(id, name, emoji)
+          budget_folders(id, name, emoji, color_code)
         `)
         .eq('user_id', session.user.id)
         .gte('created_at', filters.startDate.toISOString())
@@ -165,41 +165,40 @@ export const useBarChartData = (filters: ChartFilters): UseChartDataReturn<BarCh
       }
 
       // Группировка данных по категориям (устойчиво к объекту/массиву budget_folders)
-      const categoryTotals = (transactions ?? []).reduce((acc: Record<string, { expenses: number; income: number; emoji?: string }>, transaction: any) => {
+      const categoryTotals = (transactions ?? []).reduce((acc: Record<string, { expenses: number; income: number; emoji?: string; color_code?: string | null }>, transaction: any) => {
         const folder = Array.isArray(transaction.budget_folders)
           ? transaction.budget_folders[0]
           : transaction.budget_folders
 
         const emoji = folder?.emoji ?? ''
         const name = folder?.name ?? 'Unbudgeted'
+        const color_code = folder?.color_code ?? null
         const categoryName = `${emoji} ${name}`.trim()
 
         if (!acc[categoryName]) {
-          acc[categoryName] = { expenses: 0, income: 0, emoji }
+          acc[categoryName] = { expenses: 0, income: 0, emoji, color_code }
         }
-
         if (transaction.type === 'expense') {
           acc[categoryName].expenses += transaction.amount ?? 0
         } else {
           acc[categoryName].income += transaction.amount ?? 0
         }
-
         return acc
       }, {})
 
       // Преобразование в формат для BarChart
       const colors = Object.values(defaultChartColors)
       const barData: BarChartData[] = Object.entries(categoryTotals)
-        .map(([category, totals], index) => {
-          const amount = filters.dataType === 'Expenses' ? totals.expenses : totals.income
-          return {
-            category,
-            amount,
-            fill: colors[index % colors.length],
-            emoji: totals.emoji
-          }
-        })
-        .filter(item => item.amount > 0)
+          .map(([category, totals], index) => {
+            const amount = filters.dataType === 'Expenses' ? totals.expenses : totals.income
+            return {
+              category,
+              amount,
+              fill: totals.color_code ? `#${totals.color_code}` : colors[index % colors.length],
+              emoji: totals.emoji
+            }
+          })
+          .filter(item => item.amount > 0)
       
       setData(barData)
       

@@ -64,6 +64,12 @@
       "budget_80": "बजट का 80% उपयोग",
       "budget_100": "बजट पार हो गया"
     },
+    "details": {
+      "inlineWarning": {
+        "reduceExpenses": "खर्च कम करें",
+        "openReport": "रिपोर्ट खोलें"
+      }
+    },
     "subscription": {
       "title": "सदस्यता",
       "description": "प्लान तुलना करें और कभी भी अपग्रेड करें",
@@ -88,6 +94,12 @@
       "signOut": {
         "title": "साइन आउट करें?",
         "text": "क्या आप वाकई साइन आउट करना चाहते हैं?"
+      },
+      "budget": {
+        "pickColor": "रंग चुनें",
+        "color": {
+          "none": "कोई नहीं/डिफ़ॉल्ट"
+        }
       }
     },
     "recurringRules": {
@@ -430,7 +442,9 @@
     },
     "labels": {
       "spent": "खर्च",
-      "left": "शेष"
+      "left": "बाकी",
+      "collected": "संग्रहित",
+      "leftToGoal": "बाकी"
     },
     "details": {
       "controls": {

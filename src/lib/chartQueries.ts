@@ -12,10 +12,12 @@ export interface TransactionData {
     id: string
     name: string
     emoji: string
+    color_code?: string | null
   } | {
     id: string
     name: string
     emoji: string
+    color_code?: string | null
   }[] 
 }
 
@@ -49,7 +51,8 @@ export const fetchTransactions = async (
       budget_folders (
         id,
         name,
-        emoji
+        emoji,
+        color_code
       )
     `)
     .eq('user_id', userId)

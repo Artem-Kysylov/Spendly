@@ -54,7 +54,7 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
       setIsBudgetsLoading(true)
       const { data, error } = await supabase
         .from('budget_folders')
-        .select('id, emoji, name, amount, type')
+        .select('id, emoji, name, amount, type, color_code')
         .eq('user_id', session.user.id)
         .order('name', { ascending: true })
 

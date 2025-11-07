@@ -32,13 +32,19 @@
     },
     "labels": {
       "spent": "지출",
-      "left": "남은"
+      "left": "남은",
+      "collected": "모인 금액",
+      "leftToGoal": "남은 금액"
     },
     "details": {
       "controls": {
         "goToBudgets": "예산으로 이동",
         "editBudget": "예산 편집",
         "deleteBudget": "예산 삭제"
+      },
+      "inlineWarning": {
+        "reduceExpenses": "지출 줄이기",
+        "openReport": "보고서 열기"
       },
       "deleteModal": {
         "title": "예산 삭제",
@@ -238,6 +244,10 @@
       "type": {
         "expense": "지출",
         "income": "수입"
+      },
+      "pickColor": "색상 선택",
+      "color": {
+        "none": "없음/기본값"
       }
     },
     "transaction": {

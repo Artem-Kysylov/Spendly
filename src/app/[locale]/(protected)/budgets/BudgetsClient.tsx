@@ -56,7 +56,7 @@ export default function BudgetsClient() {
     setTimeout(() => setToastMessage(null), 3000)
   }
 
-  const handleBudgetSubmit = async (emoji: string, name: string, amount: number, type: 'expense' | 'income') => {
+  const handleBudgetSubmit = async (emoji: string, name: string, amount: number, type: 'expense' | 'income', color_code?: string | null) => {
     try {
       const { error } = await supabase
         .from('budget_folders')
@@ -65,7 +65,8 @@ export default function BudgetsClient() {
           emoji,
           name,
           amount,
-          type
+          type,
+          color_code: color_code ?? null
         })
 
       if (error) {
@@ -117,6 +118,7 @@ export default function BudgetsClient() {
                 name={folder.name}
                 amount={folder.amount}
                 type={folder.type}
+                color_code={folder.color_code ?? null}
               />
             </Link>
           </motion.div>

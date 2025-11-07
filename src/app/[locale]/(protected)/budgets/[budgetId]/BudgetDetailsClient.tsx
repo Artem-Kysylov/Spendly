@@ -52,7 +52,7 @@ export default function BudgetDetailsClient() {
       setIsLoading(true)
       const { data, error } = await supabase
         .from('budget_folders')
-        .select('emoji, name, amount, type')
+        .select('emoji, name, amount, type, color_code')
         .eq('id', id)
         .eq('user_id', session.user.id)
         .single()
@@ -167,14 +167,15 @@ export default function BudgetDetailsClient() {
     emoji: string,
     name: string,
     amount: number,
-    type: 'expense' | 'income'
+    type: 'expense' | 'income',
+    color_code?: string | null
   ) => {
     if (!session?.user?.id || !id) return
     try {
       setIsSubmitting(true)
       const { error } = await supabase
         .from('budget_folders')
-        .update({ emoji, name, amount, type })
+        .update({ emoji, name, amount, type, color_code: color_code ?? null })
         .eq('id', id)
         .eq('user_id', session.user.id)
 
@@ -273,6 +274,7 @@ export default function BudgetDetailsClient() {
           name={budgetDetails.name}
           amount={budgetDetails.amount}
           type={budgetDetails.type}
+          color_code={budgetDetails.color_code ?? null}
         />
         <BudgetDetailsForm
           isSubmitting={isSubmitting}
@@ -304,6 +306,7 @@ export default function BudgetDetailsClient() {
             name: budgetDetails.name,
             amount: budgetDetails.amount,
             type: budgetDetails.type,
+            color_code: budgetDetails.color_code ?? null,
           }}
           onClose={closeEditModal}
           onSubmit={handleUpdateBudget}

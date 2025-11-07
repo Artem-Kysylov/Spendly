@@ -67,6 +67,12 @@
       "budget_80": "Penggunaan anggaran mencapai 80%",
       "budget_100": "Anggaran terlampaui"
     },
+    "details": {
+      "inlineWarning": {
+        "reduceExpenses": "Kurangi pengeluaran",
+        "openReport": "Buka laporan"
+      }
+    },
     "subscription": {
       "title": "Langganan",
       "description": "Bandingkan paket dan upgrade kapan saja",
@@ -308,6 +314,20 @@
         "byRule": "Diisi otomatis oleh aturan",
         "undo": "Urungkan"
       }
+    },
+    "budget": {
+      "pickColor": "Pilih warna",
+      "color": {
+        "none": "Tidak ada/Default"
+      }
+    }
+  },
+  "budgets": {
+    "labels": {
+      "spent": "terpakai",
+      "left": "tersisa",
+      "collected": "terkumpul",
+      "leftToGoal": "tersisa"
     }
   }
 }

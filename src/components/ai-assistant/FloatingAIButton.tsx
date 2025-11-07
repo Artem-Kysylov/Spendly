@@ -2,7 +2,6 @@
 
 // Imports 
 import React from 'react'
-import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
@@ -53,30 +52,22 @@ export const FloatingAIButton: React.FC<FloatingAIButtonProps> = ({
               
               className
             )}
-            aria-label={isOpen ? tAI('buttons.close') : tAI('buttons.ask')}
+            aria-label={tAI('buttons.ask')}
           >
-            <div className="relative w-6 h-6 flex items-center justify-center">
+            {/* Статичная иконка sparkles, без переключения на X */}
+            <div className="w-6 h-6 flex items-center justify-center">
               <Image  
                 src="/sparkles.svg"
                 alt="Sparkles"
                 width={24}
                 height={24} 
-                className={cn(
-                  "absolute transition-all duration-300 ease-in-out",
-                  isOpen ? "opacity-0 rotate-90 scale-75" : "opacity-100 rotate-0 scale-100"
-                )} />
-              <X 
-                size={24} 
-                className={cn(
-                  "absolute transition-all duration-300 ease-in-out",
-                  isOpen ? "opacity-100 rotate-0 scale-100" : "opacity-0 rotate-90 scale-75"
-                )}
+                className="opacity-100"
               />
             </div>
           </button>
         </TooltipTrigger>
         <TooltipContent side="left" className="font-medium">
-          {isOpen ? tAI('buttons.close') : tAI('buttons.ask')}
+          {tAI('buttons.ask')}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

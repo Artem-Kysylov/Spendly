@@ -5,7 +5,7 @@ import BudgetProgressBar from '../ui-elements/BudgetProgressBar'
 import type { BudgetFolderItemProps } from '../../types/types'
 import { useTranslations } from 'next-intl'
 
-const BudgetFolderItem = ({ id, emoji, name, amount, type }: BudgetFolderItemProps) => {
+function BudgetFolderItem({ id, emoji, name, amount, type, color_code }: BudgetFolderItemProps) {
   const { session } = UserAuth()
   const [spentAmount, setSpentAmount] = useState(0)
   const tBudgets = useTranslations('budgets')
@@ -24,8 +24,13 @@ const BudgetFolderItem = ({ id, emoji, name, amount, type }: BudgetFolderItemPro
         return
       }
 
+      // Суммируем транзакции по типу бюджета
       const total =
-        (data?.reduce((sum: number, tx: { amount: number; type: string }) => (tx.type === 'expense' ? sum + tx.amount : sum), 0)) || 0
+        data?.reduce((sum: number, tx: { amount: number; type: string }) => {
+          const matchesType = tx.type === (type === 'income' ? 'income' : 'expense')
+          return matchesType ? sum + tx.amount : sum
+        }, 0) || 0
+
       setSpentAmount(total)
     } catch (err) {
       console.error('Error:', err)
@@ -42,17 +47,21 @@ const BudgetFolderItem = ({ id, emoji, name, amount, type }: BudgetFolderItemPro
   }, [id, session?.user?.id])
 
   return (
-    <div className="flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg w-full sm:w-[335px] h-[200px] bg-card transition-opacity duration-300 hover:opacity-50 p-4">
+    <div
+      className="flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg w-full sm:w-[335px] h-[200px] bg-card transition-opacity duration-300 hover:opacity-50 p-4"
+      style={{ backgroundColor: color_code ? `#${color_code}` : undefined }}
+    >
       <span className="text-[28px]">{emoji}</span>
-      <h3 className="text-foreground text-[16px] font-semibold">{name}</h3>
-      <p className="text-foreground text-[18px] font-semibold">${amount}</p>
+      <h3 className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} text-[16px] font-semibold`}>{name}</h3>
+      <p className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} text-[18px] font-semibold`}>${amount}</p>
       <div className="w-full mt-3">
         <BudgetProgressBar
           spentAmount={spentAmount}
           totalAmount={amount}
           type={type}
-          spentLabel={tBudgets('labels.spent')}
-          leftLabel={tBudgets('labels.left')}
+          spentLabel={tBudgets(type === 'income' ? 'labels.collected' : 'labels.spent')}
+          leftLabel={tBudgets(type === 'income' ? 'labels.leftToGoal' : 'labels.left')}
+          accentColorHex={color_code ?? undefined}
         />
       </div>
     </div>

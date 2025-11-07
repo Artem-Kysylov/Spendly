@@ -1,6 +1,4 @@
-// imports (добавлен Select)
-'use client'
-
+import { ToneSelect } from './ToneSelect'
 import { useState, KeyboardEvent } from 'react'
 import { Send } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -42,20 +40,13 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assist
                     <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                         {tAI('tone.select_label')}
                     </label>
-                    <Select
+                    <ToneSelect
                         value={assistantTone}
-                        onChange={(e) =>
-                            onToneChange?.(e.target.value as 'neutral' | 'friendly' | 'formal' | 'playful')
-                        }
+                        onChange={(tone) => onToneChange?.(tone)}
                         disabled={(disabled ?? false) || (isThinking ?? false)}
                         aria-label={tAI('tone.label')}
                         className="w-full"
-                    >
-                        <option value="neutral">{toneEmoji.neutral} {tAI('tone.options.neutral')}</option>
-                        <option value="formal">{toneEmoji.formal} {tAI('tone.options.formal')}</option>
-                        <option value="friendly">{toneEmoji.friendly} {tAI('tone.options.friendly')}</option>
-                        <option value="playful">{toneEmoji.playful} {tAI('tone.options.playful')}</option>
-                    </Select>
+                    />
                 </div>
 
                 <div className="flex items-center space-x-2">

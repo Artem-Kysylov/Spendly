@@ -64,6 +64,12 @@
       "budget_80": "Использование бюджета достигло 80%",
       "budget_100": "Бюджет превышен"
     },
+    "details": {
+      "inlineWarning": {
+        "reduceExpenses": "Сократить расходы",
+        "openReport": "Открыть отчёт"
+      }
+    },
     "subscription": {
       "title": "Подписка",
       "description": "Сравните планы и обновите в любое время",
@@ -430,7 +436,9 @@
     },
     "labels": {
       "spent": "Потрачено",
-      "left": "Осталось"
+      "left": "Осталось",
+      "collected": "Собрано",
+      "leftToGoal": "Осталось"
     },
     "details": {
       "controls": {
@@ -564,6 +572,10 @@
     },
     "budget": {
       "pickEmojiOptional": "Выберите эмодзи (необязательно)",
+      "pickColor": "Выберите цвет",
+      "color": {
+        "none": "Без цвета/По умолчанию"
+      },
       "placeholder": {
         "name": "Название бюджета",
         "amountUSD": "Сумма (USD)"

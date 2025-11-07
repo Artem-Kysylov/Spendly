@@ -20,7 +20,9 @@ export const ChatPresets = ({ onSelectPreset }: ChatPresetsProps) => {
   const tAI = useTranslations('assistant')
   return (
     <div className="space-y-2">
-      <p className="text-xs font-medium text-secondary-black dark:text-white mb-3 sticky top-0 bg-white dark:bg-black py-1">{tAI('presets.header')}</p>
+      <p className="text-xs font-medium text-secondary-black dark:text-white mb-3 sticky top-0 bg-transparent py-1">
+        {tAI('presets.header')}
+      </p>
       <div className="grid grid-cols-1 gap-2">
         {presets(tAI).map((preset) => (
           <button

@@ -64,6 +64,12 @@
       "budget_80": "予算の80%に到達",
       "budget_100": "予算超過"
     },
+    "details": {
+      "inlineWarning": {
+        "reduceExpenses": "支出を削減",
+        "openReport": "レポートを開く"
+      }
+    },
     "subscription": {
       "title": "購読",
       "description": "プランを比較していつでもアップグレード",
@@ -429,8 +435,10 @@
       }
     },
     "labels": {
-      "spent": "支出済み",
-      "left": "残り"
+      "spent": "支出",
+      "left": "残り",
+      "collected": "集めた額",
+      "leftToGoal": "残り"
     },
     "details": {
       "controls": {
@@ -546,6 +554,10 @@
       },
       "toast": {
         "saveFailed": "予算の保存に失敗しました"
+      },
+      "pickColor": "色を選択",
+      "color": {
+        "none": "なし/デフォルト"
       }
     },
     "mainBudget": {

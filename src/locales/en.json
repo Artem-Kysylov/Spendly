@@ -190,9 +190,15 @@
     },
     "labels": {
       "spent": "spent",
-      "left": "left"
+      "left": "left",
+      "collected": "collected",
+      "leftToGoal": "left to goal"
     },
     "details": {
+      "inlineWarning": {
+        "reduceExpenses": "Reduce spending",
+        "openReport": "Open report"
+      },
       "controls": {
         "goToBudgets": "Go to Budgets",
         "editBudget": "Edit budget",
@@ -278,6 +284,10 @@
     "appInstall": { "title": "Get Spendly on your device" },
     "budget": {
       "pickEmojiOptional": "Pick an emoji (optional)",
+      "pickColor": "Pick the color",
+      "color": {
+        "none": "None/Default"
+      },
       "placeholder": {
         "name": "Budget Folder Name",
         "amountUSD": "Amount(USD)"
