@@ -316,11 +316,22 @@
       }
     },
     "budget": {
+      "pickEmojiOptional": "Pilih emoji (opsional)",
       "pickColor": "Pilih warna",
-      "color": {
-        "none": "Tidak ada/Default"
+      "color": { "none": "Tidak ada/Default" },
+      "placeholder": {
+        "name": "Nama anggaran",
+        "amountUSD": "Jumlah (USD)"
+      },
+      "type": {
+        "expense": "Pengeluaran",
+        "income": "Pemasukan"
+      },
+      "toast": {
+        "saveFailed": "Gagal menyimpan anggaran"
       }
-    }
+    },
+    "createTitle": "Buat Anggaran"
   },
   "budgets": {
     "labels": {
@@ -328,6 +339,38 @@
       "left": "tersisa",
       "collected": "terkumpul",
       "leftToGoal": "tersisa"
+    },
+    "list": {
+      "card": {
+        "createNew": "Buat Anggaran Baru"
+      },
+      "modal": {
+        "createTitle": "Buat Anggaran"
+      }
+    },
+    "details": {
+      "controls": {
+        "goToBudgets": "Pergi ke Anggaran",
+        "editBudget": "Edit Anggaran",
+        "deleteBudget": "Hapus Anggaran"
+      },
+      "deleteModal": {
+        "title": "Hapus Anggaran",
+        "text": "Anda yakin ingin menghapus anggaran ini?"
+      },
+      "editModal": {
+        "title": "Edit Anggaran"
+      },
+      "toast": {
+        "failedDetermineType": "Gagal menentukan jenis anggaran",
+        "typeMissing": "Jenis anggaran hilang",
+        "addFailed": "Gagal menambahkan transaksi. Silakan coba lagi.",
+        "addSuccess": "Transaksi berhasil ditambahkan!",
+        "deleteFailed": "Gagal menghapus anggaran. Silakan coba lagi.",
+        "deleteSuccess": "Anggaran berhasil dihapus!",
+        "updateFailed": "Gagal memperbarui transaksi",
+        "updateSuccess": "Transaksi berhasil diperbarui!"
+      }
     }
   }
 }

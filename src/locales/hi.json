@@ -97,9 +97,7 @@
       },
       "budget": {
         "pickColor": "रंग चुनें",
-        "color": {
-          "none": "कोई नहीं/डिफ़ॉल्ट"
-        }
+        "color": { "none": "कोई नहीं/डिफ़ॉल्ट" }
       }
     },
     "recurringRules": {
@@ -615,8 +613,17 @@
     }
   },
   "common": {
-    "save": "सहेजें",
+    "saving": "सहेजा जा रहा है…",
+    "unexpectedError": "एक अप्रत्याशित त्रुटि हुई",
+    "errorLabel": "त्रुटि",
     "cancel": "रद्द करें",
+    "save": "सहेजें",
+    "submit": "प्रस्तुत करें",
+    "close": "बंद करें",
+    "pagination": {
+      "previous": "पिछला",
+      "next": "अगला"
+    },
     "delete": "हटाएँ"
   }
 }

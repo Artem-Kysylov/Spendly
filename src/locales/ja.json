@@ -564,14 +564,7 @@
       "placeholder": {
         "amountUSD": "金額（USD）"
       }
-    }
-  },
-  "recurring": {
-    "dueTodayTitle": "定期的な支払い（今日）: {name}",
-    "dueSoonTitle": "定期的な支払い（近日）: {name}",
-    "message": "支払い日 {date}。概算 {amount}."
-  },
-  "modals": {
+    },
     "transaction": {
       "placeholder": {
         "title": "取引名",
@@ -600,6 +593,11 @@
         "undo": "元に戻す"
       }
     }
+  },
+  "recurring": {
+    "dueTodayTitle": "定期的な支払い（今日）: {name}",
+    "dueSoonTitle": "定期的な支払い（近日）: {name}",
+    "message": "支払い日 {date}。概算 {amount}."
   },
   "errors": {
     "common": {
