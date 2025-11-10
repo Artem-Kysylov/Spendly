@@ -34,3 +34,7 @@
 [Gemini] model: gemini-2.5-flash userParts.len: 2 userParts.lengths: [ 299, 2 ]
 [Gemini] candidates.len: 1 firstCandidate.parts.lengths: [ 80 ] blockReason: undefined
  POST /api/assistant 200 in 1955ms
+2025-11-10T14:21:11.939Z [LLM_DEBUG gemini pre] {"requestId":"2f335d0b-0a2b-46c3-9461-eac578ec6f8e","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,3603]}
+2025-11-10T14:21:24.458Z [LLM_DEBUG gemini post] {"requestId":"2f335d0b-0a2b-46c3-9461-eac578ec6f8e","model":"gemini-2.5-flash","candidatesLen":1,"firstCandidatePartsLen":1,"firstCandidatePartsLengths":[263],"safetyRatings":[],"finishReason":"STOP"}
+2025-11-10T14:21:32.464Z [LLM_DEBUG gemini pre] {"requestId":"de74f008-db96-47bb-afd9-006af4eb1430","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,2917]}
+2025-11-10T14:21:34.092Z [LLM_DEBUG gemini post] {"requestId":"de74f008-db96-47bb-afd9-006af4eb1430","model":"gemini-2.5-flash","candidatesLen":1,"firstCandidatePartsLen":1,"firstCandidatePartsLengths":[156],"safetyRatings":[],"finishReason":"STOP"}

@@ -77,7 +77,13 @@ export async function POST(req: NextRequest) {
         }, { status: 201 })
       }
       console.error('Error adding notification to queue:', error)
-      return NextResponse.json({ error: tErrors('notifications.queueAddFailed') }, { status: 500 })
+      const details = process.env.NODE_ENV !== 'production' ? {
+        code: (error as any).code,
+        message: (error as any).message,
+        details: (error as any).details,
+        hint: (error as any).hint
+      } : undefined
+      return NextResponse.json({ error: tErrors('notifications.queueAddFailed'), details }, { status: 500 })
     }
 
     // Если уведомление не запланировано на будущее — дергаем внутренний processor

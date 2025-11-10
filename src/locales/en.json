@@ -56,6 +56,7 @@
     },
     "perMonth": "per month"
   },
+  "Sidenav": {},
   "userSettings": {
     "header": { "title": "User Settings ⚙️", "subtitle": "Manage your account settings and preferences" },
     "profile": {
@@ -273,12 +274,14 @@
       "budgets": "Budgets",
       "charts": "Charts",
       "assistant": "AI Assistant",
-      "settings": "Settings"
+      "settings": "Settings",
+      "userSettings": "User Settings"
     },
     "navbar": {
       "welcome": "Welcome",
       "logout": "Log out"
-    }
+    },
+    "alt": { "logo": "Spendly logo" }
   },
   "modals": {
     "appInstall": { "title": "Get Spendly on your device" },
@@ -361,6 +364,10 @@
         "amount": "Amount"
       }
     },
+    "buttons": {
+      "close": "Close AI assistant",
+      "ask": "Ask AI"
+    },
     "tone": {
       "label": "Tone",
       "select_label": "Choose AI assistant tone",
@@ -383,6 +390,36 @@
       "createBudgetPlan": "Create a budget plan",
       "showBiggest": "Show biggest expenses",
       "compareMonths": "Compare this month vs last"
+    },
+    "insights": {
+      "title": "AI Insights",
+      "beta": "Beta",
+      "messages": {
+        "budgetExceeded": {
+          "title": "Budget exceeded",
+          "message": "You are over budget by {over}."
+        },
+        "budgetAlert": {
+          "title": "Budget alert",
+          "message": "{usedPercent}% of your budget is used."
+        },
+        "risingExpenses": {
+          "title": "Rising expenses",
+          "message": "Expenses are trending up by {trend}%."
+        },
+        "incomeGrowth": {
+          "title": "Income growth",
+          "message": "Income is trending up by {trend}%."
+        },
+        "negativeCashFlow": {
+          "title": "Negative cash flow",
+          "message": "Spending exceeds income. Consider reducing expenses."
+        },
+        "financialHealth": {
+          "title": "Healthy finances",
+          "message": "Your spending and income look balanced."
+        }
+      }
     }
   },
   "charts": {

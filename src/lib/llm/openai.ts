@@ -1,4 +1,5 @@
 // Реальный стрим OpenAI Chat Completions (SSE)
+import { logLLMDebug } from './debug'
 
 type StreamParams = {
   model: string
@@ -21,7 +22,7 @@ export function streamOpenAIText({ model, prompt, system, requestId }: StreamPar
     async start(controller) {
       if (debug) {
         try {
-          console.debug('[LLM_DEBUG openai pre]', JSON.stringify({ requestId, model, promptLengthChars: prompt.length, hasSystem: !!system }))
+          logLLMDebug('[LLM_DEBUG openai pre]', { requestId, model, promptLengthChars: prompt.length, hasSystem: !!system })
         } catch { /* no-op */ }
       }
 
@@ -60,7 +61,7 @@ export function streamOpenAIText({ model, prompt, system, requestId }: StreamPar
           if (done) {
             if (debug) {
               try {
-                console.debug('[LLM_DEBUG openai post]', JSON.stringify({ requestId, model, sseLines, totalTextLen }))
+                logLLMDebug('[LLM_DEBUG openai post]', { requestId, model, sseLines, totalTextLen })
               } catch { /* no-op */ }
             }
             controller.close()
@@ -79,7 +80,7 @@ export function streamOpenAIText({ model, prompt, system, requestId }: StreamPar
             if (data === '[DONE]') {
               if (debug) {
                 try {
-                  console.debug('[LLM_DEBUG openai post]', JSON.stringify({ requestId, model, sseLines, totalTextLen }))
+                  logLLMDebug('[LLM_DEBUG openai post]', { requestId, model, sseLines, totalTextLen })
                 } catch { /* no-op */ }
               }
               controller.close()

@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
   const supabase = getServerSupabaseClient()
   const nowIso = new Date().toISOString()
 
-  const vapidPublic = process.env.VAPID_PUBLIC_KEY || ''
+  const vapidPublic = process.env.VAPID_PUBLIC_KEY || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || ''
   const vapidPrivate = process.env.VAPID_PRIVATE_KEY || ''
   if (!vapidPublic || !vapidPrivate) {
     return NextResponse.json({ error: 'Missing VAPID keys' }, { status: 500 })

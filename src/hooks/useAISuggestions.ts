@@ -2,6 +2,8 @@
 
 import { useState, useCallback, useContext } from 'react'
 import { AuthContext } from '@/context/AuthContext'
+import { useTranslations, useLocale } from 'next-intl'
+import { getAssistantApiUrl } from '@/lib/assistantApi'
 
 export function useAISuggestions() {
   const authContext = useContext(AuthContext)
@@ -11,6 +13,8 @@ export function useAISuggestions() {
   const [error, setError] = useState<string | null>(null)
   const [isRateLimited, setIsRateLimited] = useState<boolean>(false)
   const [abortController, setAbortController] = useState<AbortController | null>(null)
+  const tAssistant = useTranslations('assistant')
+  const locale = useLocale()
 
   const fetchSuggestion = useCallback(async (prompt: string) => {
     if (!session?.user?.id) return
@@ -23,7 +27,7 @@ export function useAISuggestions() {
     setAbortController(controller)
 
     try {
-      const res = await fetch('/api/assistant', {
+      const res = await fetch(getAssistantApiUrl(locale), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -36,18 +40,18 @@ export function useAISuggestions() {
       })
 
       if (!res.ok) {
-        if (res.status === 429) {
-          setIsRateLimited(true)
-          setError('Rate limit reached. Please try again later.')
-          return
-        }
         const ct = res.headers.get('content-type') || ''
-        if (ct.includes('application/json')) {
+        if (ct.includes('text/html') || res.status === 404) {
+          setError('Assistant endpoint is not reachable for this locale. Please reload and try again.')
+        } else if (res.status === 429) {
+          setIsRateLimited(true)
+          setError(tAssistant('rateLimited'))
+        } else if (ct.includes('application/json')) {
           const json = await res.json()
           setError(json.error || 'Failed to fetch suggestion')
-          return
+        } else {
+          setError('Failed to fetch suggestion')
         }
-        setError('Failed to fetch suggestion')
         return
       }
 
@@ -88,7 +92,7 @@ export function useAISuggestions() {
       setLoading(false)
       setAbortController(null)
     }
-  }, [session?.user?.id])
+  }, [session?.user?.id, locale])
 
   const abort = useCallback(() => {
     abortController?.abort()

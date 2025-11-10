@@ -5,7 +5,8 @@
       "transactions": "Транзакции",
       "budgets": "Бюджеты",
       "userSettings": "Настройки пользователя"
-    }
+    },
+    "alt": { "logo": "Логотип Spendly" }
   },
   "cta": {
     "upgradeToPro": "Обновить до Pro",
@@ -197,21 +198,33 @@
     },
     "insights": {
       "title": "AI-инсайты",
-      "beta": "Бета"
-    },
-    "tone": {
-      "label": "Тон",
-      "select_label": "Выберите тон ответов AI",
-      "options": {
-        "neutral": "Нейтральный",
-        "friendly": "Дружелюбный",
-        "formal": "Официальный",
-        "playful": "Игровой"
+      "beta": "Бета",
+      "messages": {
+        "budgetExceeded": {
+          "title": "Бюджет превышен",
+          "message": "Вы вышли за бюджет на {over}."
+        },
+        "budgetAlert": {
+          "title": "Предупреждение по бюджету",
+          "message": "Использовано {usedPercent}% вашего бюджета."
+        },
+        "risingExpenses": {
+          "title": "Рост расходов",
+          "message": "Расходы растут на {trend}%."
+        },
+        "incomeGrowth": {
+          "title": "Рост доходов",
+          "message": "Доходы растут на {trend}%."
+        },
+        "negativeCashFlow": {
+          "title": "Отрицательный денежный поток",
+          "message": "Расходы превышают доходы. Подумайте о сокращении расходов."
+        },
+        "financialHealth": {
+          "title": "Стабильное состояние",
+          "message": "Ваши расходы и доходы выглядят сбалансированными."
+        }
       }
-    },
-    "settings": {
-      "title": "Тон Spendly Pal",
-      "description": "Выберите тон ответов вашего AI-ассистента."
     }
   },
   "notFound": {

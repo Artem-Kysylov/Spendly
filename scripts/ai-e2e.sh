@@ -6,19 +6,19 @@ if [ -z "$USER_ID" ]; then
 fi
 
 echo "1) Health check"
-curl -sS "http://localhost:3000/api/llm/health" | jq .
+curl -sS "http://localhost:3000/en/api/llm/health" | jq .
 
 echo "2) Canonical (no expenses this week) — expects 'No expenses recorded this week.' if empty"
-curl -sS -X POST "http://localhost:3000/api/assistant" \
+curl -sS -X POST "http://localhost:3000/en/api/assistant" \
   -H "Content-Type: application/json" \
   -d "{\"userId\":\"$USER_ID\",\"message\":\"Show my expenses this week\"}"
 
 echo "3) Rate limit path"
-curl -sS -X POST "http://localhost:3000/api/assistant" \
+curl -sS -X POST "http://localhost:3000/en/api/assistant" \
   -H "Content-Type: application/json" \
   -d "{\"userId\":\"$USER_ID\",\"isPro\":false,\"enableLimits\":true,\"message\":\"Quick summary\"}"
 
 echo "4) Action parse"
-curl -sS -X POST "http://localhost:3000/api/assistant" \
+curl -sS -X POST "http://localhost:3000/en/api/assistant" \
   -H "Content-Type: application/json" \
   -d "{\"userId\":\"$USER_ID\",\"message\":\"Add coffee 4.50 to Food budget\"}"

@@ -1,4 +1,5 @@
 // Реальный стрим Gemini (Generative Language API SSE)
+import { logLLMDebug } from './debug'
 
 type StreamParams = {
   model: string
@@ -42,7 +43,7 @@ export function streamGeminiText({ model, prompt, system, requestId }: StreamPar
       if (debug) {
         try {
           const lengths = userParts.map(p => (typeof p?.text === 'string' ? p.text.length : 0))
-          console.debug('[LLM_DEBUG gemini pre]', JSON.stringify({ requestId, model, userPartsLen: userParts.length, userPartsLengths: lengths }))
+          logLLMDebug('[LLM_DEBUG gemini pre]', { requestId, model, userPartsLen: userParts.length, userPartsLengths: lengths })
         } catch {
           // no-op
         }
@@ -80,7 +81,7 @@ export function streamGeminiText({ model, prompt, system, requestId }: StreamPar
       if (!res.ok) {
         const errText = await res.text().catch(() => '')
         if (debug) {
-          console.debug('[Gemini] HTTP error:', res.status, res.statusText, 'body:', errText)
+          logLLMDebug('[Gemini] HTTP error', { status: res.status, statusText: res.statusText, bodyLen: errText.length })
         }
         controller.enqueue(`Error from Gemini (${res.status} ${res.statusText}). Please try again later.`)
         controller.close()
@@ -107,16 +108,13 @@ export function streamGeminiText({ model, prompt, system, requestId }: StreamPar
           const blockReason = (json as any)?.promptFeedback?.blockReason
           const safetyRatings = (json as any)?.promptFeedback?.safetyRatings ?? []
           const finishReason = candidates?.[0]?.finishReason
-          console.debug('[LLM_DEBUG gemini post]', JSON.stringify({
-            requestId,
-            model,
+          logLLMDebug('[LLM_DEBUG gemini post]', {
+            requestId, model,
             candidatesLen: Array.isArray(candidates) ? candidates.length : 0,
             firstCandidatePartsLen: firstParts.length,
             firstCandidatePartsLengths: firstPartsLengths,
-            blockReason,
-            safetyRatings,
-            finishReason
-          }))
+            blockReason, safetyRatings, finishReason
+          })
         } catch {
           // no-op
         }

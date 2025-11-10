@@ -20,6 +20,7 @@ import { useRouter, usePathname } from '@/i18n/routing'
 import { useParams } from 'next/navigation'
 import ToneSettings from '@/components/ai-assistant/ToneSettings'
 import RecurringRulesSettings from '@/components/user-settings/RecurringRulesSettings'
+import NotificationsDebug from '@/components/notifications/NotificationsDebug'
 
 export default function UserSettingsClient() {
   const { signOut, session } = UserAuth()
@@ -156,6 +157,19 @@ export default function UserSettingsClient() {
                 </p>
               </div>
               <NotificationSettings />
+            </div>
+
+            {/* Notifications Debug Section */}
+            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-secondary-black mb-2 dark:text-white">
+                  {tSettings('notificationsDebug.title')}
+                </h2>
+                <p className="text-gray-600 dark:text-white text-sm">
+                  {tSettings('notificationsDebug.description')}
+                </p>
+              </div>
+              <NotificationsDebug />
             </div>
 
             {/* Recurring Rules Section */}

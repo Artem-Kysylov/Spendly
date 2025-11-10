@@ -1,9 +1,9 @@
 const withPWA = require('next-pwa')({
   dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  register: false, // Отключаем авто-регистрацию
+  disable: false,
+  register: false,
   skipWaiting: true,
-  swSrc: 'service-worker.js', // кастомный источник воркера
+  swSrc: 'service-worker.js',
 })
 
 const withNextIntl = require('next-intl/plugin')('./src/i18n.ts')

@@ -3,6 +3,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { ChatMessage, UseChatReturn } from '@/types/types'
 import { UserAuth } from '@/context/AuthContext'
+import { useTranslations, useLocale } from 'next-intl'
+import { getAssistantApiUrl } from '@/lib/assistantApi'
 import { localizeEmptyWeekly, localizeEmptyMonthly, localizeEmptyGeneric, periodLabel as canonicalPeriodLabel } from '@/prompts/spendlyPal/canonicalPhrases'
 import { supabase } from '@/lib/supabaseClient'
 import type { AIResponse, AssistantTone, Period } from '@/types/ai'
@@ -25,6 +27,7 @@ type AssistantJSON =
       shouldRefetch?: boolean
     }
 
+
 export const useChat = (): UseChatReturn => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isOpen, setIsOpen] = useState(false)
@@ -35,6 +38,8 @@ export const useChat = (): UseChatReturn => {
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null)
   const [rateLimitedUntil, setRateLimitedUntil] = useState<number | null>(null)
 
+  const tAssistant = useTranslations('assistant')
+  const locale = useLocale()
   const openChat = useCallback(() => setIsOpen(true), [])
   const closeChat = useCallback(() => setIsOpen(false), [])
 
@@ -97,7 +102,7 @@ export const useChat = (): UseChatReturn => {
     setAbortController(controller)
 
     try {
-      const response = await fetch('/api/assistant', {
+      const response = await fetch(getAssistantApiUrl(locale), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -112,11 +117,25 @@ export const useChat = (): UseChatReturn => {
 
       const contentType = response.headers.get('content-type') || ''
 
+      // Дружелюбная обработка HTML/404
+      if (!response.ok) {
+        if (contentType.includes('text/html') || response.status === 404) {
+          const aiMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            content: 'Assistant endpoint is not reachable for this locale. Please reload the page or try again.',
+            role: 'assistant',
+            timestamp: new Date()
+          }
+          setMessages(prev => [...prev, aiMessage])
+          return
+        }
+      }
+
       // Rate limit / Unauthorized
       if (response.status === 429) {
         const cooldownMs = 3000
         setRateLimitedUntil(Date.now() + cooldownMs)
-        const msg = 'Rate limit reached. Please wait a few seconds and try again.\nTip: Try shorter queries or come back later.'
+        const msg = tAssistant('rateLimited')
         const aiMessage: ChatMessage = { id: (Date.now() + 1).toString(), content: msg, role: 'assistant', timestamp: new Date() }
         setMessages(prev => [...prev, aiMessage])
         return
@@ -292,7 +311,7 @@ export const useChat = (): UseChatReturn => {
       setIsTyping(false)
       setAbortController(null)
     }
-  }, [session?.user?.id, assistantTone])
+  }, [session?.user?.id, assistantTone, locale])
 
   const clearMessages = useCallback(() => setMessages([]), [])
 
@@ -317,7 +336,7 @@ export const useChat = (): UseChatReturn => {
     }
 
     try {
-      const res = await fetch('/api/assistant', {
+      const res = await fetch(getAssistantApiUrl(locale), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -327,23 +346,49 @@ export const useChat = (): UseChatReturn => {
           actionType: pendingAction.type
         })
       })
+  
+      if (!res.ok) {
+          const ct = res.headers.get('content-type') || ''
+          if (ct.includes('text/html') || res.status === 404) {
+              const aiMessage: ChatMessage = {
+                  id: (Date.now() + 3).toString(),
+                  content: 'Assistant endpoint is not reachable for this locale. Please reload and try again.',
+                  role: 'assistant',
+                  timestamp: new Date()
+              }
+              setMessages(prev => [...prev, aiMessage])
+              setPendingAction(null)
+              return
+          }
+          const jsonErr = ct.includes('application/json') ? await res.json().catch(() => null) : null
+          const msg = jsonErr?.error || 'Failed to confirm action'
+          const aiMessage: ChatMessage = {
+              id: (Date.now() + 3).toString(),
+              content: msg,
+              role: 'assistant',
+              timestamp: new Date()
+          }
+          setMessages(prev => [...prev, aiMessage])
+          setPendingAction(null)
+          return
+      }
       const jsonConfirm = await res.json() as { message?: string; shouldRefetch?: boolean }
       const aiMessage: ChatMessage = {
-        id: (Date.now() + 3).toString(),
-        content: jsonConfirm.message || 'Done.',
-        role: 'assistant',
-        timestamp: new Date()
+          id: (Date.now() + 3).toString(),
+          content: jsonConfirm.message || 'Done.',
+          role: 'assistant',
+          timestamp: new Date()
       }
       setMessages(prev => [...prev, aiMessage])
       if (jsonConfirm.shouldRefetch) {
-        window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
+          window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
       }
     } catch (e) {
       console.error('Confirm failed:', e)
     } finally {
       setPendingAction(null)
     }
-  }, [pendingAction, session?.user?.id])
+  }, [pendingAction, session?.user?.id, locale])
 
   const hasPendingAction = !!pendingAction
   const isRateLimited = rateLimitedUntil ? Date.now() < rateLimitedUntil : false

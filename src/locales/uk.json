@@ -5,7 +5,8 @@
       "transactions": "Транзакції",
       "budgets": "Бюджети",
       "userSettings": "Налаштування"
-    }
+    },
+    "alt": { "logo": "Логотип Spendly" }
   },
   "cta": {
     "upgradeToPro": "Оновити до Pro",
@@ -197,7 +198,33 @@
     },
     "insights": {
       "title": "AI-інсайти",
-      "beta": "Бета"
+      "beta": "Бета",
+      "messages": {
+        "budgetExceeded": {
+          "title": "Бюджет перевищено",
+          "message": "Ви перевищили бюджет на {over}."
+        },
+        "budgetAlert": {
+          "title": "Попередження бюджету",
+          "message": "Використано {usedPercent}% вашого бюджету."
+        },
+        "risingExpenses": {
+          "title": "Зростання витрат",
+          "message": "Витрати зростають на {trend}%."
+        },
+        "incomeGrowth": {
+          "title": "Зростання доходів",
+          "message": "Доходи зростають на {trend}%."
+        },
+        "negativeCashFlow": {
+          "title": "Від’ємний грошовий потік",
+          "message": "Витрати перевищують доходи. Розгляньте скорочення витрат."
+        },
+        "financialHealth": {
+          "title": "Фінансове здоров’я",
+          "message": "Ваші витрати та доходи виглядають збалансованими."
+        }
+      }
     },
     "tone": {
       "label": "Тон",
@@ -441,7 +468,7 @@
           "saveFailed": "Не вдалося зберегти бюджет"
         }
       },
-      "card": {
+       "card": {
         "createNew": "Створити новий бюджет"
       },
       "mainBudget": {
