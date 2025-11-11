@@ -520,7 +520,28 @@
     "notFound": { "meta": { "title": "Page Not Found", "description": "The requested page does not exist." } }
   },
   "notifications": {
-    "bell": { "aria": "Notifications", "title": "Notifications", "markAllRead": "Mark all read", "empty": { "title": "No notifications yet", "description": "We'll notify you when something important happens" }, "viewAll": "View all notifications", "setup": { "title": "Set up the database to work with notifications", "subtitle": "Go to settings for instructions" } },
+    "bell": {
+      "aria": "Notifications",
+      "title": "Notifications",
+      "markAllRead": "Mark all read",
+      "empty": {
+        "title": "No notifications yet",
+        "description": "We'll notify you when something important happens"
+      },
+      "viewAll": "View all notifications",
+      "setup": {
+        "title": "Set up the database to work with notifications",
+        "subtitle": "Go to settings for instructions"
+      },
+      "actions": {
+        "openBudget": "Open budget",
+        "openReport": "Open report"
+      },
+      "pagination": {
+        "prev": "Previous",
+        "next": "Next"
+      }
+    },
     "settings": { "push": { "title": "Push Notifications", "description": "Receive notifications on this device" } },
     "weekly": { "title": "Weekly Digest", "body": "Your weekly report is ready." },
     "push_subscribed": "Push subscribed",

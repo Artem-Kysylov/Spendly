@@ -482,6 +482,14 @@
       "setup": {
         "title": "सूचनाओं के लिए डेटाबेस सेट करें",
         "subtitle": "निर्देशों के लिए सेटिंग्स खोलें"
+      },
+      "actions": {
+        "openBudget": "बजट खोलें",
+        "openReport": "रिपोर्ट खोलें"
+      },
+      "pagination": {
+        "prev": "पिछला",
+        "next": "अगला"
       }
     },
     "settings": {

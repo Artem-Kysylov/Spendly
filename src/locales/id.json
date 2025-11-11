@@ -12,6 +12,28 @@
     "downloadApp": "Unduh Aplikasi",
     "signOut": "Keluar"
   },
+  "bell": {
+    "aria": "Notifikasi",
+    "title": "Notifikasi",
+    "markAllRead": "Tandai semua sudah dibaca",
+    "empty": {
+      "title": "Belum ada notifikasi",
+      "description": "Kami akan memberitahu Anda jika ada sesuatu yang penting terjadi"
+    },
+    "viewAll": "Lihat semua notifikasi",
+    "setup": {
+      "title": "Siapkan database untuk bekerja dengan notifikasi",
+      "subtitle": "Buka pengaturan untuk instruksi"
+    },
+    "actions": {
+      "openBudget": "Buka anggaran",
+      "openReport": "Buka laporan"
+    },
+    "pagination": {
+      "prev": "Sebelumnya",
+      "next": "Berikutnya"
+    }
+  },
   "pricing": {
     "free": {
       "label": "Gratis",

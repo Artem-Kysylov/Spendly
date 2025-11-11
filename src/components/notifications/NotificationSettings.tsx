@@ -75,7 +75,6 @@ const NotificationSettings = () => {
       setIsUpdatingPush(true)
       const success = await (enabled ? subscribeToPush() : unsubscribeFromPush())
 
-      // Обновляем локальный статус разрешения после действий
       setPermission(typeof Notification !== 'undefined' ? Notification.permission : 'default')
 
       if (success) {
@@ -221,47 +220,31 @@ const NotificationSettings = () => {
           <div className="flex items-start justify-between py-3 border-b border-border gap-4">
             <div className="flex-1">
               <h3 className="font-medium text-foreground">{tN('settings.push.title')}</h3>
-              <p className="text-sm text-muted-foreground">{tN('settings.push.description')}</p>
-
-              {/* Permission status and guidance */}
-              <div className="mt-2 text-xs text-muted-foreground">
-                Статус разрешения: <span className="font-medium">{permission}</span>
-              </div>
-
+              <p className="text-sm text-foreground">{tN('settings.push.description')}</p>
+              {/* Удалено: Статус разрешения */}
+              {/* <div className="mt-2 text-xs text-muted-foreground">
+                  Статус разрешения: <span className="font-medium">{permission}</span>
+                </div> */}
               {permission === 'denied' && (
                 <div className="mt-2 text-xs bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-900 rounded p-2">
                   {tN('permission_denied')}
                   <div className="mt-1">Откройте настройки сайта → Разрешения → Уведомления и включите.</div>
                 </div>
               )}
-
-              <div className="mt-2">
-                <button
-                  onClick={handleRetrySubscribe}
-                  disabled={isUpdatingPush}
-                  className="text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-50"
-                >
-                  Повторить подписку
-                </button>
-              </div>
             </div>
 
-            <div className="relative">
-              <Switch
-                checked={settings.push_enabled}
-                onCheckedChange={handlePushToggle}
-                disabled={isUpdatingPush}
-                aria-label={tN('a11y.togglePush')}
-                className="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border border-primary bg-background transition-colors px-0.5"
-                thumbClassName="hidden"
-              />
-              <div
-                className={`
-                  pointer-events-none absolute top-0.5 left-0.5 size-5 rounded-full shadow transition-transform duration-200
-                  ${settings.push_enabled ? 'bg-primary translate-x-5' : 'bg-primary/30 translate-x-0 ring-1 ring-primary/40'}
-                `}
-              />
-            </div>
+            <Switch
+              checked={settings.push_enabled}
+              onCheckedChange={handlePushToggle}
+              disabled={isUpdatingPush}
+              aria-label={tN('a11y.togglePush')}
+              className="
+                border border-gray-300 dark:border-border
+                data-[state=unchecked]:bg-gray-200 dark:data-[state=unchecked]:bg-neutral-800
+                data-[state=checked]:bg-primary
+              "
+              thumbClassName="bg-white dark:bg-white shadow-sm"
+            />
           </div>
 
           {/* Frequency Settings */}

@@ -1,0 +1,3 @@
+1.  **Передать `tone` в `composeLLMPrompt`**: В файле `src/app/[locale]/api/assistant/route.ts` необходимо извлечь параметр `tone` из тела запроса и передать его в функцию `composeLLMPrompt`.
+2.  **Передать `tone` в `streamProviderWithUsage`**: В том же файле `src/app/[locale]/api/assistant/route.ts` необходимо передать `tone` в `meta` объект для функции `streamProviderWithUsage` для логирования.
+3.  **Передать `tone` в `composeLLMPrompt` в `useAISuggestions`**: В файле `src/hooks/useAISuggestions.ts` также используется `composeLLMPrompt`. Нужно убедиться, что `tone` передается и туда. Для этого потребуется получать `assistantTone` из `useChat` или аналогичного источника.

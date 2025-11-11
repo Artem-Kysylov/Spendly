@@ -455,6 +455,14 @@
       "empty": {
         "title": "알림이 없습니다",
         "description": "새 소식이 있으면 여기에서 볼 수 있어요"
+      },
+      "actions": {
+        "openBudget": "예산 열기",
+        "openReport": "보고서 열기"
+      },
+      "pagination": {
+        "prev": "이전",
+        "next": "다음"
       }
     },
     "settings": {

@@ -49,7 +49,12 @@ export async function POST(req: NextRequest) {
 
   if (prefsErr) {
     console.error('digest: preferences error', prefsErr)
-    return NextResponse.json({ error: 'Failed to fetch preferences' }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch preferences',
+      },
+      { status: 500 },
+    )
   }
 
   const targets = (prefs || []).filter(p => p.push_enabled || p.email_enabled)

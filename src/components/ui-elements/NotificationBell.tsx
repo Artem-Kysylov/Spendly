@@ -241,13 +241,13 @@ function NotificationBell({ className = '', onClick }: NotificationBellProps) {
                                                               onClick={(e) => { e.stopPropagation(); openBudget(notification) }}
                                                               className="text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20"
                                                           >
-                                                              Перейти в бюджет
+                                                              {tNotifications('bell.actions.openBudget')}
                                                           </button>
                                                           <button
                                                               onClick={(e) => { e.stopPropagation(); openReport(notification) }}
                                                               className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
                                                           >
-                                                              Открыть отчёт
+                                                              {tNotifications('bell.actions.openReport')}
                                                           </button>
                                                       </>
                                                   )}
@@ -256,7 +256,7 @@ function NotificationBell({ className = '', onClick }: NotificationBellProps) {
                                                           onClick={(e) => { e.stopPropagation(); openReport(notification) }}
                                                           className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
                                                       >
-                                                          Открыть отчёт
+                                                          {tNotifications('bell.actions.openReport')}
                                                       </button>
                                                   )}
                                               </div>
@@ -276,14 +276,14 @@ function NotificationBell({ className = '', onClick }: NotificationBellProps) {
                               disabled={pageOffset === 0}
                               className="text-sm text-primary disabled:text-gray-400 hover:text-primary/80"
                           >
-                              Назад
+                              {tNotifications('bell.pagination.prev')}
                           </button>
                           <button
                               onClick={handleNextPage}
                               disabled={notifications.length < PAGE_SIZE}
                               className="text-sm text-primary disabled:text-gray-400 hover:text-primary/80"
                           >
-                              Вперёд
+                              {tNotifications('bell.pagination.next')}
                           </button>
                       </div>
                   )}

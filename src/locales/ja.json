@@ -478,6 +478,14 @@
       "setup": {
         "title": "通知用データベースを設定",
         "subtitle": "設定を開いて手順を確認"
+      },
+      "actions": {
+        "openBudget": "予算を開く",
+        "openReport": "レポートを開く"
+      },
+      "pagination": {
+        "prev": "前へ",
+        "next": "次へ"
       }
     },
     "settings": {

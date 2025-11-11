@@ -26,6 +26,8 @@ export function useAISuggestions() {
     const controller = new AbortController()
     setAbortController(controller)
 
+    const tone = (session.user.user_metadata as any)?.assistant_tone || 'neutral'
+
     try {
       const res = await fetch(getAssistantApiUrl(locale), {
         method: 'POST',
@@ -34,7 +36,8 @@ export function useAISuggestions() {
           userId: session.user.id,
           isPro: false,
           enableLimits: true,
-          message: prompt
+          message: prompt,
+          tone
         }),
         signal: controller.signal
       })

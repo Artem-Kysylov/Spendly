@@ -159,19 +159,9 @@ export default function UserSettingsClient() {
               <NotificationSettings />
             </div>
 
-            {/* Notifications Debug Section */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-secondary-black mb-2 dark:text-white">
-                  {tSettings('notificationsDebug.title')}
-                </h2>
-                <p className="text-gray-600 dark:text-white text-sm">
-                  {tSettings('notificationsDebug.description')}
-                </p>
-              </div>
-              <NotificationsDebug />
-            </div>
-
+            {/* Удаляем импорт и секцию NotificationsDebug
+            // import NotificationsDebug from '@/components/notifications/NotificationsDebug'
+            
             {/* Recurring Rules Section */}
             <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
               <div className="mb-6">
@@ -241,7 +231,7 @@ export default function UserSettingsClient() {
                     {tPricing('pro.short')}
                   </p>
                   <div className="mt-4">
-                    <div className="text-2xl font-semibold text-secondary-black dark:text-white">$5</div>
+                    <div className="text-2xl font-semibold text-secondary-black dark:text-white">$7</div>
                     <div className="text-xs text-gray-500 dark:text-gray-400">
                       {tPricing('perMonth')}
                     </div>

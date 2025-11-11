@@ -1,5 +1,5 @@
 import { ToneSelect } from './ToneSelect'
-import { useState, KeyboardEvent } from 'react'
+import { useState, KeyboardEvent, useEffect, useRef } from 'react'
 import { Send } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Select } from '@/components/ui/select'
@@ -17,6 +17,23 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assist
     const [message, setMessage] = useState('')
     const tAI = useTranslations('assistant')
     const toneEmoji = { neutral: '😐', friendly: '😊', formal: '🧑‍💼', playful: '😜' } as const
+
+    // авто‑рост textarea + скрытие скролла до лимита
+    const MAX_TEXTAREA_HEIGHT = 160
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+
+    const autoResize = () => {
+        const el = textareaRef.current
+        if (!el) return
+        el.style.height = 'auto'
+        const next = Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)
+        el.style.height = `${next}px`
+        el.style.overflowY = el.scrollHeight > MAX_TEXTAREA_HEIGHT ? 'auto' : 'hidden'
+    }
+
+    useEffect(() => {
+        autoResize()
+    }, [message])
 
     const handleSend = async () => {
         if (!message.trim() || disabled) return
@@ -52,13 +69,15 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assist
                 <div className="flex items-center space-x-2">
                     {/* Инпут и кнопка — оставлены как были */}
                     <textarea
+                        ref={textareaRef}
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyPress={handleKeyPress}
                         placeholder={tAI('input.placeholder')}
                         disabled={(disabled ?? false) || (isThinking ?? false)}
                         rows={1}
-                        className="flex-1 resize-none border border-gray-300 bg-white text-secondary-black placeholder:text-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed h-10 dark:border-gray-700 dark:bg-black dark:text-white"
+                        style={{ maxHeight: MAX_TEXTAREA_HEIGHT, overflowY: 'hidden' }}
+                        className="flex-1 resize-none border border-gray-300 bg-white text-secondary-black placeholder:text-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed min-h-10 h-auto dark:border-gray-700 dark:bg-black dark:text-white"
                     />
                     <button
                         onClick={isThinking ? (onAbort ?? (() => {})) : handleSend}
