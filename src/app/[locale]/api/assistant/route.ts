@@ -67,16 +67,45 @@ async function getTodayUsageCount(userId: string): Promise<number> {
   return count ?? 0
 }
 
-async function checkLimits(userId: string, isPro: boolean, enableLimits: boolean): Promise<{ ok: boolean; reason?: string }> {
-  if (!enableLimits) return { ok: true }
-  if (isPro) return { ok: true }
+// Новая функция: получаем дневной лимит из удалённого конфига (fallback = env или 5)
+async function getDailyLimitFromConfig(): Promise<number> {
+  try {
+    const supabase = getServerSupabaseClient()
+    const { data, error } = await supabase
+      .from('app_config')
+      .select('value')
+      .eq('key', 'free_daily_limit')
+      .single()
 
-  const dailyLimit = Number(process.env.FREE_DAILY_LIMIT ?? '50')
+    if (error) throw error
+    const raw = (data as any)?.value
+    const parsed = Number(typeof raw === 'string' ? raw : raw)
+    if (Number.isFinite(parsed) && parsed > 0) return parsed
+    return Number(process.env.FREE_DAILY_LIMIT ?? '10')
+  } catch {
+    return Number(process.env.FREE_DAILY_LIMIT ?? '10')
+  }
+}
+
+// Обновлено: возвращаем также used и dailyLimit
+async function checkLimits(
+  userId: string,
+  isPro: boolean,
+  enableLimits: boolean
+): Promise<{ ok: boolean; reason?: string; used: number; dailyLimit: number }> {
+  if (!enableLimits || isPro) return { ok: true, used: 0, dailyLimit: Infinity }
+
+  const dailyLimit = await getDailyLimitFromConfig()
   const used = await getTodayUsageCount(userId)
   if (used >= dailyLimit) {
-    return { ok: false, reason: `Daily limit reached (${dailyLimit} requests). Please try again tomorrow.` }
+    return {
+      ok: false,
+      reason: `Daily limit reached (${dailyLimit} requests). Please try again tomorrow.`,
+      used,
+      dailyLimit
+    }
   }
-  return { ok: true }
+  return { ok: true, used, dailyLimit }
 }
 
 async function logUsage(entry: {
@@ -129,6 +158,8 @@ function streamProviderWithUsage(
     locale?: string;
     currency?: string;
     tone?: 'neutral' | 'friendly' | 'formal' | 'playful';
+    dailyLimit: number;
+    usedBefore: number;
   }
 ) {
   const encoder = new TextEncoder()
@@ -160,9 +191,7 @@ function streamProviderWithUsage(
                   intent: meta.intent,
                   period: meta.period
                 }))
-              } catch {
-                // no-op
-              }
+              } catch { /* no-op */ }
             }
             await logUsage({
               userId: meta.userId,
@@ -206,6 +235,8 @@ function streamProviderWithUsage(
     }
   })
 
+  const usedAfter = Math.min((meta.usedBefore ?? 0) + 1, meta.dailyLimit ?? Infinity)
+
   return new Response(out, {
     headers: {
       'Content-Type': 'text/plain; charset=utf-8',
@@ -219,6 +250,9 @@ function streamProviderWithUsage(
       'X-Currency': meta.currency || 'USD',
       'X-Bypass': 'false',
       'X-Tone': meta.tone || 'neutral',
+      // Новые заголовки для клиента:
+      'X-Daily-Limit': String(meta.dailyLimit ?? ''),
+      'X-Usage-Used': String(usedAfter)
     }
   })
 }
@@ -267,18 +301,44 @@ export async function POST(req: NextRequest) {
       success: false,
       errorMessage: limits.reason
     })
-    return new Response(JSON.stringify({ error: limits.reason }), { status: 429, headers: { 'Content-Type': 'application/json', 'X-Request-Id': requestId } })
+    return new Response(JSON.stringify({ error: limits.reason }), {
+      status: 429,
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Request-Id': requestId,
+        'X-Daily-Limit': String(limits.dailyLimit),
+        'X-Usage-Used': String(limits.used)
+      }
+    })
   }
 
   // Подтверждение — исполняем и отдаём JSON
   if (confirm && actionPayload) {
     if (actionType === 'save_recurring_rule') {
       const res = await upsertRecurringRule(userId, actionPayload)
+      await logUsage({
+        userId,
+        provider: 'canonical',
+        model: 'action',
+        promptLength: 0,
+        responseLength: 0,
+        success: res.ok,
+        intent: 'save_recurring_rule'
+      })
       return new Response(JSON.stringify({ kind: 'message', ok: res.ok, message: res.message, shouldRefetch: false }), {
         headers: { 'Content-Type': 'application/json' }
       })
     }
     const res = await executeTransaction(userId, actionPayload)
+    await logUsage({
+      userId,
+      provider: 'canonical',
+      model: 'action',
+      promptLength: 0,
+      responseLength: 0,
+      success: res.ok,
+      intent: 'add_transaction'
+    })
     return new Response(JSON.stringify({ kind: 'message', ok: res.ok, message: res.message, shouldRefetch: res.ok }), {
       headers: { 'Content-Type': 'application/json' }
     })
@@ -367,7 +427,10 @@ export async function POST(req: NextRequest) {
         'X-Period': canonical.period,
         'X-Locale': locale,
         'X-Currency': currency,
-        'X-Bypass': 'true'
+        'X-Bypass': 'true',
+        // Новые заголовки usage:
+        'X-Daily-Limit': String(limits.dailyLimit),
+        'X-Usage-Used': String(Math.min(limits.used + 1, limits.dailyLimit))
       }
     })
   }
@@ -426,7 +489,9 @@ export async function POST(req: NextRequest) {
         period: periodDetected,
         locale,
         currency,
-        tone
+        tone,
+        dailyLimit: limits.dailyLimit,
+        usedBefore: limits.used
       })
     } else {
       const model = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash'
@@ -446,7 +511,9 @@ export async function POST(req: NextRequest) {
         period: periodDetected,
         locale,
         currency,
-        tone
+        tone,
+        dailyLimit: limits.dailyLimit,
+        usedBefore: limits.used
       })
     }
   } catch (e) {

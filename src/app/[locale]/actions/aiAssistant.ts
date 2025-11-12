@@ -72,6 +72,28 @@ export const listRecurringRules = async (userId: string) => {
 
 export const upsertRecurringRule = async (userId: string, candidate: { title_pattern: string; budget_folder_id: string | null; avg_amount: number; cadence: 'weekly' | 'monthly'; next_due_date: string }) => {
   const supabase = getServerSupabaseClient()
+
+  // Enforce Free-tier rule limit (max 2)
+  try {
+    const { data: userRes } = await supabase.auth.admin.getUserById(userId)
+    const isPro = (userRes?.user?.user_metadata as any)?.subscription_status === 'pro'
+
+    if (!isPro) {
+      const { count, error: countErr } = await supabase
+        .from('recurring_rules')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+      if (!countErr && (count ?? 0) >= 3) {
+        return {
+          ok: false,
+          message: 'limitReached'
+        }
+      }
+    }
+  } catch {
+    // if user lookup fails, we default to allow, but prefer not to block
+  }
+
   const payload = {
     user_id: userId,
     title_pattern: candidate.title_pattern,

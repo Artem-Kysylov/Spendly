@@ -81,7 +81,9 @@
       "description": "Kelola cara dan kapan Anda menerima notifikasi",
       "weekly": {
         "title": "Ringkasan Mingguan",
-        "body": "Laporan mingguan Anda siap."
+        "bodyFree": "Ringkasan mingguan Anda siap. Analisis lanjutan tersedia di Pro.",
+        "bodyPro": "Ringkasan mingguan dengan wawasan AI siap.",
+        "ctaUpgrade": "Upgrade ke Pro"
       },
       "push_subscribed": "Push diaktifkan",
       "push_failed": "Gagal berlangganan push",
@@ -169,7 +171,8 @@
         "loadFailed": "Gagal memuat aturan berkala.",
         "saveFailed": "Gagal menyimpan aturan.",
         "updateFailed": "Gagal memperbarui aturan.",
-        "deleteFailed": "Gagal menghapus aturan."
+        "deleteFailed": "Gagal menghapus aturan.",
+        "limitReached": "Batas: di paket Gratis, Anda dapat menambahkan hingga 2 aturan berkala. Upgrade ke Pro untuk tanpa batas."
       }
     }
   },
@@ -368,6 +371,9 @@
       },
       "modal": {
         "createTitle": "Buat Anggaran"
+      },
+      "toast": {
+        "limitReached": "Anda telah mencapai batas anggaran gratis. Tingkatkan ke Pro untuk lebih banyak."
       }
     },
     "details": {
@@ -393,6 +399,25 @@
         "updateFailed": "Gagal memperbarui transaksi",
         "updateSuccess": "Transaksi berhasil diperbarui!"
       }
+    }
+  },
+  "layout": {
+    "upgradeBanner": {
+      "title": "Upgrade ke Pro 🚀",
+      "description": "Akses anggaran tanpa batas, Asisten AI, dan lainnya.",
+      "cta": "Upgrade ke Pro"
+    },
+    "periodicBanner": {
+      "title": "Upgrade ke Pro 🚀",
+      "description": "Anggaran tanpa batas, Asisten AI, dan grafik lanjutan.",
+      "dismiss": "Nanti saja"
+    },
+    "limitWarning": {
+      "title": "Batas paket Gratis tercapai",
+      "description": "Anda telah mencapai batas paket Gratis.",
+      "budgets": "Hingga 3 anggaran di Gratis. Upgrade untuk tanpa batas.",
+      "assistant": "Hingga 10 pesan AI di Gratis. Upgrade untuk tanpa batas.",
+      "cta": "Upgrade ke Pro"
     }
   }
 }

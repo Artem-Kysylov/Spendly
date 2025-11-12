@@ -18,6 +18,9 @@ import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CustomTooltip } from './CustomTooltip'
 import { useTranslations } from 'next-intl'
+import { useSubscription } from '@/hooks/useSubscription'
+import UpgradeCornerPanel from '../free/UpgradeCornerPanel'
+import ProLockLabel from '../free/ProLockLabel'
 
 // Types
 interface ExpensesBarData {
@@ -58,10 +61,35 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
 }, ref) => {
   
   const { text: tip, loading: tipLoading, error: tipError, isRateLimited, fetchSuggestion, abort } = useAISuggestions()
+  const { subscriptionPlan } = useSubscription()
+  const isPro = subscriptionPlan === 'pro'
 
   const [displayTip, setDisplayTip] = React.useState<string>('')
   const [cooldownUntil, setCooldownUntil] = React.useState<number>(0)
   const lastKeyRef = React.useRef<string | null>(null)
+
+  // Один бесплатный превью для Free, затем блокируем кнопку и показываем CTA
+  const [previewUsed, setPreviewUsed] = React.useState<boolean>(() => {
+    if (typeof window === 'undefined') return false
+    try {
+      return window.localStorage.getItem('spendly:ai_preview_expenses_used') === '1'
+    } catch { return false }
+  })
+  const [showUpgrade, setShowUpgrade] = React.useState<boolean>(false)
+
+  const canShowUpgradePopup = () => {
+    try {
+      const count = parseInt(window.localStorage.getItem('spendly:upgrade_popup_count') || '0', 10)
+      return count < 3
+    } catch { return true }
+  }
+
+  const markUpgradePopupShown = () => {
+    try {
+      const count = parseInt(window.localStorage.getItem('spendly:upgrade_popup_count') || '0', 10)
+      window.localStorage.setItem('spendly:upgrade_popup_count', String(count + 1))
+    } catch { /* no-op */ }
+  }
 
   // Refresh AI tip based on chart data
   const refreshTip = () => {
@@ -72,6 +100,11 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
     // Edge case: no data at all
     if (!data || data.length === 0) {
       setDisplayTip('Недостаточно данных для анализа, попробуйте позже.')
+      return
+    }
+
+    // Если Free и превью уже использовано — блокируем
+    if (!isPro && previewUsed) {
       return
     }
 
@@ -102,6 +135,16 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
       const sanitized = sanitizeTip(tip)
       setDisplayTip(sanitized)
       setCachedTip(lastKeyRef.current, tip)
+
+      // Отмечаем использование бесплатного превью для Free
+      if (!isPro && !previewUsed) {
+        setPreviewUsed(true)
+        try { window.localStorage.setItem('spendly:ai_preview_expenses_used', '1') } catch { /* no-op */ }
+        if (canShowUpgradePopup()) {
+          setShowUpgrade(true)
+          markUpgradePopupShown()
+        }
+      }
     }
   }, [tip])
 
@@ -164,6 +207,7 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
         {description && <ChartDescription>{description}</ChartDescription>}
       </CardHeader>
       <CardContent>
+        {showUpgrade && <UpgradeCornerPanel />}
         <div style={{ width: '100%', height }}>
           <ResponsiveContainer width="100%" height="100%">
             <RechartsBarChart
@@ -223,23 +267,33 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
             )}
             {tipError && <p className="text-red-600 text-xs mt-1">{tipError}</p>}
           </div>
-          <button
-            onClick={tipLoading ? abort : refreshTip}
-            className={`text-sm font-medium px-4 py-2 rounded-md transition-colors flex items-center gap-2 ${tipLoading ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}
-            disabled={isRateLimited}
-          >
-            {tipLoading ? (
-              <>
-                <Image src="/stop.svg" alt="Stop" width={16} height={16} />
-                {tCharts('ai.stop')}
-              </>
-            ) : (
-              <>
-                <Image src="/sparkles.svg" alt="Get AI Insight" width={16} height={16} />
-                {tCharts('ai.getInsight')}
-              </>
-            )}
-          </button>
+
+          {/* Кнопка инсайта или заблокированный блок после одного превью в Free */}
+          {(!isPro && previewUsed) ? (
+            <div className="text-sm font-medium px-4 py-2 rounded-md bg-muted text-muted-foreground flex items-center gap-2">
+              <ProLockLabel />
+              <span>Полные инсайты доступны в Pro</span>
+              <a href="/payment" className="ml-2 underline text-primary">Upgrade to Pro</a>
+            </div>
+          ) : (
+            <button
+              onClick={tipLoading ? abort : refreshTip}
+              className={`text-sm font-medium px-4 py-2 rounded-md transition-colors flex items-center gap-2 ${tipLoading ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}
+              disabled={isRateLimited}
+            >
+              {tipLoading ? (
+                <>
+                  <Image src="/stop.svg" alt="Stop" width={16} height={16} />
+                  {tCharts('ai.stop')}
+                </>
+              ) : (
+                <>
+                  <Image src="/sparkles.svg" alt="Get AI Insight" width={16} height={16} />
+                  {tCharts('ai.getInsight')}
+                </>
+              )}
+            </button>
+          )}
         </div>
       </CardContent>
     </Card>

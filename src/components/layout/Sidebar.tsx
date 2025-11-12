@@ -7,6 +7,7 @@ import { Link } from '@/i18n/routing'
 import type { AppPathnames } from '@/i18n/routing'
 import { LayoutDashboard, CreditCard, Wallet } from 'lucide-react'
 import Image from 'next/image'
+import UpgradeSidebarBanner from '@/components/free/UpgradeSidebarBanner'
 
 const Sidebar = () => {
     const pathname = usePathname()
@@ -84,6 +85,14 @@ const Sidebar = () => {
                     })}
                 </ul>
             </nav>
+
+            {/* Upgrade banner */}
+            <div className="px-4 pb-2">
+                {/* Вставляем общий компонент баннера */}
+                {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+                {/* @ts-ignore */}
+                <UpgradeSidebarBanner />
+            </div>
 
             {/* User Section */}
             <div className="p-4 border-t border-border">

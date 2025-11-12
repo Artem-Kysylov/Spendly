@@ -5,6 +5,23 @@
       "transactions": "取引",
       "budgets": "予算",
       "userSettings": "ユーザー設定"
+    },
+    "upgradeBanner": {
+      "title": "Pro にアップグレード 🚀",
+      "description": "無制限の予算、AI アシスタントなどが利用可能に。",
+      "cta": "Pro にアップグレード"
+    },
+    "periodicBanner": {
+      "title": "Pro にアップグレード 🚀",
+      "description": "無制限の予算、AI アシスタント、高度なグラフ。",
+      "dismiss": "今はしない"
+    },
+    "limitWarning": {
+      "title": "無料プランの上限に達しました",
+      "description": "無料プランの制限に達しました。",
+      "budgets": "無料では最大3つの予算。無制限にはアップグレードしてください。",
+      "assistant": "無料では AI メッセージは最大10件。無制限にはアップグレードしてください。",
+      "cta": "Pro にアップグレード"
     }
   },
   "cta": {
@@ -144,7 +161,8 @@
         "loadFailed": "定期ルールの読み込みに失敗しました。",
         "saveFailed": "ルールの保存に失敗しました。",
         "updateFailed": "ルールの更新に失敗しました。",
-        "deleteFailed": "ルールの削除に失敗しました。"
+        "deleteFailed": "ルールの削除に失敗しました。",
+        "limitReached": "制限: 無料プランではルールは最大3件。Pro にアップグレードで無制限。"
       }
     }
   },
@@ -428,7 +446,8 @@
       "toast": {
         "failedLoad": "予算フォルダーの読み込みに失敗しました",
         "failedCreate": "予算の作成に失敗しました",
-        "createSuccess": "予算を作成しました"
+        "createSuccess": "予算を作成しました",
+        "limitReached": "制限: 無料プランでは予算は最大3件。Pro にアップグレードで無制限。"
       },
       "card": {
         "createNew": "新しい予算"

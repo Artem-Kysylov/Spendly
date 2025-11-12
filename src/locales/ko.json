@@ -19,6 +19,23 @@
     },
     "alt": {
       "logo": "Spendly 로고"
+    },
+    "upgradeBanner": {
+      "title": "Pro로 업그레이드 🚀",
+      "description": "무제한 예산, AI 비서 등 제공.",
+      "cta": "Pro로 업그레이드"
+    },
+    "periodicBanner": {
+      "title": "Pro로 업그레이드 🚀",
+      "description": "무제한 예산, AI 비서, 고급 차트.",
+      "dismiss": "지금은 안함"
+    },
+    "limitWarning": {
+      "title": "무료 플랜 한도에 도달함",
+      "description": "무료 플랜의 제한에 도달했습니다.",
+      "budgets": "무료는 최대 3개의 예산. 무제한 사용을 위해 업그레이드하세요.",
+      "assistant": "무료는 AI 메시지 최대 10개. 무제한 사용을 위해 업그레이드하세요.",
+      "cta": "Pro로 업그레이드"
     }
   },
   "budgets": {
@@ -28,6 +45,9 @@
       },
       "modal": {
         "createTitle": "예산 만들기"
+      },
+      "toast": {
+        "limitReached": "무료 예산 한도에 도달했습니다. 더 많은 기능을 사용하려면 Pro로 업그레이드하세요."
       }
     },
     "labels": {
@@ -435,7 +455,8 @@
         "loadFailed": "반복 규칙을 불러오지 못했습니다.",
         "saveFailed": "규칙 저장에 실패했습니다.",
         "updateFailed": "규칙 업데이트에 실패했습니다.",
-        "deleteFailed": "규칙 삭제에 실패했습니다."
+        "deleteFailed": "규칙 삭제에 실패했습니다.",
+        "limitReached": "무료 요금제에서는 반복 규칙을 최대 2개까지 추가할 수 있습니다. Pro로 업그레이드하면 무제한입니다."
       }
     }
   },
@@ -532,6 +553,9 @@
   "recurring": {
     "dueTodayTitle": "오늘 예정된 정기결제: {name}",
     "dueSoonTitle": "곧 예정된 정기결제: {name}",
-    "message": "마감 {date}. 약 {amount}."
+    "message": "{date} 마감 {amount}.",
+    "errors": {
+      "limitReached": "무료 요금제에서는 반복 규칙을 최대 2개까지 추가할 수 있습니다. Pro로 업그레이드하면 무제한입니다."
+    }
   }
 }

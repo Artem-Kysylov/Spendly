@@ -28,6 +28,7 @@ export type NamespaceKeys = {
     | 'presets.header' | 'presets.showWeek' | 'presets.saveMoney' | 'presets.analyzePatterns'
     | 'presets.createBudgetPlan' | 'presets.showBiggest' | 'presets.compareMonths'
     | 'insights.title' | 'insights.beta'
+    | 'toasts.usedNOfDailyLimit' | 'toasts.limitReached'
   charts: 'titles.analytics' | 'titles.comparisonBar' | 'bar.titleByCategory' | 'line.titleOverTime'
     | 'states.loading' | 'states.loadingData' | 'states.noData' | 'states.noExpensesData'
     | 'labels.expenses' | 'labels.income' | 'labels.for'
@@ -109,7 +110,7 @@ export type NamespaceKeys = {
     | 'notFound.meta.title' | 'notFound.meta.description'
   budgets:
     | 'list.modal.createTitle' | 'list.card.createNew'
-    | 'list.toast.failedLoad' | 'list.toast.failedCreate' | 'list.toast.createSuccess'
+    | 'list.toast.failedLoad' | 'list.toast.failedCreate' | 'list.toast.createSuccess' | 'list.toast.limitReached'
     | 'labels.spent' | 'labels.left'
     | 'details.controls.goToBudgets' | 'details.controls.editBudget' | 'details.controls.deleteBudget'
     | 'details.deleteModal.title' | 'details.deleteModal.text' | 'details.editModal.title'

@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSupabaseClient } from '@/lib/serverSupabase'
 import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
 import { getWeekRange, getLastWeekRange } from '@/lib/ai/stats'
+import { getTranslations } from 'next-intl/server'
+import { selectModel } from '@/lib/ai/routing'
+import { buildCountersPrompt } from '@/lib/ai/promptBuilders'
+import { streamOpenAIText } from '@/lib/llm/openai'
+import { streamGeminiText } from '@/lib/llm/google'
 
 function isAuthorized(req: NextRequest): boolean {
   const bearer = req.headers.get('authorization') || ''
@@ -34,6 +39,7 @@ export async function POST(req: NextRequest) {
     req.cookies.get('spendly_locale')?.value ||
     DEFAULT_LOCALE
   const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
+  const t = await getTranslations({ locale, namespace: 'Notifications' })
   const currency = 'USD' // Можно расширить и брать из профиля
 
   // Точки недели: текущая неделя (старт в понедельник) и прошлые периоды
@@ -125,20 +131,128 @@ export async function POST(req: NextRequest) {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 3)
 
-    // Формируем контент
-    const title = locale === 'ru' ? 'Еженедельный дайджест' : locale === 'id' ? 'Ringkasan Mingguan' : 'Weekly Digest'
-    const body =
-      `${locale === 'ru' ? 'За прошлую неделю' : locale === 'id' ? 'Minggu lalu' : 'Last week'} — `
-      + `${locale === 'ru' ? 'Расходы' : locale === 'id' ? 'Pengeluaran' : 'Expenses'} ${formatCurrency(totalExpensesLast, locale, currency)}, `
-      + `${locale === 'ru' ? 'Доходы' : locale === 'id' ? 'Pendapatan' : 'Income'} ${formatCurrency(totalIncomeLast, locale, currency)}. `
-      + (topBudgets.length
-        ? `${locale === 'ru' ? 'Топ:' : locale === 'id' ? 'Top:' : 'Top:'} ${topBudgets.map(([n, v]) => `${n} ${formatCurrency(v, locale, currency)}`).join(', ')}.`
-        : '')
+    // Получаем план пользователя (free/pro)
+    const { data: userRes } = await supabase.auth.admin.getUserById(userId)
+    const isPro = (userRes?.user?.user_metadata as any)?.subscription_status === 'pro'
+
+    // Сводка по прошлой неделе (базовая, для Free и Pro)
+    const title = t('weekly.title')
+    const topBudgetsText = topBudgets.length
+      ? `${t('weekly.top')}: ${topBudgets.map(([n, v]) => `${n} ${formatCurrency(v, locale, currency)}`).join(', ')}.`
+      : ''
+    const bodyBasic =
+      `${t('weekly.lastWeek')} — ` +
+      `${t('weekly.expenses')} ${formatCurrency(totalExpensesLast, locale, currency)}, ` +
+      `${t('weekly.income')} ${formatCurrency(totalIncomeLast, locale, currency)}. ` +
+      topBudgetsText
+
+    let body = bodyBasic
+
+    // Для Pro — добавляем краткие AI-инсайты, если есть ключи API
+    if (isPro) {
+      // Получаем основной бюджет (по желанию, для процента использования)
+      const { data: mainBudgetRow } = await supabase
+        .from('main_budget')
+        .select('amount')
+        .eq('user_id', userId)
+        .maybeSingle()
+      const budget = Number(mainBudgetRow?.amount ?? 0)
+
+      // Метрики для buildCountersPrompt (на недельной выборке)
+      const expensesTrendPercent = totalExpensesPrev > 0
+        ? ((totalExpensesLast - totalExpensesPrev) / totalExpensesPrev) * 100
+        : (totalExpensesLast > 0 ? 100 : 0)
+      const incomeTrendPercent = totalIncomePrev > 0
+        ? ((totalIncomeLast - totalIncomePrev) / totalIncomePrev) * 100
+        : (totalIncomeLast > 0 ? 100 : 0)
+      const incomeCoveragePercent = totalIncomeLast > 0 ? (totalExpensesLast / totalIncomeLast) * 100 : 0
+      const budgetUsagePercentage = budget > 0 ? (totalExpensesLast / budget) * 100 : 0
+      const remainingBudget = Math.max(0, budget - totalExpensesLast)
+      const budgetStatus = budget <= 0
+        ? 'not-set'
+        : budgetUsagePercentage > 100
+        ? 'exceeded'
+        : budgetUsagePercentage > 80
+        ? 'warning'
+        : 'good'
+
+      const expensesDifferenceText = t('weekly.expensesDifference', {
+        percent: Math.abs(expensesTrendPercent).toFixed(1),
+      })
+
+      const incomeDifferenceText = t('weekly.incomeDifference', {
+        percent: Math.abs(incomeTrendPercent).toFixed(1),
+      })
+
+      const prompt = buildCountersPrompt({
+        budget,
+        totalExpenses: totalExpensesLast,
+        totalIncome: totalIncomeLast,
+        previousMonthExpenses: totalExpensesPrev, // используем прежнюю неделю как ориентир
+        previousMonthIncome: totalIncomePrev,
+        budgetUsagePercentage,
+        remainingBudget,
+        budgetStatus: budgetStatus as any,
+        expensesTrendPercent,
+        incomeTrendPercent,
+        incomeCoveragePercent,
+        expensesDifferenceText,
+        incomeDifferenceText,
+        currency,
+        locale: (locale as any),
+      })
+
+      const hasOpenAI = !!process.env.OPENAI_API_KEY
+      const hasGemini = !!process.env.GOOGLE_API_KEY
+      const model = selectModel(true, true) // Pro + сложный (аналитика)
+      const requestId = `digest_${userId}_${Date.now()}`
+      let aiText = ''
+
+      try {
+        if (model.includes('gpt') && hasOpenAI) {
+          const stream = streamOpenAIText({
+            model: process.env.OPENAI_MODEL ?? 'gpt-4-turbo',
+            prompt,
+            system: 'You are a helpful budgeting assistant. Reply in 2–3 concise sentences.',
+            requestId,
+          })
+          const reader = stream.getReader()
+          const decoder = new TextDecoder()
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            aiText += typeof value === 'string' ? value : decoder.decode(value)
+            if (aiText.length > 700) break
+          }
+        } else if (hasGemini) {
+          const stream = streamGeminiText({
+            model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
+            prompt,
+            system: 'You are a helpful budgeting assistant. Reply in 2–3 concise sentences.',
+            requestId,
+          })
+          const reader = stream.getReader()
+          const decoder = new TextDecoder()
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) break
+            aiText += typeof value === 'string' ? value : decoder.decode(value)
+            if (aiText.length > 700) break
+          }
+        }
+      } catch {
+        // safe fallback: оставляем базовый текст
+      }
+
+      if (aiText.trim().length > 0) {
+        body = `${bodyBasic} ${aiText.trim()}`
+      }
+    }
 
     const actionUrl = '/dashboard?view=report&period=lastWeek'
     const deepLink = actionUrl
 
-    // In‑app уведомление c metadata
+    // In‑app уведомление
     const { error: notifErr } = await supabase
       .from('notifications')
       .insert({
@@ -151,7 +265,7 @@ export async function POST(req: NextRequest) {
           transactions_count: (lastWeekTxs || []).length,
           total_spent: totalExpensesLast,
           currency,
-          deepLink
+          deepLink,
         },
         is_read: false,
       })
@@ -196,7 +310,7 @@ export async function POST(req: NextRequest) {
         scheduled_for: scheduledAt,
         status: 'pending',
         attempts: 0,
-        max_attempts: 3
+        max_attempts: 3,
       })
 
     if (queueErr) {

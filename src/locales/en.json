@@ -105,7 +105,8 @@
         "loadFailed": "Failed to load recurring rules.",
         "saveFailed": "Failed to save rule.",
         "updateFailed": "Failed to update rule.",
-        "deleteFailed": "Failed to delete rule."
+        "deleteFailed": "Failed to delete rule.",
+        "limitReached": "In Free plan, you can add up to 2 recurring rules. Upgrade to Pro for unlimited."
       }
     },
     "modals": { "signOut": { "title": "Sign out?", "text": "Are you sure you want to sign out?" } }
@@ -183,7 +184,11 @@
       "toast": {
         "failedLoad": "Failed to load budget folders",
         "failedCreate": "Failed to create budget",
-        "createSuccess": "Budget created successfully"
+        "createSuccess": "Budget created successfully",
+      "limitReached": "Limit: 3 budgets are available in the free plan. Upgrade to Pro for unlimited budgets."
+    },
+    "labels": {
+        "createNew": "Create a New Budget"
       },
       "card": {
         "createNew": "Create a New Budget"
@@ -281,7 +286,24 @@
       "welcome": "Welcome",
       "logout": "Log out"
     },
-    "alt": { "logo": "Spendly logo" }
+    "alt": { "logo": "Spendly logo" },
+    "upgradeBanner": {
+      "title": "Upgrade to Pro 🚀",
+      "description": "Unlock unlimited budgets, AI assistant, and more.",
+      "cta": "Upgrade to Pro"
+    },
+    "periodicBanner": {
+      "title": "Upgrade to Pro 🚀",
+      "description": "Unlock unlimited budgets, AI assistant, and advanced charts.",
+      "dismiss": "Not now"
+    },
+    "limitWarning": {
+      "title": "Free limit reached",
+      "description": "You’ve hit the Free plan limits.",
+      "budgets": "Up to 3 budgets on Free. Upgrade for unlimited.",
+      "assistant": "Up to 10 AI messages on Free. Upgrade for unlimited.",
+      "cta": "Upgrade to Pro"
+    }
   },
   "modals": {
     "appInstall": { "title": "Get Spendly on your device" },
@@ -543,7 +565,12 @@
       }
     },
     "settings": { "push": { "title": "Push Notifications", "description": "Receive notifications on this device" } },
-    "weekly": { "title": "Weekly Digest", "body": "Your weekly report is ready." },
+    "weekly": {
+      "title": "Weekly Digest",
+      "bodyFree": "Your weekly report is ready. Advanced insights available in Pro.",
+      "bodyPro": "Your weekly report with AI insights is ready.",
+      "ctaUpgrade": "Upgrade to Pro"
+    },
     "push_subscribed": "Push subscribed",
     "push_failed": "Push subscription failed",
     "permission_denied": "Notification permission denied",

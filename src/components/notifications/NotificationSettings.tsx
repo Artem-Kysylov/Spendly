@@ -10,6 +10,8 @@ import ToastMessage from '@/components/ui-elements/ToastMessage'
 import Spinner from '@/components/ui-elements/Spinner'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
+import { useSubscription } from '@/hooks/useSubscription'
 
 const NotificationSettings = () => {
   const { session, isReady } = UserAuth()
@@ -25,6 +27,8 @@ const NotificationSettings = () => {
 
   const tN = useTranslations('notifications')
   const tCommon = useTranslations('common')
+  const { subscriptionPlan } = useSubscription()
+  const isPro = subscriptionPlan === 'pro'
 
   const frequencyOptions: NotificationFrequencyOption[] = [
     {
@@ -216,6 +220,23 @@ const NotificationSettings = () => {
         </>
       ) : (
         <>
+          {/* Блок с информацией о дайджесте Free/Pro и CTA */}
+          <div className="p-3 rounded-lg border bg-muted/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm font-medium">{tN('weekly.title')}</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  {isPro ? tN('weekly.bodyPro') : tN('weekly.bodyFree')}
+                </div>
+              </div>
+              {!isPro && (
+                <Link href="/payment" className="text-xs underline text-primary">
+                  {tN('weekly.ctaUpgrade')}
+                </Link>
+              )}
+            </div>
+          </div>
+
           {/* Push Notifications Toggle */}
           <div className="flex items-start justify-between py-3 border-b border-border gap-4">
             <div className="flex-1">

@@ -9,6 +9,8 @@ import MobileTabBar from '@/components/layout/MobileTabBar'
 import useDeviceType from '@/hooks/useDeviceType'
 import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion, useReducedMotion, Variants } from 'framer-motion'
+import PeriodicUpgradeBanner from '@/components/free/PeriodicUpgradeBanner'
+import UpgradeCornerPanel from '@/components/free/UpgradeCornerPanel'
 
 export default function ProtectedLayout({
   children,
@@ -49,6 +51,9 @@ export default function ProtectedLayout({
             <TopBar />
           </motion.div>
 
+          {/* Периодический баннер (без логики показа/скрытия по дню) */}
+          <PeriodicUpgradeBanner />
+
           <AnimatePresence mode="wait">
             <motion.main
               key={pathname}
@@ -67,6 +72,9 @@ export default function ProtectedLayout({
         </div>
 
         <MobileTabBar />
+
+        {/* Угловое предупреждающее окно (без логики лимитов) */}
+        <UpgradeCornerPanel />
       </div>
     </ProtectedRoute>
   )

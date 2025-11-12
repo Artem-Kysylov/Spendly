@@ -7,6 +7,8 @@ import { ChatInput } from './ChatInput'
 import { ChatPresets } from './ChatPresets'
 import { useTranslations } from 'next-intl'
 import { SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { useSubscription } from '@/hooks/useSubscription'
+import UpgradeCornerPanel from '@/components/free/UpgradeCornerPanel'
 
 export const AIChatWindow = ({
     isOpen,
@@ -37,6 +39,8 @@ export const AIChatWindow = ({
 }) => {
     if (!isOpen) return null
     const tAI = useTranslations('assistant')
+    const { subscriptionPlan } = useSubscription()
+    const isFree = subscriptionPlan === 'free'
 
     return (
         <>
@@ -64,6 +68,7 @@ export const AIChatWindow = ({
                             {tAI('rateLimited')}
                         </div>
                     )}
+                    {isFree && isRateLimited && <UpgradeCornerPanel />}
                     {messages.length === 0 ? (
                         <div className="flex-1 flex flex-col min-h-0">
                             <div className="p-4 text-center flex-shrink-0">
@@ -79,6 +84,13 @@ export const AIChatWindow = ({
                         </div>
                     ) : (
                         <ChatMessages messages={messages} isTyping={isTyping} />
+                    )}
+
+                    {/* Free hint */}
+                    {isFree && (
+                        <div className="px-4 py-2 text-xs text-muted-foreground border-t border-border">
+                          Бесплатно: 5 запросов в день. Pro — без ограничений.
+                        </div>
                     )}
 
                     {/* Input */}

@@ -4,6 +4,8 @@ import { useState, useCallback, useContext } from 'react'
 import { AuthContext } from '@/context/AuthContext'
 import { useTranslations, useLocale } from 'next-intl'
 import { getAssistantApiUrl } from '@/lib/assistantApi'
+import { useSubscription } from '@/hooks/useSubscription'
+import { useToast } from '@/components/ui/use-toast'
 
 export function useAISuggestions() {
   const authContext = useContext(AuthContext)
@@ -15,6 +17,9 @@ export function useAISuggestions() {
   const [abortController, setAbortController] = useState<AbortController | null>(null)
   const tAssistant = useTranslations('assistant')
   const locale = useLocale()
+  const { subscriptionPlan } = useSubscription()
+  const isPro = subscriptionPlan === 'pro'
+  const { toast } = useToast()
 
   const fetchSuggestion = useCallback(async (prompt: string) => {
     if (!session?.user?.id) return
@@ -34,13 +39,17 @@ export function useAISuggestions() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: session.user.id,
-          isPro: false,
+          isPro,
           enableLimits: true,
           message: prompt,
           tone
         }),
         signal: controller.signal
       })
+
+      // Заголовки usage для soft‑toast
+      const dailyLimitHeader = Number(res.headers.get('X-Daily-Limit') || '')
+      const usedHeader = Number(res.headers.get('X-Usage-Used') || '')
 
       if (!res.ok) {
         const ct = res.headers.get('content-type') || ''
@@ -49,6 +58,12 @@ export function useAISuggestions() {
         } else if (res.status === 429) {
           setIsRateLimited(true)
           setError(tAssistant('rateLimited'))
+          if (!isPro && Number.isFinite(dailyLimitHeader)) {
+            toast({
+              title: tAssistant('toasts.limitReached', { used: usedHeader, limit: dailyLimitHeader }),
+              duration: 5000
+            })
+          }
         } else if (ct.includes('application/json')) {
           const json = await res.json()
           setError(json.error || 'Failed to fetch suggestion')
@@ -56,6 +71,21 @@ export function useAISuggestions() {
           setError('Failed to fetch suggestion')
         }
         return
+      }
+
+      // Soft toasts on usage milestones for Free users
+      if (!isPro && Number.isFinite(dailyLimitHeader) && Number.isFinite(usedHeader)) {
+        if (usedHeader === 3) {
+          toast({
+            title: tAssistant('toasts.usedNOfDailyLimit', { used: usedHeader, limit: dailyLimitHeader }),
+            duration: 5000
+          })
+        } else if (usedHeader === dailyLimitHeader) {
+          toast({
+            title: tAssistant('toasts.limitReached', { used: usedHeader, limit: dailyLimitHeader }),
+            duration: 5000
+          })
+        }
       }
 
       const reader = res.body?.getReader()
@@ -95,7 +125,7 @@ export function useAISuggestions() {
       setLoading(false)
       setAbortController(null)
     }
-  }, [session?.user?.id, locale])
+  }, [session?.user?.id, locale, isPro, subscriptionPlan])
 
   const abort = useCallback(() => {
     abortController?.abort()

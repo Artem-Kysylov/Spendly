@@ -17,6 +17,8 @@ import NewBudgetModal from '@/components/modals/BudgetModal'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
 import BudgetFolderItem from '@/components/budgets/BudgetFolderItem'
 import { ToastMessageProps, BudgetFolderItemProps } from '@/types/types'
+import { useSubscription } from '@/hooks/useSubscription'
+import UpgradeCornerPanel from '@/components/free/UpgradeCornerPanel'
 
 export default function BudgetsClient() {
   const { session } = UserAuth()
@@ -25,6 +27,24 @@ export default function BudgetsClient() {
   const { isModalOpen, openModal, closeModal } = useModal()
   const tBudgets = useTranslations('budgets')
   const tCommon = useTranslations('common')
+  const { subscriptionPlan } = useSubscription()
+  const [showUpgrade, setShowUpgrade] = useState(false)
+
+  const isLimitReached = subscriptionPlan === 'free' && budgetFolders.length >= 3
+
+  const canShowUpgradePopup = () => {
+    try {
+      const count = parseInt(window.localStorage.getItem('spendly:upgrade_popup_count') || '0', 10)
+      return count < 3
+    } catch { return true }
+  }
+
+  const markUpgradePopupShown = () => {
+    try {
+      const count = parseInt(window.localStorage.getItem('spendly:upgrade_popup_count') || '0', 10)
+      window.localStorage.setItem('spendly:upgrade_popup_count', String(count + 1))
+    } catch { /* no-op */ }
+  }
 
   const fetchBudgetFolders = async () => {
     if (!session?.user?.id) return
@@ -76,6 +96,12 @@ export default function BudgetsClient() {
 
       handleToastMessage(tBudgets('list.toast.createSuccess'), 'success')
       closeModal()
+      // После успешного создания — триггерим момент delight на 3-м бюджете для Free
+      const nextCount = budgetFolders.length + 1
+      if (subscriptionPlan === 'free' && nextCount >= 3 && canShowUpgradePopup()) {
+        setShowUpgrade(true)
+        markUpgradePopupShown()
+      }
       fetchBudgetFolders()
     } catch (error) {
       handleToastMessage(tCommon('unexpectedError'), 'error')
@@ -85,6 +111,7 @@ export default function BudgetsClient() {
   return (
     <div className='mt-[30px] px-5'>
       {toastMessage && <ToastMessage text={toastMessage.text} type={toastMessage.type} />}
+      {showUpgrade && <UpgradeCornerPanel />}
 
       <motion.div
         style={{ willChange: 'opacity' }}
@@ -99,7 +126,20 @@ export default function BudgetsClient() {
           transition={{ duration: 0.6, ease: "easeOut" }}
           style={{ willChange: 'opacity, transform' }}
         >
-          <NewBudget onClick={openModal} />
+          <NewBudget
+            onClick={() => {
+              if (isLimitReached) {
+                handleToastMessage(tBudgets('list.toast.limitReached'), 'error')
+                if (canShowUpgradePopup()) {
+                  setShowUpgrade(true)
+                  markUpgradePopupShown()
+                }
+                return
+              }
+              openModal()
+            }}
+            disabled={isLimitReached}
+          />
         </motion.div>
 
         {budgetFolders.map((folder, index) => (

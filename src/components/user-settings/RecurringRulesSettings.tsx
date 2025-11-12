@@ -10,6 +10,10 @@ import CustomDatePicker from '@/components/ui-elements/CustomDatePicker'
 import { Select } from '@/components/ui/select'
 import type { BudgetFolderItemProps } from '@/types/types'
 import { useTranslations } from 'next-intl'
+import { useSubscription } from '@/hooks/useSubscription'
+import ProLockLabel from '@/components/free/ProLockLabel'
+
+const MAX_FREE_RULES = 3
 
 type DraftRule = {
   title_pattern: string
@@ -22,6 +26,9 @@ type DraftRule = {
 export default function RecurringRulesSettings() {
   const { session } = UserAuth()
   const userId = session?.user?.id || null
+
+  const { subscriptionPlan } = useSubscription()
+  const isPro = subscriptionPlan === 'pro'
 
   const [rules, setRules] = useState<RecurringRule[]>([])
   const [loading, setLoading] = useState(false)
@@ -91,6 +98,11 @@ export default function RecurringRulesSettings() {
     if (!userId) return
     if (!normalizedDraft.title_pattern || !Number.isFinite(normalizedDraft.avg_amount)) {
       setError(tSettings('recurringRules.errors.fillTitleAndAmount'))
+      return
+    }
+    // Free-tier client guard
+    if (!isPro && rules.length >= 3) {
+      setError(tSettings('recurringRules.errors.limitReached'))
       return
     }
     setSaving(true)
@@ -255,12 +267,15 @@ export default function RecurringRulesSettings() {
           </Select>
         </div>
 
-        <div className="md:col-span-5 flex justify-end">
+        <div className="md:col-span-5 flex items-center justify-end gap-2">
+          {!isPro && rules.length >= 3 && (
+            <ProLockLabel text="PRO" />
+          )}
           <Button
             text={saving ? tSettings('recurringRules.form.btn.saving') : tSettings('recurringRules.form.btn.add')}
             variant="default"
             onClick={handleCreate}
-            disabled={saving}
+            disabled={saving || (!isPro && rules.length >= 3)}
           />
         </div>
       </div>
