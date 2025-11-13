@@ -29,6 +29,7 @@ export default function RecurringRulesSettings() {
 
   const { subscriptionPlan } = useSubscription()
   const isPro = subscriptionPlan === 'pro'
+  const MAX_FREE_RULES = 2
 
   const [rules, setRules] = useState<RecurringRule[]>([])
   const [loading, setLoading] = useState(false)
@@ -100,47 +101,50 @@ export default function RecurringRulesSettings() {
       setError(tSettings('recurringRules.errors.fillTitleAndAmount'))
       return
     }
-    // Free-tier client guard
-    if (!isPro && rules.length >= 3) {
+    if (!isPro && rules.length >= MAX_FREE_RULES) {
       setError(tSettings('recurringRules.errors.limitReached'))
       return
     }
     setSaving(true)
     setError(null)
     try {
-      const payload = {
-        user_id: userId,
-        title_pattern: normalizedDraft.title_pattern,
-        budget_folder_id: normalizedDraft.budget_folder_id,
-        avg_amount: normalizedDraft.avg_amount,
-        cadence: normalizedDraft.cadence,
-        next_due_date: normalizedDraft.next_due_date,
-        active: true,
-        updated_at: new Date().toISOString(),
-      }
-      const { data, error } = await supabase
-        .from('recurring_rules')
-        .upsert(payload, { onConflict: 'user_id,title_pattern' })
-        .select()
-      if (error) throw error
-      // refresh list
-      const created = (data || [])[0]
-      setRules(prev => {
-        const idx = prev.findIndex(r => r.title_pattern === payload.title_pattern)
-        if (idx >= 0) {
-          const next = prev.slice()
-          next[idx] = created
-          return next
-        }
-        return [created, ...prev]
+      const { data: { session: current } } = await supabase.auth.getSession()
+      const token = current?.access_token
+      if (!token) throw new Error('No auth token')
+
+      const locale = document.documentElement.lang || 'en'
+      const resp = await fetch(`/${locale}/api/recurring-rules`, {
+          method: 'POST',
+          headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+              title_pattern: normalizedDraft.title_pattern,
+              budget_folder_id: normalizedDraft.budget_folder_id,
+              avg_amount: normalizedDraft.avg_amount,
+              cadence: normalizedDraft.cadence,
+              next_due_date: normalizedDraft.next_due_date
+          })
       })
-      // reset draft
+      const json = await resp.json()
+      if (!resp.ok) {
+          if (json?.error === 'limitReached') {
+              setError(tSettings('recurringRules.errors.limitReached'))
+              return
+          }
+          throw new Error(json?.error || tSettings('recurringRules.errors.saveFailed'))
+      }
+
+      const created = json.rule as RecurringRule
+      setRules(prev => [created, ...prev])
+
       setDraft({
-        title_pattern: '',
-        budget_folder_id: 'unbudgeted',
-        avg_amount: '',
-        cadence: 'monthly',
-        next_due_date: new Date(),
+          title_pattern: '',
+          budget_folder_id: 'unbudgeted',
+          avg_amount: '',
+          cadence: 'monthly',
+          next_due_date: new Date(),
       })
     } catch (e: any) {
       setError(e?.message || tSettings('recurringRules.errors.saveFailed'))
@@ -268,14 +272,14 @@ export default function RecurringRulesSettings() {
         </div>
 
         <div className="md:col-span-5 flex items-center justify-end gap-2">
-          {!isPro && rules.length >= 3 && (
+          {!isPro && rules.length >= MAX_FREE_RULES && (
             <ProLockLabel text="PRO" />
           )}
           <Button
             text={saving ? tSettings('recurringRules.form.btn.saving') : tSettings('recurringRules.form.btn.add')}
             variant="default"
             onClick={handleCreate}
-            disabled={saving || (!isPro && rules.length >= 3)}
+            disabled={saving || (!isPro && rules.length >= MAX_FREE_RULES)}
           />
         </div>
       </div>

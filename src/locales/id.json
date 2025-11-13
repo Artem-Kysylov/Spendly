@@ -196,6 +196,9 @@
     "input": {
       "placeholder": "Pesan Spendly Pal..."
     },
+    "toasts": {
+      "usedNOfDailyLimit": "Anda telah menggunakan {count} dari {limit} pesan AI hari ini."
+    },
     "actions": {
       "send": "Kirim",
       "abort": "Batalkan",
@@ -226,6 +229,9 @@
     "insights": {
       "title": "Wawasan AI",
       "beta": "Beta"
+    },
+    "freeTier": {
+      "requestsLimit": "Gratis: 5 permintaan per hari. Pro — tidak terbatas."
     },
     "tone": {
       "label": "Nada",
@@ -403,13 +409,13 @@
   },
   "layout": {
     "upgradeBanner": {
-      "title": "Upgrade ke Pro 🚀",
-      "description": "Akses anggaran tanpa batas, Asisten AI, dan lainnya.",
+      "title": "Dapatkan wawasan dengan Pro 🚀",
+      "description": "Buka anggaran tak terbatas, asisten AI, dan lainnya.",
       "cta": "Upgrade ke Pro"
     },
     "periodicBanner": {
-      "title": "Upgrade ke Pro 🚀",
-      "description": "Anggaran tanpa batas, Asisten AI, dan grafik lanjutan.",
+      "title": "Buka wawasan dengan Pro 🚀",
+      "description": "Berhenti menebak! Dapatkan wawasan tentang arus kas, transaksi, dan anggaran Anda.",
       "dismiss": "Nanti saja"
     },
     "limitWarning": {

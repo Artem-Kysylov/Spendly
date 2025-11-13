@@ -288,13 +288,13 @@
     },
     "alt": { "logo": "Spendly logo" },
     "upgradeBanner": {
-      "title": "Upgrade to Pro 🚀",
+      "title": "Get insights with Pro 🚀",
       "description": "Unlock unlimited budgets, AI assistant, and more.",
       "cta": "Upgrade to Pro"
     },
     "periodicBanner": {
-      "title": "Upgrade to Pro 🚀",
-      "description": "Unlock unlimited budgets, AI assistant, and advanced charts.",
+      "title": "Unlock insights with Pro 🚀",
+      "description": "Stop guessing! Get insights on your cash flow, transactions and budgets.",
       "dismiss": "Not now"
     },
     "limitWarning": {
@@ -372,6 +372,9 @@
     "input": {
       "placeholder": "Message Spendly Pal..."
     },
+    "toasts": {
+      "usedNOfDailyLimit": "You have used {count} of {limit} AI messages today."
+    },
     "actions": {
       "send": "Send",
       "abort": "Abort",
@@ -442,6 +445,9 @@
           "message": "Your spending and income look balanced."
         }
       }
+    },
+    "freeTier": {
+      "requestsLimit": "Free: 5 requests per day. Pro — unlimited."
     }
   },
   "charts": {

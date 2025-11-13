@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: NextRequest) {
   const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET;
@@ -30,6 +31,34 @@ export async function POST(request: NextRequest) {
   // Тут можно включать/отключать Pro-статус: 
   // subscription_payment_success -> активировать
   // subscription_cancelled/expired -> деактивировать
+
+  // Add: update Supabase user_metadata.subscription_status based on event
+  const customerEmail = payload?.data?.attributes?.customer_email;
+  if (customerEmail) {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+    const { data: users } = await supabase
+      .from('auth.users') // Supabase REST exposes users via admin; alternatively use supabase.auth.admin
+      .select('id, email')
+      .ilike('email', customerEmail)
+      .limit(1);
+
+    const userId = users?.[0]?.id;
+    if (userId) {
+      const status =
+        eventName === 'subscription_payment_success' ? 'pro' :
+        eventName === 'subscription_cancelled' || eventName === 'subscription_expired' ? 'free' :
+        undefined;
+
+      if (status) {
+        await supabase.auth.admin.updateUserById(userId, {
+          user_metadata: { subscription_status: status }
+        });
+      }
+    }
+  }
 
   return NextResponse.json("OK", { status: 200 });
 }

@@ -67,23 +67,29 @@ async function getTodayUsageCount(userId: string): Promise<number> {
   return count ?? 0
 }
 
-// Новая функция: получаем дневной лимит из удалённого конфига (fallback = env или 5)
+// Новая реализация: читаем из remote_config -> id='ai_daily_limit'
 async function getDailyLimitFromConfig(): Promise<number> {
   try {
     const supabase = getServerSupabaseClient()
     const { data, error } = await supabase
-      .from('app_config')
+      .from('remote_config')
       .select('value')
-      .eq('key', 'free_daily_limit')
+      .eq('id', 'ai_daily_limit')
       .single()
 
     if (error) throw error
+
     const raw = (data as any)?.value
-    const parsed = Number(typeof raw === 'string' ? raw : raw)
+    // Ожидаем формат { limit: 5 | 10 } или число
+    const parsed =
+      typeof raw === 'object' && raw !== null
+        ? Number((raw as any).limit)
+        : Number(raw)
+
     if (Number.isFinite(parsed) && parsed > 0) return parsed
-    return Number(process.env.FREE_DAILY_LIMIT ?? '10')
+    return Number(process.env.FREE_DAILY_LIMIT ?? '5')
   } catch {
-    return Number(process.env.FREE_DAILY_LIMIT ?? '10')
+    return Number(process.env.FREE_DAILY_LIMIT ?? '5')
   }
 }
 

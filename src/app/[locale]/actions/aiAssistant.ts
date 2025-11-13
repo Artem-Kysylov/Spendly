@@ -83,7 +83,7 @@ export const upsertRecurringRule = async (userId: string, candidate: { title_pat
         .from('recurring_rules')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', userId)
-      if (!countErr && (count ?? 0) >= 3) {
+      if (!countErr && (count ?? 0) >= 2) {
         return {
           ok: false,
           message: 'limitReached'

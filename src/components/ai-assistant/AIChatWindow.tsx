@@ -89,7 +89,7 @@ export const AIChatWindow = ({
                     {/* Free hint */}
                     {isFree && (
                         <div className="px-4 py-2 text-xs text-muted-foreground border-t border-border">
-                          Бесплатно: 5 запросов в день. Pro — без ограничений.
+                          {tAI('freeTier.requestsLimit')}
                         </div>
                     )}
 

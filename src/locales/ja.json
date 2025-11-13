@@ -7,13 +7,13 @@
       "userSettings": "ユーザー設定"
     },
     "upgradeBanner": {
-      "title": "Pro にアップグレード 🚀",
+      "title": "Proでインサイトを得る 🚀",
       "description": "無制限の予算、AI アシスタントなどが利用可能に。",
       "cta": "Pro にアップグレード"
     },
     "periodicBanner": {
-      "title": "Pro にアップグレード 🚀",
-      "description": "無制限の予算、AI アシスタント、高度なグラフ。",
+      "title": "Proでインサイトをアンロック 🚀",
+      "description": "推測はやめましょう！キャッシュフロー、取引、予算に関するインサイトを取得します。",
       "dismiss": "今はしない"
     },
     "limitWarning": {
@@ -162,7 +162,7 @@
         "saveFailed": "ルールの保存に失敗しました。",
         "updateFailed": "ルールの更新に失敗しました。",
         "deleteFailed": "ルールの削除に失敗しました。",
-        "limitReached": "制限: 無料プランではルールは最大3件。Pro にアップグレードで無制限。"
+        "limitReached": "制限: 無料プランではルールは最大2件。Pro にアップグレードで無制限。"
       }
     }
   },
@@ -185,6 +185,9 @@
     "rateLimited": "AI リクエストの上限に達しました。しばらくしてから再試行してください。",
     "input": {
       "placeholder": "Spendly Pal にメッセージ…"
+    },
+    "toasts": {
+      "usedNOfDailyLimit": "本日、AI メッセージを {limit} 件中 {count} 件使用しました。"
     },
     "actions": {
       "send": "送信",
@@ -230,6 +233,9 @@
     "settings": {
       "title": "Spendly Pal のトーン",
       "description": "AI アシスタントの応答トーンを選択します。"
+    },
+    "freeTier": {
+      "requestsLimit": "無料：1日5リクエスト。Pro — 無制限。"
     }
   },
   "notFound": {

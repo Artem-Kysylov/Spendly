@@ -4,10 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run check:locales && next build",
     "start": "next start",
     "lint": "biome check",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "check:locales": "node scripts/check-locales.mjs"
   },
   "dependencies": {
     "@lemonsqueezy/lemonsqueezy.js": "^4.0.0",
@@ -46,6 +47,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.2.0",
+    "@playwright/test": "^1.56.1",
     "@tanstack/react-query-devtools": "^5.90.2",
     "@types/html2canvas": "^0.5.35",
     "@types/node": "^20",

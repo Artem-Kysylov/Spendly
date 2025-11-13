@@ -6,8 +6,10 @@ import { UserAuth } from '@/context/AuthContext'
 import { useTranslations, useLocale } from 'next-intl'
 import { getAssistantApiUrl } from '@/lib/assistantApi'
 import { localizeEmptyWeekly, localizeEmptyMonthly, localizeEmptyGeneric, periodLabel as canonicalPeriodLabel } from '@/prompts/spendlyPal/canonicalPhrases'
+import { trackEvent } from '@/lib/telemetry';
 import { supabase } from '@/lib/supabaseClient'
 import type { AIResponse, AssistantTone, Period } from '@/types/ai'
+import { useSubscription } from '@/hooks/useSubscription'
 
 type PendingAction =
   | { type: 'add_transaction'; payload: { title: string; amount: number; budget_folder_id: string | null; budget_name: string } }
@@ -28,6 +30,7 @@ type AssistantJSON =
     }
 
 
+
 export const useChat = (): UseChatReturn => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isOpen, setIsOpen] = useState(false)
@@ -40,6 +43,7 @@ export const useChat = (): UseChatReturn => {
 
   const tAssistant = useTranslations('assistant')
   const locale = useLocale()
+  const { subscriptionPlan } = useSubscription()
   const openChat = useCallback(() => setIsOpen(true), [])
   const closeChat = useCallback(() => setIsOpen(false), [])
 
@@ -76,6 +80,7 @@ export const useChat = (): UseChatReturn => {
   }, [])
 
   const sendMessage = useCallback(async (content: string) => {
+    trackEvent('ai_request_used');
     // Добавляем сообщение пользователя
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -107,8 +112,8 @@ export const useChat = (): UseChatReturn => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: session.user.id,
-          isPro: false,
-          enableLimits: false,
+          isPro: subscriptionPlan === 'pro',
+          enableLimits: true,
           message: content,
           tone: assistantTone
         }),
@@ -133,6 +138,7 @@ export const useChat = (): UseChatReturn => {
 
       // Rate limit / Unauthorized
       if (response.status === 429) {
+        trackEvent('ai_limit_hit');
         const cooldownMs = 3000
         setRateLimitedUntil(Date.now() + cooldownMs)
         const msg = tAssistant('rateLimited')
@@ -311,7 +317,7 @@ export const useChat = (): UseChatReturn => {
       setIsTyping(false)
       setAbortController(null)
     }
-  }, [session?.user?.id, assistantTone, locale])
+  }, [session?.user?.id, assistantTone, locale, subscriptionPlan])
 
   const clearMessages = useCallback(() => setMessages([]), [])
 
@@ -341,6 +347,8 @@ export const useChat = (): UseChatReturn => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: session.user.id,
+          isPro: subscriptionPlan === 'pro',
+          enableLimits: true,
           confirm: true,
           actionPayload: pendingAction.payload,
           actionType: pendingAction.type
@@ -388,7 +396,7 @@ export const useChat = (): UseChatReturn => {
     } finally {
       setPendingAction(null)
     }
-  }, [pendingAction, session?.user?.id, locale])
+  }, [pendingAction, session?.user?.id, locale, subscriptionPlan])
 
   const hasPendingAction = !!pendingAction
   const isRateLimited = rateLimitedUntil ? Date.now() < rateLimitedUntil : false

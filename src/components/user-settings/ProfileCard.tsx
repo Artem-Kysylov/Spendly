@@ -1,7 +1,7 @@
 // Импорт и компонент ProfileCard
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Edit2, Mail, Calendar } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { UserAuth } from '@/context/AuthContext'
@@ -19,6 +19,10 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(
     session?.user?.user_metadata?.avatar_url || null
   )
+  // NEW: синхронизация аватара с данными сессии (фикс отсутствия фото)
+  useEffect(() => {
+    setAvatarUrl(session?.user?.user_metadata?.avatar_url || null)
+  }, [session?.user?.user_metadata?.avatar_url])
   const tProfile = useTranslations('userSettings.profile')
   const locale = useLocale()
 

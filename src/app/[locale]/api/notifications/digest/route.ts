@@ -324,6 +324,22 @@ export async function POST(req: NextRequest) {
       continue
     }
 
+    const hasAIInsight = isPro && body !== bodyBasic
+
+    const { error: telemetryErr } = await supabase.from('telemetry_events').insert({
+      user_id: userId,
+      event_name: 'digest_generated',
+      payload: {
+        type: 'weekly_reminder',
+        is_pro: isPro,
+        has_ai_insight: hasAIInsight,
+      },
+    })
+
+    if (telemetryErr) {
+      console.warn('digest: telemetry insert error', telemetryErr)
+    }
+
     created++
   }
 

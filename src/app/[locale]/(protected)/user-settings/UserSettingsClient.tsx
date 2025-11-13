@@ -20,7 +20,7 @@ import { useRouter, usePathname } from '@/i18n/routing'
 import { useParams } from 'next/navigation'
 import ToneSettings from '@/components/ai-assistant/ToneSettings'
 import RecurringRulesSettings from '@/components/user-settings/RecurringRulesSettings'
-import NotificationsDebug from '@/components/notifications/NotificationsDebug'
+import { useSubscription } from '@/hooks/useSubscription'
 
 export default function UserSettingsClient() {
   const { signOut, session } = UserAuth()
@@ -36,6 +36,7 @@ export default function UserSettingsClient() {
   const tCTA = useTranslations('cta')
   const tCommon = useTranslations('common')
   const tAI = useTranslations('assistant')
+  const { subscriptionPlan } = useSubscription()
 
   // Appearance & App Controls
   const [isAppInstallModalOpen, setIsAppInstallModalOpen] = useState(false)
@@ -94,6 +95,57 @@ export default function UserSettingsClient() {
       } finally {
         setIsSavingLang(false)
       }
+    }
+  }
+
+  // Admin AI daily limit
+  const isAdmin = Boolean(session?.user?.user_metadata?.is_admin === true)
+  const [aiDailyLimit, setAiDailyLimit] = useState<number | null>(null)
+  const [savingAdminLimit, setSavingAdminLimit] = useState(false)
+
+  useEffect(() => {
+    if (!isAdmin) return
+    ;(async () => {
+      try {
+        const { data: { session: current } } = await supabase.auth.getSession()
+        const token = current?.access_token
+        if (!token) return
+        const resp = await fetch('/api/admin/ai-limit', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const json = await resp.json()
+        if (resp.ok && typeof json.limit === 'number') {
+          setAiDailyLimit(json.limit)
+        }
+      } catch {
+        // no-op
+      }
+    })()
+  }, [isAdmin])
+
+  async function onAdminLimitToggle(checked: boolean) {
+    if (!isAdmin) return
+    setSavingAdminLimit(true)
+    try {
+      const { data: { session: current } } = await supabase.auth.getSession()
+      const token = current?.access_token
+      if (!token) return
+      const resp = await fetch('/api/admin/ai-limit', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ limit: checked ? 10 : 5 })
+      })
+      const json = await resp.json()
+      if (resp.ok && typeof json.limit === 'number') {
+        setAiDailyLimit(json.limit)
+      }
+    } catch {
+      // no-op
+    } finally {
+      setSavingAdminLimit(false)
     }
   }
 
@@ -188,15 +240,12 @@ export default function UserSettingsClient() {
                 </div>
                 <span
                   className={`text-xs px-2 py-1 rounded border ${
-                    (session?.user?.user_metadata?.isPro ||
-                      (typeof window !== 'undefined' && localStorage.getItem('spendly_is_pro') === 'true'))
+                    subscriptionPlan === 'pro'
                       ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-900'
                       : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-900'
                   }`}
                 >
-                  {tSettings('subscription.currentPlan')}: {(session?.user?.user_metadata?.isPro ||
-                    (typeof window !== 'undefined' && localStorage.getItem('spendly_is_pro') === 'true'))
-                    ? tPricing('pro.label') : tPricing('free.label')}
+                  {tSettings('subscription.currentPlan')}: {subscriptionPlan === 'pro' ? tPricing('pro.label') : tPricing('free.label')}
                 </span>
               </div>
 

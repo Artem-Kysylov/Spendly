@@ -11,6 +11,8 @@ import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion, useReducedMotion, Variants } from 'framer-motion'
 import PeriodicUpgradeBanner from '@/components/free/PeriodicUpgradeBanner'
 import UpgradeCornerPanel from '@/components/free/UpgradeCornerPanel'
+import { useSubscription } from '@/hooks/useSubscription'
+import { UserAuth } from '@/context/AuthContext'
 
 export default function ProtectedLayout({
   children,
@@ -20,6 +22,8 @@ export default function ProtectedLayout({
   const { isDesktop, isMobile, isTablet } = useDeviceType()
   const pathname = usePathname()
   const prefersReduced = useReducedMotion()
+  const { subscriptionPlan } = useSubscription()
+  const { isReady } = UserAuth()
 
   // Типобезопасный transition (ease — кубическая кривая)
   const transition = { duration: 0.2, ease: [0.22, 1, 0.36, 1] } as const
@@ -51,8 +55,8 @@ export default function ProtectedLayout({
             <TopBar />
           </motion.div>
 
-          {/* Периодический баннер (без логики показа/скрытия по дню) */}
-          <PeriodicUpgradeBanner />
+          {/* Периодический баннер: рендерим только после загрузки сессии */}
+          {isReady && <PeriodicUpgradeBanner />}
 
           <AnimatePresence mode="wait">
             <motion.main
@@ -73,8 +77,8 @@ export default function ProtectedLayout({
 
         <MobileTabBar />
 
-        {/* Угловое предупреждающее окно (без логики лимитов) */}
-        <UpgradeCornerPanel />
+        {/* Угловое предупреждение: показываем только для free и после загрузки сессии */}
+        {isReady && subscriptionPlan === 'free' && <UpgradeCornerPanel />}
       </div>
     </ProtectedRoute>
   )
