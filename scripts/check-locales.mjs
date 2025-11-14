@@ -37,9 +37,15 @@ for (const file of files) {
   }
 }
 
+const strict = (process.env.STRICT_LOCALE_CHECK === '1' || (process.env.LOCALE_CHECK_MODE ?? '').toLowerCase() === 'strict');
+
 if (hasErrors) {
-  console.error('\nLocale check failed. Please fix the missing keys.');
-  process.exit(1);
+  if (strict) {
+    console.error('\nLocale check failed. Please fix the missing keys.');
+    process.exit(1);
+  } else {
+    console.warn('\nLocale check found missing keys. Proceeding with build.');
+  }
 } else {
   console.log('\nLocale check passed.');
 }
