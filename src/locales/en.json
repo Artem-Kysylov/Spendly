@@ -20,6 +20,7 @@
     "unexpectedError": "An unexpected error occurred",
     "errorLabel": "Error",
     "cancel": "Cancel",
+    "delete": "Delete",
     "save": "Save",
     "submit": "Submit",
     "close": "Close",
@@ -340,6 +341,7 @@
       "loadingBudgets": "Loading budgets...",
       "noResults": "No results found",
       "type": { "expense": "Expense", "income": "Income" },
+      "autoTypeInfo": "Tip: using consistent names helps recognize recurring payments.",
       "hintRecurring": "Tip: using consistent names helps recognize recurring payments.",
       "ruleBadge": {
         "byRule": "Auto-filled by rule",
