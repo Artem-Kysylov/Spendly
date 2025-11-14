@@ -1,8 +1,10 @@
+// Функциональный компонент: ChatInput
 import { ToneSelect } from './ToneSelect'
 import { useState, KeyboardEvent, useEffect, useRef } from 'react'
 import { Send } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Select } from '@/components/ui/select'
+import { useSubscription } from '@/hooks/useSubscription'
 
 interface ChatInputProps {
     onSendMessage: (content: string) => Promise<void>
@@ -17,6 +19,8 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assist
     const [message, setMessage] = useState('')
     const tAI = useTranslations('assistant')
     const toneEmoji = { neutral: '😐', friendly: '😊', formal: '🧑‍💼', playful: '😜' } as const
+    const { subscriptionPlan } = useSubscription()
+    const isFree = subscriptionPlan === 'free'
 
     // авто‑рост textarea + скрытие скролла до лимита
     const MAX_TEXTAREA_HEIGHT = 160
@@ -58,9 +62,12 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assist
                         {tAI('tone.select_label')}
                     </label>
                     <ToneSelect
-                        value={assistantTone}
-                        onChange={(tone) => onToneChange?.(tone)}
-                        disabled={(disabled ?? false) || (isThinking ?? false)}
+                        value={isFree ? 'neutral' : assistantTone}
+                        onChange={(tone) => {
+                            if (isFree) return
+                            onToneChange?.(tone)
+                        }}
+                        disabled={(disabled ?? false) || (isThinking ?? false) || isFree}
                         aria-label={tAI('tone.label')}
                         className="w-full"
                     />

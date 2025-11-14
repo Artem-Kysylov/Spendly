@@ -74,11 +74,11 @@
     - [x] `subscription_cancelled` / `subscription_expired` → `free`
 - [ ] UI: исчезновение `Upgrade` баннеров при `pro`, корректные текст/локаль на `payment` и `checkout/success`
 - [ ] UI: Danger Zone — компонент «Unsubscribe» внизу настроек (только для Pro)
-  - [ ] Рендерить только при `useSubscription() === 'pro'`
-  - [ ] Локализация: `layout.dangerZone.title`, `layout.dangerZone.description`, `layout.dangerZone.cta`
-  - [ ] Красная кнопка «Unsubscribe» с подтверждением действия
-  - [ ] Вызов отмены подписки и обновление `user_metadata.subscription_status → 'free'`
-  - [ ] Телеметрия: `unsubscribe_cta_clicked`, `unsubscribe_success`
+  - [x] Рендерить только при `useSubscription() === 'pro'`
+  - [x] Локализация: `layout.dangerZone.title`, `layout.dangerZone.description`, `layout.dangerZone.cta`
+  - [x] Красная кнопка «Unsubscribe» с подтверждением действия
+  - [x] Вызов отмены подписки и обновление `user_metadata.subscription_status → 'free'`
+  - [x] Телеметрия: `unsubscribe_cta_clicked`, `unsubscribe_success`
 
 ## 5) PWA
 

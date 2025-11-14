@@ -8,6 +8,7 @@ export const routing = defineRouting({
   localePrefix: 'always',
   pathnames: {
     '/': '/',
+    '/auth': '/auth',
     '/forgot-password': '/forgot-password',
     '/reset-password': '/reset-password',
     '/payment': '/payment',

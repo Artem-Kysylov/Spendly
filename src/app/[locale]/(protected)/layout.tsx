@@ -10,7 +10,6 @@ import useDeviceType from '@/hooks/useDeviceType'
 import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion, useReducedMotion, Variants } from 'framer-motion'
 import PeriodicUpgradeBanner from '@/components/free/PeriodicUpgradeBanner'
-import UpgradeCornerPanel from '@/components/free/UpgradeCornerPanel'
 import { useSubscription } from '@/hooks/useSubscription'
 import { UserAuth } from '@/context/AuthContext'
 
@@ -77,8 +76,9 @@ export default function ProtectedLayout({
 
         <MobileTabBar />
 
-        {/* Угловое предупреждение: показываем только для free и после загрузки сессии */}
-        {isReady && subscriptionPlan === 'free' && <UpgradeCornerPanel />}
+        {/* Угловую карточку НЕ рендерим глобально.
+            Она показывается контекстно в AIChatWindow/Budgets/Charts при достижении лимитов. */}
+        {/* (строку {isReady && subscriptionPlan === 'free' && <UpgradeCornerPanel />} удаляем) */}
       </div>
     </ProtectedRoute>
   )

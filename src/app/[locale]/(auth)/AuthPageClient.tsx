@@ -18,6 +18,7 @@ import { supabase } from "@/lib/supabaseClient"
 import { motion } from "framer-motion"
 import { useTranslations } from 'next-intl'
 import { AvatarUpload } from '@/components/ui-elements'
+import { useSearchParams } from 'next/navigation'
 
 export default function AuthPageClient() {
   const { 
@@ -31,6 +32,8 @@ export default function AuthPageClient() {
   } = UserAuth()
   const router = useRouter()
   const tAuth = useTranslations('auth')
+  const searchParams = useSearchParams()
+  const initialTab = searchParams?.get('tab') === 'signup' ? 'signup' : 'signin'
 
   useEffect(() => {
     if (isReady && session && session.user && router) {
@@ -39,7 +42,7 @@ export default function AuthPageClient() {
     }
   }, [isReady, session, router])
 
-  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin')
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>(initialTab)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [toast, setToast] = useState<{ text: string, type: 'success' | 'error' } | null>(null)

@@ -105,6 +105,16 @@
       "signOut": {
         "title": "サインアウト",
         "description": "アカウントからサインアウト"
+      },
+      "dangerZone": {
+        "title": "危険地帯",
+        "description": "この操作を行うと、Proサブスクリプションがキャンセルされ、無料版にダウングレードされます。",
+        "unsubscribe": "退会する",
+        "modal": {
+          "title": "本当に退会しますか？",
+          "confirm": "確認",
+          "cancel": "キャンセル"
+        }
       }
     },
     "modals": {
@@ -231,6 +241,7 @@
       }
     },
     "settings": {
+      "proOnlyHint": "カスタムアシスタントトーンはProで利用可能です。アップグレードしてロックを解除してください。",
       "title": "Spendly Pal のトーン",
       "description": "AI アシスタントの応答トーンを選択します。"
     },

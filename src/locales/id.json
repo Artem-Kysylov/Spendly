@@ -65,6 +65,16 @@
       "title": "Pengaturan Pengguna⚙️",
       "subtitle": "Kelola pengaturan akun dan preferensi Anda"
     },
+    "dangerZone": {
+      "title": "Zona Berbahaya",
+      "description": "Tindakan ini akan membatalkan langganan Pro Anda dan menurunkan ke Gratis.",
+      "unsubscribe": "Berhenti berlangganan",
+      "modal": {
+        "title": "Apakah Anda yakin ingin berhenti berlangganan?",
+        "confirm": "Konfirmasi",
+        "cancel": "Batal"
+      }
+    },
     "profile": {
       "title": "Profil",
       "memberSince": "Anggota sejak {monthYear}",
@@ -244,7 +254,8 @@
       }
     },
     "settings": {
-      "title": "Nada Spendly Pal",
+      "proOnlyHint": "Nada asisten khusus tersedia di Pro. Tingkatkan untuk membuka kunci.",
+        "title": "Nada Spendly Pal",
       "description": "Pilih nada respons untuk asisten AI Anda."
     }
   },

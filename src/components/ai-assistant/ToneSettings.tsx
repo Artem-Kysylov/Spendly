@@ -1,3 +1,4 @@
+// Функциональный компонент: ToneSettings
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -7,38 +8,51 @@ import type { AssistantTone } from '@/types/ai'
 import type { ToastMessageProps } from '@/types/types'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
 import Spinner from '@/components/ui-elements/Spinner'
+import { useSubscription } from '@/hooks/useSubscription'
+import { Link } from '@/i18n/routing'
 
 const ToneSettings = () => {
   const tAI = useTranslations('assistant')
   const tN = useTranslations('notifications')
   const tCommon = useTranslations('common')
+  const tCTA = useTranslations('cta')
 
   const [selectedTone, setSelectedTone] = useState<AssistantTone>('neutral')
   const [isUpdating, setIsUpdating] = useState(false)
   const [toast, setToast] = useState<ToastMessageProps | null>(null)
 
-  const toneOptions: Array<{ value: AssistantTone; label: string; emoji: string }> = [
-    { value: 'neutral',  label: tAI('tone.options.neutral'),  emoji: '😐' },
-    { value: 'formal',   label: tAI('tone.options.formal'),   emoji: '🧑‍💼' },
-    { value: 'friendly', label: tAI('tone.options.friendly'), emoji: '😊' },
-    { value: 'playful',  label: tAI('tone.options.playful'),  emoji: '😜' },
-  ]
+  const { subscriptionPlan } = useSubscription()
+  const isFree = subscriptionPlan === 'free'
+
+  const toneOptions: Array<{ value: AssistantTone; label: string; emoji: string }> =
+    isFree
+      ? [{ value: 'neutral', label: tAI('tone.options.neutral'), emoji: '😐' }]
+      : [
+          { value: 'neutral',  label: tAI('tone.options.neutral'),  emoji: '😐' },
+          { value: 'formal',   label: tAI('tone.options.formal'),   emoji: '🧑‍💼' },
+          { value: 'friendly', label: tAI('tone.options.friendly'), emoji: '😊' },
+          { value: 'playful',  label: tAI('tone.options.playful'),  emoji: '😜' },
+        ]
 
   useEffect(() => {
     const init = async () => {
       try {
         const { data } = await supabase.auth.getUser()
         const tone = (data?.user?.user_metadata as any)?.assistant_tone as AssistantTone | undefined
-        if (tone && ['neutral','friendly','formal','playful'].includes(tone)) {
+        if (isFree) {
+          setSelectedTone('neutral')
+        } else if (tone && ['neutral','friendly','formal','playful'].includes(tone)) {
           setSelectedTone(tone)
         }
       } catch { /* no-op */ }
     }
     init()
-  }, [])
+  }, [isFree])
 
   const handleToneChange = async (tone: AssistantTone) => {
     if (isUpdating) return
+    // Блокируем выбор других тонов для Free
+    if (isFree && tone !== 'neutral') return
     try {
       setIsUpdating(true)
       setSelectedTone(tone)
@@ -65,7 +79,15 @@ const ToneSettings = () => {
         </div>
       )}
 
-      {/* <h3 className="font-medium text-foreground mb-2">{tAI('tone.label')}</h3> */} {/* Удален дублирующийся заголовок */}
+      {isFree && (
+        <div className="rounded-md border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950 p-3 text-sm text-blue-700 dark:text-blue-200">
+          {tAI('tone.proOnlyHint')}{' '}
+          <Link href={{ pathname: '/payment' }} className="underline">
+            {tCTA('upgradeToPro')}
+          </Link>
+        </div>
+      )}
+
       <div role="radiogroup" aria-label={tAI('tone.label')} className="space-y-3">
         {toneOptions.map((option) => (
           <div

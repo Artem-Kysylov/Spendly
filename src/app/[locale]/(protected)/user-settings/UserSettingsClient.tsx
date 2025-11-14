@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'motion/react'
 import { UserAuth } from '@/context/AuthContext'
 import useModal from '@/hooks/useModal'
-import Button from "@/components/ui-elements/Button"
+import Button from '@/components/ui-elements/Button'
 import SignOutModal from '@/components/modals/SignOutModal'
 import EditProfileModal from '@/components/modals/EditProfileModal'
 import NotificationSettings from '@/components/notifications/NotificationSettings'
@@ -12,15 +12,15 @@ import ProfileCard from '@/components/user-settings/ProfileCard'
 import ThemeSwitcher from '@/components/ui-elements/ThemeSwitcher'
 import useIsPWAInstalled from '@/hooks/useIsPWAInstalled'
 import AppInstallModal from '@/components/modals/AppInstallModal'
-import { Link } from '@/i18n/routing'
+import { Link, useRouter, usePathname } from '@/i18n/routing'
 import { supabase } from '@/lib/supabaseClient'
 import LanguageSelect from '@/components/ui-elements/locale/LanguageSelect'
 import { useTranslations } from 'next-intl'
-import { useRouter, usePathname } from '@/i18n/routing'
 import { useParams } from 'next/navigation'
 import ToneSettings from '@/components/ai-assistant/ToneSettings'
 import RecurringRulesSettings from '@/components/user-settings/RecurringRulesSettings'
 import { useSubscription } from '@/hooks/useSubscription'
+import UnsubscribeModal from '@/components/modals/UnsubscribeModal'
 
 export default function UserSettingsClient() {
   const { signOut, session } = UserAuth()
@@ -42,18 +42,22 @@ export default function UserSettingsClient() {
   const [isAppInstallModalOpen, setIsAppInstallModalOpen] = useState(false)
   const isPWAInstalled = useIsPWAInstalled()
 
-  // Language state (init from cookie or default 'en')
+  // Language state
   const [language, setLanguage] = useState<'en' | 'uk' | 'ru' | 'hi' | 'id' | 'ja' | 'ko'>('en')
   const [isSavingLang, setIsSavingLang] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const params = useParams()
 
+  // Unsubscribe modal state
+  const [isUnsubscribeOpen, setIsUnsubscribeOpen] = useState(false)
+  const [isUnsubscribing, setIsUnsubscribing] = useState(false)
+
   useEffect(() => {
     if (typeof document !== 'undefined') {
       const m = document.cookie.match(/(?:^|; )spendly_locale=([^;]+)/)
       const cookieLang = m ? decodeURIComponent(m[1]) : null
-      if (cookieLang && ['en','uk','ru','hi','id','ja','ko'].includes(cookieLang)) {
+      if (cookieLang && ['en', 'uk', 'ru', 'hi', 'id', 'ja', 'ko'].includes(cookieLang)) {
         setLanguage(cookieLang as any)
         document.documentElement.lang = cookieLang
       }
@@ -68,8 +72,6 @@ export default function UserSettingsClient() {
 
     // Переключаем локаль, оставаясь на странице настроек
     router.replace({ pathname, params: params as any }, { locale: next })
-
-    // Мгновенно перерисовываем серверные компоненты с новыми сообщениями
     router.refresh()
 
     if (session?.user?.id) {
@@ -81,7 +83,7 @@ export default function UserSettingsClient() {
         const resp = await fetch('/api/user/locale', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({ locale: next })
@@ -98,54 +100,19 @@ export default function UserSettingsClient() {
     }
   }
 
-  // Admin AI daily limit
-  const isAdmin = Boolean(session?.user?.user_metadata?.is_admin === true)
-  const [aiDailyLimit, setAiDailyLimit] = useState<number | null>(null)
-  const [savingAdminLimit, setSavingAdminLimit] = useState(false)
-
-  useEffect(() => {
-    if (!isAdmin) return
-    ;(async () => {
-      try {
-        const { data: { session: current } } = await supabase.auth.getSession()
-        const token = current?.access_token
-        if (!token) return
-        const resp = await fetch('/api/admin/ai-limit', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        const json = await resp.json()
-        if (resp.ok && typeof json.limit === 'number') {
-          setAiDailyLimit(json.limit)
-        }
-      } catch {
-        // no-op
-      }
-    })()
-  }, [isAdmin])
-
-  async function onAdminLimitToggle(checked: boolean) {
-    if (!isAdmin) return
-    setSavingAdminLimit(true)
+  async function handleConfirmUnsubscribe() {
+    setIsUnsubscribing(true)
     try {
-      const { data: { session: current } } = await supabase.auth.getSession()
-      const token = current?.access_token
-      if (!token) return
-      const resp = await fetch('/api/admin/ai-limit', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ limit: checked ? 10 : 5 })
+      await supabase.auth.updateUser({
+        data: { subscription_status: 'free', isPro: false, assistant_tone: 'neutral' }
       })
-      const json = await resp.json()
-      if (resp.ok && typeof json.limit === 'number') {
-        setAiDailyLimit(json.limit)
-      }
-    } catch {
-      // no-op
+      await signOut()
+      router.replace({ pathname: '/auth', query: { tab: 'signup' } })
+    } catch (e) {
+      console.error('Error during unsubscribe:', e)
     } finally {
-      setSavingAdminLimit(false)
+      setIsUnsubscribing(false)
+      setIsUnsubscribeOpen(false)
     }
   }
 
@@ -154,25 +121,25 @@ export default function UserSettingsClient() {
       <div className="flex flex-col gap-6 px-5 pb-[30px]">
         <div className="w-full">
           {/* Page Header */}
-          <motion.div 
+          <motion.div
             className="mt-[30px] mb-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
           >
-            <motion.h1 
+            <motion.h1
               className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black dark:text-white"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+              transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
             >
               {tSettings('header.title')}
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="text-sm sm:text-base text-gray-600 dark:text-white mt-2"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+              transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
             >
               {tSettings('header.subtitle')}
             </motion.p>
@@ -211,9 +178,6 @@ export default function UserSettingsClient() {
               <NotificationSettings />
             </div>
 
-            {/* Удаляем импорт и секцию NotificationsDebug
-            // import NotificationsDebug from '@/components/notifications/NotificationsDebug'
-            
             {/* Recurring Rules Section */}
             <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
               <div className="mb-6">
@@ -245,7 +209,8 @@ export default function UserSettingsClient() {
                       : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-900'
                   }`}
                 >
-                  {tSettings('subscription.currentPlan')}: {subscriptionPlan === 'pro' ? tPricing('pro.label') : tPricing('free.label')}
+                  {tSettings('subscription.currentPlan')}:{' '}
+                  {subscriptionPlan === 'pro' ? tPricing('pro.label') : tPricing('free.label')}
                 </span>
               </div>
 
@@ -255,14 +220,10 @@ export default function UserSettingsClient() {
                   <h3 className="font-medium text-secondary-black dark:text-white">
                     {tPricing('free.label')}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-white mt-1">
-                    {tPricing('free.short')}
-                  </p>
+                  <p className="text-sm text-gray-600 dark:text-white mt-1">{tPricing('free.short')}</p>
                   <div className="mt-4">
                     <div className="text-2xl font-semibold text-secondary-black dark:text-white">$0</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {tPricing('perMonth')}
-                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{tPricing('perMonth')}</div>
                   </div>
                   <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-white">
                     <li>• {tPricing('free.features.track')}</li>
@@ -273,17 +234,11 @@ export default function UserSettingsClient() {
 
                 {/* Pro */}
                 <div className="rounded-lg border border-primary dark:border-primary p-5 bg-primary/5 dark:bg-primary/10">
-                  <h3 className="font-medium text-secondary-black dark:text-white">
-                    {tPricing('pro.label')}
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-white mt-1">
-                    {tPricing('pro.short')}
-                  </p>
+                  <h3 className="font-medium text-secondary-black dark:text-white">{tPricing('pro.label')}</h3>
+                  <p className="text-sm text-gray-600 dark:text-white mt-1">{tPricing('pro.short')}</p>
                   <div className="mt-4">
                     <div className="text-2xl font-semibold text-secondary-black dark:text-white">$7</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {tPricing('perMonth')}
-                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{tPricing('perMonth')}</div>
                   </div>
                   <ul className="mt-4 space-y-2 text-sm text-gray-800 dark:text-white">
                     <li>• {tPricing('pro.features.aiUnlimited')}</li>
@@ -304,12 +259,8 @@ export default function UserSettingsClient() {
             {/* Assistant Tone Section */}
             <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
               <div className="mb-6">
-                <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
-                  {tAI('settings.title')}
-                </h2>
-                <p className="text-sm text-gray-600 dark:text-white mt-1">
-                  {tAI('settings.description')}
-                </p>
+                <h2 className="text-lg font-semibold text-secondary-black dark:text-white">{tAI('settings.title')}</h2>
+                <p className="text-sm text-gray-600 dark:text-white mt-1">{tAI('settings.description')}</p>
               </div>
               <ToneSettings />
             </div>
@@ -321,21 +272,11 @@ export default function UserSettingsClient() {
                   <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
                     {tSettings('language.title')}
                   </h2>
-                  <p className="text-sm text-gray-600 dark:text-white">
-                    {tSettings('language.description')}
-                  </p>
+                  <p className="text-sm text-gray-600 dark:text-white">{tSettings('language.description')}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <LanguageSelect
-                    value={language}
-                    onChange={(l) => handleLanguageChange(l)}
-                    className="min-w-[180px]"
-                  />
-                  {isSavingLang ? (
-                    <span className="text-xs text-muted-foreground">
-                      {tCommon('saving')}
-                    </span>
-                  ) : null}
+                  <LanguageSelect value={language} onChange={(l) => handleLanguageChange(l)} className="min-w-[180px]" />
+                  {isSavingLang ? <span className="text-xs text-muted-foreground">{tCommon('saving')}</span> : null}
                 </div>
               </div>
             </div>
@@ -348,15 +289,9 @@ export default function UserSettingsClient() {
                     <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">
                       {tSettings('appControls.title')}
                     </h2>
-                    <p className="text-sm text-gray-600 dark:text-white">
-                      {tSettings('appControls.description')}
-                    </p>
+                    <p className="text-sm text-gray-600 dark:text-white">{tSettings('appControls.description')}</p>
                   </div>
-                  <Button
-                    text={tCTA('downloadApp')}
-                    variant="default"
-                    onClick={() => setIsAppInstallModalOpen(true)}
-                  />
+                  <Button text={tCTA('downloadApp')} variant="default" onClick={() => setIsAppInstallModalOpen(true)} />
                 </div>
               </div>
             )}
@@ -390,13 +325,29 @@ export default function UserSettingsClient() {
               </div>
             </div>
 
+            {/* Danger Zone Section (только для Pro) */}
+            {subscriptionPlan === 'pro' && (
+              <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
+                <div className="mb-4">
+                  <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
+                    {tSettings('dangerZone.title')}
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-white">{tSettings('dangerZone.description')}</p>
+                </div>
+                <Button
+                  text={tSettings('dangerZone.unsubscribe')}
+                  variant="destructive"
+                  onClick={() => setIsUnsubscribeOpen(true)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Sign Out Modal */}
       {isSignOutModalOpen && (
-        <SignOutModal 
+        <SignOutModal
           title={tSettings('modals.signOut.title')}
           text={tSettings('modals.signOut.text')}
           onClose={closeSignOutModal}
@@ -405,17 +356,20 @@ export default function UserSettingsClient() {
       )}
 
       {/* Edit Profile Modal */}
-      <EditProfileModal
-        isOpen={isEditProfileModalOpen}
-        onClose={handleEditProfileClose}
-        onSuccess={() => {}}
-      />
+      <EditProfileModal isOpen={isEditProfileModalOpen} onClose={handleEditProfileClose} onSuccess={() => {}} />
 
       {/* App Install Modal */}
       {isAppInstallModalOpen && (
-        <AppInstallModal
-          isOpen={isAppInstallModalOpen}
-          onClose={() => setIsAppInstallModalOpen(false)}
+        <AppInstallModal isOpen={isAppInstallModalOpen} onClose={() => setIsAppInstallModalOpen(false)} />
+      )}
+
+      {/* Unsubscribe Modal */}
+      {isUnsubscribeOpen && (
+        <UnsubscribeModal
+          open={isUnsubscribeOpen}
+          onClose={() => setIsUnsubscribeOpen(false)}
+          onConfirm={handleConfirmUnsubscribe}
+          isLoading={isUnsubscribing}
         />
       )}
     </>

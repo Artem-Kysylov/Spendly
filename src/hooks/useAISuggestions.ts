@@ -1,3 +1,4 @@
+// Хук: useAISuggestions
 'use client'
 
 import { useState, useCallback, useContext } from 'react'
@@ -31,7 +32,7 @@ export function useAISuggestions() {
     const controller = new AbortController()
     setAbortController(controller)
 
-    const tone = (session.user.user_metadata as any)?.assistant_tone || 'neutral'
+    const tone = isPro ? ((session.user.user_metadata as any)?.assistant_tone || 'neutral') : 'neutral'
 
     try {
       const res = await fetch(getAssistantApiUrl(locale), {

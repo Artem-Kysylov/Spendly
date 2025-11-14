@@ -1,3 +1,4 @@
+// Хук: useChat
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
@@ -52,20 +53,29 @@ export const useChat = (): UseChatReturn => {
   const persistTimer = useRef<number | null>(null)
 
   useEffect(() => {
-    // Попытка подгрузить сохранённый тон из профиля
+    // Попытка подгрузить сохранённый тон из профиля с учётом плана
     const initTone = async () => {
       try {
         const user = session?.user
         const tone = (user?.user_metadata as any)?.assistant_tone as AssistantTone | undefined
-        if (tone) setAssistantToneState(tone)
+        if (subscriptionPlan === 'free') {
+          setAssistantToneState('neutral')
+        } else if (tone) {
+          setAssistantToneState(tone)
+        }
       } catch {
         // no-op
       }
     }
     initTone()
-  }, [session?.user])
+  }, [session?.user, subscriptionPlan])
 
   const setAssistantTone = useCallback(async (tone: AssistantTone) => {
+    // Для Free блокируем изменения тона
+    if (subscriptionPlan === 'free') {
+      setAssistantToneState('neutral')
+      return
+    }
     setAssistantToneState(tone)
     if (persistTimer.current) {
       window.clearTimeout(persistTimer.current)
@@ -77,7 +87,7 @@ export const useChat = (): UseChatReturn => {
         console.warn('Failed to persist tone', e)
       }
     }, 400)
-  }, [])
+  }, [subscriptionPlan])
 
   const sendMessage = useCallback(async (content: string) => {
     trackEvent('ai_request_used');
@@ -115,7 +125,7 @@ export const useChat = (): UseChatReturn => {
           isPro: subscriptionPlan === 'pro',
           enableLimits: true,
           message: content,
-          tone: assistantTone
+          tone: subscriptionPlan === 'pro' ? assistantTone : 'neutral'
         }),
         signal: controller.signal
       })

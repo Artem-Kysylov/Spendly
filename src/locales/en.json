@@ -59,6 +59,16 @@
   },
   "Sidenav": {},
   "userSettings": {
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "This action will cancel your Pro subscription and downgrade to Free.",
+      "unsubscribe": "Unsubscribe",
+      "modal": {
+        "title": "Are you sure you want to unsubscribe?",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+      }
+    },
     "header": { "title": "User Settings ⚙️", "subtitle": "Manage your account settings and preferences" },
     "profile": {
       "title": "Profile",
@@ -406,9 +416,10 @@
       }
     },
     "settings": {
-      "title": "Spendly Pal Tone",
-      "description": "Choose the response tone for your AI assistant."
-    },
+        "proOnlyHint": "Custom assistant tone is available on Pro. Upgrade to unlock.",
+        "title": "Spendly Pal Tone",
+        "description": "Choose the response tone for your AI assistant."
+      },
     "presets": {
       "header": "Quick suggestions",
       "showWeek": "Show this week’s summary",
