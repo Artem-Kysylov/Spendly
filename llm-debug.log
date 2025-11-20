@@ -64,3 +64,5 @@
 2025-11-11T17:21:54.422Z [LLM_DEBUG gemini post] {"requestId":"bcf3027b-7f05-4302-a018-10590a493b06","model":"gemini-2.5-flash","candidatesLen":1,"firstCandidatePartsLen":1,"firstCandidatePartsLengths":[81],"safetyRatings":[],"finishReason":"STOP"}
 2025-11-11T17:22:11.735Z [LLM_DEBUG gemini pre] {"requestId":"b55ce9e4-1ee3-4d4e-88ca-aa472b3cffcb","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,2651]}
 2025-11-11T17:22:22.803Z [LLM_DEBUG gemini post] {"requestId":"b55ce9e4-1ee3-4d4e-88ca-aa472b3cffcb","model":"gemini-2.5-flash","candidatesLen":1,"firstCandidatePartsLen":1,"firstCandidatePartsLengths":[429],"safetyRatings":[],"finishReason":"STOP"}
+2025-11-20T17:16:24.197Z [LLM_DEBUG gemini pre] {"requestId":"c30e47a1-e3d5-43ab-b000-8bd884ade47a","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,3105]}
+2025-11-20T17:16:34.218Z [LLM_DEBUG gemini post] {"requestId":"c30e47a1-e3d5-43ab-b000-8bd884ade47a","model":"gemini-2.5-flash","candidatesLen":1,"firstCandidatePartsLen":1,"firstCandidatePartsLengths":[262],"safetyRatings":[],"finishReason":"STOP"}
