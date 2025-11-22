@@ -37,7 +37,7 @@ export function useAISuggestions() {
     try {
       const res = await fetch(getAssistantApiUrl('en'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept-Language': 'en-US' },
         body: JSON.stringify({
           userId: session.user.id,
           isPro,

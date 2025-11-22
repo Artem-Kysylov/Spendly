@@ -119,7 +119,7 @@ export const useChat = (): UseChatReturn => {
     try {
       const response = await fetch(getAssistantApiUrl('en'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept-Language': 'en-US' },
         body: JSON.stringify({
           userId: session.user.id,
           isPro: subscriptionPlan === 'pro',
@@ -199,8 +199,7 @@ export const useChat = (): UseChatReturn => {
         // Канонический JSON‑контракт (bypass LLM)
         if (json && typeof json.intent === 'string') {
           const respLocale = response.headers.get('X-Locale') || 'en-US'
-          const respCurrencyHeader = response.headers.get('X-Currency') || ''
-          const currency = typeof json.currency === 'string' ? json.currency : (respCurrencyHeader || 'USD')
+                    const currency = 'USD'
 
           const nf = new Intl.NumberFormat(respLocale, { style: 'currency', currency })
           const df = new Intl.DateTimeFormat(respLocale, { year: 'numeric', month: 'short', day: 'numeric' })
@@ -354,7 +353,7 @@ export const useChat = (): UseChatReturn => {
     try {
       const res = await fetch(getAssistantApiUrl('en'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Accept-Language': 'en-US' },
         body: JSON.stringify({
           userId: session.user.id,
           isPro: subscriptionPlan === 'pro',
