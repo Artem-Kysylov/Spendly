@@ -195,7 +195,7 @@ function TransactionsCounters({ onIconClick, refreshTrigger }: { onIconClick: ()
         return
       }
 
-      const locale = getLocalePreference()
+      const locale: 'en' = 'en'
       const prompt = buildCountersPrompt({
         budget,
         totalExpenses,

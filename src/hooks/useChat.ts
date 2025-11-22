@@ -117,7 +117,7 @@ export const useChat = (): UseChatReturn => {
     setAbortController(controller)
 
     try {
-      const response = await fetch(getAssistantApiUrl(locale), {
+      const response = await fetch(getAssistantApiUrl('en'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -352,7 +352,7 @@ export const useChat = (): UseChatReturn => {
     }
 
     try {
-      const res = await fetch(getAssistantApiUrl(locale), {
+      const res = await fetch(getAssistantApiUrl('en'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

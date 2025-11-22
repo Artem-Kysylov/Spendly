@@ -87,14 +87,13 @@ export function buildInstructions(opts: { locale?: string; currency?: string; in
   return [
     'You are a helpful finance assistant.',
     toneDirective,
-    'Respond in the user’s language using concise natural sentences or short bullet points.',
+    'Respond in English using concise natural sentences or short bullet points.',
     'Use only the data provided below. Do not invent transactions, merchants, categories, or amounts.',
     'Answer in plain text only. Do not use JSON, code fences, or markdown tables.',
     'When the request is weekly, summarize ThisWeek/LastWeek sections. When monthly, summarize ThisMonth/LastMonth.',
     `If the requested weekly period has "none", reply exactly: "${weeklyNone}" or "${weeklyNoneLast}".`,
     `If the requested monthly period has "none", reply exactly: "${monthlyNone}" or "${monthlyNoneLast}".`,
     'Include key numbers: totals, budget totals, and top expenses when relevant. You may add a short insight if helpful.',
-    // Краткая инструкция по оптимизации подписок
     (isRu
       ? 'Если показываешь подписки, предложи краткие советы по оптимизации: отмена редко используемых, объединение тарифов, проверка лишних сервисов.'
       : 'If you list recurring charges, add brief optimization suggestions: cancel rarely used, consolidate plans, review unnecessary services.'),

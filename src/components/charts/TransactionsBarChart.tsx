@@ -108,7 +108,7 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
       return
     }
 
-    const locale = getLocalePreference()
+    const locale: 'en' = 'en'
     const prompt = buildBarChartPrompt({
       data,
       filters,
