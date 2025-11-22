@@ -108,7 +108,7 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
       return
     }
 
-    const locale: 'en' = 'en'
+    const locale = getLocalePreference()
     const prompt = buildBarChartPrompt({
       data,
       filters,
@@ -283,13 +283,17 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
             >
               {tipLoading ? (
                 <>
-                  <Image src="/stop.svg" alt="Stop" width={16} height={16} />
-                  {tCharts('ai.stop')}
+                  <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                  </svg>
+                  <span>{tCharts('ai.stop')}</span>
                 </>
               ) : (
                 <>
-                  <Image src="/sparkles.svg" alt="Get AI Insight" width={16} height={16} />
-                  {tCharts('ai.getInsight')}
+                  <Image src="/sparkles.svg" alt="Sparkles" width={16} height={16} />
+                  <span>{tCharts('ai.getInsight')}</span>
                 </>
               )}
             </button>

@@ -21,7 +21,8 @@ export const composeLLMPrompt = (
     intent === 'save_advice' ||
     intent === 'analyze_spending' ||
     intent === 'biggest_expenses' ||
-    intent === 'compare_months'
+    intent === 'compare_months' ||
+    intent === 'create_budget_plan'
       ? intent
       : 'unknown'
 

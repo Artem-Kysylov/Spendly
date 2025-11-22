@@ -43,7 +43,7 @@ export function buildRecurringSummary(args: {
   return ['RecurringCharges:', ...top.map(x => `• ${x}`)].join('\n')
 }
 
-export function buildInstructions(opts: { locale?: string; currency?: string; intent?: 'unknown' | 'save_advice' | 'analyze_spending' | 'biggest_expenses' | 'compare_months'; promptVersion?: string; tone?: AssistantTone }): string {
+export function buildInstructions(opts: { locale?: string; currency?: string; intent?: 'unknown' | 'save_advice' | 'analyze_spending' | 'biggest_expenses' | 'compare_months' | 'create_budget_plan'; promptVersion?: string; tone?: AssistantTone }): string {
   const locale = opts?.locale || 'en-US'
   const currency = (opts?.currency || 'USD').toUpperCase()
   const pv = opts?.promptVersion || PROMPT_VERSION
@@ -68,6 +68,10 @@ export function buildInstructions(opts: { locale?: string; currency?: string; in
       ? (isRu
           ? 'Если просят сравнение месяцев — сравни итоги текущего и прошлого месяца и укажи разницу.'
           : 'If asked to compare months, compare totals for this and last month and state the difference.')
+      : opts.intent === 'create_budget_plan'
+      ? (isRu
+          ? 'Если просят создать план бюджета — предложи распределение по 4–6 категориям на основе текущих трат (50/30/20 как ориентир). Укажи проценты и суммы, отметь риски (перерасход, подписки), добавь 1–2 шага: установить лимиты, цель сбережений.'
+          : 'If asked to create a budget plan — propose allocations across 4–6 categories using current spending as context (50/30/20 as a baseline). Provide percentages and amounts, note risks (overspending, subscriptions), and add 1–2 actionable steps: set limits, define a savings goal.')
       : ''
 
   const toneMapEn: Record<AssistantTone, string> = {
@@ -87,7 +91,7 @@ export function buildInstructions(opts: { locale?: string; currency?: string; in
   return [
     'You are a helpful finance assistant.',
     toneDirective,
-    'Respond in English using concise natural sentences or short bullet points.',
+    'Respond in the user’s language using concise natural sentences or short bullet points.',
     'Use only the data provided below. Do not invent transactions, merchants, categories, or amounts.',
     'Answer in plain text only. Do not use JSON, code fences, or markdown tables.',
     'When the request is weekly, summarize ThisWeek/LastWeek sections. When monthly, summarize ThisMonth/LastMonth.',

@@ -35,9 +35,9 @@ export function useAISuggestions() {
     const tone = isPro ? ((session.user.user_metadata as any)?.assistant_tone || 'neutral') : 'neutral'
 
     try {
-      const res = await fetch(getAssistantApiUrl('en'), {
+      const res = await fetch(getAssistantApiUrl(locale), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Accept-Language': 'en-US' },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: session.user.id,
           isPro,

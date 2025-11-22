@@ -4,7 +4,7 @@ import type { Model } from '@/types/ai'
 
 export const isComplexRequest = (text: string): boolean => {
   const lower = text.toLowerCase()
-  const hasKeywords = /(save|analyze|forecast)/.test(lower)
+  const hasKeywords = /(save|analyze|forecast|plan|budget\s*plan)/.test(lower)
   const isLong = text.length > 100
   return hasKeywords || isLong
 }
