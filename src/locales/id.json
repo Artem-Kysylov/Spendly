@@ -133,6 +133,13 @@
         "text": "Anda yakin ingin keluar?"
       }
     },
+    "templates": {
+      "title": "Template Transaksi",
+      "description": "Percepat input: simpan judul, jumlah, tipe, dan anggaran yang sering digunakan. Template tidak menggunakan tanggal.",
+      "loading": "Memuat template…",
+      "empty": "Belum ada template",
+      "delete": "Hapus"
+    },
     "recurringRules": {
       "title": "Aturan Berkala",
       "description": "Kelola langganan terdeteksi otomatis dan biaya berulang.",
@@ -350,6 +357,11 @@
       "type": {
         "expense": "Pengeluaran",
         "income": "Pemasukan"
+      },
+      "saveAsTemplate": "Simpan sebagai template",
+      "templates": {
+        "limitTitle": "Batas template",
+        "limitDescription": "Di paket Gratis tersedia hingga 3 template."
       },
       "hintRecurring": "Tip: Gunakan nama yang konsisten untuk membantu mengidentifikasi pembayaran berulang.",
       "ruleBadge": {

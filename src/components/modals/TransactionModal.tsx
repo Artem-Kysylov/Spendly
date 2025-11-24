@@ -6,12 +6,18 @@ import Button from '../ui-elements/Button'
 import TextInput from '../ui-elements/TextInput'
 import RadioButton from '../ui-elements/RadioButton'
 import CustomDatePicker from '../ui-elements/CustomDatePicker'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
 import { Select } from '@/components/ui/select'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { X } from 'lucide-react'
+import { Command, CommandList, CommandInput, CommandGroup, CommandItem, CommandEmpty } from '@/components/ui/command'
+import { Checkbox } from '@/components/ui/checkbox'
+import { useToast } from '@/components/ui/use-toast'
+import { useSubscription } from '@/hooks/useSubscription'
 
 import { TransactionModalProps, BudgetFolderItemProps } from '../../types/types'
 import { useTranslations } from 'next-intl'
-import type { RecurringRule } from '@/types/ai'
+
 
 function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
   const { session } = UserAuth()
@@ -19,11 +25,18 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
   const tModals = useTranslations('modals')
   const tCommon = useTranslations('common')
   const tTxn = useTranslations('transaction')
+  const tSettings = useTranslations('userSettings')
+  const tTransactions = useTranslations('transactions')
 
   const [transactionTitle, setTransactionTitle] = useState<string>('')
   const [amount, setAmount] = useState<string>('')
   const [type, setType] = useState<'expense' | 'income'>('expense')
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [saveAsTemplate, setSaveAsTemplate] = useState<boolean>(false)
+  const [templates, setTemplates] = useState<Array<{ id: string; title: string; amount: number; type: 'expense' | 'income'; budget_folder_id: string | null }>>([])
+  const [recentTitles, setRecentTitles] = useState<string[]>([])
+  const { toast } = useToast()
+  const { subscriptionPlan } = useSubscription()
 
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>('unbudgeted')
   const [budgetFolders, setBudgetFolders] = useState<BudgetFolderItemProps[]>([])
@@ -32,21 +45,6 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
   const [isTypeDisabled, setIsTypeDisabled] = useState<boolean>(false)
   const [selectedDate, setSelectedDate] = useState<Date>(new Date())
 
-  // Автоподстановка: состояние правил и совпадения
-  const [recurringRules, setRecurringRules] = useState<RecurringRule[]>([])
-  const [matchedRule, setMatchedRule] = useState<RecurringRule | null>(null)
-  const [autoApplyKey, setAutoApplyKey] = useState<string | null>(null)
-  const [prevManual, setPrevManual] = useState<{ amount: string; budgetId: string; type: 'expense' | 'income' } | null>(null)
-
-  // Резервные строки для бейджа автозаполнения (если ключи лежат в другом неймспейсе)
-  const badgeByRuleText = (() => {
-    const s = tModals('transaction.ruleBadge.byRule')
-    return s === 'modals.transaction.ruleBadge.byRule' ? tTxn('ruleBadge.byRule') : s
-  })()
-  const badgeUndoText = (() => {
-    const s = tModals('transaction.ruleBadge.undo')
-    return s === 'modals.transaction.ruleBadge.undo' ? tTxn('ruleBadge.undo') : s
-  })()
 
   const fetchBudgetFolders = async () => {
     if (!session?.user?.id) return
@@ -73,24 +71,32 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
   useEffect(() => {
     if (dialogRef.current) dialogRef.current.showModal()
     fetchBudgetFolders()
+    ;(async () => {
+      if (!session?.user?.id) return
+      try {
+        const { data } = await supabase
+          .from('transaction_templates')
+          .select('id, title, amount, type, budget_folder_id')
+          .eq('user_id', session.user.id)
+          .order('updated_at', { ascending: false })
+        setTemplates((data || []).map((t: any) => ({ id: t.id, title: t.title, amount: Number(t.amount||0), type: t.type, budget_folder_id: t.budget_folder_id ?? null })))
+      } catch { /* ignore */ }
+      try {
+        const { data } = await supabase
+          .from('transactions')
+          .select('title')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(50)
+        const uniq = Array.from(new Set((data || []).map((r: any) => r.title).filter(Boolean)))
+        setRecentTitles(uniq)
+      } catch { /* ignore */ }
+    })()
     return () => {
       if (dialogRef.current) dialogRef.current.close()
     }
   }, [session?.user?.id])
 
-  // Загрузка активных правил пользователя
-  useEffect(() => {
-    if (!session?.user?.id) return
-    ;(async () => {
-      const { data, error } = await supabase
-        .from('recurring_rules')
-        .select('id, user_id, title_pattern, budget_folder_id, avg_amount, cadence, next_due_date, active, created_at, updated_at')
-        .eq('user_id', session.user.id)
-        .eq('active', true)
-        .order('avg_amount', { ascending: false })
-      if (!error && data) setRecurringRules(data as RecurringRule[])
-    })()
-  }, [session?.user?.id])
 
   const filteredBudgets = budgetFolders.filter((budget) =>
     budget.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -123,26 +129,6 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
     }
   }
 
-  // Поиск совпадения по правилу и автозаполнение
-  useEffect(() => {
-    const norm = normalizeTitle(transactionTitle)
-    if (!norm) {
-      setMatchedRule(null)
-      setAutoApplyKey(null)
-      return
-    }
-    const rule = recurringRules.find((r) => normalizeTitle(r.title_pattern) === norm) || null
-    if (rule && autoApplyKey !== rule.title_pattern) {
-      setPrevManual({ amount, budgetId: selectedBudgetId, type })
-      setAmount(String(rule.avg_amount))
-      applyBudgetId(rule.budget_folder_id ?? 'unbudgeted')
-      setMatchedRule(rule)
-      setAutoApplyKey(rule.title_pattern)
-    } else if (!rule) {
-      setMatchedRule(null)
-      setAutoApplyKey(null)
-    }
-  }, [transactionTitle, recurringRules])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -166,6 +152,25 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
         onSubmit('Failed to add transaction. Please try again.', 'error')
       } else {
         console.log('Transaction added successfully:', data)
+        if (saveAsTemplate && session?.user?.id) {
+          const limitReached = subscriptionPlan === 'free' && templates.length >= 3
+          if (limitReached) {
+            toast({ title: tModals('transaction.templates.limitTitle'), description: tModals('transaction.templates.limitDescription'), variant: 'destructive' })
+          } else {
+            try {
+              const exists = templates.some(t => normalizeTitle(t.title) === normalizeTitle(transactionTitle))
+              if (!exists) {
+                await supabase.from('transaction_templates').insert({
+                  user_id: session.user.id,
+                  title: transactionTitle,
+                  amount: Number(amount),
+                  type,
+                  budget_folder_id: selectedBudgetId === 'unbudgeted' ? null : selectedBudgetId
+                })
+              }
+            } catch { /* ignore */ }
+          }
+        }
         setTransactionTitle('')
         setAmount('')
         setType('expense')
@@ -202,28 +207,33 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
     }
   }
 
-  const handleUndoRule = () => {
-    if (!prevManual) {
-      setMatchedRule(null)
-      setAutoApplyKey(null)
-      return
-    }
-    setAmount(prevManual.amount)
-    applyBudgetId(prevManual.budgetId)
-    setType(prevManual.type)
-    setMatchedRule(null)
-    setAutoApplyKey(null)
-  }
+
 
   return (
     <Dialog open={true} onOpenChange={(o) => { if (!o) onClose() }}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-center">{title}</DialogTitle>
+          <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"><X size={22} /></DialogClose>
         </DialogHeader>
 
         <div className="mt-[30px]">
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            <Tabs value={type} onValueChange={(v) => setType(v as 'expense' | 'income')} className="mb-3 flex justify-center">
+              <TabsList className="mx-auto gap-2">
+                <TabsTrigger value="expense" disabled={isTypeDisabled} className="data-[state=active]:bg-error data-[state=active]:text-error-foreground">{tModals('transaction.type.expense')}</TabsTrigger>
+                <TabsTrigger value="income" disabled={isTypeDisabled} className="data-[state=active]:bg-success data-[state=active]:text-success-foreground">{tModals('transaction.type.income')}</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <TextInput
+              type="number"
+              placeholder={tTransactions('table.headers.amount')}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              inputMode="decimal"
+              autoFocus
+              className={`text-3xl font-semibold ${type === 'expense' ? 'text-error' : 'text-success'}`}
+            />
             <TextInput
               type="text"
               placeholder={tModals('transaction.placeholder.title')}
@@ -231,25 +241,46 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
               onChange={(e) => setTransactionTitle(e.target.value)}
               onInput={handleInput}
             />
-            {matchedRule && (
-              <div className="flex items-center gap-2 text-xs">
-                <span className="px-2 py-1 rounded bg-muted text-muted-foreground">
-                  {badgeByRuleText}
-                </span>
-                <button type="button" onClick={handleUndoRule} className="text-primary underline">
-                  {badgeUndoText}
-                </button>
-              </div>
+
+            {transactionTitle && (
+              <Command className="border rounded-md">
+                <CommandInput
+                  placeholder={tModals('transaction.placeholder.title')}
+                  value={transactionTitle}
+                  onValueChange={(v) => setTransactionTitle(v)}
+                />
+                <CommandList>
+                  <CommandEmpty>{tModals('transaction.noResults')}</CommandEmpty>
+                  <CommandGroup>
+                    {templates
+                      .filter((t) => normalizeTitle(t.title).includes(normalizeTitle(transactionTitle)))
+                      .slice(0, 6)
+                      .map((t) => (
+                        <CommandItem
+                          key={`tpl-${t.id}`}
+                          onSelect={() => {
+                            setTransactionTitle(t.title)
+                            setAmount(String(t.amount))
+                            applyBudgetId(t.budget_folder_id ?? 'unbudgeted')
+                            setType(t.type)
+                          }}
+                        >
+                          <span className="font-medium">⭐ {t.title}</span>
+                          <span className="ml-auto text-muted-foreground">{String(t.amount)}</span>
+                        </CommandItem>
+                      ))}
+                    {recentTitles
+                      .filter((tt) => normalizeTitle(tt).includes(normalizeTitle(transactionTitle)))
+                      .slice(0, 6)
+                      .map((tt, idx) => (
+                        <CommandItem key={`hist-${idx}`} onSelect={() => setTransactionTitle(tt)}>
+                          <span className="font-medium">{tt}</span>
+                        </CommandItem>
+                      ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
             )}
-            <p className="text-xs text-muted-foreground italic">
-              {tModals('transaction.hintRecurring')}
-            </p>
-            <TextInput
-              type="number"
-              placeholder={tModals('transaction.placeholder.amountUSD')}
-              value={amount}
-              onChange={(e) => setAmount(e.target.value)}
-            />
 
             <CustomDatePicker
               selectedDate={selectedDate}
@@ -295,46 +326,36 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
               <p className="text-sm text-gray-500">{tModals('transaction.noResults')}</p>
             )}
 
-            <div className="flex gap-4">
-              <RadioButton
-                title={tModals('transaction.type.expense')}
-                value="expense"
-                currentValue={type}
-                variant="expense"
-                onChange={(e) => setType(e.target.value as 'expense' | 'income')}
-                disabled={isTypeDisabled}
-              />
-              <RadioButton
-                title={tModals('transaction.type.income')}
-                value="income"
-                currentValue={type}
-                variant="income"
-                onChange={(e) => setType(e.target.value as 'expense' | 'income')}
-                disabled={isTypeDisabled}
-              />
-            </div>
-
             {isTypeDisabled && (
               <p className="text-xs text-gray-500 -mt-2">
                 {tModals('transaction.autoTypeInfo')}
               </p>
             )}
 
-            <DialogFooter className="justify-center sm:justify-center gap-4">
-              <Button
-                text={tCommon('cancel')}
-                variant="ghost"
-                className="text-primary"
-                onClick={onClose}
+            <label className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={saveAsTemplate}
+                onChange={(e) => setSaveAsTemplate(e.currentTarget.checked)}
+                className="h-4 w-4 rounded border border-border bg-transparent dark:bg-transparent data-[state=checked]:bg-primary data-[state=checked]:border-primary"
               />
+              <span>{tModals('transaction.saveAsTemplate')}</span>
+            </label>
+            {saveAsTemplate && (
+              <p className="text-xs text-muted-foreground mt-1">
+                {tSettings('header.title')} → {tSettings('templates.title')}
+              </p>
+            )}
+
+            <div className="sticky bottom-0 mt-4">
               <Button
                 type="submit"
                 text={tCommon('submit')}
                 variant="default"
                 disabled={isLoading}
                 isLoading={isLoading}
+                className={`w-full ${type === 'expense' ? 'bg-error text-error-foreground' : 'bg-success text-success-foreground'}`}
               />
-            </DialogFooter>
+            </div>
           </form>
         </div>
       </DialogContent>

@@ -157,72 +157,35 @@ function TransactionsTable({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
     >
+
+
       {/* Мобильная версия - карточки */}
-      <div className="lg:hidden space-y-3">
+      <div className="block md:hidden space-y-3">
         {pageItems.map((transaction, index) => (
           <motion.div
             key={transaction.id}
-            className="bg-card border border-border rounded-lg p-4 space-y-3"
+            className="bg-card border border-border rounded-lg p-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{
-              duration: 0.5,
-              ease: "easeOut",
-              delay: index * 0.1
-            }}
+            transition={{ duration: 0.5, ease: "easeOut", delay: index * 0.05 }}
           >
-            <div className="flex justify-between items-start">
-              <div className="flex-1">
-                <h3 className="font-medium text-foreground">{transaction.title}</h3>
-                <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
-                  {transaction.category_emoji && transaction.category_name ? (
-                    <>
-                      <span>{transaction.category_emoji}</span>
-                      <span>{transaction.category_name}</span>
-                    </>
-                  ) : (
-                    <span className="italic">{tTransactions('table.unbudgeted')}</span>
-                  )}
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-lg">
+                <span>{transaction.category_emoji || '🧾'}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-medium truncate text-foreground">{transaction.title}</div>
+                <div className="text-xs text-muted-foreground">
+                  {new Date(transaction.created_at).toLocaleDateString()}
+                  {transaction.category_name ? ` • ${transaction.category_name}` : ''}
                 </div>
               </div>
-              <div className="text-right">
-                <div className="font-semibold text-foreground">${transaction.amount}</div>
-                <span
-                  className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium uppercase tracking-wide border mt-1 ${
-                    transaction.type === 'expense'
-                      ? 'border-red-500 text-red-500 bg-transparent'
-                      : 'border-green-500 text-green-500 bg-transparent'
-                  }`}
-                >
-                  {transaction.type}
-                </span>
-              </div>
-            </div>
-            <div className="flex justify-between items-center pt-2 border-t border-border">
-              <span className="text-sm text-muted-foreground">
-                {new Date(transaction.created_at).toLocaleDateString()}
-              </span>
+              <div className={`${transaction.type === 'expense' ? 'text-error' : 'text-success'} font-bold`}>${transaction.amount}</div>
               <div className="flex items-center gap-2">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 text-primary hover:bg-blue-50"
-                  onClick={() => {
-                    setEditingTransaction(transaction)
-                    setIsEditOpen(true)
-                  }}
-                >
+                <Button size="icon" variant="ghost" className="h-8 w-8 text-primary" onClick={() => { setEditingTransaction(transaction); setIsEditOpen(true) }}>
                   <Pencil size={16} />
                 </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 text-error hover:bg-red-50"
-                  onClick={() => {
-                    setSelectedTransactionId(transaction.id)
-                    setIsModalOpen(true)
-                  }}
-                >
+                <Button size="icon" variant="ghost" className="h-8 w-8 text-error" onClick={() => { setSelectedTransactionId(transaction.id); setIsModalOpen(true) }}>
                   <Trash size={16} />
                 </Button>
               </div>
@@ -231,9 +194,17 @@ function TransactionsTable({
         ))}
       </div>
 
+      <div className="mt-4 block md:hidden">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={(p) => setCurrentPage(p)}
+        />
+      </div>
+
       {/* Десктопная версия - таблица */}
       <motion.div
-        className="hidden lg:block w-full overflow-x-auto rounded-lg border border-border bg-card shadow-sm"
+        className="hidden md:block w-full overflow-x-auto rounded-lg border border-border bg-card shadow-sm"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
@@ -318,8 +289,8 @@ function TransactionsTable({
         </Table>
       </motion.div>
 
-      {/* Пагинация */}
-      <div className="mt-4">
+      {/* Пагинация (только для десктоп-таблицы) */}
+      <div className="mt-4 hidden md:block">
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}

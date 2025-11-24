@@ -120,6 +120,13 @@
         "limitReached": "In Free plan, you can add up to 2 recurring rules. Upgrade to Pro for unlimited."
       }
     },
+    "templates": {
+      "title": "Transaction Templates",
+      "description": "Save frequent titles, amounts, type, and budget to speed up entry. Templates don’t use dates.",
+      "loading": "Loading templates…",
+      "empty": "No templates yet",
+      "delete": "Delete"
+    },
     "modals": { "signOut": { "title": "Sign out?", "text": "Are you sure you want to sign out?" } }
   },
   "payment": {
@@ -351,6 +358,11 @@
       "loadingBudgets": "Loading budgets...",
       "noResults": "No results found",
       "type": { "expense": "Expense", "income": "Income" },
+      "saveAsTemplate": "Save as template",
+      "templates": {
+        "limitTitle": "Templates limit",
+        "limitDescription": "On Free plan you can have up to 3 templates."
+      },
       "autoTypeInfo": "Tip: using consistent names helps recognize recurring payments.",
       "hintRecurring": "Tip: using consistent names helps recognize recurring payments.",
       "ruleBadge": {

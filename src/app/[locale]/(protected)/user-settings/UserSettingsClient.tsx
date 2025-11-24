@@ -18,7 +18,8 @@ import LanguageSelect from '@/components/ui-elements/locale/LanguageSelect'
 import { useTranslations } from 'next-intl'
 import { useParams } from 'next/navigation'
 import ToneSettings from '@/components/ai-assistant/ToneSettings'
-import RecurringRulesSettings from '@/components/user-settings/RecurringRulesSettings'
+
+import TransactionTemplatesSettings from '@/components/user-settings/TransactionTemplatesSettings'
 import { useSubscription } from '@/hooks/useSubscription'
 import UnsubscribeModal from '@/components/modals/UnsubscribeModal'
 
@@ -178,17 +179,11 @@ export default function UserSettingsClient() {
               <NotificationSettings />
             </div>
 
-            {/* Recurring Rules Section */}
+
+
+            {/* Transaction Templates Section */}
             <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-secondary-black mb-2 dark:text-white">
-                  {tSettings('recurringRules.title')}
-                </h2>
-                <p className="text-gray-600 dark:text-white text-sm">
-                  {tSettings('recurringRules.description')}
-                </p>
-              </div>
-              <RecurringRulesSettings />
+              <TransactionTemplatesSettings />
             </div>
 
             {/* Subscription Section */}

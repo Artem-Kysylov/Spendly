@@ -4,7 +4,9 @@ import Button from '../ui-elements/Button'
 import TextInput from '../ui-elements/TextInput'
 import RadioButton from '../ui-elements/RadioButton'
 import CustomDatePicker from '../ui-elements/CustomDatePicker'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { X } from 'lucide-react'
 import { EditTransactionModalProps } from '../../types/types'
 import { useTranslations } from 'next-intl'
 
@@ -21,6 +23,7 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
 
     const tCommon = useTranslations('common')
     const tModals = useTranslations('modals')
+    const tTransactions = useTranslations('transactions')
 
     const handleAmountInput = (e: React.FormEvent<HTMLInputElement>) => {
         const value = e.currentTarget.value
@@ -60,9 +63,27 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle className="text-center">{title}</DialogTitle>
+                    <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"><X size={22} /></DialogClose>
                 </DialogHeader>
                 <div className="mt-[30px]">
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+                        <Tabs value={type} onValueChange={(v) => { if (allowTypeChange) setType(v as 'expense' | 'income') }} className="mb-3 flex justify-center">
+                          <TabsList className="mx-auto gap-2">
+                            <TabsTrigger value="expense" disabled={!allowTypeChange} className="data-[state=active]:bg-error data-[state=active]:text-error-foreground">{tModals('transaction.type.expense')}</TabsTrigger>
+                            <TabsTrigger value="income" disabled={!allowTypeChange} className="data-[state=active]:bg-success data-[state=active]:text-success-foreground">{tModals('transaction.type.income')}</TabsTrigger>
+                          </TabsList>
+                        </Tabs>
+                        <TextInput
+                            type="number"
+                            placeholder={tTransactions('table.headers.amount')}
+                            value={amount}
+                            onChange={(e) => setAmount(e.target.value)}
+                            onInput={handleAmountInput}
+                            disabled={isLoading}
+                            inputMode="decimal"
+                            autoFocus
+                            className={`text-3xl font-semibold ${type === 'expense' ? 'text-error' : 'text-success'}`}
+                        />
                         <TextInput
                             type="text"
                             placeholder={tModals('transaction.placeholder.title')}
@@ -70,57 +91,28 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
                             onChange={(e) => setLocalTitle(e.target.value)}
                             disabled={isLoading}
                         />
-                        <TextInput
-                            type="number"
-                            placeholder={tModals('transaction.placeholder.amountUSD')}
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            onInput={handleAmountInput}
-                            disabled={isLoading}
-                        />
-                        
-                        {/* Date Picker */}
+
                         <CustomDatePicker
                             selectedDate={selectedDate}
                             onDateSelect={setSelectedDate}
                             label={tModals('transaction.date.label')}
                             placeholder={tModals('transaction.date.placeholder')}
                         />
-
-                        {allowTypeChange && (
-                            <div className="flex gap-4">
-                                <RadioButton
-                                    title={tModals('transaction.type.expense')}
-                                    value="expense"
-                                    currentValue={type}
-                                    variant="expense"
-                                    onChange={(e) => setType(e.target.value as 'expense' | 'income')}
-                                />
-                                <RadioButton
-                                    title={tModals('transaction.type.income')}
-                                    value="income"
-                                    currentValue={type}
-                                    variant="income"
-                                    onChange={(e) => setType(e.target.value as 'expense' | 'income')}
-                                />
-                            </div>
+                        {!allowTypeChange && (
+                          <p className="text-xs text-gray-500 -mt-2">
+                            {tModals('transaction.autoTypeInfo')}
+                          </p>
                         )}
-                        <DialogFooter className="justify-center sm:justify-center gap-4">
-                            <Button
-                                text={tCommon('cancel')}
-                                variant="ghost"
-                                className="text-primary"
-                                onClick={handleCancel}
-                                disabled={isLoading}
-                            />
+                        <div className="sticky bottom-0 mt-4">
                             <Button
                                 type="submit"
                                 text={tCommon('save')}
-                                variant="primary"
+                                variant="default"
                                 disabled={isLoading || !localTitle.trim() || !amount}
                                 isLoading={isLoading}
+                                className={`w-full ${type === 'expense' ? 'bg-error text-error-foreground' : 'bg-success text-success-foreground'}`}
                             />
-                        </DialogFooter>
+                        </div>
                     </form>
                 </div>
             </DialogContent>

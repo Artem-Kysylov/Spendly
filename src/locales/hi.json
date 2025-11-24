@@ -112,6 +112,13 @@
         "description": "अपने अकाउंट से साइन आउट करें"
       }
     },
+    "templates": {
+      "title": "लेन-देन टेम्पलेट",
+      "description": "इनपुट तेज करें: अक्सर उपयोग होने वाले शीर्षक, राशि, प्रकार और बजट सहेजें। टेम्पलेट में तारीख शामिल नहीं होती।",
+      "loading": "टेम्पलेट लोड हो रहे हैं…",
+      "empty": "कोई टेम्पलेट नहीं",
+      "delete": "हटाएँ"
+    },
     "modals": {
       "signOut": {
         "title": "साइन आउट करें?",
@@ -120,6 +127,20 @@
       "budget": {
         "pickColor": "रंग चुनें",
         "color": { "none": "कोई नहीं/डिफ़ॉल्ट" }
+      },
+      "transaction": {
+        "placeholder": {
+          "title": "लेन-देन का नाम",
+          "amountUSD": "राशि (USD)"
+        },
+        "date": { "label": "तारीख चुनें", "placeholder": "तारीख चुनें" },
+        "select": { "label": "बजट श्रेणी चुनें", "unbudgeted": "बिना बजट" },
+        "search": { "placeholder": "बजट खोजें…" },
+        "loadingBudgets": "बजट लोड हो रहे हैं…",
+        "noResults": "कोई परिणाम नहीं मिला",
+        "type": { "expense": "खर्च", "income": "आय" },
+        "saveAsTemplate": "टेम्पलेट के रूप में सहेजें",
+        "templates": { "limitTitle": "टेम्पलेट सीमा", "limitDescription": "फ्री प्लान में अधिकतम 3 टेम्पलेट उपलब्ध हैं।" }
       }
     },
     "recurringRules": {

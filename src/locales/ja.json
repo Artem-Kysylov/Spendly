@@ -123,6 +123,13 @@
         "text": "本当にサインアウトしますか？"
       }
     },
+    "templates": {
+      "title": "取引テンプレート",
+      "description": "入力を高速化：よく使うタイトル・金額・種類・予算を保存します。テンプレートに日付は使用しません。",
+      "loading": "テンプレートを読み込み中…",
+      "empty": "テンプレートはありません",
+      "delete": "削除"
+    },
     "recurringRules": {
       "title": "定期ルール",
       "description": "自動検出されたサブスクリプションや定期的な支払いを管理します。",
@@ -630,6 +637,11 @@
       "type": {
         "expense": "支出",
         "income": "収入"
+      },
+      "saveAsTemplate": "テンプレートとして保存",
+      "templates": {
+        "limitTitle": "テンプレートの上限",
+        "limitDescription": "無料プランでは最大3つのテンプレートが利用できます。"
       },
       "hintRecurring": "ヒント: 定期的な支払いを識別しやすくするために、一貫した名前を使用してください。",
       "ruleBadge": {

@@ -263,6 +263,11 @@
         "expense": "지출",
         "income": "수입"
       },
+      "saveAsTemplate": "템플릿으로 저장",
+      "templates": {
+        "limitTitle": "템플릿 제한",
+        "limitDescription": "무료 요금제에서는 최대 3개의 템플릿을 사용할 수 있어요."
+      },
       "autoTypeInfo": "금액에 따라 지출/수입이 자동으로 결정됩니다.",
       "hintRecurring": "팁: 동일한 이름을 사용하면 반복 결제를 인식하는 데 도움이 됩니다.",
       "ruleBadge": {
@@ -441,6 +446,13 @@
         "title": "로그아웃하시겠어요?",
         "text": "정말 로그아웃하시겠습니까?"
       }
+    },
+    "templates": {
+      "title": "거래 템플릿",
+      "description": "입력을 빠르게: 자주 쓰는 제목, 금액, 유형, 예산을 저장하세요. 템플릿은 날짜를 사용하지 않습니다.",
+      "loading": "템플릿 불러오는 중…",
+      "empty": "템플릿이 없습니다",
+      "delete": "삭제"
     },
     "recurringRules": {
       "title": "반복 규칙",

@@ -6,7 +6,9 @@ import EmojiPicker from 'emoji-picker-react'
 import Button from '../ui-elements/Button'
 import TextInput from '../ui-elements/TextInput'
 import RadioButton from '../ui-elements/RadioButton'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { X } from 'lucide-react'
 
 // Import types
 import { BudgetModalProps } from '../../types/types'
@@ -38,6 +40,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
 
     const tModals = useTranslations('modals')
     const tCommon = useTranslations('common')
+    const tTransactions = useTranslations('transactions')
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -67,15 +70,29 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle className="text-center">{title}</DialogTitle>
+                    <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"><X size={22} /></DialogClose>
                 </DialogHeader>
                 <div className="mt-[30px]">
-                    <div className='flex items-center justify-center gap-2 mb-[20px]'>
+                    <Tabs value={type} onValueChange={(v) => setType(v as 'expense' | 'income')} className="mb-4 flex justify-center">
+                      <TabsList className="mx-auto gap-2">
+                        <TabsTrigger value="expense" className="data-[state=active]:bg-error data-[state=active]:text-error-foreground">{tModals('budget.type.expense')}</TabsTrigger>
+                        <TabsTrigger value="income" className="data-[state=active]:bg-success data-[state=active]:text-success-foreground">{tModals('budget.type.income')}</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                    <div className='flex items-center gap-2 mb-[20px]'>
                         <Button
                             text={emojiIcon}
                             className="bg-[#F5F3FF] dark:bg-background text-primary text-[25px] w-[60px] h-[60px] flex items-center justify-center rounded-lg hover:opacity-50 transition-opacity duration-300 border-none"
                             onClick={() => setOpenEmojiPicker(true)}
                         />
-                        <span className='text-secondary-black dark:text-white'>{tModals('budget.pickEmojiOptional')}</span>
+                        <TextInput
+                            type="text"
+                            placeholder={tModals('budget.placeholder.name')}
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            disabled={isLoading}
+                            className="flex-1"
+                        />
                     </div>
                     <div className='absolute top-0 right-0'>
                         <EmojiPicker 
@@ -114,52 +131,21 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                         <TextInput
                             type="text"
-                            placeholder={tModals('budget.placeholder.name')}
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            disabled={isLoading}
-                        />
-                        <TextInput
-                            type="text"
-                            placeholder={tModals('budget.placeholder.amountUSD')}
+                            placeholder={tTransactions('table.headers.amount')}
                             value={amount}
                             onChange={(e) => setAmount(e.target.value)}
                             onInput={handleInput}
                             disabled={isLoading}
+                            inputMode="decimal"
+                            className={type === 'expense' ? 'text-error text-2xl font-semibold' : 'text-success text-2xl font-semibold'}
                         />
-                        <div className="flex gap-4">
-                            <RadioButton
-                                title={tModals('budget.type.expense')}
-                                value="expense"
-                                currentValue={type}
-                                variant="expense"
-                                onChange={(e) => setType(e.target.value as 'expense' | 'income')}
-                                inactiveBgClassName="bg-background"
-                            />
-                            <RadioButton
-                                title={tModals('budget.type.income')}
-                                value="income"
-                                currentValue={type}
-                                variant="income"
-                                onChange={(e) => setType(e.target.value as 'expense' | 'income')}
-                                inactiveBgClassName="bg-background"
-                            />
-                        </div>
-                        <DialogFooter className="justify-center sm:justify-center gap-4">
-                            <Button
-                                text={tCommon('cancel')}
-                                variant="ghost"
-                                className="text-primary"
-                                onClick={handleCancel}
-                                disabled={isLoading}
-                            />
-                            <Button
-                                type="submit"
-                                text={isLoading ? tCommon('saving') : tCommon('submit')}
-                                variant="primary"
-                                disabled={isLoading || !name.trim() || !amount}
-                            />
-                        </DialogFooter>
+                        <Button
+                            type="submit"
+                            text={isLoading ? tCommon('saving') : tCommon('submit')}
+                            variant="default"
+                            disabled={isLoading || !name.trim() || !amount}
+                            className={`w-full ${type === 'expense' ? 'bg-error text-error-foreground' : 'bg-success text-success-foreground'}`}
+                        />
                     </form>
                 </div>
             </DialogContent>

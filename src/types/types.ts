@@ -52,6 +52,17 @@ export interface Transaction {
     category_emoji?: string
 }
 
+export interface TransactionTemplate {
+    id: string
+    user_id: string
+    title: string
+    amount: number
+    type: 'expense' | 'income'
+    budget_folder_id?: string | null
+    created_at?: string
+    updated_at?: string
+}
+
 export interface TransactionsTableProps {
     transactions: Transaction[]
     onDeleteTransaction: (id: string) => Promise<void>
@@ -108,6 +119,9 @@ export interface TextInputProps {
     className?: string,
     label?: string,
     error?: string,
+    inputMode?: 'search' | 'text' | 'decimal' | 'none' | 'email' | 'tel' | 'url' | 'numeric',
+    autoFocus?: boolean,
+    onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void,
 }
 
 export interface RadioButtonProps {

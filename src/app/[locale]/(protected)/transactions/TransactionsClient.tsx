@@ -8,6 +8,7 @@ import { useTransactionsData } from '@/hooks/useTransactionsData'
 import Button from '@/components/ui-elements/Button'
 import Spinner from '@/components/ui-elements/Spinner'
 import TransactionsTable from '@/components/chunks/TransactionsTable'
+import MobileTransactionsList from '@/components/chunks/MobileTransactionsList'
 import EmptyState from '@/components/chunks/EmptyState'
 import TransactionModal from '@/components/modals/TransactionModal'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
@@ -173,11 +174,20 @@ export default function TransactionsClient() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: "easeOut", delay: 0.5 }}
         >
-          <TransactionsTable
-            transactions={filteredTransactions}
-            onDeleteTransaction={handleDeleteTransaction}
-            onEditTransaction={handleEditTransaction}
-          />
+          <div className="block md:hidden">
+            <MobileTransactionsList
+              transactions={filteredTransactions}
+              onDeleteTransaction={handleDeleteTransaction}
+              onEditTransaction={handleEditTransaction}
+            />
+          </div>
+          <div className="hidden md:block">
+            <TransactionsTable
+              transactions={filteredTransactions}
+              onDeleteTransaction={handleDeleteTransaction}
+              onEditTransaction={handleEditTransaction}
+            />
+          </div>
         </motion.div>
       )}
 
