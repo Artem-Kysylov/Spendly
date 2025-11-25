@@ -1,24 +1,27 @@
+// TransactionsClient component
 'use client';
 
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
+
 import useModal from '@/hooks/useModal'
 import { useTransactionsData } from '@/hooks/useTransactionsData'
+import { UserAuth } from '@/context/AuthContext'
+import { supabase } from '@/lib/supabaseClient'
+
 import Button from '@/components/ui-elements/Button'
 import Spinner from '@/components/ui-elements/Spinner'
-import TransactionsTable from '@/components/chunks/TransactionsTable'
-import MobileTransactionsList from '@/components/chunks/MobileTransactionsList'
-import EmptyState from '@/components/chunks/EmptyState'
-import TransactionModal from '@/components/modals/TransactionModal'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
 import TransactionsFilter from '@/components/ui-elements/TransactionsFilter'
+import EmptyState from '@/components/chunks/EmptyState'
+import TransactionsTable from '@/components/chunks/TransactionsTable'
+import MobileTransactionsList from '@/components/chunks/MobileTransactionsList'
+import TransactionModal from '@/components/modals/TransactionModal'
 import { ExpensesBarChart } from '@/components/charts/TransactionsBarChart'
-import { ToastMessageProps } from '@/types/types'
-import type { EditTransactionPayload } from '@/types/types'
-import { supabase } from '@/lib/supabaseClient'
-import { UserAuth } from '@/context/AuthContext'
-import { useTranslations } from 'next-intl'
+
+import type { EditTransactionPayload, ToastMessageProps } from '@/types/types'
 
 export default function TransactionsClient() {
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
@@ -127,6 +130,7 @@ export default function TransactionsClient() {
           variant="primary"
           onClick={openModal}
           icon={<Plus size={16} className="text-white" />}
+          className="hidden md:inline-flex" // скрыть на мобильных
         />
       </motion.div>
 

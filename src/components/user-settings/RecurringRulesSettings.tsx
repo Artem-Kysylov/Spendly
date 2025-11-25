@@ -6,7 +6,7 @@ import { UserAuth } from '@/context/AuthContext'
 import type { RecurringRule } from '@/types/ai'
 import TextInput from '@/components/ui-elements/TextInput'
 import Button from '@/components/ui-elements/Button'
-import CustomDatePicker from '@/components/ui-elements/CustomDatePicker'
+import HybridDatePicker from '@/components/ui-elements/HybridDatePicker'
 import { Select } from '@/components/ui/select'
 import type { BudgetFolderItemProps } from '@/types/types'
 import { useTranslations } from 'next-intl'
@@ -245,7 +245,7 @@ export default function RecurringRulesSettings() {
           <label className="text-sm font-medium text-secondary-black dark:text-white">
             {tSettings('recurringRules.form.nextDue.label')}
           </label>
-          <CustomDatePicker
+          <HybridDatePicker
             selectedDate={draft.next_due_date}
             onDateSelect={(d) => setDraft(prev => ({ ...prev, next_due_date: d }))}
             placeholder={tSettings('recurringRules.form.nextDue.placeholder')}

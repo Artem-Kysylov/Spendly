@@ -17,9 +17,10 @@ import { useSubscription } from '@/hooks/useSubscription'
 
 import { TransactionModalProps, BudgetFolderItemProps } from '../../types/types'
 import { useTranslations } from 'next-intl'
+import { HybridDatePicker } from '../ui-elements'
 
 
-function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
+function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: TransactionModalProps) {
   const { session } = UserAuth()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const tModals = useTranslations('modals')
@@ -97,6 +98,15 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
     }
   }, [session?.user?.id])
 
+  // Применяем предзаполненный бюджет после загрузки списков
+  useEffect(() => {
+    if (initialBudgetId && budgetFolders.length > 0) {
+      const exists = budgetFolders.some(b => b.id === initialBudgetId)
+      if (exists) {
+        applyBudgetId(initialBudgetId)
+      }
+    }
+  }, [initialBudgetId, budgetFolders])
 
   const filteredBudgets = budgetFolders.filter((budget) =>
     budget.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -211,7 +221,7 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
 
   return (
     <Dialog open={true} onOpenChange={(o) => { if (!o) onClose() }}>
-      <DialogContent>
+      <DialogContent className="transaction-modal">
         <DialogHeader>
           <DialogTitle className="text-center">{title}</DialogTitle>
           <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"><X size={22} /></DialogClose>
@@ -232,7 +242,7 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
               onChange={(e) => setAmount(e.target.value)}
               inputMode="decimal"
               autoFocus
-              className={`text-3xl font-semibold ${type === 'expense' ? 'text-error' : 'text-success'}`}
+              className={`text-3xl font-medium ${type === 'expense' ? 'text-error' : 'text-success'}`}
             />
             <TextInput
               type="text"
@@ -282,7 +292,7 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
               </Command>
             )}
 
-            <CustomDatePicker
+            <HybridDatePicker
               selectedDate={selectedDate}
               onDateSelect={setSelectedDate}
               label={tModals('transaction.date.label')}
@@ -336,13 +346,13 @@ function TransactionModal({ title, onClose, onSubmit }: TransactionModalProps) {
               <Checkbox
                 checked={saveAsTemplate}
                 onChange={(e) => setSaveAsTemplate(e.currentTarget.checked)}
-                className="h-4 w-4 rounded border border-border bg-transparent dark:bg-transparent data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                className="h-4 w-4 rounded border border-border bg-transparent dark:bg-transparent accent-primary"
               />
               <span>{tModals('transaction.saveAsTemplate')}</span>
             </label>
             {saveAsTemplate && (
               <p className="text-xs text-muted-foreground mt-1">
-                {tSettings('header.title')} → {tSettings('templates.title')}
+                You can view and manage templates in {tSettings('header.title')} → {tSettings('templates.title')}
               </p>
             )}
 

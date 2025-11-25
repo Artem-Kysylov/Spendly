@@ -1,10 +1,12 @@
+// AIAssistantProvider component
 "use client"
 
-import React from 'react'
+import React, { useEffect } from 'react'
 import { FloatingAIButton } from './FloatingAIButton'
 import { AIChatWindow } from './AIChatWindow'
 import { useChat } from '@/hooks/useChat'
 import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet'
+import useDeviceType from '@/hooks/useDeviceType'
 
 const AIAssistantProvider: React.FC = () => {
   const {
@@ -22,19 +24,20 @@ const AIAssistantProvider: React.FC = () => {
     assistantTone,
     setAssistantTone,
   } = useChat()
+  const { isDesktop } = useDeviceType()
 
-  const handleAIButtonClick = () => {
-    if (isOpen) {
-      closeChat()
-    } else {
-      openChat()
-    }
-  }
+  // Слушатель глобального открытия ассистента
+  useEffect(() => {
+    const handler = () => openChat()
+    window.addEventListener('ai-assistant:open', handler)
+    return () => window.removeEventListener('ai-assistant:open', handler)
+  }, [openChat])
 
   return (
     <>
       <Sheet open={isOpen} onOpenChange={(o) => (o ? openChat() : closeChat())}>
-        {!isOpen && (
+        {/* Показываем плавающую кнопку только на десктопе */}
+        {!isOpen && isDesktop && (
           <SheetTrigger>
             <FloatingAIButton />
           </SheetTrigger>

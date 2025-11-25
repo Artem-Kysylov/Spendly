@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import Button from '../ui-elements/Button'
 import TextInput from '../ui-elements/TextInput'
 import RadioButton from '../ui-elements/RadioButton'
-import CustomDatePicker from '../ui-elements/CustomDatePicker'
+import HybridDatePicker from '../ui-elements/HybridDatePicker'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { X } from 'lucide-react'
@@ -82,7 +82,7 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
                             disabled={isLoading}
                             inputMode="decimal"
                             autoFocus
-                            className={`text-3xl font-semibold ${type === 'expense' ? 'text-error' : 'text-success'}`}
+                            className={`text-3xl font-medium ${type === 'expense' ? 'text-error' : 'text-success'}`}
                         />
                         <TextInput
                             type="text"
@@ -92,7 +92,7 @@ const EditTransactionModal = ({ title, onClose, onSubmit, isLoading = false, ini
                             disabled={isLoading}
                         />
 
-                        <CustomDatePicker
+                        <HybridDatePicker
                             selectedDate={selectedDate}
                             onDateSelect={setSelectedDate}
                             label={tModals('transaction.date.label')}

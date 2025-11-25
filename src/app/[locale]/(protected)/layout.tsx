@@ -1,3 +1,4 @@
+// ProtectedLayout component
 'use client'
 
 import React from 'react'
@@ -6,6 +7,7 @@ import Sidebar from '@/components/layout/Sidebar'
 import ProtectedRoute from '@/components/guards/ProtectedRoute'
 import { AIAssistantProvider } from '@/components/ai-assistant'
 import MobileTabBar from '@/components/layout/MobileTabBar'
+import AddTransactionProvider from '@/components/layout/AddTransactionProvider'
 import useDeviceType from '@/hooks/useDeviceType'
 import { usePathname } from 'next/navigation'
 import { AnimatePresence, motion, useReducedMotion, Variants } from 'framer-motion'
@@ -40,6 +42,7 @@ export default function ProtectedLayout({
   return (
     <ProtectedRoute>
       <AIAssistantProvider/>
+      <AddTransactionProvider />
       <div className="flex h-screen transition-colors duration-300">
         <Sidebar />
 

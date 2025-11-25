@@ -292,6 +292,8 @@
   },
   "layout": {
     "sidebar": {
+      "addTransaction": "Add Transaction",
+      "aiAssistant": "AI Assistant",
       "dashboard": "Dashboard",
       "transactions": "Transactions",
       "budgets": "Budgets",

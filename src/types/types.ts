@@ -93,6 +93,7 @@ export interface TransactionModalProps {
     title: string,
     onClose: () => void,
     onSubmit: (message: string, type: ToastMessageProps['type']) => void,
+    initialBudgetId?: string
 }
 
 export interface NewBudgetModalProps  {
@@ -288,6 +289,8 @@ export interface BarChartProps {
     showBudgetLine?: boolean    // Показывать ли бюджетную линию
     mainBudget?: number         // Общий бюджет
     budgetLineColor?: string    // Цвет бюджетной линии
+    onBarHover?: (index: number, item: BarChartData) => void
+    onBarLeave?: () => void
 }
 
 // Charts Container Props

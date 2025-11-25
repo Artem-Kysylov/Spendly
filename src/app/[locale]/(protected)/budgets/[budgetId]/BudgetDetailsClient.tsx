@@ -17,6 +17,8 @@ import TransactionsTable from '@/components/chunks/TransactionsTable'
 import { BudgetDetailsProps, Transaction, ToastMessageProps } from '@/types/types'
 import type { EditTransactionPayload } from '@/types/types'
 import { useTranslations } from 'next-intl'
+import TransactionModal from '@/components/modals/TransactionModal'
+import Button from '@/components/ui-elements/Button'
 
 export default function BudgetDetailsClient() {
   const { budgetId } = useParams<{ budgetId: string }>()
@@ -37,9 +39,11 @@ export default function BudgetDetailsClient() {
     type: 'expense'
   })
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false)
 
   const tBudgets = useTranslations('budgets')
   const tCommon = useTranslations('common')
+  const tTransactions = useTranslations('transactions')
 
   const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
     setToastMessage({ text, type })
@@ -262,12 +266,35 @@ export default function BudgetDetailsClient() {
     <div className="px-5 mt-[30px] space-y-6">
       {toastMessage && <ToastMessage text={toastMessage.text} type={toastMessage.type} />}
 
-
       <BudgetDetailsControls
         onDeleteClick={openDeleteModal}
         onEditClick={openEditModal}
       />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+
+      {/* Мобильная версия: инфо + кнопка открытия модалки */}
+      <div className="block md:hidden">
+        <div className="grid grid-cols-1 gap-6 items-stretch">
+          <BudgetDetailsInfo
+            id={id}
+            emoji={budgetDetails.emoji}
+            name={budgetDetails.name}
+            amount={budgetDetails.amount}
+            type={budgetDetails.type}
+            color_code={budgetDetails.color_code ?? null}
+          />
+          <div className="mt-2">
+            <Button
+              text={tTransactions('addTransaction')}
+              variant="default"
+              className="w-full"
+              onClick={() => setIsAddModalOpen(true)}
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Десктопная версия: инфо + форма */}
+      <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         <BudgetDetailsInfo
           id={id}
           emoji={budgetDetails.emoji}
@@ -312,6 +339,18 @@ export default function BudgetDetailsClient() {
           onSubmit={handleUpdateBudget}
           isLoading={isSubmitting}
           handleToastMessage={handleToastMessage}
+        />
+      )}
+
+      {isAddModalOpen && (
+        <TransactionModal
+          title={tTransactions('modal.addTitle')}
+          onClose={() => setIsAddModalOpen(false)}
+          onSubmit={(message, type) => {
+            handleToastMessage(message, type)
+            fetchTransactions()
+          }}
+          initialBudgetId={id}
         />
       )}
     </div>

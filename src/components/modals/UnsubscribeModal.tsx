@@ -1,5 +1,6 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
 import Button from '@/components/ui-elements/Button'
+import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 interface UnsubscribeModalProps {
@@ -18,6 +19,7 @@ export default function UnsubscribeModal({ open, onClose, onConfirm, isLoading }
           <DialogTitle className="text-secondary-black dark:text-white">
             {tSettings('dangerZone.modal.title')}
           </DialogTitle>
+          <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"><X size={22} /></DialogClose>
         </DialogHeader>
         <p className="py-4 text-secondary-black dark:text-gray-300">
           😢 {tSettings('dangerZone.description')}

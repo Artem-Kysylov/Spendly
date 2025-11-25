@@ -4,7 +4,9 @@
       "dashboard": "डैशबोर्ड",
       "transactions": "लेन-देन",
       "budgets": "बजट",
-      "userSettings": "यूज़र सेटिंग्स"
+      "userSettings": "यूज़र सेटिंग्स",
+      "addTransaction": "लेन-देन जोड़ें",
+      "aiAssistant": "AI सहायक"
     },
     "alt": {
       "logo": "Spendly लोगो"
@@ -798,4 +800,3 @@
     }
   }
 }
-

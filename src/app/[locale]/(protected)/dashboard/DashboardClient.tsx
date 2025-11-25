@@ -1,3 +1,4 @@
+// DashboardClient component
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -186,6 +187,7 @@ const DashboardClient = () => {
                 variant="primary"
                 onClick={openAddModal}
                 icon={<Plus size={16} className="text-white" />}
+                className="hidden md:inline-flex" // скрыть на мобильных
               />
             </motion.div>
           </motion.div>
@@ -216,7 +218,7 @@ const DashboardClient = () => {
                 title={tTransactions('empty.title')}
                 description={tTransactions('empty.description')}
                 buttonText={tTransactions('addTransaction')}
-                onButtonClick={() => router.push('/transactions')}
+                onButtonClick={openAddModal} // при пустом списке открыть модалку
               />
             ) : (
               <motion.div

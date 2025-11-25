@@ -15,7 +15,9 @@
       "dashboard": "대시보드",
       "transactions": "거래",
       "budgets": "예산",
-      "userSettings": "사용자 설정"
+      "userSettings": "사용자 설정",
+      "addTransaction": "거래 추가",
+      "aiAssistant": "AI 비서"
     },
     "alt": {
       "logo": "Spendly 로고"

@@ -4,7 +4,9 @@
       "dashboard": "ダッシュボード",
       "transactions": "取引",
       "budgets": "予算",
-      "userSettings": "ユーザー設定"
+      "userSettings": "ユーザー設定",
+      "addTransaction": "取引を追加",
+      "aiAssistant": "AI アシスタント"
     },
     "upgradeBanner": {
       "title": "Proでインサイトを得る 🚀",

@@ -1,11 +1,11 @@
+// Sidebar component
 'use client'
 
 import { UserAuth } from '@/context/AuthContext'
 import { usePathname } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/routing'
-import type { AppPathnames } from '@/i18n/routing'
-import { LayoutDashboard, CreditCard, Wallet } from 'lucide-react'
+import { LayoutDashboard, CreditCard, Wallet, Plus, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import UpgradeSidebarBanner from '@/components/free/UpgradeSidebarBanner'
 
@@ -57,6 +57,18 @@ const Sidebar = () => {
                     priority
                 />
             </div>
+
+            {/* Большая кнопка "Добавить транзакцию" */}
+            <div className="px-4 pt-4">
+                <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('transactions:add'))}
+                    className="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-medium text-sm shadow hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                >
+                    <Plus className="h-4 w-4 text-white" />
+                    {tOr('sidebar.addTransaction', 'Добавить транзакцию')}
+                </button>
+            </div>
+
             {/* Navigation Section */}
             <nav className="flex-1 px-4 py-6">
                 <ul className="space-y-2">
@@ -83,12 +95,21 @@ const Sidebar = () => {
                             </li>
                         )
                     })}
+                    {/* AI Ассистент как отдельный пункт меню */}
+                    <li>
+                        <button
+                            onClick={() => window.dispatchEvent(new CustomEvent('ai-assistant:open'))}
+                            className="w-full flex items-center gap-3 rounded-md text-sm font-medium transition-all duration-200 px-3 py-2.5 text-foreground hover:text-primary hover:bg-muted"
+                        >
+                            <Sparkles className="h-5 w-5" />
+                            <span>{tOr('sidebar.aiAssistant', 'AI Assistant')}</span>
+                        </button>
+                    </li>
                 </ul>
             </nav>
 
             {/* Upgrade banner */}
             <div className="px-4 pb-2">
-                {/* Вставляем общий компонент баннера */}
                 {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
                 {/* @ts-ignore */}
                 <UpgradeSidebarBanner />

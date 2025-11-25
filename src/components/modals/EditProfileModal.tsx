@@ -1,13 +1,13 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog'
 import { UserAuth } from '@/context/AuthContext'
 import { supabase } from '@/lib/supabaseClient'
 import Button from '@/components/ui-elements/Button'
 import FormInput from '@/components/ui-elements/FormInput'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 interface EditProfileModalProps {
@@ -177,6 +177,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{tModals('editProfile.title')}</DialogTitle>
+            <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"><X size={22} /></DialogClose>
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-4">

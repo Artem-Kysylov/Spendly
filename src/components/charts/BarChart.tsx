@@ -9,6 +9,7 @@ import { CustomTooltip } from './CustomTooltip'
 import { BarChartProps } from '@/types/types'
 import { ChartDescription } from './ChartDescription'
 import { useTranslations } from 'next-intl'
+import useDeviceType from '@/hooks/useDeviceType'
 
 // BarChartComponent component (forwardRef)
 const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({ 
@@ -24,11 +25,60 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
   error = null,
   barColor = "hsl(var(--primary))",
   orientation = "vertical",
-  className = ""
+  className = "",
+  onBarHover,
+  onBarLeave,
 }, ref) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const tCharts = useTranslations('charts')
   const resolvedTitle = title ?? tCharts('bar.titleByCategory')
+  const { isMobile } = useDeviceType()
+
+  // Разделяем первое «слово»-эмодзи и текст
+  const splitEmojiLabel = (value: string) => {
+    const parts = value.trim().split(' ')
+    if (parts.length > 1 && !/^[\p{L}\p{N}]+$/u.test(parts[0])) {
+      return { emoji: parts[0], label: parts.slice(1).join(' ') }
+    }
+    return { emoji: '', label: value.trim() }
+  }
+
+  // Кастомный тик для мобильной оси категорий: оставляем 10px
+  const renderMobileCategoryTick = (props: any) => {
+    const { x, y, payload } = props
+    const { emoji, label } = splitEmojiLabel(payload.value)
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize={10}>
+          {emoji && <tspan x={0} dy={10}>{emoji}</tspan>}
+          <tspan x={0} dy={emoji ? 16 : 0}>{label}</tspan>
+        </text>
+      </g>
+    )
+  }
+
+  // Кастомный рендер тика: мобайл — столбик (эмодзи сверху), десктоп — в ряд
+  const CategoryTick = (props: any) => {
+    const { x, y, payload } = props
+    const { emoji, label } = splitEmojiLabel(payload.value)
+    if (isMobile) {
+      return (
+        <g transform={`translate(${x},${y})`}>
+          <text textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize={10}>
+            {emoji && <tspan x={0} dy={-6}>{emoji}</tspan>}
+            <tspan x={0} dy={emoji ? 12 : 0}>{label}</tspan>
+          </text>
+        </g>
+      )
+    }
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text textAnchor="middle" fill="hsl(var(--muted-foreground))" fontSize={12}>
+          {emoji ? `${emoji} ${label}` : label}
+        </text>
+      </g>
+    )
+  }
 
   if (isLoading) {
     return (
@@ -95,22 +145,22 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
 
   return (
     <Card className={className} ref={ref}>
-      <CardHeader>
+      <CardHeader className="px-5 pt-5 pb-3 sm:px-6">
         <CardTitle>{resolvedTitle}</CardTitle>
         {description && <ChartDescription>{description}</ChartDescription>}
       </CardHeader>
-      <CardContent>
-        <div style={{ width: '100%', height }}>
+      <CardContent className="p-0">
+        <div style={{ width: '100%', height, paddingRight: 10 }}>
           <ResponsiveContainer width="100%" height="100%">
             <RechartsBarChart
               data={data}
               layout={orientation === "horizontal" ? "vertical" : "horizontal"}
               barCategoryGap="25%"
               margin={{
-                top: 36,
-                right: 30,
-                left: orientation === "horizontal" ? 80 : 20,
-                bottom: 5,
+                top: 28,
+                right: 0,
+                left: orientation === "horizontal" ? 70 : 8,
+                bottom: isMobile ? 12 : 5, // больше «воздуха» снизу на мобиле
               }}
             >
               {showGrid && <CartesianGrid strokeDasharray="3 3" />}
@@ -140,13 +190,13 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
                   <XAxis 
                     dataKey="category"
                     stroke="hsl(var(--muted-foreground))"
-                    fontSize={12}
+                    fontSize={isMobile ? 10 : 12}
                     tickLine={false}
                     axisLine={false}
-                    tickFormatter={formatXAxisLabel}
-                    // Ровные подписи с эмодзи, меньше «воздуха» снизу
-                    height={28}
-                    tickMargin={4}
+                    tick={isMobile ? renderMobileCategoryTick : undefined}
+                    tickFormatter={!isMobile ? formatXAxisLabel : undefined}
+                    height={isMobile ? 58 : 28}
+                    tickMargin={isMobile ? 10 : 4}
                     interval={0}
                   />
                   <YAxis 
@@ -177,6 +227,14 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
                     key={`cell-${index}`} 
                     fill={entry.fill}
                     opacity={entry.opacity}
+                    onMouseEnter={() => {
+                      setHoveredIndex(index)
+                      onBarHover?.(index, data[index])
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredIndex(null)
+                      onBarLeave?.()
+                    }}
                   />
                 ))}
               </Bar>

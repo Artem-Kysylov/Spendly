@@ -137,7 +137,7 @@ const BudgetModal = ({ title, onClose, onSubmit, isLoading = false, initialData,
                             onInput={handleInput}
                             disabled={isLoading}
                             inputMode="decimal"
-                            className={type === 'expense' ? 'text-error text-2xl font-semibold' : 'text-success text-2xl font-semibold'}
+                            className={type === 'expense' ? 'text-error text-2xl font-medium' : 'text-success text-2xl font-medium'}
                         />
                         <Button
                             type="submit"

@@ -4,7 +4,9 @@
       "dashboard": "Dasbor",
       "transactions": "Transaksi",
       "budgets": "Anggaran",
-      "userSettings": "Pengaturan Pengguna"
+      "userSettings": "Pengaturan Pengguna",
+      "addTransaction": "Tambah Transaksi",
+      "aiAssistant": "Asisten AI"
     }
   },
   "cta": {

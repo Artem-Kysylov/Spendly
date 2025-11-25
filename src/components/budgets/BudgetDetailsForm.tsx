@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabaseClient'
 import { UserAuth } from '../../context/AuthContext'
 import TextInput from '../ui-elements/TextInput'
 import Button from '../ui-elements/Button'
-import CustomDatePicker from '../ui-elements/CustomDatePicker'
+import HybridDatePicker from '../ui-elements/HybridDatePicker'
 import { useTranslations } from 'next-intl'
 
 
@@ -84,7 +84,7 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.7 }}
         >
-          <CustomDatePicker
+          <HybridDatePicker
             selectedDate={selectedDate}
             onDateSelect={setSelectedDate}
             label={tModals('transaction.date.label')}

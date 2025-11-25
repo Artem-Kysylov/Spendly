@@ -5,10 +5,11 @@ import { UserAuth } from '../../context/AuthContext'
 // Import components 
 import Button from '../ui-elements/Button'
 import TextInput from '../ui-elements/TextInput'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
 
 // Import types 
 import { MainBudgetModalProps } from '../../types/types'
+import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 // Component: TotalBudgetModal
@@ -113,6 +114,7 @@ const TotalBudgetModal = ({ title, onClose, onSubmit }: MainBudgetModalProps) =>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle className="text-center">{title}</DialogTitle>
+                    <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"><X size={22} /></DialogClose>
                 </DialogHeader>
                 <div className="mt-[30px]">
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">

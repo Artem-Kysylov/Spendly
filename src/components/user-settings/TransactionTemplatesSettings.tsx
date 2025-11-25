@@ -11,6 +11,7 @@ export default function TransactionTemplatesSettings() {
   const [templates, setTemplates] = useState<Array<{ id: string; title: string; amount: number; type: 'expense' | 'income'; budget_folder_id: string | null }>>([])
   const [loading, setLoading] = useState(false)
   const tSettings = useTranslations('userSettings')
+  const tModals = useTranslations('modals')
 
   useEffect(() => {
     if (!session?.user?.id) return
@@ -53,7 +54,7 @@ export default function TransactionTemplatesSettings() {
                 <span>⭐</span>
                 <div>
                   <div className="font-medium">{t.title}</div>
-                  <div className="text-xs text-muted-foreground">{t.type === 'expense' ? 'Расход' : 'Доход'} · ${t.amount}</div>
+                  <div className="text-xs text-muted-foreground">{t.type === 'expense' ? tModals('transaction.type.expense') : tModals('transaction.type.income')} · ${t.amount}</div>
                 </div>
               </div>
               <Button variant="outline" onClick={() => handleDelete(t.id)}>{tSettings('templates.delete')}</Button>

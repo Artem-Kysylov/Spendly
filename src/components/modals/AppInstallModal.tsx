@@ -1,8 +1,8 @@
 'use client'
 
 import Button from '@/components/ui-elements/Button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { CheckCircle2 } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
+import { CheckCircle2, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 type AppInstallModalProps = {
@@ -26,6 +26,7 @@ const AppInstallModal = ({ isOpen, onClose }: AppInstallModalProps) => {
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-center">{tModals('appInstall.title')}</DialogTitle>
+          <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"><X size={22} /></DialogClose>
         </DialogHeader>
 
         <div className="space-y-4 mt-2">

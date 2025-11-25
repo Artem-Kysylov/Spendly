@@ -6,7 +6,8 @@ import { DeleteModalProps } from '../../types/types'
 
 // Import components 
 import Button from '../ui-elements/Button'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
+import { X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 const DeleteModal = ({ title, text, onClose, onConfirm, isLoading = false }: DeleteModalProps) => {
@@ -35,6 +36,7 @@ const DeleteModal = ({ title, text, onClose, onConfirm, isLoading = false }: Del
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
+          <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"><X size={22} /></DialogClose>
         </DialogHeader>
         <p className="py-4">{text}</p>
         <DialogFooter>

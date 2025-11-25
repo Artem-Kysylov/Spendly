@@ -4,7 +4,9 @@
       "dashboard": "Панель",
       "transactions": "Транзакції",
       "budgets": "Бюджети",
-      "userSettings": "Налаштування"
+      "userSettings": "Налаштування",
+      "addTransaction": "Додати транзакцію",
+      "aiAssistant": "AI‑асистент"
     },
     "alt": { "logo": "Логотип Spendly" },
     "upgradeBanner": {

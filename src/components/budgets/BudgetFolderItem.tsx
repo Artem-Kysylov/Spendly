@@ -48,12 +48,16 @@ function BudgetFolderItem({ id, emoji, name, amount, type, color_code }: BudgetF
 
   return (
     <div
-      className="flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg w-full sm:w-[335px] h-[200px] bg-card transition-opacity duration-300 hover:opacity-50 p-4"
+      className="flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg w-full h-[200px] bg-card transition-opacity duration-300 hover:opacity-50 p-4"
       style={{ backgroundColor: color_code ? `#${color_code}` : undefined }}
     >
       <span className="text-[28px]">{emoji}</span>
-      <h3 className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} text-[16px] font-semibold`}>{name}</h3>
-      <p className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} text-[18px] font-semibold`}>${amount}</p>
+      <h3 className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} text-[16px] font-semibold text-center break-words leading-tight min-w-0`}>
+        {name}
+      </h3>
+      <p className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} text-[18px] font-semibold text-center leading-tight`}>
+        ${amount}
+      </p>
       <div className="w-full mt-3">
         <BudgetProgressBar
           spentAmount={spentAmount}

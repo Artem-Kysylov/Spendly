@@ -19,6 +19,7 @@ interface CustomDatePickerProps {
 }
 
 const MAX_POPOVER_WIDTH = 360
+const POPOVER_HEIGHT = 340
 
 const CustomDatePicker = ({ 
   selectedDate, 
@@ -51,15 +52,23 @@ const CustomDatePicker = ({
     const update = () => {
       const rect = triggerRef.current?.getBoundingClientRect()
       if (rect) {
-        const clampedLeft = Math.min(
-          Math.max(8, rect.left),
-          window.innerWidth - 8 - MAX_POPOVER_WIDTH
-        )
-        setPortalCoords({
-          top: Math.min(rect.bottom + 8, window.innerHeight - 8),
-          left: clampedLeft,
-          width: rect.width,
-        })
+        const isDesktop = window.innerWidth >= 1024
+        if (isDesktop) {
+          const modalEl = document.querySelector('.transaction-modal') as HTMLElement | null
+          const m = modalEl?.getBoundingClientRect()
+          if (m) {
+            const left = Math.min(window.innerWidth - 8 - MAX_POPOVER_WIDTH, Math.max(8, m.right + 16))
+            const top = Math.max(8, Math.min(window.innerHeight - 8 - POPOVER_HEIGHT, Math.round(m.top + m.height / 2 - POPOVER_HEIGHT / 2)))
+            setPortalCoords({ top, left, width: MAX_POPOVER_WIDTH })
+            return
+          }
+        }
+        const preferRight = rect.right + 8
+        const preferLeft = rect.left - 8 - MAX_POPOVER_WIDTH
+        const fitsRight = preferRight + MAX_POPOVER_WIDTH <= window.innerWidth - 8
+        const left = fitsRight ? preferRight : Math.max(8, preferLeft)
+        const top = Math.min(Math.max(8, rect.top), window.innerHeight - 8)
+        setPortalCoords({ top, left, width: MAX_POPOVER_WIDTH })
       }
     }
     update()
@@ -106,15 +115,30 @@ const CustomDatePicker = ({
           onClick={() => {
             const rect = triggerRef.current?.getBoundingClientRect()
             if (rect) {
-              const clampedLeft = Math.min(
-                Math.max(8, rect.left),
-                window.innerWidth - 8 - MAX_POPOVER_WIDTH
-              )
-              setPortalCoords({
-                top: Math.min(rect.bottom + 8, window.innerHeight - 8),
-                left: clampedLeft,
-                width: rect.width
-              })
+              const isDesktop = window.innerWidth >= 1024
+              if (isDesktop) {
+                const modalEl = document.querySelector('.transaction-modal') as HTMLElement | null
+                const m = modalEl?.getBoundingClientRect()
+                if (m) {
+                  const left = Math.min(window.innerWidth - 8 - MAX_POPOVER_WIDTH, Math.max(8, m.right + 16))
+                  const top = Math.max(8, Math.min(window.innerHeight - 8 - POPOVER_HEIGHT, Math.round(m.top + m.height / 2 - POPOVER_HEIGHT / 2)))
+                  setPortalCoords({ top, left, width: MAX_POPOVER_WIDTH })
+                } else {
+                  const preferRight = rect.right + 8
+                  const preferLeft = rect.left - 8 - MAX_POPOVER_WIDTH
+                  const fitsRight = preferRight + MAX_POPOVER_WIDTH <= window.innerWidth - 8
+                  const left = fitsRight ? preferRight : Math.max(8, preferLeft)
+                  const top = Math.min(Math.max(8, rect.top), window.innerHeight - 8)
+                  setPortalCoords({ top, left, width: MAX_POPOVER_WIDTH })
+                }
+              } else {
+                const preferRight = rect.right + 8
+                const preferLeft = rect.left - 8 - MAX_POPOVER_WIDTH
+                const fitsRight = preferRight + MAX_POPOVER_WIDTH <= window.innerWidth - 8
+                const left = fitsRight ? preferRight : Math.max(8, preferLeft)
+                const top = Math.min(Math.max(8, rect.top), window.innerHeight - 8)
+                setPortalCoords({ top, left, width: MAX_POPOVER_WIDTH })
+              }
             }
             setIsDatePickerOpen(!isDatePickerOpen)
           }}
@@ -123,7 +147,7 @@ const CustomDatePicker = ({
         {isDatePickerOpen && createPortal(
           <div
             className="custom-date-picker-popover p-4 bg-white dark:bg-card rounded-lg shadow-lg border border-border dark:border-border z-[10000]"
-            style={{ position: 'fixed', top: portalCoords.top, left: portalCoords.left }}
+            style={{ position: 'fixed', top: portalCoords.top, left: portalCoords.left, width: portalCoords.width }}
           >
             <div className="flex justify-between items-center mb-4">
               <button
