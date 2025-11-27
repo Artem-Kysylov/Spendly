@@ -5,6 +5,10 @@ type TelemetryEvent =
   | 'ai_limit_hit'
   | 'upgrade_cta_clicked'
   | 'digest_generated'
+  | 'ai_session_created'
+  | 'ai_message_sent'
+  | 'ai_title_generated'
+  | 'ai_session_synced'
 
 export async function trackEvent(
   name: TelemetryEvent,

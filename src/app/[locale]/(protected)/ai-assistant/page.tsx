@@ -1,0 +1,227 @@
+'use client'
+
+import { useChat } from '@/hooks/useChat'
+import { ChatMessages } from '@/components/ai-assistant/ChatMessages'
+import { ChatInput } from '@/components/ai-assistant/ChatInput'
+import { ChatPresets } from '@/components/ai-assistant/ChatPresets'
+import { useTranslations } from 'next-intl'
+import useDeviceType from '@/hooks/useDeviceType'
+import { supabase } from '@/lib/supabaseClient'
+import { useEffect, useState, useCallback } from 'react'
+import { UserAuth } from '@/context/AuthContext'
+import { Trash } from 'lucide-react'
+import { ToneSelect } from '@/components/ai-assistant/ToneSelect'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { ChevronLeft, Pencil } from 'lucide-react'
+
+export default function AIAssistantPage() {
+  const {
+    messages,
+    isTyping,
+    sendMessage,
+    abort,
+    assistantTone,
+    setAssistantTone,
+    hasPendingAction,
+    isRateLimited,
+    currentSessionId,
+    loadSessionMessages,
+    newChat,
+    deleteSession,
+  } = useChat()
+  const tAI = useTranslations('assistant')
+  const { isDesktop } = useDeviceType()
+  const { session } = UserAuth()
+  const [sessions, setSessions] = useState<Array<{ id: string; title: string | null; created_at: string }>>([])
+  const [historyOpen, setHistoryOpen] = useState(false)
+
+  const refreshSessions = useCallback(async () => {
+    const userId = session?.user?.id
+    if (!userId) return
+    const { data, error } = await supabase
+      .from('ai_chat_sessions')
+      .select('id, title, created_at, user_id')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+    const remote = Array.isArray(data) ? data : []
+    let local: Array<{ id: string; title: string | null; created_at: string; user_id?: string }> = []
+    try {
+      const raw = window.localStorage.getItem('spendly:ai_sessions') || '[]'
+      const arr = JSON.parse(raw) as any[]
+      local = arr.filter(s => s?.user_id === userId)
+    } catch {}
+    const merged = [...local, ...remote]
+      .map(s => ({ id: String(s.id), title: (s.title ?? null) as string | null, created_at: String(s.created_at) }))
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    const unique = Array.from(new Map(merged.map(s => [s.id, s])).values())
+    setSessions(unique)
+    if (error) {
+      console.warn('Failed to load sessions', error)
+    }
+  }, [session?.user?.id])
+
+  useEffect(() => {
+    refreshSessions()
+  }, [refreshSessions])
+
+  useEffect(() => {
+    const onCreated = () => refreshSessions()
+    const onUpdated = () => refreshSessions()
+    window.addEventListener('ai:sessionCreated', onCreated)
+    window.addEventListener('ai:sessionUpdated', onUpdated)
+    return () => {
+      window.removeEventListener('ai:sessionCreated', onCreated)
+      window.removeEventListener('ai:sessionUpdated', onUpdated)
+    }
+  }, [refreshSessions])
+
+  const HistoryPane = (
+    <div className="border border-border rounded-lg bg-card h-full flex flex-col">
+      <div className="px-4 py-3 border-b border-border">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold">{tAI('history.title')}</h2>
+          {isDesktop && (
+            <button
+              className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded bg-primary text-white"
+              onClick={() => { newChat() }}
+            >
+              <Pencil size={14} />
+              {tAI('buttons.newChat')}
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="flex-1 h-full flex flex-col">
+        <div className="px-2 py-2 overflow-y-auto">
+          {sessions.length === 0 ? (
+            <div className="text-muted-foreground px-2">{tAI('history.empty')}</div>
+          ) : (
+            <ul className="space-y-1">
+              {sessions.map(s => {
+                const title = s.title?.trim() || tAI('history.untitled')
+                const date = new Date(s.created_at)
+                const label = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(date)
+                const isActive = currentSessionId === s.id
+                return (
+                  <li key={s.id}>
+                    <div
+                      className={`relative w-full max-w-full overflow-hidden rounded-md border bg-card transition-colors ${isActive ? 'border-primary/30' : 'border-border hover:bg-muted/40'}`}
+                      onClick={() => {
+                        loadSessionMessages(s.id)
+                        setHistoryOpen(false)
+                      }}
+                    >
+                      <div className="flex items-center justify-between px-3 py-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[13px] font-medium truncate">{title}</div>
+                          <div className="text-[11px] text-muted-foreground">{label}</div>
+                        </div>
+                        <button
+                          className="inline-flex h-6 w-6 items-center justify-center rounded text-error hover:bg-red-50"
+                          onClick={(e) => { e.stopPropagation(); void deleteSession(s.id) }}
+                          title={tAI('buttons.delete') ?? 'Delete'}
+                          aria-label={tAI('buttons.delete') ?? 'Delete'}
+                        >
+                          <Trash size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+      </div>
+      {!isDesktop && (
+        <div className="mt-auto px-3 pb-3">
+          <button
+            className="w-full h-12 rounded-lg bg-primary text-white text-[16px] font-medium inline-flex items-center justify-center gap-2"
+            onClick={() => { newChat(); setHistoryOpen(false) }}
+          >
+            <Pencil size={20} />
+            {tAI('buttons.newChat')}
+          </button>
+        </div>
+      )}
+    </div>
+  )
+
+  const ChatPane = (
+    <div className={`h-full flex flex-col min-h-0 ${!isDesktop ? 'pb-[72px]' : ''}`}>
+      {!isDesktop && (
+        <div className="px-0 pt-2 pb-2 border-b border-border bg-background flex items-center justify-between">
+          <button
+            className="flex items-center gap-2 text-[16px] text-foreground hover:text-foreground"
+            aria-label={tAI('history.title')}
+            onClick={() => setHistoryOpen(true)}
+          >
+            <ChevronLeft className="h-6 w-6" />
+            <span className="leading-none">{tAI('history.chatsLabel')}</span>
+          </button>
+          <ToneSelect
+            value={assistantTone}
+            onChange={(tone) => setAssistantTone(tone)}
+            disabled={isTyping}
+            aria-label={tAI('tone.label')}
+            className="w-[180px] text-[16px]"
+          />
+        </div>
+      )}
+      {isRateLimited && (
+        <div className="px-4 py-2 text-xs text-amber-700 bg-amber-50 border-t border-b border-amber-200 dark:text-amber-100 dark:bg-amber-900 dark:border-amber-800">
+          {tAI('rateLimited')}
+        </div>
+      )}
+      {messages.length === 0 ? (
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="p-4 text-center flex-shrink-0">
+            <div className="text-3xl mb-3">✨</div>
+            <h4 className="font-semibold mb-2">{tAI('welcomeTitle')}</h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {tAI('welcomeDesc')}
+            </p>
+          </div>
+          <div className="flex-1 overflow-y-auto px-4 pb-4 min-h-0">
+            <ChatPresets onSelectPreset={sendMessage} />
+          </div>
+        </div>
+      ) : (
+        <ChatMessages messages={messages} isTyping={isTyping} />
+      )}
+      <div
+        className={`border-t border-border bg-background ${!isDesktop ? 'fixed left-0 right-0 z-40 px-5' : ''}`}
+        style={!isDesktop ? { bottom: 'calc(env(safe-area-inset-bottom) + 100px)' } : undefined}
+      >
+        <div className="flex items-center gap-2 p-2 px-0 sm:pb-safe">
+          <div className="flex-1">
+            <ChatInput
+              onSendMessage={sendMessage}
+              isThinking={isTyping}
+              onAbort={abort}
+              assistantTone={assistantTone}
+              onToneChange={setAssistantTone}
+              showTone={isDesktop}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="mt-[30px] px-5 pb-20 h-full">
+      <div className="flex gap-4 h-full min-h-0">
+        {isDesktop && <div className="w-64 min-h-[300px] h-full">{HistoryPane}</div>}
+        <div className="flex-1 min-h-0 h-full">{ChatPane}</div>
+      </div>
+      {!isDesktop && (
+        <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+          <SheetContent side="left" className="p-0" style={{ width: '65vw' }}>
+            {HistoryPane}
+          </SheetContent>
+        </Sheet>
+      )}
+    </div>
+  )
+}

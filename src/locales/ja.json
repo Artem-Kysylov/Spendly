@@ -224,7 +224,17 @@
     },
     "buttons": {
       "close": "AI アシスタントを閉じる",
-      "ask": "AI に尋ねる"
+      "ask": "AI に尋ねる",
+      "newChat": "新しいチャット"
+    },
+    "history": {
+      "title": "履歴",
+      "empty": "まだ会話がありません",
+      "untitled": "無題のチャット"
+    },
+    "dates": {
+      "today": "今日",
+      "yesterday": "昨日"
     },
     "presets": {
       "header": "すぐ使える提案から始める",

@@ -429,6 +429,19 @@
         "playful": "Playful"
       }
     },
+    "history": {
+      "title": "History",
+      "empty": "No conversations yet",
+      "untitled": "Untitled",
+      "chatsLabel": "Chats history"
+    },
+    "buttons": {
+      "newChat": "New chat"
+    },
+    "dates": {
+      "today": "Today",
+      "yesterday": "Yesterday"
+    },
     "settings": {
         "proOnlyHint": "Custom assistant tone is available on Pro. Upgrade to unlock.",
         "title": "Spendly Pal Tone",

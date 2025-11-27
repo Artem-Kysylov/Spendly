@@ -18,7 +18,7 @@ import UpgradeCornerPanel from '@/components/free/UpgradeCornerPanel'
 import useDeviceType from '@/hooks/useDeviceType'
 import { useTransactionsData } from '@/hooks/useTransactionsData'
 import BudgetComparisonChart from '@/components/budgets/BudgetComparisonChart'
-
+import { BarChart3 } from 'lucide-react'
 export default function BudgetsClient() {
   const { session } = UserAuth()
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
@@ -155,11 +155,11 @@ export default function BudgetsClient() {
         ) : (
           <div className="space-y-3">
             <button
-              className="w-full px-4 py-3 rounded-md bg-muted hover:bg-muted/80 transition-colors flex items-center justify-between"
+              className="w-full px-4 py-3 rounded-lg bg-card border border-primary transition-colors flex items-center justify-between"
               onClick={() => setIsAnalyticsOpen((v) => !v)}
             >
-              <span className="text-sm font-medium flex items-center gap-2">
-                <span aria-hidden>📊</span>
+              <span className="text-sm font-medium flex items-center gap-2 text-foreground">
+                <BarChart3 className="w-4 h-4 text-foreground" aria-hidden />
                 {isAnalyticsOpen ? 'Hide Analytics' : 'Show Analytics'}
               </span>
               <svg

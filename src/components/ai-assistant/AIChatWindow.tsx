@@ -1,5 +1,4 @@
 'use client'
-
 import { X } from 'lucide-react'
 import { ChatMessage } from '@/types/types'
 import { ChatMessages } from './ChatMessages'
@@ -83,7 +82,30 @@ export const AIChatWindow = ({
                             </div>
                         </div>
                     ) : (
-                        <ChatMessages messages={messages} isTyping={isTyping} />
+                        <>
+                          <ChatMessages messages={messages} isTyping={isTyping} />
+                          {/* Preset chips row */}
+                          <div className="px-4 py-2 border-t border-border bg-background">
+                            <div className="flex gap-2 overflow-x-auto pb-2">
+                              {[
+                                tAI('presets.showWeek'),
+                                tAI('presets.saveMoney'),
+                                tAI('presets.analyzePatterns'),
+                                tAI('presets.createBudgetPlan'),
+                                tAI('presets.showBiggest'),
+                                tAI('presets.compareMonths'),
+                              ].map((label, idx) => (
+                                <button
+                                  key={idx}
+                                  onClick={() => onSendMessage(label)}
+                                  className="flex-shrink-0 text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary hover:bg-primary/30 transition-colors"
+                                >
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </>
                     )}
 
                     {/* Free hint */}

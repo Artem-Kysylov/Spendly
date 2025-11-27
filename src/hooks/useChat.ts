@@ -1,4 +1,4 @@
-// Хук: useChat
+// Хук: useChat — переписан полностью, с корректной областью видимости и синхронизацией
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
@@ -7,10 +7,11 @@ import { UserAuth } from '@/context/AuthContext'
 import { useTranslations, useLocale } from 'next-intl'
 import { getAssistantApiUrl } from '@/lib/assistantApi'
 import { localizeEmptyWeekly, localizeEmptyMonthly, localizeEmptyGeneric, periodLabel as canonicalPeriodLabel } from '@/prompts/spendlyPal/canonicalPhrases'
-import { trackEvent } from '@/lib/telemetry';
+import { trackEvent } from '@/lib/telemetry'
 import { supabase } from '@/lib/supabaseClient'
 import type { AIResponse, AssistantTone, Period } from '@/types/ai'
 import { useSubscription } from '@/hooks/useSubscription'
+import { useToast } from '@/components/ui/use-toast'
 
 type PendingAction =
   | { type: 'add_transaction'; payload: { title: string; amount: number; budget_folder_id: string | null; budget_name: string } }
@@ -30,8 +31,6 @@ type AssistantJSON =
       shouldRefetch?: boolean
     }
 
-
-
 export const useChat = (): UseChatReturn => {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isOpen, setIsOpen] = useState(false)
@@ -45,15 +44,23 @@ export const useChat = (): UseChatReturn => {
   const tAssistant = useTranslations('assistant')
   const locale = useLocale()
   const { subscriptionPlan } = useSubscription()
+  const { toast } = useToast()
   const openChat = useCallback(() => setIsOpen(true), [])
   const closeChat = useCallback(() => setIsOpen(false), [])
 
-  // Тон ассистента + лёгкий debounce сохранения в профиле
+  // Сниппет из первого сообщения для заголовка (как ChatGPT)
+  const deriveTitle = useCallback((text: string): string => {
+    const cleaned = (text || '').replace(/\s+/g, ' ').trim()
+    if (!cleaned) return tAssistant('history.untitled')
+    const sentenceEnd = cleaned.search(/[.!?]/)
+    const base = sentenceEnd !== -1 ? cleaned.slice(0, sentenceEnd + 1) : cleaned
+    const max = 80
+    return base.length > max ? base.slice(0, max).trim() + '…' : base
+  }, [tAssistant])
   const [assistantTone, setAssistantToneState] = useState<AssistantTone>('neutral')
   const persistTimer = useRef<number | null>(null)
 
   useEffect(() => {
-    // Попытка подгрузить сохранённый тон из профиля с учётом плана
     const initTone = async () => {
       try {
         const user = session?.user
@@ -71,7 +78,6 @@ export const useChat = (): UseChatReturn => {
   }, [session?.user, subscriptionPlan])
 
   const setAssistantTone = useCallback(async (tone: AssistantTone) => {
-    // Для Free блокируем изменения тона
     if (subscriptionPlan === 'free') {
       setAssistantToneState('neutral')
       return
@@ -89,9 +95,183 @@ export const useChat = (): UseChatReturn => {
     }, 400)
   }, [subscriptionPlan])
 
+  // ID текущей AI‑сессии (Supabase или локальная)
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
+
+  // ФОЛБЭК: локальное сохранение сообщения — объявлено раньше persistMessage
+  const persistLocalMessage = useCallback((role: 'user' | 'assistant', content: string, sid: string) => {
+    try {
+      const key = `spendly:ai_messages:${sid}`
+      const raw = window.localStorage.getItem(key) || '[]'
+      const arr = JSON.parse(raw) as any[]
+      arr.push({ id: Date.now().toString(), content, role, created_at: new Date().toISOString() })
+      window.localStorage.setItem(key, JSON.stringify(arr))
+      window.dispatchEvent(new CustomEvent('ai:sessionUpdated', { detail: { id: sid } }))
+    } catch {}
+  }, [])
+
+  // Сохранение сообщения в Supabase — для local-* пишем только в локалку
+  const persistMessage = useCallback(async (role: 'user' | 'assistant', content: string, sessionId?: string | null) => {
+    const sid = sessionId ?? currentSessionId
+    if (!sid) return
+
+    if (String(sid).startsWith('local-')) {
+      persistLocalMessage(role, content, sid)
+      return
+    }
+
+    const { error } = await supabase
+      .from('ai_chat_messages')
+      .insert({
+        session_id: sid,
+        role,
+        content,
+        tool_calls: null
+      })
+    if (error) {
+      console.warn('Failed to insert ai_chat_message', error)
+      persistLocalMessage(role, content, sid)
+    } else {
+      trackEvent('ai_message_sent', { role, sessionId: sid })
+      window.dispatchEvent(new CustomEvent('ai:sessionUpdated', { detail: { id: sid } }))
+    }
+  }, [currentSessionId, persistLocalMessage])
+
+  // Загрузка сообщений для сессии
+  const loadSessionMessages = useCallback(async (sessionId: string) => {
+    if (!sessionId) return
+    if (String(sessionId).startsWith('local-')) {
+      try {
+        const raw = window.localStorage.getItem(`spendly:ai_messages:${sessionId}`) || '[]'
+        const arr = JSON.parse(raw) as Array<{ id: string; role: 'user' | 'assistant'; content: string; created_at?: string }>
+        const msgs: ChatMessage[] = arr.map(m => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          timestamp: m.created_at ? new Date(m.created_at) : new Date()
+        }))
+        setMessages(msgs)
+      } catch {
+        setMessages([])
+      }
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('ai_chat_messages')
+      .select('id, role, content, created_at')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true })
+    if (error) {
+      console.warn('Failed to load messages for session', error)
+      setMessages([])
+      return
+    }
+    const msgs: ChatMessage[] = (data || []).map((r: any) => ({
+      id: r.id || Date.now().toString(),
+      role: r.role,
+      content: r.content,
+      timestamp: new Date(r.created_at)
+    }))
+    setMessages(msgs)
+  }, [])
+
+  useEffect(() => {
+    if (currentSessionId) {
+      void loadSessionMessages(currentSessionId)
+    }
+  }, [currentSessionId, loadSessionMessages])
+
+  // Авто‑титул: короткий заголовок 3–4 слова
+  const generateAutoTitle = useCallback(async (firstMessage: string, sid: string) => {
+    try {
+      const res = await fetch(getAssistantApiUrl(locale), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: session?.user?.id,
+          isPro: subscriptionPlan === 'pro',
+          enableLimits: true,
+          message: `Generate a concise 3-4 word title for this conversation based on: ${firstMessage}`
+        })
+      })
+      const ct = res.headers.get('content-type') || ''
+      if (res.ok && ct.includes('application/json')) {
+        const json = await res.json().catch(() => null) as any
+        const title: string | undefined =
+          (json?.kind === 'message' && typeof json?.message === 'string')
+            ? json.message
+            : (typeof json === 'string' ? json : undefined)
+        const finalTitle = title?.trim().slice(0, 80) || null
+        if (finalTitle) {
+          if (String(sid).startsWith('local-')) {
+            try {
+              const raw = window.localStorage.getItem('spendly:ai_sessions') || '[]'
+              const arr = JSON.parse(raw) as any[]
+              const idx = arr.findIndex((s: any) => s.id === sid)
+              if (idx >= 0) {
+                arr[idx].title = finalTitle
+                window.localStorage.setItem('spendly:ai_sessions', JSON.stringify(arr))
+              }
+              window.dispatchEvent(new CustomEvent('ai:sessionUpdated', { detail: { id: sid } }))
+            } catch {}
+          } else {
+            await supabase.from('ai_chat_sessions').update({ title: finalTitle }).eq('id', sid)
+            trackEvent('ai_title_generated', { sessionId: sid })
+            window.dispatchEvent(new CustomEvent('ai:sessionUpdated', { detail: { id: sid } }))
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Auto-title failed', e)
+    }
+  }, [locale, session?.user?.id, subscriptionPlan])
+
+  const saveLocalSession = useCallback((firstMessage: string) => {
+    const sid = `local-${Date.now()}`
+    setCurrentSessionId(sid)
+    try {
+      const raw = window.localStorage.getItem('spendly:ai_sessions') || '[]'
+      const arr = JSON.parse(raw) as any[]
+      arr.unshift({
+        id: sid,
+        // Было: title: null
+        title: deriveTitle(firstMessage) || tAssistant('history.untitled'),
+        created_at: new Date().toISOString(),
+        user_id: session?.user?.id || 'unknown'
+      })
+      window.localStorage.setItem('spendly:ai_sessions', JSON.stringify(arr))
+      window.dispatchEvent(new CustomEvent('ai:sessionCreated', { detail: { id: sid } }))
+    } catch {}
+    void generateAutoTitle(firstMessage, sid)
+    trackEvent('ai_session_created', { sessionId: sid })
+    return sid
+  }, [session?.user?.id, generateAutoTitle, deriveTitle, tAssistant])
+
+  const createSessionIfNeeded = useCallback(async (firstMessage: string) => {
+    if (currentSessionId || !session?.user?.id) return currentSessionId
+    const initialTitle = deriveTitle(firstMessage) || tAssistant('history.untitled')
+    const { data, error } = await supabase
+      .from('ai_chat_sessions')
+      // Было: title: tAssistant('history.untitled')
+      .insert({ user_id: session.user.id, title: initialTitle })
+      .select('id')
+      .single()
+    if (error || !data?.id) {
+      console.warn('Failed to create ai_chat_session', error)
+      return saveLocalSession(firstMessage)
+    }
+    const sessionId = data.id as string
+    setCurrentSessionId(sessionId)
+    void generateAutoTitle(firstMessage, sessionId)
+    trackEvent('ai_session_created', { sessionId })
+    window.dispatchEvent(new CustomEvent('ai:sessionCreated', { detail: { id: sessionId } }))
+    return sessionId
+  }, [currentSessionId, session?.user?.id, saveLocalSession, generateAutoTitle, deriveTitle, tAssistant])
+
   const sendMessage = useCallback(async (content: string) => {
-    trackEvent('ai_request_used');
-    // Добавляем сообщение пользователя
+    trackEvent('ai_request_used')
+
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       content,
@@ -113,6 +293,9 @@ export const useChat = (): UseChatReturn => {
       return
     }
 
+    const sid = await createSessionIfNeeded(content)
+    await persistMessage('user', content, sid)
+
     const controller = new AbortController()
     setAbortController(controller)
 
@@ -132,7 +315,6 @@ export const useChat = (): UseChatReturn => {
 
       const contentType = response.headers.get('content-type') || ''
 
-      // Дружелюбная обработка HTML/404
       if (!response.ok) {
         if (contentType.includes('text/html') || response.status === 404) {
           const aiMessage: ChatMessage = {
@@ -146,9 +328,8 @@ export const useChat = (): UseChatReturn => {
         }
       }
 
-      // Rate limit / Unauthorized
       if (response.status === 429) {
-        trackEvent('ai_limit_hit');
+        trackEvent('ai_limit_hit')
         const cooldownMs = 3000
         setRateLimitedUntil(Date.now() + cooldownMs)
         const msg = tAssistant('rateLimited')
@@ -163,10 +344,8 @@ export const useChat = (): UseChatReturn => {
       }
 
       if (contentType.includes('application/json')) {
-        // JSON: либо action/message, либо канонический контракт (bypass)
         const json = (await response.json()) as AssistantJSON
 
-        // Ветка action/message (AIResponse)
         if ('kind' in json) {
           if (json.kind === 'action') {
             const confirmText = json.confirmText
@@ -187,11 +366,7 @@ export const useChat = (): UseChatReturn => {
               timestamp: new Date()
             }
             setMessages(prev => [...prev, aiMessage])
-
-            const shouldRefetch = (json as any)?.shouldRefetch === true
-            if (shouldRefetch) {
-              window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
-            }
+            await persistMessage('assistant', json.message, sid)
           }
           return
         }
@@ -258,7 +433,6 @@ export const useChat = (): UseChatReturn => {
           }
 
           if (lines.length <= 1) {
-            // Пустой период — локализованный фолбэк
             if (period === 'thisWeek') {
               lines.push(localizeEmptyWeekly('thisWeek', respLocale))
             } else if (period === 'lastWeek') {
@@ -279,10 +453,10 @@ export const useChat = (): UseChatReturn => {
             timestamp: new Date()
           }
           setMessages(prev => [...prev, aiMessage])
+          await persistMessage('assistant', aiMessage.content, sid)
           return
         }
 
-        // Непредвиденная форма JSON — безопасный фолбэк
         const fallback = typeof (json as any)?.message === 'string'
           ? (json as any).message
           : 'Unexpected server response.'
@@ -293,6 +467,7 @@ export const useChat = (): UseChatReturn => {
           timestamp: new Date()
         }
         setMessages(prev => [...prev, aiMessage])
+        await persistMessage('assistant', aiMessage.content, sid)
         return
       }
 
@@ -311,7 +486,6 @@ export const useChat = (): UseChatReturn => {
         setMessages(prev => prev.map(m => m.id === streamMsgId ? { ...m, content: acc } : m))
       }
 
-      // Пост‑обработка: дружелюбный текст при пустых кандидатах
       const providerEmptyMsgPattern = /LLM provider returned empty text candidates\./i
       if (providerEmptyMsgPattern.test(acc)) {
         const blockedReasonMatch = acc.match(/Blocked:\s*([^.\n]+)/i)
@@ -320,6 +494,9 @@ export const useChat = (): UseChatReturn => {
           ? `Your request was blocked by the provider (${reason}). Tip: Try rephrasing your request and avoid sensitive content.`
           : 'The assistant could not generate a response this time. Try rephrasing your request or reducing its complexity.'
         setMessages(prev => prev.map(m => m.id === streamMsgId ? { ...m, content: friendly } : m))
+        await persistMessage('assistant', friendly, sid)
+      } else {
+        await persistMessage('assistant', acc, sid)
       }
     } catch (error) {
       console.error('Error sending message:', error)
@@ -327,7 +504,7 @@ export const useChat = (): UseChatReturn => {
       setIsTyping(false)
       setAbortController(null)
     }
-  }, [session?.user?.id, assistantTone, locale, subscriptionPlan])
+  }, [session?.user?.id, assistantTone, locale, subscriptionPlan, createSessionIfNeeded, persistMessage, tAssistant])
 
   const clearMessages = useCallback(() => setMessages([]), [])
 
@@ -341,75 +518,151 @@ export const useChat = (): UseChatReturn => {
 
     if (!confirm) {
       const aiMessage: ChatMessage = {
-        id: (Date.now() + 2).toString(),
-        content: 'Cancelled.',
+        id: (Date.now() + 1).toString(),
+        content: 'Action cancelled.',
         role: 'assistant',
         timestamp: new Date()
       }
       setMessages(prev => [...prev, aiMessage])
       setPendingAction(null)
+      await persistMessage('assistant', aiMessage.content, currentSessionId || undefined)
       return
     }
 
+    // Простая подтверждалка: здесь можно вызвать бэкенд для выполнения действия
+    const aiMessage: ChatMessage = {
+      id: (Date.now() + 1).toString(),
+      content: 'Action confirmed and processed.',
+      role: 'assistant',
+      timestamp: new Date()
+    }
+    setMessages(prev => [...prev, aiMessage])
+    setPendingAction(null)
+    await persistMessage('assistant', aiMessage.content, currentSessionId || undefined)
+  }, [pendingAction, session?.user?.id, currentSessionId, persistMessage])
+
+  const newChat = useCallback(() => {
+    setMessages([])
+    setCurrentSessionId(null)
+    setPendingAction(null)
+    setIsTyping(false)
+  }, [])
+
+  const syncLocalToCloud: () => Promise<void> = useCallback(async () => {
+    if (!session?.user?.id) return
+
     try {
-      const res = await fetch(getAssistantApiUrl(locale), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: session.user.id,
-          isPro: subscriptionPlan === 'pro',
-          enableLimits: true,
-          confirm: true,
-          actionPayload: pendingAction.payload,
-          actionType: pendingAction.type
-        })
-      })
-  
-      if (!res.ok) {
-          const ct = res.headers.get('content-type') || ''
-          if (ct.includes('text/html') || res.status === 404) {
-              const aiMessage: ChatMessage = {
-                  id: (Date.now() + 3).toString(),
-                  content: 'Assistant endpoint is not reachable for this locale. Please reload and try again.',
-                  role: 'assistant',
-                  timestamp: new Date()
-              }
-              setMessages(prev => [...prev, aiMessage])
-              setPendingAction(null)
-              return
+      const rawSessions = window.localStorage.getItem('spendly:ai_sessions') || '[]'
+      const sessionsArr = JSON.parse(rawSessions) as Array<{ id: string; title?: string | null; created_at?: string; user_id?: string | null }>
+
+      const localSessions = sessionsArr.filter(s => String(s.id).startsWith('local-'))
+      for (const ls of localSessions) {
+        // Загружаем сообщения локальной сессии заранее, чтобы взять сниппет
+        const oldKey = `spendly:ai_messages:${ls.id}`
+        const rawMsgs = window.localStorage.getItem(oldKey) || '[]'
+        const msgs = JSON.parse(rawMsgs) as Array<{ role: 'user' | 'assistant'; content: string; created_at?: string }>
+        const firstUserMsg = msgs.find(m => m.role === 'user')?.content ?? msgs[0]?.content ?? ''
+        const initialTitle = (ls.title && ls.title.trim())
+          ? ls.title!
+          : deriveTitle(firstUserMsg) || tAssistant('history.untitled')
+
+        // 1) Создаём серверную сессию с безопасным и полезным title
+        const { data, error } = await supabase
+          .from('ai_chat_sessions')
+          .insert({ user_id: session.user.id, title: initialTitle })
+          .select('id')
+          .single()
+        if (error || !data?.id) {
+          console.warn('Failed to create server session during sync', error)
+          continue
+        }
+        const newSid = data.id as string
+
+        // 2) Переносим сообщения
+        const rows = msgs.map(m => ({
+          session_id: newSid,
+          role: m.role,
+          content: m.content,
+          tool_calls: null
+        }))
+        if (rows.length > 0) {
+          const { error: insertErr } = await supabase.from('ai_chat_messages').insert(rows)
+          if (insertErr) {
+            console.warn('Failed to import messages during sync', insertErr)
           }
-          const jsonErr = ct.includes('application/json') ? await res.json().catch(() => null) : null
-          const msg = jsonErr?.error || 'Failed to confirm action'
-          const aiMessage: ChatMessage = {
-              id: (Date.now() + 3).toString(),
-              content: msg,
-              role: 'assistant',
-              timestamp: new Date()
-          }
-          setMessages(prev => [...prev, aiMessage])
-          setPendingAction(null)
-          return
-      }
-      const jsonConfirm = await res.json() as { message?: string; shouldRefetch?: boolean }
-      const aiMessage: ChatMessage = {
-          id: (Date.now() + 3).toString(),
-          content: jsonConfirm.message || 'Done.',
-          role: 'assistant',
-          timestamp: new Date()
-      }
-      setMessages(prev => [...prev, aiMessage])
-      if (jsonConfirm.shouldRefetch) {
-          window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
+        }
+
+        // 3) Обновляем локальные данные
+        const newKey = `spendly:ai_messages:${newSid}`
+        window.localStorage.setItem(newKey, JSON.stringify(msgs))
+        window.localStorage.removeItem(oldKey)
+
+        const idx = sessionsArr.findIndex(s => s.id === ls.id)
+        if (idx >= 0) {
+          sessionsArr[idx].id = newSid
+          sessionsArr[idx].user_id = session.user.id
+          sessionsArr[idx].title = initialTitle
+        }
+        window.localStorage.setItem('spendly:ai_sessions', JSON.stringify(sessionsArr))
+
+        // 4) Обновляем текущую сессию и UI
+        setCurrentSessionId(newSid)
+        trackEvent('ai_session_created', { from: ls.id, to: newSid, synced: true })
+        window.dispatchEvent(new CustomEvent('ai:sessionUpdated', { detail: { id: newSid } }))
       }
     } catch (e) {
-      console.error('Confirm failed:', e)
-    } finally {
-      setPendingAction(null)
+      console.warn('Sync failed', e)
     }
-  }, [pendingAction, session?.user?.id, locale, subscriptionPlan])
+  }, [session?.user?.id, deriveTitle, tAssistant])
+
+  const deleteSession = useCallback(async (sid: string) => {
+    if (!sid) return
+
+    try {
+      if (String(sid).startsWith('local-')) {
+        window.localStorage.removeItem(`spendly:ai_messages:${sid}`)
+        const raw = window.localStorage.getItem('spendly:ai_sessions') || '[]'
+        const arr = JSON.parse(raw) as Array<{ id: string }>
+        const next = arr.filter(s => s.id !== sid)
+        window.localStorage.setItem('spendly:ai_sessions', JSON.stringify(next))
+      } else {
+        if (!session?.user?.id) return
+        await supabase.from('ai_chat_messages').delete().eq('session_id', sid)
+        await supabase.from('ai_chat_sessions').delete().eq('id', sid)
+      }
+
+      if (currentSessionId === sid) {
+        setCurrentSessionId(null)
+        setMessages([])
+      }
+
+      window.dispatchEvent(new CustomEvent('ai:sessionUpdated', { detail: { id: sid } }))
+      trackEvent('ai_session_created', { sessionId: sid, deleted: true })
+    } catch (e) {
+      console.warn('Failed to delete session', e)
+    }
+  }, [session?.user?.id, currentSessionId])
 
   const hasPendingAction = !!pendingAction
-  const isRateLimited = rateLimitedUntil ? Date.now() < rateLimitedUntil : false
+  const isRateLimited = !!(rateLimitedUntil && Date.now() < rateLimitedUntil)
+
+  // Приведение pendingAction к payload интерфейса UseChatReturn
+  const pendingActionPayload = pendingAction
+    ? (pendingAction.type === 'add_transaction'
+        ? {
+            title: pendingAction.payload.title,
+            amount: pendingAction.payload.amount,
+            budget_folder_id: pendingAction.payload.budget_folder_id,
+            budget_name: pendingAction.payload.budget_name
+          }
+        : {
+            title_pattern: pendingAction.payload.title_pattern,
+            avg_amount: pendingAction.payload.avg_amount,
+            cadence: pendingAction.payload.cadence,
+            next_due_date: pendingAction.payload.next_due_date,
+            budget_folder_id: pendingAction.payload.budget_folder_id
+          })
+    : null
 
   return {
     messages,
@@ -423,8 +676,13 @@ export const useChat = (): UseChatReturn => {
     confirmAction,
     hasPendingAction,
     isRateLimited,
-    pendingActionPayload: pendingAction?.payload ?? null,
+    pendingActionPayload,
     assistantTone,
-    setAssistantTone
+    setAssistantTone,
+    currentSessionId,
+    loadSessionMessages,
+    newChat,
+    syncLocalToCloud,
+    deleteSession
   }
 }

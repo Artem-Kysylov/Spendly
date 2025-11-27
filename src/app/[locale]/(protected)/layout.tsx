@@ -41,48 +41,48 @@ export default function ProtectedLayout({
 
   return (
     <ProtectedRoute>
-      <AIAssistantProvider/>
-      <AddTransactionProvider />
-      <div className="flex h-screen transition-colors duration-300">
-        <Sidebar />
+        {/* Удалён глобальный AIAssistantProvider */}
+        <AddTransactionProvider />
+        <div className="flex h-screen transition-colors duration-300">
+            <Sidebar />
 
-        <div className="flex-1 flex flex-col lg:ml-64 transition-colors duration-300">
-          <motion.div
-            key={`topbar-${pathname}`}
-            initial={prefersReduced ? false : { opacity: 0, y: -4 }}
-            animate={prefersReduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
-            transition={transition}
-            style={{ willChange: 'opacity, transform' }}
-          >
-            <TopBar />
-          </motion.div>
+            <div className="flex-1 flex flex-col lg:ml-64 transition-colors duration-300">
+              <motion.div
+                key={`topbar-${pathname}`}
+                initial={prefersReduced ? false : { opacity: 0, y: -4 }}
+                animate={prefersReduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
+                transition={transition}
+                style={{ willChange: 'opacity, transform' }}
+              >
+                <TopBar />
+              </motion.div>
 
-          {/* Периодический баннер: рендерим только после загрузки сессии */}
-          {isReady && <PeriodicUpgradeBanner />}
+              {/* Периодический баннер: рендерим только после загрузки сессии */}
+              {isReady && <PeriodicUpgradeBanner />}
 
-          <AnimatePresence mode="wait">
-            <motion.main
-              key={pathname}
-              className="flex-1 overflow-auto pb-20 lg:pb-0 transition-colors duration-300"
-              // При наличии variants — используем метки; при reduced — чёткие цели
-              initial={pageVariants ? 'initial' : false}
-              animate={pageVariants ? 'animate' : { opacity: 1 }}
-              exit={pageVariants ? 'exit' : undefined}
-              variants={pageVariants}
-              transition={transition}
-              style={{ willChange: 'opacity, transform' }}
-            >
-              {children}
-            </motion.main>
-          </AnimatePresence>
+              <AnimatePresence mode="wait">
+                <motion.main
+                  key={pathname}
+                  className="flex-1 overflow-auto pb-20 lg:pb-0 transition-colors duration-300"
+                  // При наличии variants — используем метки; при reduced — чёткие цели
+                  initial={pageVariants ? 'initial' : false}
+                  animate={pageVariants ? 'animate' : { opacity: 1 }}
+                  exit={pageVariants ? 'exit' : undefined}
+                  variants={pageVariants}
+                  transition={transition}
+                  style={{ willChange: 'opacity, transform' }}
+                >
+                  {children}
+                </motion.main>
+              </AnimatePresence>
+            </div>
+
+            <MobileTabBar />
+
+            {/* Угловую карточку НЕ рендерим глобально.
+                Она показывается контекстно в AIChatWindow/Budgets/Charts при достижении лимитов. */}
+            {/* (строку {isReady && subscriptionPlan === 'free' && <UpgradeCornerPanel />} удаляем) */}
         </div>
-
-        <MobileTabBar />
-
-        {/* Угловую карточку НЕ рендерим глобально.
-            Она показывается контекстно в AIChatWindow/Budgets/Charts при достижении лимитов. */}
-        {/* (строку {isReady && subscriptionPlan === 'free' && <UpgradeCornerPanel />} удаляем) */}
-      </div>
     </ProtectedRoute>
   )
 }

@@ -234,7 +234,17 @@
     },
     "buttons": {
       "close": "Tutup AI Assistant",
-      "ask": "Tanya AI"
+      "ask": "Tanya AI",
+      "newChat": "Obrolan baru"
+    },
+    "history": {
+      "title": "Riwayat",
+      "empty": "Belum ada percakapan",
+      "untitled": "Obrolan tanpa judul"
+    },
+    "dates": {
+      "today": "Hari ini",
+      "yesterday": "Kemarin"
     },
     "presets": {
       "header": "Mulai dari saran siap pakai",

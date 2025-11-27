@@ -228,6 +228,9 @@
     "input": {
       "placeholder": "Spendly Pal को संदेश…"
     },
+    "toasts": {
+      "usedNOfDailyLimit": "आपने आज {limit} AI संदेशों में से {count} का उपयोग किया है।"
+    },
     "actions": {
       "send": "भेजें",
       "abort": "रोकें",
@@ -244,8 +247,33 @@
     },
     "buttons": {
       "close": "AI असिस्टेंट बंद करें",
-      "ask": "AI से पूछें"
+      "ask": "AI से पूछें",
+      "newChat": "नई चैट"
     },
+    "tone": {
+      "label": "टोन",
+      "select_label": "AI असिस्टेंट का टोन चुनें",
+      "options": {
+        "neutral": "तटस्थ",
+        "friendly": "मित्रतापूर्ण",
+        "formal": "औपचारिक",
+        "playful": "चंचल"
+      }
+    },
+    "history": {
+      "title": "इतिहास",
+      "empty": "अभी तक कोई बातचीत नहीं",
+      "untitled": "शीर्षकहीन चैट"
+    },
+    "dates": {
+      "today": "आज",
+      "yesterday": "कल"
+    },
+    "settings": {
+        "proOnlyHint": "कस्टम असिस्टेंट टोन प्रो पर उपलब्ध है। अनलॉक करने के लिए अपग्रेड करें।",
+        "title": "Spendly Pal टोन",
+        "description": "अपने AI असिस्टेंट के लिए प्रतिक्रिया टोन चुनें।"
+      },
     "presets": {
       "header": "तैयार सुझावों से शुरू करें",
       "showWeek": "इस सप्ताह के खर्च दिखाएँ",

@@ -153,6 +153,18 @@
         "amount": "금액"
       }
     },
+    "buttons": {
+      "newChat": "새 채팅"
+    },
+    "history": {
+      "title": "기록",
+      "empty": "아직 대화 없음",
+      "untitled": "제목 없는 채팅"
+    },
+    "dates": {
+      "today": "오늘",
+      "yesterday": "어제"
+    },
     "tone": {
       "label": "톤",
       "select_label": "AI 비서 톤 선택",

@@ -506,6 +506,13 @@ export interface UseChatReturn {
     // Новый: текущий тон и setter
     assistantTone: AssistantTone
     setAssistantTone: (tone: AssistantTone) => Promise<void> | void
+
+    // Новый: текущая AI-сессия и работа с историей
+    currentSessionId: string | null
+    loadSessionMessages: (sessionId: string) => Promise<void>
+    newChat: () => void
+    syncLocalToCloud: () => Promise<void>
+    deleteSession: (sessionId: string) => Promise<void>
 }
 
 // ===== NOTIFICATION TYPES =====

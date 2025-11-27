@@ -38,9 +38,11 @@ const TopBar = () => {
             <div className="mx-auto px-5 h-16 flex items-center">
                 {/* Left: Date */}
                 <div className="flex-1 flex items-center">
-                    <span suppressHydrationWarning className="text-xs sm:text-sm md:text-base text-foreground font-medium">
-                        {currentDate || '\u00A0'}
-                    </span>
+                    {isDesktop ? (
+                        <span suppressHydrationWarning className="text-xs sm:text-sm md:text-base text-foreground font-medium">
+                            {currentDate || '\u00A0'}
+                        </span>
+                    ) : null}
                 </div>
                 {/* Right: Theme + Notifications + Rocket + (Mobile) Avatar Settings */}
                 <div className="flex-1 flex items-center justify-end gap-4">
@@ -50,18 +52,18 @@ const TopBar = () => {
                     {/* Мобильный аватар → Настройки */}
                     <Link
                         href="/user-settings"
-                        className="block lg:hidden"
+                        className="block lg:hidden shrink-0"
                         aria-label="User Settings"
                     >
                         {session?.user?.user_metadata?.avatar_url ? (
                             <img
-                                className="w-8 h-8 rounded-full object-cover"
+                                className="w-8 h-8 rounded-full object-cover aspect-square shrink-0"
                                 src={session.user.user_metadata.avatar_url}
                                 alt="User Avatar"
                                 referrerPolicy="no-referrer"
                             />
                         ) : (
-                            <div className="w-8 h-8 rounded-full bg-indigo-600 dark:bg-indigo-400 flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-full aspect-square shrink-0 bg-indigo-600 dark:bg-indigo-400 flex items-center justify-center">
                                 <span className="text-white text-sm font-semibold">{initial}</span>
                             </div>
                         )}

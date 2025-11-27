@@ -20,6 +20,7 @@ export const routing = defineRouting({
     '/budgets/[id]': '/budgets/[id]',
     '/setup/budget': '/setup/budget',
     '/user-settings': '/user-settings',
+    '/ai-assistant': '/ai-assistant'
   }
 });
 

@@ -8,6 +8,7 @@ import { Link } from '@/i18n/routing'
 import { LayoutDashboard, CreditCard, Wallet, Plus, Sparkles } from 'lucide-react'
 import Image from 'next/image'
 import UpgradeSidebarBanner from '@/components/free/UpgradeSidebarBanner'
+// удалено: import router from 'next/router'
 
 const Sidebar = () => {
     const pathname = usePathname()
@@ -19,6 +20,7 @@ const Sidebar = () => {
       session?.user?.email ||
       'U'
     const initial = displayName.charAt(0).toUpperCase()
+    // удалено: const router = useRouter()
 
     // Фолбэк: если ключ отсутствует, показываем читаемое значение
     const tOr = (key: string, fallback: string): string => {
@@ -95,15 +97,22 @@ const Sidebar = () => {
                             </li>
                         )
                     })}
-                    {/* AI Ассистент как отдельный пункт меню */}
+                    {/* AI Ассистент как отдельный пункт меню — теперь Link и активное состояние */}
                     <li>
-                        <button
-                            onClick={() => window.dispatchEvent(new CustomEvent('ai-assistant:open'))}
-                            className="w-full flex items-center gap-3 rounded-md text-sm font-medium transition-all duration-200 px-3 py-2.5 text-foreground hover:text-primary hover:bg-muted"
+                        <Link
+                            href="/ai-assistant"
+                            className={`
+                                flex items-center gap-3 rounded-md text-sm font-medium transition-all duration-200
+                                px-3 py-2.5
+                                ${pathname === '/ai-assistant' 
+                                    ? 'bg-primary/20 dark:bg-primary/30 text-primary px-5 py-4' 
+                                    : 'text-foreground hover:text-primary hover:bg-muted'
+                                }
+                            `}
                         >
-                            <Sparkles className="h-5 w-5" />
+                            <Sparkles className={`h-5 w-5 ${pathname === '/ai-assistant' ? 'text-primary' : ''}`} />
                             <span>{tOr('sidebar.aiAssistant', 'AI Assistant')}</span>
-                        </button>
+                        </Link>
                     </li>
                 </ul>
             </nav>

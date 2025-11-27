@@ -2,15 +2,18 @@
 'use client'
 
 import { CreditCard, LayoutDashboard, Wallet } from 'lucide-react'
-import { usePathname, Link } from '@/i18n/routing'
+import { usePathname, Link, useRouter } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import Image from 'next/image'
+import router from 'next/router'
 
 const MobileTabBar = () => {
   const t = useTranslations('Sidenav')
   const pathname = usePathname()
   const prefersReduced = useReducedMotion()
+  const tLayout = useTranslations('layout')
+  const router = useRouter()
 
   // Премиум анимация с ease-out
   const navTransition = { duration: 0.5, ease: "easeOut" } as const
@@ -37,7 +40,7 @@ const MobileTabBar = () => {
         exit={prefersReduced ? undefined : { opacity: 0, y: 20 }}
         transition={navTransition}
         style={{ willChange: 'opacity, transform' }}
-        className="fixed bottom-0 left-0 right-0 h-16 border-t border-border bg-white dark:bg-card lg:hidden z-50"
+        className="fixed bottom-0 left-0 right-0 h-20 pb-safe-bottom border-t border-border bg-white dark:bg-card lg:hidden z-50"
         aria-label="Bottom navigation"
       >
         {/* 5-элементная сетка: [Дашборд] [Транзакции] [FAB +] [Бюджеты] [AI] */}
@@ -46,13 +49,14 @@ const MobileTabBar = () => {
           <li className="flex items-center justify-center">
             <Link
               href="/dashboard"
-              aria-label="Dashboard"
+              aria-label={tLayout('sidebar.dashboard')}
               aria-current={pathname === '/dashboard' ? 'page' : undefined}
-              className={`flex items-center justify-center h-full w-full transition-colors ${
+              className={`flex flex-col items-center justify-center h-full w-full gap-0.5 transition-colors ${
                 pathname === '/dashboard' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <LayoutDashboard className="h-6 w-6" />
+              <span className="text-[8px] font-light">{tLayout('sidebar.dashboard')}</span>
             </Link>
           </li>
 
@@ -60,52 +64,72 @@ const MobileTabBar = () => {
           <li className="flex items-center justify-center">
             <Link
               href="/transactions"
-              aria-label="Transactions"
+              aria-label={tLayout('sidebar.transactions')}
               aria-current={pathname === '/transactions' ? 'page' : undefined}
-              className={`flex items-center justify-center h-full w-full transition-colors ${
+              className={`flex flex-col items-center justify-center h-full w-full gap-0.5 transition-colors ${
                 pathname === '/transactions' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <CreditCard className="h-6 w-6" />
+              <span className="text-[8px] font-light">{tLayout('sidebar.transactions')}</span>
             </Link>
           </li>
 
-          {/* Центральный FAB (+) — акцентный, крупнее */}
+          {/* Центральный FAB (+) — чуть меньше, по центру + подпись */}
           <li className="flex items-center justify-center">
-            <button
-              aria-label="Add Transaction"
-              onClick={() => window.dispatchEvent(new CustomEvent('transactions:add'))}
-              className="w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all duration-200 -mt-6 border-4 border-white dark:border-card"
-            >
-              <span className="text-2xl leading-none">+</span>
-            </button>
+            <div className="flex flex-col items-center justify-center gap-0.5">
+              <button
+                aria-label={tLayout('sidebar.addTransaction')}
+                onClick={() => window.dispatchEvent(new CustomEvent('transactions:add'))}
+                className="w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all duration-200 border-4 border-white dark:border-card"
+              >
+                <span className="text-2xl leading-none">+</span>
+              </button>
+              <span className="text-[8px] font-light text-muted-foreground">
+                {tLayout('sidebar.addTransaction')}
+              </span>
+            </div>
           </li>
 
           {/* Бюджеты */}
           <li className="flex items-center justify-center">
             <Link
               href="/budgets"
-              aria-label="Budgets"
+              aria-label={tLayout('sidebar.budgets')}
               aria-current={pathname === '/budgets' ? 'page' : undefined}
-              className={`flex items-center justify-center h-full w-full transition-colors ${
+              className={`flex flex-col items-center justify-center h-full w-full gap-0.5 transition-colors ${
                 pathname === '/budgets' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               <Wallet className="h-6 w-6" />
+              <span className="text-[8px] font-light">{tLayout('sidebar.budgets')}</span>
             </Link>
           </li>
 
-          {/* AI Ассистент — градиент + sparkles.svg */}
+          {/* AI Ассистент — градиент по маске + подпись */}
           <li className="flex items-center justify-center">
             <button
-              aria-label="AI Assistant"
-              onClick={() => window.dispatchEvent(new CustomEvent('ai-assistant:open'))}
-              className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-primary/70 shadow hover:opacity-90 transition-opacity"
+              aria-label={tLayout('sidebar.aiAssistant')}
+              onClick={() => router.push('/ai-assistant')}
+              className="flex flex-col items-center justify-center h-full w-full gap-0.5 hover:opacity-90 transition-opacity"
             >
-              <span className="sr-only">AI Assistant</span>
-              <div className="w-5 h-5 mx-auto">
-                <Image src="/sparkles.svg" alt="Sparkles" width={20} height={20} />
-              </div>
+              <span className="sr-only">{tLayout('sidebar.aiAssistant')}</span>
+              <div
+                className={`${prefersReduced ? '' : 'gradient-animated'} w-6 h-6 bg-gradient-to-r from-primary to-primary-800`}
+                style={{
+                  WebkitMaskImage: 'url(/sparkles.svg)',
+                  maskImage: 'url(/sparkles.svg)',
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskPosition: 'center',
+                  maskPosition: 'center',
+                  WebkitMaskSize: 'contain',
+                  maskSize: 'contain',
+                }}
+              />
+              <span className={`text-[8px] font-light ${pathname === '/ai-assistant' ? 'text-primary' : 'text-muted-foreground'}`}>
+                {tLayout('sidebar.aiAssistant')}
+              </span>
             </button>
           </li>
         </ul>

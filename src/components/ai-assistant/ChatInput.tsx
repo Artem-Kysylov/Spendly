@@ -5,6 +5,7 @@ import { Send } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Select } from '@/components/ui/select'
 import { useSubscription } from '@/hooks/useSubscription'
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
 interface ChatInputProps {
     onSendMessage: (content: string) => Promise<void>
@@ -13,9 +14,10 @@ interface ChatInputProps {
     onAbort?: () => void
     assistantTone?: 'neutral' | 'friendly' | 'formal' | 'playful'
     onToneChange?: (tone: 'neutral' | 'friendly' | 'formal' | 'playful') => void | Promise<void>
+    showTone?: boolean
 }
 
-export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assistantTone = 'neutral', onToneChange }: ChatInputProps) => {
+export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assistantTone = 'neutral', onToneChange, showTone = true }: ChatInputProps) => {
     const [message, setMessage] = useState('')
     const tAI = useTranslations('assistant')
     const toneEmoji = { neutral: '😐', friendly: '😊', formal: '🧑‍💼', playful: '😜' } as const
@@ -23,16 +25,20 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assist
     const isFree = subscriptionPlan === 'free'
 
     // авто‑рост textarea + скрытие скролла до лимита
-    const MAX_TEXTAREA_HEIGHT = 160
+    // фиксируем высоту textarea под кнопку
+    // const MAX_TEXTAREA_HEIGHT = 160
+    const MAX_TEXTAREA_HEIGHT = 40
     const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+    const [isOverflowing, setIsOverflowing] = useState(false)
 
     const autoResize = () => {
         const el = textareaRef.current
         if (!el) return
-        el.style.height = 'auto'
-        const next = Math.min(el.scrollHeight, MAX_TEXTAREA_HEIGHT)
-        el.style.height = `${next}px`
-        el.style.overflowY = el.scrollHeight > MAX_TEXTAREA_HEIGHT ? 'auto' : 'hidden'
+        // фиксированная высота
+        el.style.height = `${MAX_TEXTAREA_HEIGHT}px`
+        // скролл только при переполнении
+        const overflow = el.scrollHeight > MAX_TEXTAREA_HEIGHT
+        setIsOverflowing(overflow)
     }
 
     useEffect(() => {
@@ -54,27 +60,45 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assist
     }
 
     return (
-        <div className="p-4">
+        <div className="p-0">
             <div className="flex flex-col gap-2">
-                {/* Тон: выпадающий список над инпутом и кнопкой */}
-                <div>
-                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                        {tAI('tone.select_label')}
-                    </label>
-                    <ToneSelect
-                        value={isFree ? 'neutral' : assistantTone}
-                        onChange={(tone) => {
-                            if (isFree) return
-                            onToneChange?.(tone)
-                        }}
-                        disabled={(disabled ?? false) || (isThinking ?? false) || isFree}
-                        aria-label={tAI('tone.label')}
-                        className="w-full"
-                    />
-                </div>
-
+                {showTone && (
+                    <div>
+                        <label className="block text-xs text-muted-foreground mb-1">
+                            {tAI('tone.select_label')}
+                        </label>
+                        {isFree ? (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div>
+                                    <ToneSelect
+                                      value={'neutral'}
+                                      onChange={() => {}}
+                                      disabled
+                                      aria-label={tAI('tone.label')}
+                                      className="w-full"
+                                    />
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="font-medium">
+                                  {tAI('settings.proOnlyHint')}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                        ) : (
+                            <ToneSelect
+                                value={assistantTone}
+                                onChange={(tone) => onToneChange?.(tone)}
+                                disabled={(disabled ?? false) || (isThinking ?? false)}
+                                aria-label={tAI('tone.label')}
+                                className="w-full"
+                            />
+                        )}
+                    </div>
+                )}
+                {/* Инпут и кнопка — растянуты по краям */}
                 <div className="flex items-center space-x-2">
-                    {/* Инпут и кнопка — оставлены как были */}
                     <textarea
                         ref={textareaRef}
                         value={message}
@@ -83,8 +107,12 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assist
                         placeholder={tAI('input.placeholder')}
                         disabled={(disabled ?? false) || (isThinking ?? false)}
                         rows={1}
-                        style={{ maxHeight: MAX_TEXTAREA_HEIGHT, overflowY: 'hidden' }}
-                        className="flex-1 resize-none border border-gray-300 bg-white text-secondary-black placeholder:text-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed min-h-10 h-auto dark:border-gray-700 dark:bg-black dark:text-white"
+                        style={{
+                            height: MAX_TEXTAREA_HEIGHT,
+                            maxHeight: MAX_TEXTAREA_HEIGHT,
+                            overflowY: isOverflowing ? 'auto' : 'hidden',
+                        }}
+                        className="flex-1 resize-none border border-border bg-card text-foreground placeholder:text-muted-foreground rounded-lg px-3 py-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed h-10"
                     />
                     <button
                         onClick={isThinking ? (onAbort ?? (() => {})) : handleSend}

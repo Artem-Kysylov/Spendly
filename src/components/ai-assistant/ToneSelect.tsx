@@ -52,15 +52,15 @@ export function ToneSelect({ value, onChange, disabled, className, ...props }: T
             </span>
           </span>
           <svg
-              width="16"
-              height="16"
-              viewBox="0 0 20 20"
-              className="text-black dark:text-white"
+            width="24"
+            height="24"
+            viewBox="0 0 20 20"
+            className="text-black dark:text-white"
           >
-              <path
-                  d="M14.77 12.79a.75.75 0 01-1.06-.02L10 9.06l-3.71 3.71a.75.75 0 11-1.06-1.06l4.24-4.24a.75.75 0 011.06 0l4.24 4.24c.29.29.29.77 0 1.08z"
-                  fill="currentColor"
-              />
+            <path
+              d="M14.77 12.79a.75.75 0 01-1.06-.02L10 9.06l-3.71 3.71a.75.75 0 11-1.06-1.06l4.24-4.24a.75.75 0 011.06 0l4.24 4.24c.29.29.29.77 0 1.08z"
+              fill="currentColor"
+            />
           </svg>
         </button>
       </PopoverTrigger>
