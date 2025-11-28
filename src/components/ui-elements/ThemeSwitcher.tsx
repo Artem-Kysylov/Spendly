@@ -9,7 +9,10 @@ import { UserAuth } from '@/context/AuthContext'
 const ThemeSwitcher = () => {
   const { setUserThemePreference } = UserAuth()
   const { resolvedTheme, setTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  // Избегаем SSR/CSR рассинхронизации: рендерим нейтральное состояние до маунта
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => { setMounted(true) }, [])
+  const isDark = mounted ? (resolvedTheme === 'dark') : false
 
   const handleToggle = async (checked: boolean) => {
     const next = checked ? 'dark' : 'light'
@@ -22,14 +25,14 @@ const ThemeSwitcher = () => {
       {/* Sun icon for light theme */}
       <Sun 
         className={`size-4 transition-colors ${
-          !isDark ? 'text-primary' : 'text-muted-foreground'
+          mounted ? (!isDark ? 'text-primary' : 'text-muted-foreground') : 'text-muted-foreground'
         }`} 
       />
       
       {/* Custom styled switch */}
       <div className="relative">
         <Switch 
-          checked={isDark} 
+          checked={mounted ? isDark : false} 
           onCheckedChange={handleToggle} 
           aria-label="Toggle theme"
           className="
@@ -43,14 +46,14 @@ const ThemeSwitcher = () => {
         {/* Custom thumb with primary color */}
         <div className={`
           absolute top-0.5 left-0.5 size-5 rounded-full bg-primary shadow transition-transform duration-200
-          ${isDark ? 'translate-x-5' : 'translate-x-0'}
+          ${mounted && isDark ? 'translate-x-5' : 'translate-x-0'}
         `} />
       </div>
       
       {/* Moon icon for dark theme */}
       <Moon 
         className={`size-4 transition-colors ${
-          isDark ? 'text-primary' : 'text-muted-foreground'
+          mounted ? (isDark ? 'text-primary' : 'text-muted-foreground') : 'text-muted-foreground'
         }`} 
       />
     </div>

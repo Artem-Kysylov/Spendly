@@ -1,12 +1,11 @@
-// AIAssistantProvider component
-"use client"
+'use client'
 
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { FloatingAIButton } from './FloatingAIButton'
 import { AIChatWindow } from './AIChatWindow'
-import { useChat } from '@/hooks/useChat'
-import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet'
 import useDeviceType from '@/hooks/useDeviceType'
+import { useChat } from '@/hooks/useChat'
 
 const AIAssistantProvider: React.FC = () => {
   const {
@@ -43,7 +42,7 @@ const AIAssistantProvider: React.FC = () => {
           </SheetTrigger>
         )}
 
-        <SheetContent side="right" className="p-0" aria-labelledby="ai-assistant-title">
+        <SheetContent side="right" className="p-0 overflow-hidden mt-16" aria-labelledby="ai-assistant-title">
           <AIChatWindow
             isOpen={true}
             messages={messages}
@@ -63,5 +62,4 @@ const AIAssistantProvider: React.FC = () => {
     </>
   )
 }
-
 export default AIAssistantProvider

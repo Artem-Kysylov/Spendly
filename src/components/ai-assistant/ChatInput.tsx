@@ -7,6 +7,8 @@ import { Select } from '@/components/ui/select'
 import { useSubscription } from '@/hooks/useSubscription'
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 
+import { PresetChipsRow } from './PresetChipsRow'
+
 interface ChatInputProps {
     onSendMessage: (content: string) => Promise<void>
     disabled?: boolean
@@ -15,9 +17,10 @@ interface ChatInputProps {
     assistantTone?: 'neutral' | 'friendly' | 'formal' | 'playful'
     onToneChange?: (tone: 'neutral' | 'friendly' | 'formal' | 'playful') => void | Promise<void>
     showTone?: boolean
+    showChips?: boolean
 }
 
-export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assistantTone = 'neutral', onToneChange, showTone = true }: ChatInputProps) => {
+export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assistantTone = 'neutral', onToneChange, showTone = true, showChips = true }: ChatInputProps) => {
     const [message, setMessage] = useState('')
     const tAI = useTranslations('assistant')
     const toneEmoji = { neutral: '😐', friendly: '😊', formal: '🧑‍💼', playful: '😜' } as const
@@ -62,6 +65,11 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assist
     return (
         <div className="p-0">
             <div className="flex flex-col gap-2">
+                {showChips && (
+                    <div className="hidden lg:block">
+                        <PresetChipsRow onSelect={onSendMessage} className="flex-shrink-0" />
+                    </div>
+                )}
                 {showTone && (
                     <div>
                         <label className="block text-xs text-muted-foreground mb-1">

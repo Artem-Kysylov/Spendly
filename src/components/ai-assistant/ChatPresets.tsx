@@ -18,5 +18,14 @@ const presets = (t: ReturnType<typeof useTranslations>): ChatPreset[] => [
 ]
 
 export const ChatPresets = ({ onSelectPreset }: ChatPresetsProps) => {
-  return <PresetButtons onSelectPreset={onSelectPreset} />
+  return (
+    <div className="w-full flex items-center justify-center">
+      <PresetButtons
+        onSelectPreset={onSelectPreset}
+        className="w-full max-w-[520px]"
+        title={undefined}
+        // Показываем все пресеты (лимит убран)
+      />
+    </div>
+  )
 }

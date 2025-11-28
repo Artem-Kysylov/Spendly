@@ -4,6 +4,7 @@ import { useChat } from '@/hooks/useChat'
 import { ChatMessages } from '@/components/ai-assistant/ChatMessages'
 import { ChatInput } from '@/components/ai-assistant/ChatInput'
 import { ChatPresets } from '@/components/ai-assistant/ChatPresets'
+import { PresetChipsRow } from '@/components/ai-assistant/PresetChipsRow'
 import { useTranslations } from 'next-intl'
 import useDeviceType from '@/hooks/useDeviceType'
 import { supabase } from '@/lib/supabaseClient'
@@ -76,7 +77,7 @@ export default function AIAssistantPage() {
   }, [refreshSessions])
 
   const HistoryPane = (
-    <div className="border border-border rounded-lg bg-card h-full flex flex-col">
+    <div className="border border-border rounded-lg bg-card flex-1 flex flex-col">
       <div className="px-4 py-3 border-b border-border">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold">{tAI('history.title')}</h2>
@@ -92,7 +93,7 @@ export default function AIAssistantPage() {
         </div>
       </div>
       <div className="flex-1 h-full flex flex-col">
-        <div className="px-2 py-2 overflow-y-auto">
+        <div className="px-2 py-2 overflow-y-auto pb-2">
           {sessions.length === 0 ? (
             <div className="text-muted-foreground px-2">{tAI('history.empty')}</div>
           ) : (
@@ -148,9 +149,9 @@ export default function AIAssistantPage() {
   )
 
   const ChatPane = (
-    <div className={`h-full flex flex-col min-h-0 ${!isDesktop ? 'pb-[72px]' : ''}`}>
+    <div className={`h-full flex flex-col min-h-0 overflow-hidden min-w-0`}>
       {!isDesktop && (
-        <div className="px-0 pt-2 pb-2 border-b border-border bg-background flex items-center justify-between">
+        <div className="sticky top-0 z-20 px-5 pt-2 pb-2 border-b border-border bg-background flex items-center justify-between">
           <button
             className="flex items-center gap-2 text-[16px] text-foreground hover:text-foreground"
             aria-label={tAI('history.title')}
@@ -168,32 +169,35 @@ export default function AIAssistantPage() {
           />
         </div>
       )}
+      {/* Контент */}
       {isRateLimited && (
         <div className="px-4 py-2 text-xs text-amber-700 bg-amber-50 border-t border-b border-amber-200 dark:text-amber-100 dark:bg-amber-900 dark:border-amber-800">
           {tAI('rateLimited')}
         </div>
       )}
       {messages.length === 0 ? (
-        <div className="flex-1 flex flex-col min-h-0">
-          <div className="p-4 text-center flex-shrink-0">
-            <div className="text-3xl mb-3">✨</div>
-            <h4 className="font-semibold mb-2">{tAI('welcomeTitle')}</h4>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {tAI('welcomeDesc')}
-            </p>
-          </div>
-          <div className="flex-1 overflow-y-auto px-4 pb-4 min-h-0">
+        <div className="flex-1 min-h-0 flex items-center justify-center px-4 pb-24">
+          <div className="w-full max-w-[560px]">
+            <div className="text-center mb-4">
+              <div className="text-3xl mb-3">✨</div>
+              <h4 className="font-semibold mb-2">{tAI('welcomeTitle')}</h4>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {tAI('welcomeDesc')}
+              </p>
+            </div>
             <ChatPresets onSelectPreset={sendMessage} />
           </div>
         </div>
       ) : (
-        <ChatMessages messages={messages} isTyping={isTyping} />
+        // единый контейнер: скролл только у ChatMessages; добавляем нижний паддинг под инпут
+        <div className="flex-1 min-h-0 flex flex-col pb-24">
+          <ChatMessages messages={messages} isTyping={isTyping} />
+          <PresetChipsRow onSelect={sendMessage} className="flex-shrink-0" />
+        </div>
       )}
-      <div
-        className={`border-t border-border bg-background ${!isDesktop ? 'fixed left-0 right-0 z-40 px-5' : ''}`}
-        style={!isDesktop ? { bottom: 'calc(env(safe-area-inset-bottom) + 100px)' } : undefined}
-      >
-        <div className="flex items-center gap-2 p-2 px-0 sm:pb-safe">
+      {/* Инпут: всегда прилипает к низу контейнера */}
+      <div className={`sticky bottom-0 border-t border-border bg-background z-10 w-full`}>
+        <div className="flex items-center gap-2 p-3 px-4 sm:pb-safe">
           <div className="flex-1">
             <ChatInput
               onSendMessage={sendMessage}
@@ -210,10 +214,14 @@ export default function AIAssistantPage() {
   )
 
   return (
-    <div className="mt-[30px] px-5 pb-20 h-full">
+    <div className="px-5 h-[calc(100dvh-64px)] overflow-hidden min-w-0">
       <div className="flex gap-4 h-full min-h-0">
-        {isDesktop && <div className="w-64 min-h-[300px] h-full">{HistoryPane}</div>}
-        <div className="flex-1 min-h-0 h-full">{ChatPane}</div>
+        {isDesktop && (
+          <div className="w-64 min-h-0 h-full flex flex-col pb-4 min-w-0">
+            {HistoryPane}
+          </div>
+        )}
+        <div className="flex-1 min-h-0 h-full min-w-0">{ChatPane}</div>
       </div>
       {!isDesktop && (
         <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>

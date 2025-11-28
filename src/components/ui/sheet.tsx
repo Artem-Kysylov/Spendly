@@ -79,7 +79,7 @@ export function SheetContent({
 
   const sideClasses =
     side === 'right'
-      ? 'inset-y-0 right-0 h-screen w-screen sm:h-full sm:w-[480px]'
+      ? 'inset-y-0 right-0 w-screen sm:w-[480px]'
       : side === 'left'
       ? 'inset-y-0 left-0 h-screen w-screen sm:h-full sm:w-[480px]'
       : side === 'top'

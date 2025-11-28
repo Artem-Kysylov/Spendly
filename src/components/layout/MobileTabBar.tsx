@@ -1,12 +1,13 @@
 // MobileTabBar component
 'use client'
 
-import { CreditCard, LayoutDashboard, Wallet } from 'lucide-react'
+import { CreditCard, LayoutDashboard, Wallet, Plus } from 'lucide-react'
 import { usePathname, Link, useRouter } from '@/i18n/routing'
 import { useTranslations } from 'next-intl'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import Image from 'next/image'
 import router from 'next/router'
+import React from 'react'
 
 const MobileTabBar = () => {
   const t = useTranslations('Sidenav')
@@ -14,6 +15,34 @@ const MobileTabBar = () => {
   const prefersReduced = useReducedMotion()
   const tLayout = useTranslations('layout')
   const router = useRouter()
+
+  // Скрывать таббар при открытой клавиатуре (mobile)
+  const [hideForKeyboard, setHideForKeyboard] = React.useState(false)
+  React.useEffect(() => {
+    const threshold = 120 // px сокращение высоты экрана, означающее открытую клавиатуру
+    const onResize = () => {
+      try {
+        const vv = window.visualViewport
+        if (!vv) return
+        const shrink = window.innerHeight - vv.height
+        setHideForKeyboard(shrink > threshold)
+      } catch {}
+    }
+    const onFocusIn = (e: FocusEvent) => {
+      const target = e.target as HTMLElement | null
+      const isInput = !!target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.getAttribute('contenteditable') === 'true')
+      if (isInput) setHideForKeyboard(true)
+    }
+    const onFocusOut = () => setHideForKeyboard(false)
+    window.visualViewport?.addEventListener('resize', onResize)
+    window.addEventListener('focusin', onFocusIn)
+    window.addEventListener('focusout', onFocusOut)
+    return () => {
+      window.visualViewport?.removeEventListener('resize', onResize)
+      window.removeEventListener('focusin', onFocusIn)
+      window.removeEventListener('focusout', onFocusOut)
+    }
+  }, [])
 
   // Премиум анимация с ease-out
   const navTransition = { duration: 0.5, ease: "easeOut" } as const
@@ -40,11 +69,11 @@ const MobileTabBar = () => {
         exit={prefersReduced ? undefined : { opacity: 0, y: 20 }}
         transition={navTransition}
         style={{ willChange: 'opacity, transform' }}
-        className="fixed bottom-0 left-0 right-0 h-20 pb-safe-bottom border-t border-border bg-white dark:bg-card lg:hidden z-50"
+        className={`${hideForKeyboard ? 'hidden' : ''} fixed bottom-0 left-0 right-0 h-24 pb-safe-bottom border-t border-border bg-white dark:bg-card lg:hidden z-50`}
         aria-label="Bottom navigation"
       >
         {/* 5-элементная сетка: [Дашборд] [Транзакции] [FAB +] [Бюджеты] [AI] */}
-        <ul className="h-full grid grid-cols-5">
+        <ul className="h-full grid grid-cols-5 pt-1 -translate-y-[15px]">
           {/* Дашборд */}
           <li className="flex items-center justify-center">
             <Link
@@ -81,9 +110,9 @@ const MobileTabBar = () => {
               <button
                 aria-label={tLayout('sidebar.addTransaction')}
                 onClick={() => window.dispatchEvent(new CustomEvent('transactions:add'))}
-                className="w-14 h-14 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all duration-200 border-4 border-white dark:border-card"
+                className="w-12 h-12 rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all duration-200 border-2 border-white dark:border-card flex items-center justify-center"
               >
-                <span className="text-2xl leading-none">+</span>
+                <Plus className="w-6 h-6 block" />
               </button>
               <span className="text-[8px] font-light text-muted-foreground">
                 {tLayout('sidebar.addTransaction')}

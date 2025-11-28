@@ -9,6 +9,7 @@ interface PresetButtonsProps {
   onSelectPreset: (prompt: string) => Promise<void>
   title?: string
   className?: string
+  limit?: number
 }
 
 const buildPresets = (t: ReturnType<typeof useTranslations>): ChatPreset[] => [
@@ -20,23 +21,28 @@ const buildPresets = (t: ReturnType<typeof useTranslations>): ChatPreset[] => [
   { id: '6', title: t('presets.compareMonths'), prompt: t('presets.compareMonths') },
 ]
 
-export default function PresetButtons({ onSelectPreset, title, className }: PresetButtonsProps) {
+export default function PresetButtons({ onSelectPreset, title, className, limit }: PresetButtonsProps) {
   const tAI = useTranslations('assistant')
   const { isMobile } = useDeviceType()
-  const paddingY = isMobile ? 'py-[15px]' : 'py-2.5' // +5px на мобилке
+  const paddingY = isMobile ? 'py-[15px]' : 'py-2.5'
+  const items = buildPresets(tAI)
+  const shown = typeof limit === 'number' ? items.slice(0, limit) : items
 
   return (
     <div className={cn('space-y-2', className)}>
-      <p className="text-xs font-medium text-secondary-black dark:text-white mb-3 sticky top-0 bg-transparent py-1">
+      <p className="text-xs font-medium text-secondary-black dark:text-white mb-3 text-center">
         {title ?? tAI('presets.header')}
       </p>
-      <div className="grid grid-cols-1 gap-2">
-        {buildPresets(tAI).map((preset) => (
+      <div className="grid grid-cols-2 gap-3 justify-items-stretch">
+        {shown.map((preset) => (
           <button
             key={preset.id}
             onClick={() => onSelectPreset(preset.prompt)}
             className={cn(
-              'w-full text-left px-3 text-xs bg-primary/10 hover:bg-primary/40 text-primary rounded-full transition-all duration-200 border border-primary touch-manipulation',
+              'w-full inline-flex items-center justify-center text-center',
+              'px-4 text-xs',
+              'bg-primary/10 hover:bg-primary/40 text-primary',
+              'rounded-full transition-all duration-200 border border-primary touch-manipulation',
               paddingY
             )}
           >

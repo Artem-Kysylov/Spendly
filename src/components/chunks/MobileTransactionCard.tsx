@@ -1,9 +1,8 @@
 // /Users/macbookair/Documents/projects/spendly-app-ver-1.0/src/components/chunks/MobileTransactionCard.tsx
 'use client'
 
-import { MoreVertical } from 'lucide-react'
+import { Pencil, Trash } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu'
 import type { Transaction } from '@/types/types'
 
 type Props = {
@@ -33,19 +32,14 @@ export default function MobileTransactionCard({ transaction, onEdit, onDelete }:
             </div>
           </div>
         </div>
-        <div className="flex items-start gap-2">
+        <div className="flex items-center gap-2">
           <div className={`font-bold ${amountClass}`}>${transaction.amount}</div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button size="icon" variant="ghost" aria-label="More actions">
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onEdit(transaction)}>Edit</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onDelete(transaction.id)}>Delete</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button size="icon" variant="ghost" className="h-8 w-8 text-primary" aria-label="Edit" onClick={() => onEdit(transaction)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button size="icon" variant="ghost" className="h-8 w-8 text-error" aria-label="Delete" onClick={() => onDelete(transaction.id)}>
+            <Trash className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>

@@ -549,6 +549,10 @@ export interface NotificationBellProps {
     count?: number
     className?: string
     onClick?: () => void
+    /** Режим без фона для кнопки колокола */
+    minimal?: boolean
+    /** Стили для самой кнопки триггера, если нужно переопределить */
+    buttonClassName?: string
 }
 
 export interface NotificationDropdownProps {

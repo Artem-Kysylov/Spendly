@@ -9,7 +9,7 @@ import type { NotificationBellProps } from '@/types/types'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/routing'
 
-function NotificationBell({ className = '', onClick }: NotificationBellProps) {
+function NotificationBell({ className = '', onClick, minimal = false, buttonClassName = '' }: NotificationBellProps) {
   const { notifications, unreadCount, isLoading, error, markAsRead, markAllAsRead, refetch } = useNotifications()
   const [isOpen, setIsOpen] = useState(false)
   const router = useRouter()
@@ -121,11 +121,15 @@ function NotificationBell({ className = '', onClick }: NotificationBellProps) {
 
   return (
       <div className={`relative ${className}`} ref={dropdownRef}>
-          {/* Bell Icon with background */}
+          {/* Bell Icon (supports minimal mode without background) */}
           <button
               ref={triggerRef}
               onClick={handleBellClick}
-              className="notification-bell-trigger relative p-2 text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 rounded-full transition-all duration-200"
+              className={
+                minimal
+                  ? `notification-bell-trigger relative p-1 text-foreground hover:text-foreground ${buttonClassName}`
+                  : `notification-bell-trigger relative p-2 text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 rounded-full transition-all duration-200 ${buttonClassName}`
+              }
               aria-label={tNotifications('bell.aria')}
           >
               <Bell className="w-6 h-6" />

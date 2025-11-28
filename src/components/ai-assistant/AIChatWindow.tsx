@@ -4,6 +4,7 @@ import { ChatMessage } from '@/types/types'
 import { ChatMessages } from './ChatMessages'
 import { ChatInput } from './ChatInput'
 import { ChatPresets } from './ChatPresets'
+import { PresetChipsRow } from './PresetChipsRow'
 import { useTranslations } from 'next-intl'
 import { SheetClose, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useSubscription } from '@/hooks/useSubscription'
@@ -44,7 +45,7 @@ export const AIChatWindow = ({
     return (
         <>
             {/* Контент шторки */}
-            <div className="h-full bg-background text-foreground flex flex-col">
+            <div className="bg-background text-foreground flex flex-col relative">
                 {/* Header внутри шторки */}
                 <SheetHeader>
                   <div className="flex items-center gap-2">
@@ -61,7 +62,7 @@ export const AIChatWindow = ({
                 </SheetHeader>
 
                 {/* Chat Content */}
-                <div className="flex-1 flex flex-col min-h-0 bg-background">
+                <div className="flex flex-col min-h-0 bg-background pb-28">
                     {isRateLimited && (
                         <div className="px-4 py-2 text-xs text-amber-700 bg-amber-50 border-t border-b border-amber-200 dark:text-amber-100 dark:bg-amber-900 dark:border-amber-800">
                             {tAI('rateLimited')}
@@ -69,7 +70,7 @@ export const AIChatWindow = ({
                     )}
                     {isFree && isRateLimited && <UpgradeCornerPanel />}
                     {messages.length === 0 ? (
-                        <div className="flex-1 flex flex-col min-h-0">
+                        <div className="flex flex-col min-h-0">
                             <div className="p-4 text-center flex-shrink-0">
                                 <div className="text-3xl mb-3">✨</div>
                                 <h4 className="font-semibold mb-2">{tAI('welcomeTitle')}</h4>
@@ -77,40 +78,21 @@ export const AIChatWindow = ({
                                     {tAI('welcomeDesc')}
                                 </p>
                             </div>
-                            <div className="flex-1 overflow-y-auto px-4 pb-4 min-h-0">
+                            <div className="overflow-y-auto px-4 pb-4 min-h-0">
                                 <ChatPresets onSelectPreset={onSendMessage} />
                             </div>
                         </div>
                     ) : (
-                        <>
-                          <ChatMessages messages={messages} isTyping={isTyping} />
-                          {/* Preset chips row */}
-                          <div className="px-4 py-2 border-t border-border bg-background">
-                            <div className="flex gap-2 overflow-x-auto pb-2">
-                              {[
-                                tAI('presets.showWeek'),
-                                tAI('presets.saveMoney'),
-                                tAI('presets.analyzePatterns'),
-                                tAI('presets.createBudgetPlan'),
-                                tAI('presets.showBiggest'),
-                                tAI('presets.compareMonths'),
-                              ].map((label, idx) => (
-                                <button
-                                  key={idx}
-                                  onClick={() => onSendMessage(label)}
-                                  className="flex-shrink-0 text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary hover:bg-primary/30 transition-colors"
-                                >
-                                  {label}
-                                </button>
-                              ))}
+                        <div className="min-h-0 flex flex-col">
+                            <div className="overflow-y-auto">
+                                <ChatMessages messages={messages} isTyping={isTyping} />
                             </div>
-                          </div>
-                        </>
+                        </div>
                     )}
 
                     {/* Free hint */}
                     {isFree && (
-                        <div className="px-4 py-2 text-xs text-muted-foreground border-t border-border">
+                        <div className="px-4 py-2 text-xs text-muted-foreground">
                           {tAI('freeTier.requestsLimit')}
                         </div>
                     )}
@@ -170,7 +152,7 @@ export const AIChatWindow = ({
                     )}
 
                     {/* Input with integrated Abort */}
-                    <div className="border-t border-border bg-background flex-shrink-0">
+                    <div className="bg-background flex-shrink-0 absolute bottom-0 left-0 right-0 px-4">
                         <div className="flex items-center gap-2 p-2 sm:pb-safe">
                             <div className="flex-1">
                                 <ChatInput
@@ -180,6 +162,7 @@ export const AIChatWindow = ({
                                     onAbort={onAbort}
                                     assistantTone={assistantTone}
                                     onToneChange={onToneChange}
+                                    showChips={messages.length > 0}
                                 />
                             </div>
                         </div>

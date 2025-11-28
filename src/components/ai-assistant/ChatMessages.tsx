@@ -5,6 +5,9 @@ import { ChatMessage } from '@/types/types'
 import { User, Bot } from 'lucide-react'
 import { UserAuth } from '@/context/AuthContext'
 import { useTranslations, useLocale } from 'next-intl'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 
 interface ChatMessagesProps {
     messages: ChatMessage[]
@@ -59,9 +62,21 @@ export const ChatMessages = ({ messages, isTyping }: ChatMessagesProps) => {
       return parts
     }
 
+    const markdownSchema = {
+      ...defaultSchema,
+      tagNames: [...(defaultSchema.tagNames || []), 'table','thead','tbody','tr','th','td'],
+      attributes: {
+        ...defaultSchema.attributes,
+        a: ['href','title','target','rel'],
+        table: ['className'], thead: ['className'], tbody: ['className'],
+        tr: ['className'], th: ['className'], td: ['className'],
+        code: ['className'], pre: ['className']
+      }
+    }
+
     return (
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 scrollbar-track-transparent">
-            {/* Date separators */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4">
+            {/* Date separators and bubbles */}
             {messages.map((message, idx) => {
                 const showSeparator = idx === 0 || !isSameDay(message.timestamp, messages[idx - 1].timestamp)
                 return (
@@ -82,13 +97,32 @@ export const ChatMessages = ({ messages, isTyping }: ChatMessagesProps) => {
                         </div>
                       )}
                       <div
-                        className={`max-w-[75%] p-3 rounded-2xl shadow-sm ${
+                        className={`max-w-[75%] p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words ${
                             message.role === 'user'
                                 ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md'
                                 : 'bg-gray-100 text-secondary-black rounded-bl-md border border-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700'
                         }`}
                       >
-                        {renderMarkdownLite(message.content)}
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[[rehypeSanitize, markdownSchema]]}
+                          components={{
+                            p: ({ children }) => <p className="mb-2 leading-relaxed">{children}</p>,
+                            ul: ({ children }) => <ul className="list-disc pl-5 space-y-1">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal pl-5 space-y-1">{children}</ol>,
+                            li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                            a: ({ href, children }) => <a href={href as string} target="_blank" rel="noreferrer" className="text-primary underline">{children}</a>,
+                            code: ({ children }) => <code className="bg-muted px-1 py-0.5 rounded font-mono text-[12px]">{children}</code>,
+                            pre: ({ children }) => <pre className="bg-muted p-2 rounded overflow-x-auto text-[12px]">{children}</pre>,
+                            table: ({ children }) => <table className="w-full border-collapse my-2">{children}</table>,
+                            thead: ({ children }) => <thead className="bg-muted">{children}</thead>,
+                            th: ({ children }) => <th className="border px-2 py-1 text-left">{children}</th>,
+                            td: ({ children }) => <td className="border px-2 py-1">{children}</td>,
+                            strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                          }}
+                        >
+                          {message.content}
+                        </ReactMarkdown>
                         <div className={`text-xs mt-2 ${message.role === 'user' ? 'text-blue-200 dark:text-blue-100' : 'text-gray-500 dark:text-gray-400'}`}>
                             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </div>
