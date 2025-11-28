@@ -97,7 +97,7 @@ export const ChatMessages = ({ messages, isTyping }: ChatMessagesProps) => {
                         </div>
                       )}
                       <div
-                        className={`max-w-[75%] p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words ${
+                        className={`w-fit max-w-[65%] sm:max-w-[75%] p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words break-all overflow-x-hidden ${
                             message.role === 'user'
                                 ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md'
                                 : 'bg-gray-100 text-secondary-black rounded-bl-md border border-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700'

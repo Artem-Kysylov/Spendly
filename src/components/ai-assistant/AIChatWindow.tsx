@@ -61,43 +61,48 @@ export const AIChatWindow = ({
                   </SheetClose>
                 </SheetHeader>
 
-                {/* Chat Content */}
-                <div className="flex flex-col min-h-0 bg-background pb-28">
+                {/* Chat Content: grid, без pb-28 */}
+                <div className="flex-1 min-h-0 grid grid-rows-[auto_1fr_auto] bg-background">
+                    {/* Rate-limit и подсказка для free — верхняя строка */}
                     {isRateLimited && (
                         <div className="px-4 py-2 text-xs text-amber-700 bg-amber-50 border-t border-b border-amber-200 dark:text-amber-100 dark:bg-amber-900 dark:border-amber-800">
                             {tAI('rateLimited')}
                         </div>
                     )}
                     {isFree && isRateLimited && <UpgradeCornerPanel />}
-                    {messages.length === 0 ? (
-                        <div className="flex flex-col min-h-0">
-                            <div className="p-4 text-center flex-shrink-0">
-                                <div className="text-3xl mb-3">✨</div>
-                                <h4 className="font-semibold mb-2">{tAI('welcomeTitle')}</h4>
-                                <p className="text-sm text-muted-foreground leading-relaxed">
-                                    {tAI('welcomeDesc')}
-                                </p>
-                            </div>
-                            <div className="overflow-y-auto px-4 pb-4 min-h-0">
-                                <ChatPresets onSelectPreset={onSendMessage} />
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="min-h-0 flex flex-col">
-                            <div className="overflow-y-auto">
-                                <ChatMessages messages={messages} isTyping={isTyping} />
-                            </div>
-                        </div>
-                    )}
 
-                    {/* Free hint */}
-                    {isFree && (
-                        <div className="px-4 py-2 text-xs text-muted-foreground">
-                          {tAI('freeTier.requestsLimit')}
-                        </div>
-                    )}
+                    {/* Основной контент (скроллимый) — средняя строка */}
+                    <div className="min-h-0 overflow-y-auto">
+                        {messages.length === 0 ? (
+                            <div className="flex flex-col min-h-0">
+                                <div className="p-4 text-center flex-shrink-0">
+                                    <div className="text-3xl mb-3">✨</div>
+                                    <h4 className="font-semibold mb-2">{tAI('welcomeTitle')}</h4>
+                                    <p className="text-sm text-muted-foreground leading-relaxed">
+                                        {tAI('welcomeDesc')}
+                                    </p>
+                                </div>
+                                <div className="px-4 pb-4 min-h-0">
+                                    <ChatPresets onSelectPreset={onSendMessage} />
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="min-h-0 flex flex-col">
+                                <div className="overflow-y-auto">
+                                    <ChatMessages messages={messages} isTyping={isTyping} />
+                                </div>
+                            </div>
+                        )}
 
-                    {/* Input */}
+                        {/* Free hint */}
+                        {isFree && (
+                            <div className="px-4 py-2 text-xs text-muted-foreground">
+                              {tAI('freeTier.requestsLimit')}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Нижняя строка: поле ввода, без absolute */}
                     {hasPendingAction && !isTyping && (
                         <div className="px-4 py-3 border-t border-border bg-background">
                             <div className="text-sm font-semibold text-secondary-black dark:text-white mb-1">{tAI('confirm.title')}</div>
@@ -151,9 +156,8 @@ export const AIChatWindow = ({
                         </div>
                     )}
 
-                    {/* Input with integrated Abort */}
-                    <div className="bg-background flex-shrink-0 absolute bottom-0 left-0 right-0 px-4">
-                        <div className="flex items-center gap-2 p-2 sm:pb-safe">
+                    <div className="bg-background flex-shrink-0 border-t border-border px-4 sm:pb-safe">
+                        <div className="flex items-center gap-2 p-2">
                             <div className="flex-1">
                                 <ChatInput
                                     onSendMessage={onSendMessage}

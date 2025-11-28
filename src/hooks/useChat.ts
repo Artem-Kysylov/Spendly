@@ -139,41 +139,45 @@ export const useChat = (): UseChatReturn => {
 
   // Загрузка сообщений для сессии
   const loadSessionMessages = useCallback(async (sessionId: string) => {
-    if (!sessionId) return
-    if (String(sessionId).startsWith('local-')) {
-      try {
-        const raw = window.localStorage.getItem(`spendly:ai_messages:${sessionId}`) || '[]'
-        const arr = JSON.parse(raw) as Array<{ id: string; role: 'user' | 'assistant'; content: string; created_at?: string }>
-        const msgs: ChatMessage[] = arr.map(m => ({
-          id: m.id,
-          role: m.role,
-          content: m.content,
-          timestamp: m.created_at ? new Date(m.created_at) : new Date()
-        }))
-        setMessages(msgs)
-      } catch {
-        setMessages([])
+      if (!sessionId) return
+      // КРИТИЧЕСКОЕ: фиксируем выбранную сессию,
+      // чтобы sendMessage не создавал новую
+      setCurrentSessionId(sessionId)
+  
+      if (String(sessionId).startsWith('local-')) {
+          try {
+              const raw = window.localStorage.getItem(`spendly:ai_messages:${sessionId}`) || '[]'
+              const arr = JSON.parse(raw) as Array<{ id: string; role: 'user' | 'assistant'; content: string; created_at?: string }>
+              const msgs: ChatMessage[] = arr.map(m => ({
+                  id: m.id,
+                  role: m.role,
+                  content: m.content,
+                  timestamp: m.created_at ? new Date(m.created_at) : new Date()
+              }))
+              setMessages(msgs)
+          } catch {
+              setMessages([])
+          }
+          return
       }
-      return
-    }
-
-    const { data, error } = await supabase
-      .from('ai_chat_messages')
-      .select('id, role, content, created_at')
-      .eq('session_id', sessionId)
-      .order('created_at', { ascending: true })
-    if (error) {
-      console.warn('Failed to load messages for session', error)
-      setMessages([])
-      return
-    }
-    const msgs: ChatMessage[] = (data || []).map((r: any) => ({
-      id: r.id || Date.now().toString(),
-      role: r.role,
-      content: r.content,
-      timestamp: new Date(r.created_at)
-    }))
-    setMessages(msgs)
+  
+      const { data, error } = await supabase
+          .from('ai_chat_messages')
+          .select('id, role, content, created_at')
+          .eq('session_id', sessionId)
+          .order('created_at', { ascending: true })
+      if (error) {
+          console.warn('Failed to load messages for session', error)
+          setMessages([])
+          return
+      }
+      const msgs: ChatMessage[] = (data || []).map((r: any) => ({
+          id: r.id || Date.now().toString(),
+          role: r.role,
+          content: r.content,
+          timestamp: new Date(r.created_at)
+      }))
+      setMessages(msgs)
   }, [])
 
   useEffect(() => {

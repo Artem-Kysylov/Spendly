@@ -73,7 +73,7 @@ const MobileTabBar = () => {
         aria-label="Bottom navigation"
       >
         {/* 5-элементная сетка: [Дашборд] [Транзакции] [FAB +] [Бюджеты] [AI] */}
-        <ul className="h-full grid grid-cols-5 pt-1 -translate-y-[15px]">
+        <ul className="h-full grid grid-cols-5 pt-1 -translate-y-[5px]">
           {/* Дашборд */}
           <li className="flex items-center justify-center">
             <Link

@@ -77,7 +77,7 @@ export default function AIAssistantPage() {
   }, [refreshSessions])
 
   const HistoryPane = (
-    <div className="border border-border rounded-lg bg-card flex-1 flex flex-col">
+    <div className="border border-border rounded-lg bg-card h-full min-h-0 overflow-hidden flex flex-col">
       <div className="px-4 py-3 border-b border-border">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold">{tAI('history.title')}</h2>
@@ -92,50 +92,52 @@ export default function AIAssistantPage() {
           )}
         </div>
       </div>
-      <div className="flex-1 h-full flex flex-col">
-        <div className="px-2 py-2 overflow-y-auto pb-2">
-          {sessions.length === 0 ? (
-            <div className="text-muted-foreground px-2">{tAI('history.empty')}</div>
-          ) : (
-            <ul className="space-y-1">
-              {sessions.map(s => {
-                const title = s.title?.trim() || tAI('history.untitled')
-                const date = new Date(s.created_at)
-                const label = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(date)
-                const isActive = currentSessionId === s.id
-                return (
-                  <li key={s.id}>
-                    <div
-                      className={`relative w-full max-w-full overflow-hidden rounded-md border bg-card transition-colors ${isActive ? 'border-primary/30' : 'border-border hover:bg-muted/40'}`}
-                      onClick={() => {
-                        loadSessionMessages(s.id)
-                        setHistoryOpen(false)
-                      }}
-                    >
-                      <div className="flex items-center justify-between px-3 py-2">
-                        <div className="min-w-0 flex-1">
-                          <div className="text-[13px] font-medium truncate">{title}</div>
-                          <div className="text-[11px] text-muted-foreground">{label}</div>
-                        </div>
-                        <button
-                          className="inline-flex h-6 w-6 items-center justify-center rounded text-error hover:bg-red-50"
-                          onClick={(e) => { e.stopPropagation(); void deleteSession(s.id) }}
-                          title={tAI('buttons.delete') ?? 'Delete'}
-                          aria-label={tAI('buttons.delete') ?? 'Delete'}
-                        >
-                          <Trash size={16} />
-                        </button>
+
+      {/* Прокрутка списка — занимает всё доступное пространство */}
+      <div className="flex-1 min-h-0 px-2 py-2 overflow-y-auto">
+        {sessions.length === 0 ? (
+          <div className="text-muted-foreground px-2">{tAI('history.empty')}</div>
+        ) : (
+          <ul className="space-y-1">
+            {sessions.map(s => {
+              const title = s.title?.trim() || tAI('history.untitled')
+              const date = new Date(s.created_at)
+              const label = new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric' }).format(date)
+              const isActive = currentSessionId === s.id
+              return (
+                <li key={s.id}>
+                  <div
+                    className={`relative w-full max-w-full overflow-hidden rounded-md border bg-card transition-colors ${isActive ? 'border-primary/30' : 'border-border hover:bg-muted/40'}`}
+                    onClick={() => {
+                      loadSessionMessages(s.id)
+                      setHistoryOpen(false)
+                    }}
+                  >
+                    <div className="flex items-center justify-between px-3 py-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[13px] font-medium truncate">{title}</div>
+                        <div className="text-[11px] text-muted-foreground">{label}</div>
                       </div>
+                      <button
+                        className="inline-flex h-6 w-6 items-center justify-center rounded text-error hover:bg-red-50"
+                        onClick={(e) => { e.stopPropagation(); void deleteSession(s.id) }}
+                        title={tAI('buttons.delete') ?? 'Delete'}
+                        aria-label={tAI('buttons.delete') ?? 'Delete'}
+                      >
+                        <Trash size={16} />
+                      </button>
                     </div>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-        </div>
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+        )}
       </div>
+
+      {/* Мобайл: кнопка закреплена внизу с отступом 20px */}
       {!isDesktop && (
-        <div className="mt-auto px-3 pb-3">
+        <div className="mt-auto px-3 pb-[20px]">
           <button
             className="w-full h-12 rounded-lg bg-primary text-white text-[16px] font-medium inline-flex items-center justify-center gap-2"
             onClick={() => { newChat(); setHistoryOpen(false) }}
@@ -149,9 +151,9 @@ export default function AIAssistantPage() {
   )
 
   const ChatPane = (
-    <div className={`h-full flex flex-col min-h-0 overflow-hidden min-w-0`}>
+    <div className={`h-full flex flex-col min-h-0 overflow-x-hidden min-w-0 pb-[calc(env(safe-area-inset-bottom)+12px)]`}>
       {!isDesktop && (
-        <div className="sticky top-0 z-20 px-5 pt-2 pb-2 border-b border-border bg-background flex items-center justify-between">
+        <div className="sticky top-0 z-20 px-0 pt-2 pb-2 border-b border-border bg-background flex items-center justify-between w-full">
           <button
             className="flex items-center gap-2 text-[16px] text-foreground hover:text-foreground"
             aria-label={tAI('history.title')}
@@ -176,59 +178,78 @@ export default function AIAssistantPage() {
         </div>
       )}
       {messages.length === 0 ? (
-        <div className="flex-1 min-h-0 flex items-center justify-center px-4 pb-24">
-          <div className="w-full max-w-[560px]">
-            <div className="text-center mb-4">
-              <div className="text-3xl mb-3">✨</div>
-              <h4 className="font-semibold mb-2">{tAI('welcomeTitle')}</h4>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {tAI('welcomeDesc')}
-              </p>
+        <>
+          {/* центрируем приветствие, без большого нижнего паддинга */}
+          <div className="flex-1 min-h-0 flex items-center justify-center px-4">
+            <div className="w-full max-w-[560px]">
+              <div className="text-center mb-4">
+                <div className="text-3xl mb-3">✨</div>
+                <h4 className="font-semibold mb-2">{tAI('welcomeTitle')}</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {tAI('welcomeDesc')}
+                </p>
+              </div>
+              <ChatPresets onSelectPreset={sendMessage} />
             </div>
-            <ChatPresets onSelectPreset={sendMessage} />
           </div>
-        </div>
+        </>
       ) : (
-        // единый контейнер: скролл только у ChatMessages; добавляем нижний паддинг под инпут
-        <div className="flex-1 min-h-0 flex flex-col pb-24">
+        <div className="flex-1 min-h-0 min-w-0 flex flex-col">
           <ChatMessages messages={messages} isTyping={isTyping} />
-          <PresetChipsRow onSelect={sendMessage} className="flex-shrink-0" />
+          {!isDesktop && (
+            <PresetChipsRow onSelect={sendMessage} className="flex-shrink-0" />
+          )}
         </div>
       )}
-      {/* Инпут: всегда прилипает к низу контейнера */}
-      <div className={`sticky bottom-0 border-t border-border bg-background z-10 w-full`}>
-        <div className="flex items-center gap-2 p-3 px-4 sm:pb-safe">
-          <div className="flex-1">
-            <ChatInput
-              onSendMessage={sendMessage}
-              isThinking={isTyping}
-              onAbort={abort}
-              assistantTone={assistantTone}
-              onToneChange={setAssistantTone}
-              showTone={isDesktop}
-            />
-          </div>
+      {/* Инпут: обычный поток внизу контейнера, без sticky */}
+      <div className="border-t border-border bg-background w-full">
+        <div className="p-0 sm:pb-safe">
+          <ChatInput
+            onSendMessage={sendMessage}
+            isThinking={isTyping}
+            onAbort={abort}
+            assistantTone={assistantTone}
+            onToneChange={setAssistantTone}
+            showTone={isDesktop}
+            showChips={isDesktop && messages.length > 0}
+          />
         </div>
       </div>
     </div>
   )
 
+  // Основной рендер страницы: сетка на десктопе, мобильная история через Sheet
   return (
-    <div className="px-5 h-[calc(100dvh-64px)] overflow-hidden min-w-0">
-      <div className="flex gap-4 h-full min-h-0">
-        {isDesktop && (
-          <div className="w-64 min-h-0 h-full flex flex-col pb-4 min-w-0">
-            {HistoryPane}
-          </div>
-        )}
-        <div className="flex-1 min-h-0 h-full min-w-0">{ChatPane}</div>
-      </div>
-      {!isDesktop && (
-        <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
-          <SheetContent side="left" className="p-0" style={{ width: '65vw' }}>
-            {HistoryPane}
-          </SheetContent>
-        </Sheet>
+    <div className="h-full w-full md:grid md:grid-cols-[320px_1fr] md:gap-3 p-3 overflow-x-hidden">
+      {isDesktop ? (
+        <>
+          {HistoryPane}
+          {ChatPane}
+        </>
+      ) : (
+        <>
+          {ChatPane}
+          <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+            <SheetContent side="left" className="p-0 w-[90vw] sm:w-[400px]">
+              <div className="h-full flex flex-col">
+                <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+                  <button
+                    className="flex items-center gap-2"
+                    onClick={() => setHistoryOpen(false)}
+                    aria-label={tAI('history.title')}
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                    <span>{tAI('history.title')}</span>
+                  </button>
+                </div>
+                {/* История тянется на всю высоту шторки */}
+                <div className="flex-1 p-3">
+                  {HistoryPane}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </>
       )}
     </div>
   )

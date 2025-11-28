@@ -42,7 +42,7 @@ const AIAssistantProvider: React.FC = () => {
           </SheetTrigger>
         )}
 
-        <SheetContent side="right" className="p-0 overflow-hidden mt-16" aria-labelledby="ai-assistant-title">
+        <SheetContent side="right" className="p-0 overflow-hidden" aria-labelledby="ai-assistant-title">
           <AIChatWindow
             isOpen={true}
             messages={messages}

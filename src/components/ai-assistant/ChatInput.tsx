@@ -63,7 +63,7 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assist
     }
 
     return (
-        <div className="p-0">
+        <div className="w-full p-0">
             <div className="flex flex-col gap-2">
                 {showChips && (
                     <div className="hidden lg:block">
@@ -105,8 +105,8 @@ export const ChatInput = ({ onSendMessage, disabled, isThinking, onAbort, assist
                         )}
                     </div>
                 )}
-                {/* Инпут и кнопка — растянуты по краям */}
-                <div className="flex items-center space-x-2">
+                {/* Инпут и кнопка — растянуты по ширине секции */}
+                <div className="flex items-center space-x-2 w-full">
                     <textarea
                         ref={textareaRef}
                         value={message}
