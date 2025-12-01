@@ -570,7 +570,14 @@
     },
     "dashboard": { "meta": { "title": "Dashboard", "description": "Overview of budgets, transactions, and insights." } },
     "transactions": { "meta": { "title": "Transactions", "description": "Browse and manage all your transactions." } },
-    "budgets": { "meta": { "title": "Budgets", "description": "Create and manage your budgets." } },
+    "budgets": {
+        "rollover": {
+            "panelTitle": "Rollover",
+            "toggleLabel": "Enable rollover",
+            "modeLabel": "Mode",
+            "positiveOnly": "Positive only",
+            "allowNegative": "Allow negative"
+        }, "meta": { "title": "Budgets", "description": "Create and manage your budgets." } },
     "budgetDetails": {
       "meta": {
         "title": "Budget Details",

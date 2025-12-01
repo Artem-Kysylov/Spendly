@@ -519,6 +519,13 @@
     }
   },
   "budgets": {
+        "rollover": {
+            "panelTitle": "Перенесення залишку",
+            "toggleLabel": "Увімкнути перенесення",
+            "modeLabel": "Режим",
+            "positiveOnly": "Тільки позитивний",
+            "allowNegative": "Дозволити від'ємний"
+        },
     "list": {
       "modal": {
         "createTitle": "Створити новий бюджет",

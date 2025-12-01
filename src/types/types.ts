@@ -146,6 +146,29 @@ export interface CreateMainBudgetProps {
     onSubmit: (budget: string, locale?: import('./locale').UserLocaleSettings) => void;
 }
 
+export type RolloverMode = 'positive-only' | 'allow-negative'
+
+export interface BudgetRolloverSettings {
+    rolloverEnabled: boolean
+    rolloverMode: RolloverMode
+    rolloverCap?: number | null
+}
+
+export interface UserBudgetSettings {
+    defaultRolloverEnabled?: boolean
+}
+
+export interface MonthlyBudgetCategory {
+    budget_folder_id: string
+    month: string
+    allocated: number
+    spent: number
+    available: number
+    rolloverFromPrev: number
+    rolloverAppliedAt?: string | null
+    rolloverSourceMonth?: string | null
+}
+
 export interface BudgetFolderItemProps {
     id: string,
     emoji: string,
@@ -153,7 +176,11 @@ export interface BudgetFolderItemProps {
     amount: number,
     spentAmount?: number,
     type: 'expense' | 'income',
-    color_code?: string | null
+    color_code?: string | null,
+    rolloverEnabled?: boolean,
+    rolloverMode?: RolloverMode,
+    rolloverCap?: number | null,
+    rolloverPreviewCarry?: number
 }
 
 export interface BudgetDetailsInfoProps {
@@ -168,7 +195,10 @@ export interface BudgetDetailsProps {
     name: string,
     amount: number,
     type: 'expense' | 'income',
-    color_code?: string | null
+    color_code?: string | null,
+    rolloverEnabled?: boolean,
+    rolloverMode?: RolloverMode,
+    rolloverCap?: number | null
 }
 
 export interface BudgetDetailsFormProps {
@@ -184,7 +214,16 @@ export interface BudgetDetailsControlsProps {
 export interface BudgetModalProps {
     title: string,
     onClose: () => void,
-    onSubmit: (emoji: string, name: string, amount: number, type: 'expense' | 'income', color_code?: string | null) => Promise<void>,
+    onSubmit: (
+        emoji: string,
+        name: string,
+        amount: number,
+        type: 'expense' | 'income',
+        color_code?: string | null,
+        rolloverEnabled?: boolean,
+        rolloverMode?: RolloverMode,
+        rolloverCap?: number | null
+    ) => Promise<void>,
     isLoading?: boolean,
     initialData?: BudgetDetailsProps,
     handleToastMessage?: (text: string, type: ToastMessageProps['type']) => void

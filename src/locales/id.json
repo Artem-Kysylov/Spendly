@@ -400,6 +400,13 @@
     "createTitle": "Buat Anggaran"
   },
   "budgets": {
+        "rollover": {
+            "panelTitle": "Rollover",
+            "toggleLabel": "Aktifkan rollover",
+            "modeLabel": "Mode",
+            "positiveOnly": "Hanya positif",
+            "allowNegative": "Izinkan negatif"
+        },
     "labels": {
       "spent": "terpakai",
       "left": "tersisa",

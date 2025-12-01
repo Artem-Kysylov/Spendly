@@ -63,8 +63,7 @@ export default function ProtectedLayout({
               <AnimatePresence mode="wait">
                 <motion.main
                   key={pathname}
-                  className="flex-1 overflow-auto pb-20 lg:pb-0 transition-colors duration-300"
-                  // При наличии variants — используем метки; при reduced — чёткие цели
+                  className="flex-1 overflow-auto pb-[calc(env(safe-area-inset-bottom)+120px)] lg:pb-0 transition-colors duration-300"
                   initial={pageVariants ? 'initial' : false}
                   animate={pageVariants ? 'animate' : { opacity: 1 }}
                   exit={pageVariants ? 'exit' : undefined}

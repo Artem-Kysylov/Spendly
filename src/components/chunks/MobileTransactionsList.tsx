@@ -11,6 +11,8 @@ import DeleteModal from '@/components/modals/DeleteModal'
 import EditTransactionModal from '@/components/modals/EditTransactionModal'
 import type { Transaction, EditTransactionPayload } from '@/types/types'
 import { Pagination } from '@/components/ui/pagination'
+import DateHeader from './DateHeader'
+import { groupTransactionsByDate } from '@/lib/format/transactionsGrouping'
 
 type Props = {
   transactions: Transaction[]
@@ -36,24 +38,63 @@ export default function MobileTransactionsList({ transactions, onDeleteTransacti
   const endIndex = startIndex + pageSize
   const pageItems = sorted.slice(startIndex, endIndex)
 
+  // Группировка по датам (мобильная версия)
+  const groups = groupTransactionsByDate(pageItems)
+
+  // Фолбэк-апдейт, если не передан onEditTransaction
   const handleUpdateFallback = async (payload: EditTransactionPayload) => {
-    if (!session?.user?.id) throw new Error('No session user id')
-    const updateData: any = { title: payload.title, amount: payload.amount, type: payload.type }
-    if (payload.created_at) updateData.created_at = payload.created_at
-    const { error } = await supabase.from('transactions').update(updateData).eq('id', payload.id).eq('user_id', session.user.id)
-    if (error) throw error
+    const userId = session?.user?.id
+    if (!userId) {
+      throw new Error('No session user id')
+    }
+
+    const updateData: Record<string, unknown> = {
+      title: payload.title,
+      amount: payload.amount,
+      type: payload.type,
+      budget_folder_id: payload.budget_folder_id ?? null,
+    }
+
+    if (payload.created_at) {
+      updateData.created_at = payload.created_at
+    }
+
+    const { error } = await supabase
+      .from('transactions')
+      .update(updateData)
+      .eq('id', payload.id)
+      .eq('user_id', userId)
+
+    if (error) {
+      throw error
+    }
   }
 
   return (
     <div className="space-y-3">
-      {pageItems.map((t, i) => (
-        <motion.div key={t.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: 'easeOut', delay: i * 0.05 }}>
-          <MobileTransactionCard
-            transaction={t}
-            onEdit={(tx) => { setSelectedTransaction(tx); setIsEditOpen(true) }}
-            onDelete={(id) => { const tx = sorted.find(x => x.id === id) || null; setSelectedTransaction(tx); setIsDeleteOpen(true) }}
-          />
-        </motion.div>
+      {groups.map((group, gi) => (
+        <div key={group.date} className={gi === 0 ? 'space-y-1' : 'space-y-1 mt-4'}>
+          <DateHeader date={group.date} />
+          {group.items.map((t, i) => (
+            <motion.div
+              key={t.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: 'easeOut', delay: i * 0.05 }}
+              className="mb-2"
+            >
+              <MobileTransactionCard
+                transaction={t}
+                onEdit={(tx) => { setSelectedTransaction(tx); setIsEditOpen(true) }}
+                onDelete={(id) => {
+                  const tx = pageItems.find(x => x.id === id) || null
+                  setSelectedTransaction(tx)
+                  setIsDeleteOpen(true)
+                }}
+              />
+            </motion.div>
+          ))}
+        </div>
       ))}
 
       <div className="mt-4">

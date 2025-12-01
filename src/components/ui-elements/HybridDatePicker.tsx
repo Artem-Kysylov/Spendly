@@ -1,11 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, Suspense, lazy } from 'react'
 import { format } from 'date-fns'
 import { enUS, ru, uk, id, ja, ko, hi } from 'date-fns/locale'
 import type { Locale as DateFnsLocale } from 'date-fns'
 import { Calendar as CalendarIcon } from 'lucide-react'
-import { Calendar } from '@/components/ui/calendar'
+import { Calendar } from '@/components/ui/calendar' // удаляем прямой импорт
 import { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from '@/components/ui/popover'
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet'
 import Button from './Button'
@@ -97,7 +97,11 @@ export default function HybridDatePicker({
       {isMobile ? (
         <Sheet open={openMobile} onOpenChange={setOpenMobile}>
           <SheetTrigger>{buttonElMobile}</SheetTrigger>
-          <SheetContent side="bottom" className="bg-background text-foreground h-[70vh]">
+          <SheetContent
+            side="bottom"
+            className="bg-background text-foreground h-[70dvh] z-[10010] pb-[env(safe-area-inset-bottom)]"
+            overlayClassName="bg-foreground/40"
+          >
             <SheetHeader className="px-4 py-4 border-b border-border justify-center">
               <SheetTitle className="text-[18px] sm:text-[20px] font-semibold text-center">
                 Choose date
@@ -112,26 +116,30 @@ export default function HybridDatePicker({
                 }}
               />
               <div className="flex justify-center">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={(d) => {
-                    if (d) {
-                      onDateSelect(d)
-                      setOpenMobile(false)
-                    }
-                  }}
-                  disabled={normalizedDisabled}
-                  initialFocus
-                  showOutsideDays={false}
-                  captionLayout="dropdown"
-                  buttonVariant="ghost"
-                  hideNav
-                  className="[--cell-size:56px]"
-                  classNames={{ week: "flex w-full mt-3 gap-4" }}
-                  components={{ DayButton: MobileDayButton }}
-                  locale={dfLocale}
-                />
+                {openMobile ? (
+                  <Suspense fallback={<div className="h-40 w-full flex items-center justify-center text-muted-foreground">Loading calendar…</div>}>
+                    <LazyCalendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={(d) => {
+                        if (d) {
+                          onDateSelect(d)
+                          setOpenMobile(false)
+                        }
+                      }}
+                      disabled={normalizedDisabled}
+                      initialFocus
+                      showOutsideDays={false}
+                      captionLayout="dropdown"
+                      buttonVariant="ghost"
+                      hideNav
+                      className="[--cell-size:56px]"
+                      classNames={{ week: "flex w-full mt-3 gap-4" }}
+                      components={{ DayButton: MobileDayButton }}
+                      locale={dfLocale}
+                    />
+                  </Suspense>
+                ) : null}
               </div>
             </div>
 
@@ -152,23 +160,27 @@ export default function HybridDatePicker({
             </PopoverAnchor>
             {/* Убираем фикс. ширину и внешнюю паддингу — отступы слева/справа становятся равными */}
             <PopoverContent className="w-auto p-0" align="center" side="right" sideOffset={16}>
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={(d) => {
-                  if (d) {
-                    onDateSelect(d)
-                    setOpenDesktop(false)
-                  }
-                }}
-                disabled={normalizedDisabled}
-                initialFocus
-                showOutsideDays={false}
-                captionLayout="dropdown"
-                buttonVariant="ghost"
-                hideNav
-                locale={dfLocale}
-              />
+              {openDesktop ? (
+                <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading calendar…</div>}>
+                  <LazyCalendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(d) => {
+                      if (d) {
+                        onDateSelect(d)
+                        setOpenDesktop(false)
+                      }
+                    }}
+                    disabled={normalizedDisabled}
+                    initialFocus
+                    showOutsideDays={false}
+                    captionLayout="dropdown"
+                    buttonVariant="ghost"
+                    hideNav
+                    locale={dfLocale}
+                  />
+                </Suspense>
+              ) : null}
             </PopoverContent>
           </Popover>
         </div>
@@ -176,3 +188,8 @@ export default function HybridDatePicker({
     </div>
   )
 }
+
+// Ленивая загрузка именованного экспорта через маппинг на default
+const LazyCalendar = lazy(() =>
+  import('@/components/ui/calendar').then(mod => ({ default: mod.Calendar }))
+)

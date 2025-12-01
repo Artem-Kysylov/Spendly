@@ -69,11 +69,11 @@ const MobileTabBar = () => {
         exit={prefersReduced ? undefined : { opacity: 0, y: 20 }}
         transition={navTransition}
         style={{ willChange: 'opacity, transform' }}
-        className={`${hideForKeyboard ? 'hidden' : ''} fixed bottom-0 left-0 right-0 h-24 pb-safe-bottom border-t border-border bg-white dark:bg-card lg:hidden z-50`}
+        className={`${hideForKeyboard ? 'hidden' : ''} fixed bottom-0 left-0 right-0 h-[106px] pb-safe-bottom border-t border-border bg-white dark:bg-card lg:hidden z-50`}
         aria-label="Bottom navigation"
       >
         {/* 5-элементная сетка: [Дашборд] [Транзакции] [FAB +] [Бюджеты] [AI] */}
-        <ul className="h-full grid grid-cols-5 pt-1 -translate-y-[5px]">
+        <ul className="h-full grid grid-cols-5 pt-1 -translate-y-[15px]">
           {/* Дашборд */}
           <li className="flex items-center justify-center">
             <Link
@@ -104,7 +104,7 @@ const MobileTabBar = () => {
             </Link>
           </li>
 
-          {/* Центральный FAB (+) — чуть меньше, по центру + подпись */}
+          {/* Центральный FAB (+) — без подписи */}
           <li className="flex items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-0.5">
               <button
@@ -114,12 +114,8 @@ const MobileTabBar = () => {
               >
                 <Plus className="w-6 h-6 block" />
               </button>
-              <span className="text-[8px] font-light text-muted-foreground">
-                {tLayout('sidebar.addTransaction')}
-              </span>
             </div>
           </li>
-
           {/* Бюджеты */}
           <li className="flex items-center justify-center">
             <Link

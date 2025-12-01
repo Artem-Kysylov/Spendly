@@ -10,6 +10,9 @@ interface Budget {
   amount: number
   type: 'expense' | 'income'
   color_code?: string | null
+  rollover_enabled?: boolean
+  rollover_mode?: 'positive-only' | 'allow-negative' | null
+  rollover_cap?: number | null
 }
 
 export const useBudgets = () => {
@@ -24,7 +27,7 @@ export const useBudgets = () => {
       setIsLoading(true)
       const { data, error } = await supabase
         .from('budget_folders')
-        .select('id, emoji, name, amount, type, color_code')
+        .select('*')
         .eq('user_id', session.user.id)
         .order('name', { ascending: true })
 

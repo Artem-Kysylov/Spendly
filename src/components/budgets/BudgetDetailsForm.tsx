@@ -6,6 +6,7 @@ import TextInput from '../ui-elements/TextInput'
 import Button from '../ui-elements/Button'
 import HybridDatePicker from '../ui-elements/HybridDatePicker'
 import { useTranslations } from 'next-intl'
+import { Plus } from 'lucide-react'
 
 
 // Import types
@@ -103,6 +104,7 @@ const BudgetDetailsForm = ({ onSubmit, isSubmitting }: BudgetDetailsFormProps) =
             text={tTransactions('addTransaction')}
             disabled={isSubmitting || !transactionTitle || !amount}
             isLoading={isSubmitting}
+            icon={<Plus className="h-4 w-4" />}
           />
         </motion.div>
       </motion.form>

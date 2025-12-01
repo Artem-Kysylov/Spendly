@@ -10,14 +10,14 @@ type Props = {
   className?: string
 }
 
-const LANGUAGES: Array<{ code: Language; label: string }> = [
-  { code: 'en', label: 'English' },
-  { code: 'uk', label: 'Українська' },
-  { code: 'ru', label: 'Русский (СНГ)' },
-  { code: 'hi', label: 'हिन्दी' },
-  { code: 'id', label: 'Bahasa Indonesia' },
-  { code: 'ja', label: '日本語' },
-  { code: 'ko', label: '한국어' }
+const LANGUAGES: Array<{ code: Language; label: string; emoji: string }> = [
+  { code: 'en', label: 'English', emoji: '🇺🇸' },
+  { code: 'uk', label: 'Українська', emoji: '🇺🇦' },
+  { code: 'ru', label: 'Русский (СНГ)', emoji: '🇷🇺' },
+  { code: 'hi', label: 'हिन्दी', emoji: '🇮🇳' },
+  { code: 'id', label: 'Bahasa Indonesia', emoji: '🇮🇩' },
+  { code: 'ja', label: '日本語', emoji: '🇯🇵' },
+  { code: 'ko', label: '한국어', emoji: '🇰🇷' }
 ]
 
 export default function LanguageSelect({ value, onChange, placeholder = 'Select language', className }: Props) {
@@ -30,7 +30,7 @@ export default function LanguageSelect({ value, onChange, placeholder = 'Select 
       {!value && <option value="" disabled>{placeholder}</option>}
       {LANGUAGES.map((l) => (
         <option key={l.code} value={l.code}>
-          {l.label}
+          {l.emoji} {l.label}
         </option>
       ))}
     </Select>

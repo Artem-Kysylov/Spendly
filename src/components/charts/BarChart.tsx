@@ -159,11 +159,17 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
               margin={{
                 top: 28,
                 right: 0,
-                left: orientation === "horizontal" ? 70 : 8,
-                bottom: isMobile ? 12 : 5, // больше «воздуха» снизу на мобиле
+                left: orientation === "horizontal" ? (isMobile ? 12 : 110) : 8, // меньше слева на мобилке
+                bottom: isMobile ? 12 : 5,
               }}
             >
-              {showGrid && <CartesianGrid strokeDasharray="3 3" />}
+              {showGrid && (
+                <CartesianGrid
+                  strokeDasharray="2 4"
+                  stroke="hsl(var(--muted-foreground))"
+                  opacity={0.3} // сетка заметна, но мягкая
+                />
+              )}
               {orientation === "horizontal" ? (
                 <>
                   <XAxis 
@@ -182,7 +188,8 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
                     tickLine={false}
                     axisLine={false}
                     tickFormatter={formatXAxisLabel}
-                    width={90}
+                    width={isMobile ? 90 : 120}  // компактнее на мобилке
+                    tickMargin={6}
                   />
                 </>
               ) : (

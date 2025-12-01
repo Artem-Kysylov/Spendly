@@ -21,6 +21,9 @@ export class ChartCacheManager {
       }),
       this.queryClient.invalidateQueries({
         queryKey: chartQueryKeys.aggregated(filters, filters.period)
+      }),
+      this.queryClient.invalidateQueries({
+        queryKey: [...chartQueryKeys.all, 'rollover', `${filters.startDate.toISOString()}_${filters.endDate.toISOString()}`]
       })
     ])
   }

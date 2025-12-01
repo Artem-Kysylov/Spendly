@@ -2,6 +2,7 @@
 
 // Import components 
 import Button from '../ui-elements/Button'
+import { Plus } from 'lucide-react'
 
 interface EmptyStateProps {
   title: string
@@ -20,7 +21,8 @@ const EmptyState = ({ title, description, buttonText, onButtonClick }: EmptyStat
       <Button 
         variant="primary"
         text={buttonText}
-        onClick={onButtonClick} 
+        onClick={onButtonClick}
+        icon={<Plus className="h-4 w-4" />} 
       />
     </div>  
   )

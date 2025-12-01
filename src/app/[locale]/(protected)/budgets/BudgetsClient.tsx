@@ -19,6 +19,8 @@ import useDeviceType from '@/hooks/useDeviceType'
 import { useTransactionsData } from '@/hooks/useTransactionsData'
 import BudgetComparisonChart from '@/components/budgets/BudgetComparisonChart'
 import { BarChart3 } from 'lucide-react'
+import { getPreviousMonthRange } from '@/lib/dateUtils'
+import { computeCarry } from '@/lib/budgetRollover'
 export default function BudgetsClient() {
   const { session } = UserAuth()
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
@@ -90,13 +92,17 @@ export default function BudgetsClient() {
     name: string,
     amount: number,
     type: 'expense' | 'income',
-    color_code?: string | null
+    color_code?: string | null,
+    rolloverEnabled?: boolean,
+    rolloverMode?: 'positive-only' | 'allow-negative',
+    rolloverCap?: number | null
   ): Promise<void> => {
     if (!session?.user?.id) {
       throw new Error('Not authenticated')
     }
     try {
-      const { error } = await supabase
+      // первичная попытка — с колонками переноса
+      const { error: insertErr } = await supabase
         .from('budget_folders')
         .insert({
           user_id: session.user.id,
@@ -105,11 +111,26 @@ export default function BudgetsClient() {
           amount,
           type,
           color_code: color_code ?? null,
+          rollover_enabled: type === 'expense' ? !!rolloverEnabled : false,
+          rollover_mode: type === 'expense' ? (rolloverMode ?? 'positive-only') : null,
+          rollover_cap: type === 'expense' ? (rolloverCap ?? null) : null,
         })
         .select()
-
-      if (error) {
-        throw error
+      if (insertErr) {
+        // если колонок нет — повторяем без них
+        console.warn('Insert with rollover fields failed, retrying without:', insertErr?.message)
+        const { error: fallbackErr } = await supabase
+          .from('budget_folders')
+          .insert({
+            user_id: session.user.id,
+            emoji,
+            name,
+            amount,
+            type,
+            color_code: color_code ?? null,
+          })
+          .select()
+        if (fallbackErr) throw fallbackErr
       }
 
       handleToastMessage(tBudgets('list.toast.createSuccess'), 'success')
@@ -132,8 +153,62 @@ export default function BudgetsClient() {
     }))
   }, [budgetFolders, spentByBudget])
 
+  const [prevSpentByBudget, setPrevSpentByBudget] = useState<Record<string, number>>({})
+  const [rolloverPreviewById, setRolloverPreviewById] = useState<Record<string, number>>({})
+
+  useEffect(() => {
+    const fetchPrevMonthSpent = async () => {
+      if (!session?.user?.id) return
+      const { start, end } = getPreviousMonthRange()
+      const { data, error } = await supabase
+        .from('transactions')
+        .select('amount, type, budget_folder_id, created_at')
+        .eq('user_id', session.user.id)
+        .gte('created_at', start.toISOString())
+        .lte('created_at', end.toISOString())
+      if (error) {
+        console.error('Error fetching previous month transactions:', error)
+        return
+      }
+      const acc: Record<string, number> = {}
+      for (const t of data || []) {
+        if (t.type === 'expense' && t.budget_folder_id) {
+          acc[t.budget_folder_id] = (acc[t.budget_folder_id] || 0) + t.amount
+        }
+      }
+      setPrevSpentByBudget(acc)
+    }
+    fetchPrevMonthSpent()
+  }, [session?.user?.id])
+
+  useEffect(() => {
+    const next: Record<string, number> = {}
+    for (const folder of budgetFolders) {
+      if (folder.type === 'expense') {
+        const prev = prevSpentByBudget[folder.id] || 0
+        const mode = (folder as any).rollover_mode ?? 'positive-only'
+        const cap = (folder as any).rollover_cap ?? null
+        const enabled = (folder as any).rollover_enabled ?? true
+        next[folder.id] = enabled ? computeCarry(folder.amount, prev, mode, cap) : 0
+      }
+    }
+    setRolloverPreviewById(next)
+  }, [budgetFolders, prevSpentByBudget])
+
+  const rolloverTotals = useMemo(() => {
+    let positive = 0
+    let negative = 0
+    for (const folder of budgetFolders) {
+      const carry = rolloverPreviewById[folder.id]
+      if (typeof carry !== 'number') continue
+      if (carry >= 0) positive += carry
+      else negative += -carry
+    }
+    return { positive, negative }
+  }, [budgetFolders, rolloverPreviewById])
+
   return (
-    <div className='mt-[30px] px-5 pb-20'>
+    <div className='mt-[30px] px-4 md:px-5 pb-20'>
       {toastMessage && <ToastMessage text={toastMessage.text} type={toastMessage.type} />}
       {showUpgrade && <UpgradeCornerPanel />}
 
@@ -155,7 +230,7 @@ export default function BudgetsClient() {
         ) : (
           <div className="space-y-3">
             <button
-              className="w-full px-4 py-3 rounded-lg bg-card border border-primary transition-colors flex items-center justify-between"
+              className="h-[60px] w-full px-4 rounded-lg bg-card border border-border transition-colors flex items-center justify-between"
               onClick={() => setIsAnalyticsOpen((v) => !v)}
             >
               <span className="text-sm font-medium flex items-center gap-2 text-foreground">
@@ -248,24 +323,24 @@ export default function BudgetsClient() {
             key={folder.id} 
             style={{ willChange: 'opacity, transform' }} 
             className={`w-full cursor-pointer ${hoveredIndex === index ? 'ring-2 ring-primary/80 bg-primary/5 scale-[1.01] transition' : ''}`}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 + (index * 0.1) }}
           >
-            <Link href={{ pathname: '/budgets/[id]', params: { id: String(folder.id) } }}>
-              <BudgetFolderItem 
+            {/* типизированный маршрут для next-intl */}
+            <Link href={{ pathname: '/budgets/[id]', params: { id: folder.id } }}>
+              <BudgetFolderItem
                 id={folder.id}
                 emoji={folder.emoji}
                 name={folder.name}
                 amount={folder.amount}
                 type={folder.type}
-                color_code={folder.color_code ?? null}
+                color_code={folder.color_code}
+                rolloverPreviewCarry={rolloverPreviewById[folder.id]}
               />
             </Link>
           </motion.div>
         ))}
       </motion.div>
 
+      {/* Модалка создания */}
       {isModalOpen && (
         <NewBudgetModal
           title={tBudgets('list.modal.createTitle')}

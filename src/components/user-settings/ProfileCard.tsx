@@ -38,12 +38,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="p-3 md:p-6">
         <CardTitle className="text-lg font-semibold text-secondary-black dark:text-white">
           {tProfile('title')}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="p-3 md:p-6 pt-0 space-y-6">
         {/* Avatar Section */}
         <div className="flex flex-col md:flex-row md:items-center gap-6">
           <div className="flex-shrink-0">

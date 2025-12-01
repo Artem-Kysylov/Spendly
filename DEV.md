@@ -39,3 +39,14 @@ Risks and rollback:
 - To set up a runner quickly: add Vitest and run `npm run test` (optional).
 - Health-check endpoint `/api/llm/health` logs duration and provider.
 - For perf, enable `LLM_DEBUG=1` and inspect SSE length, durations.
+
+## Stacked Sheets (Drawer vs Dialog)
+
+- Mobile: формы транзакций/бюджетов рендерим как full‑screen `Sheet` (`h-[95dvh]`, `overflow-y-auto`, `pb-[env(safe-area-inset-bottom)]`, `z-[10000]`).
+- Desktop: сохраняем `Dialog` без изменений.
+- Вложенный календарь в `HybridDatePicker`:
+  - Mobile: отдельная шторка `Sheet` поверх формы (`z-[10010]`), lazy‑load `Calendar`.
+  - Desktop: `Popover` рядом с модалкой, календарь грузится лениво при открытии.
+- Фокус: при открытии вложенной шторки переносим фокус внутрь, при закрытии — возвращаем на поле даты.
+- Фича‑флаг: `NEXT_PUBLIC_ENABLE_MOBILE_SHEETS=true|false` — быстро отключить drawer‑режим на мобайле.
+- d/vh: используем `dvh` для корректного поведения с мобильной клавиатурой.

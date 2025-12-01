@@ -22,6 +22,8 @@ import ToneSettings from '@/components/ai-assistant/ToneSettings'
 import TransactionTemplatesSettings from '@/components/user-settings/TransactionTemplatesSettings'
 import { useSubscription } from '@/hooks/useSubscription'
 import UnsubscribeModal from '@/components/modals/UnsubscribeModal'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet'
+import { LogOut } from 'lucide-react'
 
 export default function UserSettingsClient() {
   const { signOut, session } = UserAuth()
@@ -53,6 +55,7 @@ export default function UserSettingsClient() {
   // Unsubscribe modal state
   const [isUnsubscribeOpen, setIsUnsubscribeOpen] = useState(false)
   const [isUnsubscribing, setIsUnsubscribing] = useState(false)
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false)
 
   useEffect(() => {
     if (typeof document !== 'undefined') {
@@ -119,7 +122,7 @@ export default function UserSettingsClient() {
 
   return (
     <>
-      <div className="flex flex-col gap-6 px-5 pb-[30px]">
+      <div className="flex flex-col gap-6 px-4 md:px-5 pb-24">
         <div className="w-full">
           {/* Page Header */}
           <motion.div
@@ -151,43 +154,8 @@ export default function UserSettingsClient() {
             {/* Profile Section */}
             <ProfileCard onEditProfile={handleEditProfile} />
 
-            {/* Appearance Section */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">
-                    {tSettings('appearance.title')}
-                  </h2>
-                  <p className="text-sm text-gray-600 dark:text-white">
-                    {tSettings('appearance.description')}
-                  </p>
-                </div>
-                <ThemeSwitcher />
-              </div>
-            </div>
-
-            {/* Notifications Section */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-secondary-black mb-2 dark:text-white">
-                  {tSettings('notifications.title')}
-                </h2>
-                <p className="text-gray-600 dark:text-white text-sm">
-                  {tSettings('notifications.description')}
-                </p>
-              </div>
-              <NotificationSettings />
-            </div>
-
-
-
-            {/* Transaction Templates Section */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
-              <TransactionTemplatesSettings />
-            </div>
-
-            {/* Subscription Section */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
+            {/* Subscription Section — мобильный паддинг 12px */}
+            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
@@ -208,13 +176,10 @@ export default function UserSettingsClient() {
                   {subscriptionPlan === 'pro' ? tPricing('pro.label') : tPricing('free.label')}
                 </span>
               </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Free */}
-                <div className="rounded-lg border border-gray-200 dark:border-border p-5">
-                  <h3 className="font-medium text-secondary-black dark:text-white">
-                    {tPricing('free.label')}
-                  </h3>
+                <div className="rounded-lg border border-gray-200 dark:border-border p-3 md:p-5">
+                  <h3 className="font-medium text-secondary-black dark:text-white">{tPricing('free.label')}</h3>
                   <p className="text-sm text-gray-600 dark:text-white mt-1">{tPricing('free.short')}</p>
                   <div className="mt-4">
                     <div className="text-2xl font-semibold text-secondary-black dark:text-white">$0</div>
@@ -226,9 +191,8 @@ export default function UserSettingsClient() {
                     <li>• {tPricing('free.features.notifications')}</li>
                   </ul>
                 </div>
-
                 {/* Pro */}
-                <div className="rounded-lg border border-primary dark:border-primary p-5 bg-primary/5 dark:bg-primary/10">
+                <div className="rounded-lg border border-primary dark:border-primary p-3 md:p-5 bg-primary/5 dark:bg-primary/10">
                   <h3 className="font-medium text-secondary-black dark:text-white">{tPricing('pro.label')}</h3>
                   <p className="text-sm text-gray-600 dark:text-white mt-1">{tPricing('pro.short')}</p>
                   <div className="mt-4">
@@ -243,25 +207,16 @@ export default function UserSettingsClient() {
                     <li>• {tPricing('pro.features.earlyAccess')}</li>
                   </ul>
                   <div className="mt-5">
-                    <Link href={{ pathname: '/payment' }} className="inline-flex">
-                      <Button text={tCTA('upgradeToPro')} variant="primary" />
+                    <Link href={{ pathname: '/payment' }} className="inline-flex w-full">
+                      <Button text={tCTA('upgradeToPro')} variant="primary" className="w-full" />
                     </Link>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Assistant Tone Section */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-secondary-black dark:text-white">{tAI('settings.title')}</h2>
-                <p className="text-sm text-gray-600 dark:text-white mt-1">{tAI('settings.description')}</p>
-              </div>
-              <ToneSettings />
-            </div>
-
-            {/* Language Section */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
+            {/* Language Section — мобильный паддинг 12px */}
+            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
@@ -276,9 +231,57 @@ export default function UserSettingsClient() {
               </div>
             </div>
 
-            {/* App Controls Section */}
+            {/* Appearance Section — мобильный паддинг 12px */}
+            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">
+                    {tSettings('appearance.title')}
+                  </h2>
+                  <p className="text-sm text-gray-600 dark:text-white">
+                    {tSettings('appearance.description')}
+                  </p>
+                </div>
+                <ThemeSwitcher />
+              </div>
+            </div>
+
+            {/* Notifications Section — теперь открывается в Sheet */}
+            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-secondary-black mb-2 dark:text-white">
+                    {tSettings('notifications.title')}
+                  </h2>
+                  <p className="text-gray-600 dark:text-white text-sm">
+                    {tSettings('notifications.description')}
+                  </p>
+                </div>
+                <Button
+                  text={tSettings('notifications.title')}
+                  variant="default"
+                  onClick={() => setIsNotificationsOpen(true)}
+                />
+              </div>
+            </div>
+
+            {/* Transaction Templates Section — мобильный паддинг 12px */}
+            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+              <TransactionTemplatesSettings />
+            </div>
+
+            {/* Assistant Tone Section — мобильный паддинг 12px */}
+            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+              <div className="mb-6">
+                <h2 className="text-lg font-semibold text-secondary-black dark:text-white">{tAI('settings.title')}</h2>
+                <p className="text-sm text-gray-600 dark:text-white mt-1">{tAI('settings.description')}</p>
+              </div>
+              <ToneSettings />
+            </div>
+
+            {/* App Controls Section — мобильный паддинг 12px */}
             {!isPWAInstalled && (
-              <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
+              <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">
@@ -291,15 +294,15 @@ export default function UserSettingsClient() {
               </div>
             )}
 
-            {/* Account Section */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
+            {/* Account Section — мобильный паддинг 12px и без нижнего дивайдера */}
+            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
               <div className="space-y-6">
                 <div>
                   <h2 className="text-lg font-semibold text-secondary-black mb-4 dark:text-white">
                     {tSettings('account.title')}
                   </h2>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center justify-between py-3">
                       <div>
                         <h3 className="font-medium text-secondary-black dark:text-white">
                           {tSettings('account.signOut.title')}
@@ -310,8 +313,8 @@ export default function UserSettingsClient() {
                       </div>
                       <Button
                         text={tCTA('signOut')}
-                        variant="outline"
-                        className="bg-transparent text-red-600 border-red-600 hover:bg-red-600 hover:text-white hover:border-red-600 dark:hover:bg-red-600"
+                        variant="ghost"
+                        icon={<LogOut size={16} />}
                         onClick={openSignOutModal}
                       />
                     </div>
@@ -320,11 +323,11 @@ export default function UserSettingsClient() {
               </div>
             </div>
 
-            {/* Danger Zone Section (только для Pro) */}
+            {/* Danger Zone Section — мобильный паддинг 12px */}
             {subscriptionPlan === 'pro' && (
-              <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-6">
+              <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
                 <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
+                  <h2 className="text-lg font-semibold text-red-600 dark:text-red-400">
                     {tSettings('dangerZone.title')}
                   </h2>
                   <p className="text-sm text-gray-600 dark:text-white">{tSettings('dangerZone.description')}</p>
@@ -367,6 +370,25 @@ export default function UserSettingsClient() {
           isLoading={isUnsubscribing}
         />
       )}
+
+      {/* Notifications Sheet — без изменений */}
+      <Sheet open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
+        <SheetContent side="bottom" className="bg-background text-foreground h-[75vh]">
+          <SheetHeader className="px-4 py-4 border-b border-border justify-center">
+            <SheetTitle className="text-[18px] sm:text-[20px] font-semibold text-center">
+              {tSettings('notifications.title')}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="p-4">
+            <NotificationSettings />
+          </div>
+          <SheetFooter className="px-4 py-3 border-t border-border">
+            <SheetClose className="h-10 px-4 w-full rounded-md border border-input bg-background text-sm text-center">
+              {tCommon('close')}
+            </SheetClose>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </>
   )
 }

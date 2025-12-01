@@ -475,6 +475,13 @@
     }
   },
   "budgets": {
+        "rollover": {
+            "panelTitle": "繰越",
+            "toggleLabel": "繰越を有効にする",
+            "modeLabel": "モード",
+            "positiveOnly": "正のみ",
+            "allowNegative": "負を許可"
+        },
     "list": {
       "modal": {
         "createTitle": "新しい予算を作成💸"

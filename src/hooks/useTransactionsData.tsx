@@ -116,21 +116,39 @@ export const useTransactionsData = (initialFilters?: Partial<ChartFilters>): Use
       endDate.setDate(startDate.getDate() + 6)
       endDate.setHours(23, 59, 59, 999)
     } else {
-      // Текущий месяц
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-      endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+      // Выбранный месяц (по умолчанию текущий)
+      const year = filters.selectedYear ?? now.getFullYear()
+      const month = filters.selectedMonth ?? now.getMonth()
+      startDate = new Date(year, month, 1)
+      endDate = new Date(year, month + 1, 0, 23, 59, 59, 999)
     }
 
-    // Фильтруем транзакции по дате и типу
-    return allTransactions.filter(transaction => {
-      const transactionDate = new Date(transaction.created_at)
-      const isInDateRange = transactionDate >= startDate && transactionDate <= endDate
-      const isCorrectType = filters.dataType === 'Expenses' 
-        ? transaction.type === 'expense' 
-        : transaction.type === 'income'
-      
-      return isInDateRange && isCorrectType
-    })
+    // хелпер для отфильтровки по диапазону и типу
+    const filterByRangeAndType = (rangeStart: Date, rangeEnd: Date) => {
+      return allTransactions.filter(transaction => {
+        const transactionDate = new Date(transaction.created_at)
+        const isInDateRange = transactionDate >= rangeStart && transactionDate <= rangeEnd
+        const isCorrectType = filters.dataType === 'Expenses' 
+          ? transaction.type === 'expense' 
+          : transaction.type === 'income'
+        return isInDateRange && isCorrectType
+      })
+    }
+
+    let result = filterByRangeAndType(startDate, endDate)
+
+    // Фолбэк: если выбран "Month" и текущий месяц пуст — показать предыдущий месяц
+    if (filters.period === 'Month' && result.length === 0) {
+      const baseYear = startDate.getFullYear()
+      const baseMonth = startDate.getMonth()
+      const prevMonth = (baseMonth + 11) % 12
+      const prevYear = baseMonth === 0 ? baseYear - 1 : baseYear
+      const prevStart = new Date(prevYear, prevMonth, 1)
+      const prevEnd = new Date(prevYear, prevMonth + 1, 0, 23, 59, 59, 999)
+      result = filterByRangeAndType(prevStart, prevEnd)
+    }
+
+    return result
   }, [allTransactions, filters])
 
   // Мемоизированные данные для чарта

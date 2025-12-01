@@ -19,10 +19,12 @@ import type { EditTransactionPayload } from '@/types/types'
 import { useTranslations } from 'next-intl'
 import TransactionModal from '@/components/modals/TransactionModal'
 import Button from '@/components/ui-elements/Button'
+import { Plus } from 'lucide-react'
+import MobileTransactionsList from '@/components/chunks/MobileTransactionsList'
 
 export default function BudgetDetailsClient() {
   const { budgetId } = useParams<{ budgetId: string }>()
-  const id = budgetId
+  const id = budgetId as string
   const router = useRouter()
   const { session } = UserAuth()
 
@@ -56,7 +58,7 @@ export default function BudgetDetailsClient() {
       setIsLoading(true)
       const { data, error } = await supabase
         .from('budget_folders')
-        .select('emoji, name, amount, type, color_code')
+        .select('*')
         .eq('id', id)
         .eq('user_id', session.user.id)
         .single()
@@ -172,22 +174,42 @@ export default function BudgetDetailsClient() {
     name: string,
     amount: number,
     type: 'expense' | 'income',
-    color_code?: string | null
+    color_code?: string | null,
+    rolloverEnabled?: boolean,
+    rolloverMode?: 'positive-only' | 'allow-negative',
+    rolloverCap?: number | null
   ) => {
     if (!session?.user?.id || !id) return
     try {
       setIsSubmitting(true)
-      const { error } = await supabase
+      const { error: updateErr } = await supabase
         .from('budget_folders')
-        .update({ emoji, name, amount, type, color_code: color_code ?? null })
+        .update({
+          emoji,
+          name,
+          amount,
+          type,
+          color_code: color_code ?? null,
+          rollover_enabled: type === 'expense' ? !!rolloverEnabled : false,
+          rollover_mode: type === 'expense' ? (rolloverMode ?? 'positive-only') : null,
+          rollover_cap: type === 'expense' ? (rolloverCap ?? null) : null,
+        })
         .eq('id', id)
         .eq('user_id', session.user.id)
-
-      if (error) {
-        handleToastMessage(tBudgets('details.toast.updateFailed'), 'error')
-        return
+  
+      if (updateErr) {
+        console.warn('Update with rollover fields failed, retrying without:', updateErr?.message)
+        const { error: fallbackErr } = await supabase
+          .from('budget_folders')
+          .update({ emoji, name, amount, type, color_code: color_code ?? null })
+          .eq('id', id)
+          .eq('user_id', session.user.id)
+        if (fallbackErr) {
+          handleToastMessage(tBudgets('details.toast.updateFailed'), 'error')
+          return
+        }
       }
-
+  
       handleToastMessage(tBudgets('details.toast.updateSuccess'), 'success')
       closeEditModal()
       fetchBudgetDetails()
@@ -263,7 +285,7 @@ export default function BudgetDetailsClient() {
   }
 
   return (
-    <div className="px-5 mt-[30px] space-y-6">
+    <div className="px-4 md:px-5 mt-[30px] space-y-6">
       {toastMessage && <ToastMessage text={toastMessage.text} type={toastMessage.type} />}
 
       <BudgetDetailsControls
@@ -271,7 +293,7 @@ export default function BudgetDetailsClient() {
         onEditClick={openEditModal}
       />
 
-      {/* Мобильная версия: инфо + кнопка открытия модалки */}
+      {/* Мобильная версия: инфо + кнопка + список транзакций по группам */}
       <div className="block md:hidden">
         <div className="grid grid-cols-1 gap-6 items-stretch">
           <BudgetDetailsInfo
@@ -288,12 +310,21 @@ export default function BudgetDetailsClient() {
               variant="default"
               className="w-full"
               onClick={() => setIsAddModalOpen(true)}
+              icon={<Plus className="h-4 w-4" />}
+            />
+          </div>
+          <div>
+            <MobileTransactionsList
+              transactions={transactions}
+              onDeleteTransaction={handleDeleteTransaction}
+              onEditTransaction={handleEditTransaction}
+              allowTypeChange={false}
             />
           </div>
         </div>
       </div>
 
-      {/* Десктопная версия: инфо + форма */}
+      {/* Десктопная версия: инфо + форма + таблица */}
       <div className="hidden md:grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         <BudgetDetailsInfo
           id={id}
@@ -309,11 +340,13 @@ export default function BudgetDetailsClient() {
         />
       </div>
 
-      <TransactionsTable
-        transactions={transactions}
-        onDeleteTransaction={handleDeleteTransaction}
-        onEditTransaction={handleEditTransaction}
-      />
+      <div className="hidden md:block">
+        <TransactionsTable
+          transactions={transactions}
+          onDeleteTransaction={handleDeleteTransaction}
+          onEditTransaction={handleEditTransaction}
+        />
+      </div>
 
       {isDeleteModalOpen && (
         <DeleteModal
@@ -334,6 +367,8 @@ export default function BudgetDetailsClient() {
             amount: budgetDetails.amount,
             type: budgetDetails.type,
             color_code: budgetDetails.color_code ?? null,
+            rolloverEnabled: budgetDetails.rolloverEnabled ?? (budgetDetails as any).rollover_enabled ?? true,
+            rolloverMode: budgetDetails.rolloverMode ?? (budgetDetails as any).rollover_mode ?? 'positive-only'
           }}
           onClose={closeEditModal}
           onSubmit={handleUpdateBudget}
@@ -346,7 +381,7 @@ export default function BudgetDetailsClient() {
         <TransactionModal
           title={tTransactions('modal.addTitle')}
           onClose={() => setIsAddModalOpen(false)}
-          onSubmit={(message, type) => {
+          onSubmit={(message: string, type: ToastMessageProps['type']) => {
             handleToastMessage(message, type)
             fetchTransactions()
           }}

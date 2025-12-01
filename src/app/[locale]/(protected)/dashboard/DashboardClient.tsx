@@ -18,14 +18,18 @@ import { ChartsContainer } from '@/components/charts/ChartsContainer'
 import Button from '@/components/ui-elements/Button'
 import TransactionModal from '@/components/modals/TransactionModal'
 import { Plus } from 'lucide-react'
+import DateHeader from '@/components/chunks/DateHeader'
+
+
 
 import useModal from '@/hooks/useModal'
 import useCheckBudget from '@/hooks/useCheckBudget'
 
 import { ToastMessageProps, Transaction } from '@/types/types'
 import type { EditTransactionPayload } from '@/types/types'
+import MobileTransactionCard from '@/components/chunks/MobileTransactionCard'
 
-const DashboardClient = () => {
+function DashboardClient() {
   const { session } = UserAuth()
   const router = useRouter()  
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -164,7 +168,7 @@ const DashboardClient = () => {
             <ToastMessage text={toastMessage.text} type={toastMessage.type} />
           )}
           <motion.div
-            className="flex flex-col items-center gap-5 text-center mt-[30px] px-5 md:flex-row md:justify-between md:text-left"
+            className="flex flex-col items-center gap-5 text-center mt-[30px] px-4 md:px-5 md:flex-row md:justify-between md:text-left"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
@@ -197,7 +201,7 @@ const DashboardClient = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.28 }}
-            className="mt-[30px] px-5 flex flex-col gap-5"
+            className="mt-[30px] px-4 md:px-5 flex flex-col gap-5"
           >
             <Counters onIconClick={handleIconClick} refreshTrigger={refreshCounters} />
 
@@ -218,7 +222,7 @@ const DashboardClient = () => {
                 title={tTransactions('empty.title')}
                 description={tTransactions('empty.description')}
                 buttonText={tTransactions('addTransaction')}
-                onButtonClick={openAddModal} // при пустом списке открыть модалку
+                onButtonClick={openAddModal}
               />
             ) : (
               <motion.div
@@ -228,15 +232,57 @@ const DashboardClient = () => {
                 transition={{ duration: 0.28 }}
                 className="mt-8"
               >
-                <TransactionsTable 
-                  transactions={transactions} 
-                  onDeleteTransaction={handleDeleteTransaction}
-                  deleteModalConfig={{ 
-                    title: tDashboard('deleteModal.title'), 
-                    text: tDashboard('deleteModal.prompt') 
-                  }}
-                  onEditTransaction={handleEditTransaction}
-                />
+                {/* Мобильный дашборд: последние 5 транзакций, заголовок и Show all */}
+                <div className="block md:hidden space-y-2">
+                  {(() => {
+                    const last5 = transactions.slice(0, 5)
+                    const headerDate = last5[0]?.created_at
+                    return (
+                      <>
+                        {headerDate && <DateHeader date={headerDate} />}
+                        <div className="space-y-1">
+                          {last5.map((t, i) => (
+                            <div key={t.id} className="border-b border-border last:border-b-0">
+                              <MobileTransactionCard 
+                                transaction={t}
+                                onEdit={(tx) => handleEditTransaction({
+                                  id: tx.id,
+                                  title: tx.title,
+                                  amount: tx.amount,
+                                  type: tx.type,
+                                  budget_folder_id: tx.budget_folder_id ?? null,
+                                  created_at: tx.created_at
+                                })}
+                                onDelete={(id) => handleDeleteTransaction(id)}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        <div className="mt-3">
+                          <Button
+                            text="Show all"
+                            variant="default"
+                            className="w-full"
+                            onClick={() => router.push('/transactions')}
+                          />
+                        </div>
+                      </>
+                    )
+                  })()}
+                </div>
+
+                {/* Десктоп: полная таблица транзакций */}
+                <div className="hidden md:block">
+                  <TransactionsTable 
+                    transactions={transactions} 
+                    onDeleteTransaction={handleDeleteTransaction}
+                    deleteModalConfig={{ 
+                      title: tDashboard('deleteModal.title'), 
+                      text: tDashboard('deleteModal.prompt') 
+                    }}
+                    onEditTransaction={handleEditTransaction}
+                  />
+                </div>
               </motion.div>
             )}
           </motion.div>

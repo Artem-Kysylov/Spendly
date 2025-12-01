@@ -102,7 +102,7 @@ export default function TransactionsClient() {
 
   if (error) {
     return (
-      <div className="flex flex-col gap-6 px-5">
+      <div className="flex flex-col gap-6 px-4 md:px-5">
         <div className="flex items-center justify-center mt-[30px]">
           <div className="text-destructive">{tCommon('errorLabel')}: {String(error)}</div>
         </div>
@@ -111,7 +111,7 @@ export default function TransactionsClient() {
   }
 
   return (
-    <div className="flex flex-col gap-6 px-5">
+    <div className="flex flex-col gap-6 px-4 md:px-5">
       {toastMessage && (
         <ToastMessage text={toastMessage.text} type={toastMessage.type} />
       )}

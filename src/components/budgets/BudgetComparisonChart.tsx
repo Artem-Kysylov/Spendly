@@ -35,13 +35,14 @@ export default function BudgetComparisonChart({
       description={description}
       showGrid
       showTooltip
-      height={280}
+      height={Math.max(280, Math.min(600, data.length * 40))}
       currency={currency}
       isLoading={isLoading}
       error={error}
       className={className}
       onBarHover={onBarHover}
       onBarLeave={onBarLeave}
+      orientation="horizontal"  // горизонтальный график для страницы бюджетов
     />
   )
 }
