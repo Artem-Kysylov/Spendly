@@ -66,14 +66,14 @@ function BudgetDetailsInfo({ id, emoji, name, amount, type, color_code }: Budget
 
   return (
     <motion.div 
-      className='flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg min-h-[300px] h-full self-stretch bg-card p-[20px] w-full max-w-full overflow-hidden'
+      className='flex flex-col items-center justify-center gap-[6px] md:gap-[8px] border border-border rounded-lg min-h-[160px] md:min-h-[300px] h-full self-stretch bg-card p-[12px] md:p-[20px] w-full max-w-full overflow-hidden'
       style={{ backgroundColor: bgColor }}
       initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
       <motion.span 
-        className='text-[24px] sm:text-[25px]'
+        className='text-[18px] sm:text-[20px] md:text-[25px]'
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.2, ease: "easeOut" }}
@@ -81,7 +81,7 @@ function BudgetDetailsInfo({ id, emoji, name, amount, type, color_code }: Budget
         {emoji}
       </motion.span>
       <motion.h1 
-        className={`${color_code ? 'text-black dark:text-black' : 'text-secondary-black dark:text-white'} text-[20px] sm:text-[22px] md:text-[25px] font-semibold break-words text-center`}
+        className={`${color_code ? 'text-black dark:text-black' : 'text-secondary-black dark:text-white'} text-[18px] sm:text-[20px] md:text-[25px] font-semibold break-words text-center`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
@@ -89,7 +89,7 @@ function BudgetDetailsInfo({ id, emoji, name, amount, type, color_code }: Budget
         {name}
       </motion.h1>
       <motion.p 
-        className={`${color_code ? 'text-black dark:text-black' : 'text-secondary-black dark:text-white'} text-[20px] sm:text-[22px] md:text-[25px] font-semibold break-words text-center`}
+        className={`${color_code ? 'text-black dark:text-black' : 'text-secondary-black dark:text-white'} text-[18px] sm:text-[20px] md:text-[25px] font-semibold break-words text-center`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.4, ease: "easeOut" }}
@@ -121,7 +121,7 @@ function BudgetDetailsInfo({ id, emoji, name, amount, type, color_code }: Budget
       )}
 
       <motion.div 
-        className="w-full mt-4"
+        className="w-full mt-2 md:mt-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.5, ease: "easeOut" }}

@@ -38,6 +38,7 @@ function DashboardClient() {
   const [refreshCounters, setRefreshCounters] = useState<number>(0) 
   const { isModalOpen, openModal, closeModal } = useModal()
   const { isModalOpen: isAddOpen, openModal: openAddModal, closeModal: closeAddModal } = useModal()
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
 
   const tDashboard = useTranslations('dashboard')
   const tTransactions = useTranslations('transactions')
@@ -122,40 +123,8 @@ function DashboardClient() {
     }
   }
 
-  const handleEditTransaction = async (payload: EditTransactionPayload) => {
-    if (!session?.user?.id) return
-    try {
-      const updateData: any = {
-        title: payload.title,
-        amount: payload.amount,
-        type: payload.type,
-        budget_folder_id: payload.budget_folder_id ?? null,
-      }
-      
-      if (payload.created_at) {
-        updateData.created_at = payload.created_at
-      }
-
-      const { error } = await supabase
-        .from('transactions')
-        .update(updateData)
-        .eq('id', payload.id)
-        .eq('user_id', session.user.id)
-        .select('*')
-
-      if (error) {
-        console.error('Error updating transaction:', error)
-        handleToastMessage(tTransactions('toast.updateFailed'), 'error')
-        return
-      }
-      handleToastMessage(tTransactions('toast.updateSuccess'), 'success')
-      await fetchTransactions()
-      setRefreshCounters(prev => prev + 1) 
-      window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
-    } catch (e) {
-      console.error('Unexpected error during update:', e)
-      handleToastMessage(tCommon('unexpectedError'), 'error')
-    }
+  const openEditModal = (transaction: Transaction) => {
+    setEditingTransaction(transaction)
   }
 
   return (
@@ -241,21 +210,13 @@ function DashboardClient() {
                       <>
                         {headerDate && <DateHeader date={headerDate} />}
                         <div className="space-y-1">
-                          {last5.map((t, i) => (
-                            <div key={t.id} className="border-b border-border last:border-b-0">
-                              <MobileTransactionCard 
-                                transaction={t}
-                                onEdit={(tx) => handleEditTransaction({
-                                  id: tx.id,
-                                  title: tx.title,
-                                  amount: tx.amount,
-                                  type: tx.type,
-                                  budget_folder_id: tx.budget_folder_id ?? null,
-                                  created_at: tx.created_at
-                                })}
-                                onDelete={(id) => handleDeleteTransaction(id)}
-                              />
-                            </div>
+                          {last5.map((t) => (
+                            <MobileTransactionCard
+                              key={t.id}
+                              transaction={t}
+                              onEdit={(tx) => openEditModal(tx)}
+                              onDelete={(id) => handleDeleteTransaction(id)}
+                            />
                           ))}
                         </div>
                         <div className="mt-3">
@@ -270,7 +231,6 @@ function DashboardClient() {
                     )
                   })()}
                 </div>
-
                 {/* Десктоп: полная таблица транзакций */}
                 <div className="hidden md:block">
                   <TransactionsTable 
@@ -280,7 +240,11 @@ function DashboardClient() {
                       title: tDashboard('deleteModal.title'), 
                       text: tDashboard('deleteModal.prompt') 
                     }}
-                    onEditTransaction={handleEditTransaction}
+                    onEditTransaction={async (payload) => {
+                      // Find full transaction object or construct it
+                      const tx = transactions.find(t => t.id === payload.id)
+                      if (tx) openEditModal(tx)
+                    }}
                   />
                 </div>
               </motion.div>
@@ -298,6 +262,16 @@ function DashboardClient() {
             <TransactionModal
               title={tTransactions('modal.addTitle')}
               onClose={closeAddModal}
+              onSubmit={(message, type) => {
+                handleTransactionSubmit(message, type)
+              }}
+            />
+          )}
+          {editingTransaction && (
+            <TransactionModal
+              title={tTransactions('table.modal.editTitle')}
+              initialData={editingTransaction}
+              onClose={() => setEditingTransaction(null)}
               onSubmit={(message, type) => {
                 handleTransactionSubmit(message, type)
               }}

@@ -99,7 +99,7 @@ export default function HybridDatePicker({
           <SheetTrigger>{buttonElMobile}</SheetTrigger>
           <SheetContent
             side="bottom"
-            className="bg-background text-foreground h-[70dvh] z-[10010] pb-[env(safe-area-inset-bottom)]"
+            className="bg-background text-foreground h-auto max-h-[95dvh] overflow-y-auto z-[10010] pb-[env(safe-area-inset-bottom)]"
             overlayClassName="bg-foreground/40"
           >
             <SheetHeader className="px-4 py-4 border-b border-border justify-center">
@@ -144,7 +144,7 @@ export default function HybridDatePicker({
             </div>
 
             <SheetFooter className="px-4 py-3 border-t border-border">
-              <SheetClose className="h-10 px-4 w-full rounded-md border border-input bg-background text-sm text-center">
+              <SheetClose className="h-[60px] md:h-10 px-4 w-full rounded-md border border-input bg-background text-sm text-center">
                 Cancel
               </SheetClose>
             </SheetFooter>

@@ -56,6 +56,12 @@ function BudgetFolderItem({ id, emoji, name, amount, type, color_code, rolloverP
       <h3 className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} text-[16px] font-semibold text-center break-words leading-tight min-w-0`}>
         {name}
       </h3>
+
+      {/* Общая сумма сразу под названием */}
+      <p className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} text-[18px] font-semibold text-center leading-tight`}>
+        {formatCurrency(amount, 'USD')}
+      </p>
+
       {type === 'expense' && typeof rolloverPreviewCarry === 'number' && rolloverPreviewCarry !== 0 && (
         <div
           className={`px-2 py-1 rounded-md text-xs font-semibold ${
@@ -66,6 +72,7 @@ function BudgetFolderItem({ id, emoji, name, amount, type, color_code, rolloverP
           {formatCurrency(Math.abs(rolloverPreviewCarry), 'USD')}
         </div>
       )}
+
       {/* Прогрессбар */}
       <div className="w-full mt-3">
         <BudgetProgressBar
@@ -78,10 +85,7 @@ function BudgetFolderItem({ id, emoji, name, amount, type, color_code, rolloverP
           compact
         />
       </div>
-      {/* Сумма бюджета под прогрессбаром */}
-      <p className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} text-[18px] font-semibold text-center leading-tight`}>
-        ${amount}
-      </p>
+
       {/* Суммы spent/left над текстовыми метками */}
       <div className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} grid grid-cols-2 text-xs w-full`}>
         <span className="font-semibold text-left justify-self-start">

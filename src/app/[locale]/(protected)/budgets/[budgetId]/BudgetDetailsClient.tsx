@@ -280,6 +280,12 @@ export default function BudgetDetailsClient() {
     }
   }
 
+  const handleTransactionUpdateSuccess = async () => {
+    handleToastMessage(tBudgets('details.toast.updateSuccess'), 'success')
+    await fetchTransactions()
+    window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
+  }
+
   if (isLoading) {
     return <Spinner />
   }
@@ -318,6 +324,7 @@ export default function BudgetDetailsClient() {
               transactions={transactions}
               onDeleteTransaction={handleDeleteTransaction}
               onEditTransaction={handleEditTransaction}
+              onTransactionUpdateSuccess={handleTransactionUpdateSuccess}
               allowTypeChange={false}
             />
           </div>

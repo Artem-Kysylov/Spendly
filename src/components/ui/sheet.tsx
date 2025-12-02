@@ -88,15 +88,14 @@ export function SheetContent({
 
   const enterAnim =
     side === 'right'
-      ? { x: 40, opacity: 0 }
+      ? { x: '100%', opacity: 1 }
       : side === 'left'
-      ? { x: -40, opacity: 0 }
+      ? { x: '-100%', opacity: 1 }
       : side === 'top'
-      ? { y: -40, opacity: 0 }
-      : { y: 40, opacity: 0 }
+      ? { y: '-100%', opacity: 1 }
+      : { y: '100%', opacity: 1 }
 
-  const centerAnim =
-    side === 'right' || side === 'left' ? { x: 0, opacity: 1 } : { y: 0, opacity: 1 }
+  const centerAnim = side === 'right' || side === 'left' ? { x: 0 } : { y: 0 }
 
   // Focus trap + Escape
   React.useEffect(() => {
@@ -149,7 +148,7 @@ export function SheetContent({
   }, [open])
 
   return createPortal(
-    <AnimatePresence initial={false}>
+    <AnimatePresence>
       {open && (
         <motion.div
           className="fixed inset-0 z-[100]"
@@ -159,14 +158,14 @@ export function SheetContent({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.35 }}
+          transition={{ duration: 0.4, ease: 'easeInOut' }}
         >
           <motion.div
             className={cn('fixed inset-0 bg-foreground/50 dark:bg-black/70 backdrop-blur-[1px] z-0', overlayClassName)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.35 }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
           />
           <motion.div
             ref={contentRef}
@@ -181,7 +180,11 @@ export function SheetContent({
             initial={enterAnim}
             animate={centerAnim}
             exit={enterAnim}
-            transition={{ ease: 'easeOut', duration: 0.35 }}
+            transition={{
+              type: 'spring',
+              stiffness: 260,
+              damping: 30,
+            }}
             onClick={(e) => e.stopPropagation()}
             {...rest}
           >

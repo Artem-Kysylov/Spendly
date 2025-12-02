@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react'
+// Компонент: TransactionModal
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { UserAuth } from '@/context/AuthContext'
 import { useTranslations } from 'next-intl'
@@ -19,7 +20,7 @@ import { X } from 'lucide-react'
 import type { TransactionModalProps, BudgetFolderItemProps } from '@/types/types'
 import { useFeatureFlags } from '@/hooks/useFeatureFlags'
 
-function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: TransactionModalProps) {
+function TransactionModal({ title, onClose, onSubmit, initialBudgetId, initialData, allowTypeChange = true }: TransactionModalProps) {
   const { session } = UserAuth()
   const tModals = useTranslations('modals')
   const tCommon = useTranslations('common')
@@ -29,10 +30,18 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: Transac
   const { isMobile } = useDeviceType()
   const { toast } = useToast()
   const { mobileSheetsEnabled } = useFeatureFlags()
+  const [internalOpen, setInternalOpen] = useState(true)
 
-  const [transactionTitle, setTransactionTitle] = useState<string>('')
-  const [amount, setAmount] = useState<string>('')
-  const [type, setType] = useState<'expense' | 'income'>('expense')
+  const handleClose = () => {
+    setInternalOpen(false)
+    setTimeout(() => {
+      onClose()
+    }, 450) // Wait for animation
+  }
+
+  const [transactionTitle, setTransactionTitle] = useState<string>(initialData?.title || '')
+  const [amount, setAmount] = useState<string>(initialData?.amount?.toString() || '')
+  const [type, setType] = useState<'expense' | 'income'>(initialData?.type || 'expense')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [saveAsTemplate, setSaveAsTemplate] = useState<boolean>(false)
 
@@ -41,12 +50,25 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: Transac
   >([])
 
   const [recentTitles, setRecentTitles] = useState<string[]>([])
-  const [selectedBudgetId, setSelectedBudgetId] = useState<string>('unbudgeted')
+  const [selectedBudgetId, setSelectedBudgetId] = useState<string>(initialData?.budget_folder_id || initialBudgetId || 'unbudgeted')
   const [budgetFolders, setBudgetFolders] = useState<BudgetFolderItemProps[]>([])
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [isBudgetsLoading, setIsBudgetsLoading] = useState<boolean>(false)
-  const [isTypeDisabled, setIsTypeDisabled] = useState<boolean>(false)
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date())
+  const [isTypeDisabled, setIsTypeDisabled] = useState<boolean>(!allowTypeChange)
+  const [selectedDate, setSelectedDate] = useState<Date>(initialData?.created_at ? new Date(initialData.created_at) : new Date())
+
+  // ref для поля суммы
+  const amountRef = useRef<HTMLInputElement | null>(null)
+
+
+
+  // Фокусируем поле суммы после монтирования
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      amountRef.current?.focus()
+    }, 60)
+    return () => clearTimeout(timer)
+  }, [])
 
   const fetchBudgetFolders = async () => {
     if (!session?.user?.id) return
@@ -151,56 +173,75 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: Transac
 
     try {
       setIsLoading(true)
-      const { data, error } = await supabase
-        .from('transactions')
-        .insert({
-          user_id: session.user.id,
-          title: transactionTitle,
-          amount: Number(amount),
-          type,
-          budget_folder_id: selectedBudgetId === 'unbudgeted' ? null : selectedBudgetId,
-          created_at: selectedDate.toISOString(),
-        })
-        .select()
+      const transactionData = {
+        user_id: session.user.id,
+        title: transactionTitle,
+        amount: Number(amount),
+        type,
+        budget_folder_id: selectedBudgetId === 'unbudgeted' ? null : selectedBudgetId,
+        created_at: selectedDate.toISOString(),
+      }
 
-      if (error) {
-        console.error('Error inserting transaction:', error)
-        onSubmit('Failed to add transaction. Please try again.', 'error')
-      } else {
-        if (saveAsTemplate && session?.user?.id) {
-          const limitReached = templates.length >= 3 // free plan limit — проверка в UI ниже
-          if (limitReached) {
-            toast({
-              title: tModals('transaction.templates.limitTitle'),
-              description: tModals('transaction.templates.limitDescription'),
-              variant: 'destructive'
-            })
-          } else {
-            try {
-              const exists = templates.some(t => normalizeTitle(t.title) === normalizeTitle(transactionTitle))
-              if (!exists) {
-                await supabase.from('transaction_templates').insert({
-                  user_id: session.user.id,
-                  title: transactionTitle,
-                  amount: Number(amount),
-                  type,
-                  budget_folder_id: selectedBudgetId === 'unbudgeted' ? null : selectedBudgetId,
-                })
-              }
-            } catch { /* ignore */ }
-          }
+      if (initialData) {
+        // Update existing transaction
+        const { error } = await supabase
+          .from('transactions')
+          .update(transactionData)
+          .eq('id', initialData.id)
+          .eq('user_id', session.user.id)
+
+        if (error) {
+          console.error('Error updating transaction:', error)
+          onSubmit('Failed to update transaction. Please try again.', 'error')
+        } else {
+          onSubmit('Transaction updated successfully!', 'success')
+          handleClose()
         }
+      } else {
+        // Insert new transaction
+        const { error } = await supabase
+          .from('transactions')
+          .insert(transactionData)
 
-        // Reset form
-        setTransactionTitle('')
-        setAmount('')
-        setType('expense')
-        setSelectedBudgetId('unbudgeted')
-        setSelectedDate(new Date())
-        setIsTypeDisabled(false)
+        if (error) {
+          console.error('Error inserting transaction:', error)
+          onSubmit('Failed to add transaction. Please try again.', 'error')
+        } else {
+          if (saveAsTemplate && session?.user?.id) {
+            const limitReached = templates.length >= 3 // free plan limit — проверка в UI ниже
+            if (limitReached) {
+              toast({
+                title: tModals('transaction.templates.limitTitle'),
+                description: tModals('transaction.templates.limitDescription'),
+                variant: 'destructive'
+              })
+            } else {
+              try {
+                const exists = templates.some(t => normalizeTitle(t.title) === normalizeTitle(transactionTitle))
+                if (!exists) {
+                  await supabase.from('transaction_templates').insert({
+                    user_id: session.user.id,
+                    title: transactionTitle,
+                    amount: Number(amount),
+                    type,
+                    budget_folder_id: selectedBudgetId === 'unbudgeted' ? null : selectedBudgetId,
+                  })
+                }
+              } catch { /* ignore */ }
+            }
+          }
 
-        onClose()
-        onSubmit('Transaction added successfully!', 'success')
+          // Reset form
+          setTransactionTitle('')
+          setAmount('')
+          setType('expense')
+          setSelectedBudgetId('unbudgeted')
+          setSelectedDate(new Date())
+          setIsTypeDisabled(false)
+
+          onSubmit('Transaction added successfully!', 'success')
+          handleClose()
+        }
       }
     } catch (err) {
       console.error('Error:', err)
@@ -222,7 +263,11 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: Transac
   // Мобильная версия: шторка Sheet (под фича‑флагом)
   if (isMobile && mobileSheetsEnabled) {
     return (
-      <Sheet open={true} onOpenChange={(o) => { if (!o) onClose() }}>
+      <Sheet open={internalOpen} onOpenChange={(open) => {
+        if (!open) {
+          handleClose()
+        }
+      }}>
         <SheetContent
           side="bottom"
           className="transaction-modal fixed h-[95dvh] pb-[env(safe-area-inset-bottom)] overflow-y-auto z-[10000]"
@@ -232,7 +277,9 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: Transac
             {/* Drawer handle */}
             <div className="mx-auto mt-2 mb-2 h-1.5 w-12 rounded-full bg-muted" />
             <SheetHeader>
-              <SheetTitle className="text-center">{title}</SheetTitle>
+              <SheetTitle className="text-center text-xl font-semibold w-full">
+                {title} 📉
+              </SheetTitle>
             </SheetHeader>
 
             <div className="mt-[10px] px-4">
@@ -251,6 +298,7 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: Transac
                   onChange={(e) => setAmount(e.target.value)}
                   inputMode="decimal"
                   autoFocus
+                  ref={amountRef}
                   className={`text-3xl font-medium ${type === 'expense' ? 'text-error' : 'text-success'}`}
                 />
 
@@ -317,7 +365,7 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: Transac
                   <Select
                     value={selectedBudgetId}
                     onChange={handleBudgetChange}
-                    className="bg-background text-foreground"
+                    className="bg-background text-foreground h-[60px] px-[20px]"
                   >
                     <option value="unbudgeted">{tModals('transaction.select.unbudgeted')}</option>
                     {filteredBudgets.map((b) => (
@@ -379,8 +427,8 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: Transac
               </form>
             </div>
 
-            <SheetFooter className="px-4">
-              <SheetClose className="h-10 px-4 w-full rounded-md border border-input bg-background text-sm text-center">
+            <SheetFooter className="mt-4 px-4">
+              <SheetClose className="h-[60px] md:h-10 px-4 w-full rounded-md border border-input bg-background text-sm text-center">
                 {tCommon('close')}
               </SheetClose>
             </SheetFooter>
@@ -392,7 +440,11 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: Transac
 
   // Десктопная версия: диалог
   return (
-    <Dialog open={true} onOpenChange={(o) => { if (!o) onClose() }}>
+    <Dialog open={internalOpen} onOpenChange={(open) => {
+      if (!open) {
+        handleClose()
+      }
+    }}>
       <DialogContent className="transaction-modal">
         <DialogHeader>
           <DialogTitle className="text-center">{title}</DialogTitle>
@@ -417,6 +469,7 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: Transac
               onChange={(e) => setAmount(e.target.value)}
               inputMode="decimal"
               autoFocus
+              ref={amountRef}
               className={`text-3xl font-medium ${type === 'expense' ? 'text-error' : 'text-success'}`}
             />
 
@@ -532,7 +585,7 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId }: Transac
               </p>
             )}
 
-            <div className="mt-4">
+            <div className="mt-2">
               <Button
                 type="submit"
                 text={tCommon('submit')}

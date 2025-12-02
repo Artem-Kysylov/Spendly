@@ -476,11 +476,15 @@
   },
   "budgets": {
         "rollover": {
-            "panelTitle": "繰越",
-            "toggleLabel": "繰越を有効にする",
+            "panelTitle": "ロールオーバー",
+            "toggleLabel": "ロールオーバーを有効にする",
             "modeLabel": "モード",
             "positiveOnly": "正のみ",
             "allowNegative": "負を許可"
+        },
+        "meta": {
+            "title": "予算",
+            "description": "予算を作成および管理します。"
         },
     "list": {
       "modal": {

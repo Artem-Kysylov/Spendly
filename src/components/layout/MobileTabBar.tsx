@@ -9,7 +9,7 @@ import Image from 'next/image'
 import router from 'next/router'
 import React from 'react'
 
-const MobileTabBar = () => {
+function MobileTabBar() {
   const t = useTranslations('Sidenav')
   const pathname = usePathname()
   const prefersReduced = useReducedMotion()
@@ -73,7 +73,7 @@ const MobileTabBar = () => {
         aria-label="Bottom navigation"
       >
         {/* 5-элементная сетка: [Дашборд] [Транзакции] [FAB +] [Бюджеты] [AI] */}
-        <ul className="h-full grid grid-cols-5 pt-1 -translate-y-[15px]">
+        <ul className="h-full grid grid-cols-5 pt-1 -translate-y-[5px]">
           {/* Дашборд */}
           <li className="flex items-center justify-center">
             <Link
@@ -85,7 +85,7 @@ const MobileTabBar = () => {
               }`}
             >
               <LayoutDashboard className="h-6 w-6" />
-              <span className="text-[8px] font-light">{tLayout('sidebar.dashboard')}</span>
+              <span className="text-[9px] font-light">{tLayout('sidebar.dashboard')}</span>
             </Link>
           </li>
 
@@ -100,7 +100,7 @@ const MobileTabBar = () => {
               }`}
             >
               <CreditCard className="h-6 w-6" />
-              <span className="text-[8px] font-light">{tLayout('sidebar.transactions')}</span>
+              <span className="text-[9px] font-light">{tLayout('sidebar.transactions')}</span>
             </Link>
           </li>
 
@@ -127,11 +127,11 @@ const MobileTabBar = () => {
               }`}
             >
               <Wallet className="h-6 w-6" />
-              <span className="text-[8px] font-light">{tLayout('sidebar.budgets')}</span>
+              <span className="text-[9px] font-light">{tLayout('sidebar.budgets')}</span>
             </Link>
           </li>
 
-          {/* AI Ассистент — градиент по маске + подпись */}
+          {/* AI Ассистент — градиент и подпись */}
           <li className="flex items-center justify-center">
             <button
               aria-label={tLayout('sidebar.aiAssistant')}
@@ -152,7 +152,7 @@ const MobileTabBar = () => {
                   maskSize: 'contain',
                 }}
               />
-              <span className={`text-[8px] font-light ${pathname === '/ai-assistant' ? 'text-primary' : 'text-muted-foreground'}`}>
+              <span className={`text-[9px] font-light ${pathname === '/ai-assistant' ? 'text-primary' : 'text-muted-foreground'}`}>
                 {tLayout('sidebar.aiAssistant')}
               </span>
             </button>

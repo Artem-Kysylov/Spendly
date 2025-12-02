@@ -195,6 +195,17 @@
     }
   },
   "budgets": {
+    "rollover": {
+      "panelTitle": "Rollover",
+      "toggleLabel": "Enable rollover",
+      "modeLabel": "Mode",
+      "positiveOnly": "Positive only",
+      "allowNegative": "Allow negative"
+    },
+    "meta": {
+      "title": "Budgets",
+      "description": "Create and manage your budgets."
+    },
     "list": {
       "modal": {
         "createTitle": "Create a new budget💸"
@@ -203,13 +214,10 @@
         "failedLoad": "Failed to load budget folders",
         "failedCreate": "Failed to create budget",
         "createSuccess": "Budget created successfully",
-      "limitReached": "Limit: 3 budgets are available in the free plan. Upgrade to Pro for unlimited budgets."
-    },
-    "labels": {
-        "createNew": "Create a New Budget"
+        "limitReached": "Limit: 3 budgets are available in the free plan. Upgrade to Pro for unlimited budgets."
       },
       "card": {
-        "createNew": "Create a New Budget"
+        "createNew": "Create new budget"
       }
     },
     "labels": {
@@ -570,14 +578,6 @@
     },
     "dashboard": { "meta": { "title": "Dashboard", "description": "Overview of budgets, transactions, and insights." } },
     "transactions": { "meta": { "title": "Transactions", "description": "Browse and manage all your transactions." } },
-    "budgets": {
-        "rollover": {
-            "panelTitle": "Rollover",
-            "toggleLabel": "Enable rollover",
-            "modeLabel": "Mode",
-            "positiveOnly": "Positive only",
-            "allowNegative": "Allow negative"
-        }, "meta": { "title": "Budgets", "description": "Create and manage your budgets." } },
     "budgetDetails": {
       "meta": {
         "title": "Budget Details",

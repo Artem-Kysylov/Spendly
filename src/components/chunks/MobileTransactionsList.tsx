@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabaseClient'
 import { UserAuth } from '@/context/AuthContext'
 import MobileTransactionCard from './MobileTransactionCard'
 import DeleteModal from '@/components/modals/DeleteModal'
-import EditTransactionModal from '@/components/modals/EditTransactionModal'
+import TransactionModal from '@/components/modals/TransactionModal'
 import type { Transaction, EditTransactionPayload } from '@/types/types'
 import { Pagination } from '@/components/ui/pagination'
 import DateHeader from './DateHeader'
@@ -19,16 +19,16 @@ type Props = {
   onDeleteTransaction: (id: string) => Promise<void>
   onEditTransaction?: (payload: EditTransactionPayload) => Promise<void>
   allowTypeChange?: boolean
+  onTransactionUpdateSuccess?: () => void
 }
 
-export default function MobileTransactionsList({ transactions, onDeleteTransaction, onEditTransaction, allowTypeChange = true }: Props) {
+export default function MobileTransactionsList({ transactions, onDeleteTransaction, onEditTransaction, allowTypeChange = true, onTransactionUpdateSuccess }: Props) {
   const tTransactions = useTranslations('transactions')
   const { session } = UserAuth()
 
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null)
   const [isDeleteOpen, setIsDeleteOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
-  const [isEditing, setIsEditing] = useState(false)
   const [currentPage, setCurrentPage] = useState<number>(1)
 
   const sorted = [...transactions].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -40,35 +40,6 @@ export default function MobileTransactionsList({ transactions, onDeleteTransacti
 
   // Группировка по датам (мобильная версия)
   const groups = groupTransactionsByDate(pageItems)
-
-  // Фолбэк-апдейт, если не передан onEditTransaction
-  const handleUpdateFallback = async (payload: EditTransactionPayload) => {
-    const userId = session?.user?.id
-    if (!userId) {
-      throw new Error('No session user id')
-    }
-
-    const updateData: Record<string, unknown> = {
-      title: payload.title,
-      amount: payload.amount,
-      type: payload.type,
-      budget_folder_id: payload.budget_folder_id ?? null,
-    }
-
-    if (payload.created_at) {
-      updateData.created_at = payload.created_at
-    }
-
-    const { error } = await supabase
-      .from('transactions')
-      .update(updateData)
-      .eq('id', payload.id)
-      .eq('user_id', userId)
-
-    if (error) {
-      throw error
-    }
-  }
 
   return (
     <div className="space-y-3">
@@ -119,33 +90,26 @@ export default function MobileTransactionsList({ transactions, onDeleteTransacti
       )}
 
       {isEditOpen && selectedTransaction && (
-        <EditTransactionModal
+        <TransactionModal
           title={tTransactions('table.modal.editTitle')}
           onClose={() => { setIsEditOpen(false); setSelectedTransaction(null) }}
-          isLoading={isEditing}
-          initialData={{
-            id: selectedTransaction.id,
-            title: selectedTransaction.title,
-            amount: selectedTransaction.amount,
-            type: selectedTransaction.type,
-            budget_folder_id: selectedTransaction.budget_folder_id ?? null,
-            created_at: selectedTransaction.created_at,
-          }}
+          initialData={selectedTransaction}
           allowTypeChange={allowTypeChange}
-          onSubmit={async (payload) => {
-            try {
-              setIsEditing(true)
-              if (onEditTransaction) {
-                await onEditTransaction(payload)
-              } else {
-                await handleUpdateFallback(payload)
-                window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
+          onSubmit={(message, type) => {
+            if (type === 'success') {
+              if (onTransactionUpdateSuccess) {
+                onTransactionUpdateSuccess()
+              } else if (onEditTransaction) {
+                // Compatibility: if parent expects onEditTransaction, we can't really use it easily here 
+                // because TransactionModal already did the update.
+                // But we should at least trigger a refresh if possible.
+                // Ideally parents should provide onTransactionUpdateSuccess.
+                 window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
               }
-              setIsEditOpen(false)
-              setSelectedTransaction(null)
-            } finally {
-              setIsEditing(false)
             }
+            // TransactionModal handles toast messages itself? 
+            // Actually TransactionModal calls onSubmit(message, type). 
+            // If we want to show toast here we can, but TransactionModal calls onSubmit to let parent know status.
           }}
         />
       )}

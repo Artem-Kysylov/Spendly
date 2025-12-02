@@ -28,6 +28,7 @@ type Props = {
   buttonVariant?: React.ComponentProps<typeof ShadButton>['variant']
   buttonSize?: React.ComponentProps<typeof ShadButton>['size']
   buttonClassName?: string
+  contentClassName?: string
 }
 
 export default function Dropdown({
@@ -39,6 +40,7 @@ export default function Dropdown({
   buttonVariant = 'ghost',
   buttonSize = 'icon',
   buttonClassName,
+  contentClassName,
 }: Props) {
   return (
     <DropdownMenu>
@@ -52,15 +54,14 @@ export default function Dropdown({
           {icon ?? <MoreVertical className="h-4 w-4" />}
         </ShadButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} sideOffset={sideOffset}>
+      <DropdownMenuContent align={align} sideOffset={sideOffset} className={contentClassName}>
         {items.map((item, idx) => (
           <DropdownMenuItem
             key={idx}
             onClick={item.onClick}
             className={cn(
               item.destructive
-                ? // Акцент для опасных действий в обеих темах
-                  'text-error focus:bg-error/10 dark:focus:bg-error/20'
+                ? 'text-error focus:bg-error/10 dark:focus:bg-error/20'
                 : '',
               item.className
             )}

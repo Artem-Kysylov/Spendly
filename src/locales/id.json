@@ -407,6 +407,10 @@
             "positiveOnly": "Hanya positif",
             "allowNegative": "Izinkan negatif"
         },
+        "meta": {
+            "title": "Anggaran",
+            "description": "Buat dan kelola anggaran Anda."
+        },
     "labels": {
       "spent": "terpakai",
       "left": "tersisa",

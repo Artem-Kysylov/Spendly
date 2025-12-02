@@ -93,7 +93,9 @@ export interface TransactionModalProps {
     title: string,
     onClose: () => void,
     onSubmit: (message: string, type: ToastMessageProps['type']) => void,
-    initialBudgetId?: string
+    initialBudgetId?: string,
+    initialData?: Transaction,
+    allowTypeChange?: boolean
 }
 
 export interface NewBudgetModalProps  {
