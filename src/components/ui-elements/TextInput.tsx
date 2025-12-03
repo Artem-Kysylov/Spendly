@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(function TextInput(
-  { type, placeholder, value, onChange, onInput, disabled, min, step, className, inputMode, autoFocus, onBlur },
+  { type, placeholder, value, onChange, onInput, disabled, min, step, className, inputMode, autoFocus, onBlur, enterKeyHint },
   ref
 ) {
   return (
@@ -22,6 +22,7 @@ const TextInput = React.forwardRef<HTMLInputElement, TextInputProps>(function Te
       step={step}
       inputMode={inputMode}
       autoFocus={autoFocus}
+      enterKeyHint={enterKeyHint}
       className={cn("h-[50px] px-[20px]", className)}
     />
   )

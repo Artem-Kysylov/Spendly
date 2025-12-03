@@ -135,18 +135,7 @@ export default function AIAssistantPage() {
         )}
       </div>
 
-      {/* Мобайл: кнопка закреплена внизу с отступом 20px */}
-      {!isDesktop && (
-        <div className="mt-auto px-3 pb-[20px]">
-          <button
-            className="w-full h-12 rounded-lg bg-primary text-white text-[16px] font-medium inline-flex items-center justify-center gap-2"
-            onClick={() => { newChat(); setHistoryOpen(false) }}
-          >
-            <Pencil size={20} />
-            {tAI('buttons.newChat')}
-          </button>
-        </div>
-      )}
+      {/* Удалено: мобильная большая кнопка New chat внизу */}
     </div>
   )
 
@@ -178,7 +167,7 @@ export default function AIAssistantPage() {
       )}
       {messages.length === 0 ? (
         <>
-          {/* центрируем приветствие, без большого нижнего паддинга */}
+          {/* центрируем приветствие */}
           <div className="flex-1 min-h-0 flex items-center justify-center px-4">
             <div className="w-full max-w-[560px]">
               <div className="text-center mb-4">
@@ -195,9 +184,7 @@ export default function AIAssistantPage() {
       ) : (
         <div className="flex-1 min-h-0 min-w-0 flex flex-col">
           <ChatMessages messages={messages} isTyping={isTyping} />
-          {!isDesktop && (
-            <PresetChipsRow onSelect={sendMessage} className="flex-shrink-0" />
-          )}
+          {/* PresetChipsRow удалён */}
         </div>
       )}
       {/* Инпут: обычный поток внизу контейнера, без sticky */}
@@ -231,13 +218,21 @@ export default function AIAssistantPage() {
           <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
             <SheetContent side="left" className="p-0 w-[90vw] sm:w-[400px]">
               <div className="h-full flex flex-col">
-                <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                   <button
                     className="flex items-center text-primary"
                     onClick={() => setHistoryOpen(false)}
                     aria-label={tAI('history.title')}
                   >
                     <ChevronLeft className="h-6 w-6 text-primary -scale-x-100" />
+                  </button>
+                  <button
+                    className="flex items-center text-primary"
+                    onClick={() => { newChat(); setHistoryOpen(false) }}
+                    aria-label={tAI('buttons.newChat')}
+                    title={tAI('buttons.newChat') ?? 'New chat'}
+                  >
+                    <Pencil className="h-6 w-6 text-primary" />
                   </button>
                 </div>
                 {/* История тянется на всю высоту шторки */}

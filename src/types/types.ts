@@ -125,6 +125,7 @@ export interface TextInputProps {
     inputMode?: 'search' | 'text' | 'decimal' | 'none' | 'email' | 'tel' | 'url' | 'numeric',
     autoFocus?: boolean,
     onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void,
+    enterKeyHint?: 'done' | 'go' | 'next' | 'search' | 'send',
 }
 
 export interface RadioButtonProps {

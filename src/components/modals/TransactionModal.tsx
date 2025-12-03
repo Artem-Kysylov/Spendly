@@ -62,13 +62,13 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId, initialDa
 
 
 
-  // Фокусируем поле суммы после монтирования
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      amountRef.current?.focus()
-    }, 60)
-    return () => clearTimeout(timer)
-  }, [])
+  // УБРАНО: повторное автосмещение фокуса таймером, чтобы не сбивать фокус пользователя
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     amountRef.current?.focus()
+  //   }, 60)
+  //   return () => clearTimeout(timer)
+  // }, [])
 
   const fetchBudgetFolders = async () => {
     if (!session?.user?.id) return
@@ -195,6 +195,7 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId, initialDa
           onSubmit('Failed to update transaction. Please try again.', 'error')
         } else {
           onSubmit('Transaction updated successfully!', 'success')
+          toast({ title: 'Транзакция обновлена', description: transactionTitle ? `«${transactionTitle}»` : undefined })
           handleClose()
         }
       } else {

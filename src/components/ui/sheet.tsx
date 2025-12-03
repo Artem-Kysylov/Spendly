@@ -110,7 +110,9 @@ export function SheetContent({
         )
       )
 
-    const el = focusables()[0] ?? node
+    // Предпочитаем явный элемент с autofocus, если он есть
+    const autofocusEl = node.querySelector<HTMLElement>('[autofocus], [data-auto-focus="true"]')
+    const el = autofocusEl ?? focusables()[0] ?? node
     el.focus()
 
     const onKeyDown = (e: KeyboardEvent) => {

@@ -33,9 +33,9 @@ export default function CompactKPICard({
     const remainingBudget = budget - totalExpenses
 
     return (
-        <div className="kpi-scroll--hidden min-w-0 flex flex-row overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 gap-4 pb-2 md:pb-0">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4">
             {/* Card 1: Total Budget */}
-            <div className="min-w-[74vw] md:min-w-0 snap-center bg-card border border-border rounded-xl p-4 flex flex-col justify-between h-[140px] relative group">
+            <div className="bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-between h-[110px] md:h-[140px] relative group">
                 <button
                     type="button"
                     className="absolute top-3 right-3 cursor-pointer opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
@@ -46,11 +46,11 @@ export default function CompactKPICard({
                 </button>
 
                 <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">
+                    <h3 className="text-[13px] md:text-sm font-medium text-muted-foreground">
                         {tDashboard('counters.totalBudget')}
                     </h3>
                     <div className="mt-2 flex items-baseline gap-2">
-                        <span className="text-2xl font-bold text-foreground">
+                        <span className="text-xl md:text-2xl font-bold text-foreground">
                             {formatCurrency(budget)}
                         </span>
                     </div>
@@ -64,7 +64,7 @@ export default function CompactKPICard({
                         className="h-2"
                         showLabels={false}
                     />
-                    <div className="flex justify-between text-xs text-muted-foreground">
+                    <div className="flex justify-between text-[11px] md:text-xs text-muted-foreground">
                         <span>
                             {formatCurrency(totalExpenses)} {tBudgets('labels.spent')}
                         </span>
@@ -76,13 +76,13 @@ export default function CompactKPICard({
             </div>
 
             {/* Card 2: Total Expenses */}
-            <div className="min-w-[74vw] md:min-w-0 snap-center bg-card border border-border rounded-xl p-4 flex flex-col justify-between h-[140px]">
+            <div className="bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-between h-[110px] md:h-[140px]">
                 <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">
+                    <h3 className="text-[13px] md:text-sm font-medium text-muted-foreground">
                         {tDashboard('counters.totalExpenses')}
                     </h3>
                     <div className="mt-2">
-                        <span className="text-2xl font-bold text-foreground">
+                        <span className="text-xl md:text-2xl font-bold text-foreground">
                             {formatCurrency(totalExpenses)}
                         </span>
                     </div>
@@ -93,26 +93,21 @@ export default function CompactKPICard({
             </div>
 
             {/* Card 3: Daily Safe-to-Spend */}
-            <div className="min-w-[74vw] md:min-w-0 snap-center bg-card border border-border rounded-xl p-4 flex flex-col justify-between h-[140px]">
+            <div className="bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-between h-[110px] md:h-[140px]">
                 <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">
+                    <h3 className="text-[13px] md:text-sm font-medium text-muted-foreground">
                         {tDashboard('counters.dailySafeToSpend')}
                     </h3>
                     <div className="mt-2">
-                        <span className={`text-2xl font-bold ${safeToSpend < 0 ? 'text-red-500' : 'text-foreground'}`}>
+                        <span className={`text-xl md:text-2xl font-bold ${safeToSpend < 0 ? 'text-red-500' : 'text-foreground'}`}>
                             {formatCurrency(safeToSpend)}
                         </span>
                     </div>
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div className="text-[11px] md:text-xs text-muted-foreground">
                     {daysLeft} days left in month
                 </div>
             </div>
-
-            <style>{`
-                .kpi-scroll--hidden { scrollbar-width: none; }
-                .kpi-scroll--hidden::-webkit-scrollbar { display: none; }
-            `}</style>
         </div>
     )
 }

@@ -7,6 +7,7 @@ import { UserAuth } from '@/context/AuthContext'
 import { useTranslations, useLocale } from 'next-intl'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize'
 
 interface ChatMessagesProps {
@@ -74,6 +75,22 @@ export const ChatMessages = ({ messages, isTyping }: ChatMessagesProps) => {
       }
     }
 
+    // Универсальная нормализация Markdown для всех локалей
+    const normalizeMarkdown = (text: string) => {
+        let s = text;
+
+        // Перенос строки перед маркером списка, если он идёт после знака препинания
+        s = s.replace(/([:;,.!?—–])\s+([\-*•]\s)/g, '$1\n$2');
+
+        // Пустая строка перед списком для корректного распознавания Markdown
+        s = s.replace(/\n([\-*•]\s)/g, '\n\n$1');
+
+        // Даты в отдельные пункты списка (локале-агностично)
+        s = s.replace(/(\d{4}-\d{2}-\d{2})\s—\s/g, '\n- $1 — ');
+
+        return s;
+    };
+
     return (
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4">
             {/* Date separators and bubbles */}
@@ -97,14 +114,14 @@ export const ChatMessages = ({ messages, isTyping }: ChatMessagesProps) => {
                         </div>
                       )}
                       <div
-                        className={`w-fit max-w-[65%] sm:max-w-[75%] p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words break-all overflow-x-hidden ${
+                        className={`w-fit max-w-[85%] p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words overflow-x-auto ${
                             message.role === 'user'
                                 ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md'
                                 : 'bg-gray-100 text-secondary-black rounded-bl-md border border-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700'
                         }`}
                       >
                         <ReactMarkdown
-                          remarkPlugins={[remarkGfm]}
+                          remarkPlugins={[remarkGfm, remarkBreaks]}
                           rehypePlugins={[[rehypeSanitize, markdownSchema]]}
                           components={{
                             p: ({ children }) => <p className="mb-2 leading-relaxed">{children}</p>,
@@ -114,14 +131,14 @@ export const ChatMessages = ({ messages, isTyping }: ChatMessagesProps) => {
                             a: ({ href, children }) => <a href={href as string} target="_blank" rel="noreferrer" className="text-primary underline">{children}</a>,
                             code: ({ children }) => <code className="bg-muted px-1 py-0.5 rounded font-mono text-[12px]">{children}</code>,
                             pre: ({ children }) => <pre className="bg-muted p-2 rounded overflow-x-auto text-[12px]">{children}</pre>,
-                            table: ({ children }) => <table className="w-full border-collapse my-2">{children}</table>,
+                            table: ({ children }) => <div className="overflow-x-auto my-2"><table className="w-full border-collapse min-w-[300px]">{children}</table></div>,
                             thead: ({ children }) => <thead className="bg-muted">{children}</thead>,
                             th: ({ children }) => <th className="border px-2 py-1 text-left">{children}</th>,
                             td: ({ children }) => <td className="border px-2 py-1">{children}</td>,
                             strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
                           }}
                         >
-                          {message.content}
+                          {normalizeMarkdown(message.content)}
                         </ReactMarkdown>
                         <div className={`text-xs mt-2 ${message.role === 'user' ? 'text-blue-200 dark:text-blue-100' : 'text-gray-500 dark:text-gray-400'}`}>
                             {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

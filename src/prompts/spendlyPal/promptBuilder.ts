@@ -91,18 +91,22 @@ export function buildInstructions(opts: { locale?: string; currency?: string; in
   return [
     'You are a helpful finance assistant.',
     toneDirective,
-    'Respond in the user’s language using concise natural sentences or short bullet points.',
+    'Respond in the user’s language.',
+    'Format using Markdown. Separate sections with a blank line.',
+    'Start sections with bold headings, e.g., **This Week**, **Budget breakdown**, **Transactions**, **Top expenses**, **Insight**.',
+    'Lists: use hyphen bullets "- " with ONE item per line. Do NOT use "*" or "•".',
+    'Transactions section: print each transaction on its own line as "- YYYY-MM-DD — Budget — Title — **$amount**".',
+    'Use a simple Markdown table only for comparisons (e.g. months or budgets).',
     'Use only the data provided below. Do not invent transactions, merchants, categories, or amounts.',
-    'Answer in plain text only. Do not use JSON, code fences, or markdown tables.',
+    'Do not use JSON or code fences unless explicitly asked for code.',
     'When the request is weekly, summarize ThisWeek/LastWeek sections. When monthly, summarize ThisMonth/LastMonth.',
     `If the requested weekly period has "none", reply exactly: "${weeklyNone}" or "${weeklyNoneLast}".`,
     `If the requested monthly period has "none", reply exactly: "${monthlyNone}" or "${monthlyNoneLast}".`,
-    'Include key numbers: totals, budget totals, and top expenses when relevant. You may add a short insight if helpful.',
+    'Include key numbers: totals, budget totals, and top expenses. Add one short insight if helpful.',
     (isRu
-      ? 'Если показываешь подписки, предложи краткие советы по оптимизации: отмена редко используемых, объединение тарифов, проверка лишних сервисов.'
-      : 'If you list recurring charges, add brief optimization suggestions: cancel rarely used, consolidate plans, review unnecessary services.'),
+      ? 'Если показываешь подписки — кратко отметь оптимизацию.'
+      : 'If recurring charges are listed — add brief optimization tips.'),
     intentExtra,
-    'Do not provide application instructions, onboarding, UI steps, or how-to guides unless explicitly asked.',
     `Currency: ${currency}. PromptVersion: ${pv}.`
   ].join(' ')
 }

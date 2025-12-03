@@ -24,7 +24,6 @@ export const ChatPresets = ({ onSelectPreset }: ChatPresetsProps) => {
         onSelectPreset={onSelectPreset}
         className="w-full max-w-[520px]"
         title={undefined}
-        // Показываем все пресеты (лимит убран)
       />
     </div>
   )
