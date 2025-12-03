@@ -43,9 +43,8 @@ export default function ProtectedLayout({
     <ProtectedRoute>
         {/* Удалён глобальный AIAssistantProvider */}
         <AddTransactionProvider />
-        <div className="flex h-screen transition-colors duration-300">
+        <div className="flex h-[100dvh] transition-colors duration-300">
             <Sidebar />
-
             <div className="flex-1 flex flex-col lg:ml-64 transition-colors duration-300">
               <motion.div
                 key={`topbar-${pathname}`}
@@ -56,10 +55,8 @@ export default function ProtectedLayout({
               >
                 <TopBar />
               </motion.div>
-
               {/* Периодический баннер: рендерим только после загрузки сессии */}
               {isReady && <PeriodicUpgradeBanner />}
-
               <AnimatePresence mode="wait">
                 <motion.main
                   key={pathname}
@@ -75,9 +72,7 @@ export default function ProtectedLayout({
                 </motion.main>
               </AnimatePresence>
             </div>
-
             <MobileTabBar />
-
             {/* Угловую карточку НЕ рендерим глобально.
                 Она показывается контекстно в AIChatWindow/Budgets/Charts при достижении лимитов. */}
             {/* (строку {isReady && subscriptionPlan === 'free' && <UpgradeCornerPanel />} удаляем) */}

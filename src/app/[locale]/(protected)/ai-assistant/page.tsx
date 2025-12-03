@@ -155,12 +155,11 @@ export default function AIAssistantPage() {
       {!isDesktop && (
         <div className="sticky top-0 z-20 px-0 pt-2 pb-2 border-b border-border bg-background flex items-center justify-between w-full">
           <button
-            className="flex items-center gap-2 text-[16px] text-foreground hover:text-foreground"
+            className="flex items-center text-primary"
             aria-label={tAI('history.title')}
             onClick={() => setHistoryOpen(true)}
           >
-            <ChevronLeft className="h-6 w-6" />
-            <span className="leading-none">{tAI('history.chatsLabel')}</span>
+            <ChevronLeft className="h-6 w-6 text-primary" />
           </button>
           <ToneSelect
             value={assistantTone}
@@ -234,12 +233,11 @@ export default function AIAssistantPage() {
               <div className="h-full flex flex-col">
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-border">
                   <button
-                    className="flex items-center gap-2"
+                    className="flex items-center text-primary"
                     onClick={() => setHistoryOpen(false)}
                     aria-label={tAI('history.title')}
                   >
-                    <ChevronLeft className="h-5 w-5" />
-                    <span>{tAI('history.title')}</span>
+                    <ChevronLeft className="h-6 w-6 text-primary -scale-x-100" />
                   </button>
                 </div>
                 {/* История тянется на всю высоту шторки */}
