@@ -8,18 +8,17 @@ import { useRouter } from '@/i18n/routing'
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 
-import TransactionsTable from '@/components/chunks/TransactionsTable'
 import EmptyState from '@/components/chunks/EmptyState'
-import Counters from '@/components/chunks/Counters'
+import CompactKPICard from '@/components/dashboard/CompactKPICard'
+import AiInsightTeaser from '@/components/dashboard/AiInsightTeaser'
+import SimplifiedChart from '@/components/dashboard/SimplifiedChart'
+import DashboardTransactionsTable from '@/components/dashboard/DashboardTransactionsTable'
 import Spinner from '@/components/ui-elements/Spinner'
 import MainBudgetModal from '@/components/modals/MainBudgetModal'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
-import { ChartsContainer } from '@/components/charts/ChartsContainer'
 import Button from '@/components/ui-elements/Button'
 import TransactionModal from '@/components/modals/TransactionModal'
 import { Plus } from 'lucide-react'
-import DateHeader from '@/components/chunks/DateHeader'
-
 
 
 import useModal from '@/hooks/useModal'
@@ -27,15 +26,20 @@ import useCheckBudget from '@/hooks/useCheckBudget'
 
 import { ToastMessageProps, Transaction } from '@/types/types'
 import type { EditTransactionPayload } from '@/types/types'
-import MobileTransactionCard from '@/components/chunks/MobileTransactionCard'
+import {
+  calculatePercentageChange,
+  getPreviousMonthRange,
+  getCurrentMonthRange
+} from '@/lib/chartUtils'
 
 function DashboardClient() {
   const { session } = UserAuth()
-  const router = useRouter()  
+  const router = useRouter()
   const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [budget, setBudget] = useState<number>(0)
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
-  const [refreshCounters, setRefreshCounters] = useState<number>(0) 
+  const [refreshCounters, setRefreshCounters] = useState<number>(0)
   const { isModalOpen, openModal, closeModal } = useModal()
   const { isModalOpen: isAddOpen, openModal: openAddModal, closeModal: closeAddModal } = useModal()
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
@@ -43,12 +47,15 @@ function DashboardClient() {
   const tDashboard = useTranslations('dashboard')
   const tTransactions = useTranslations('transactions')
   const tCommon = useTranslations('common')
+  const tGreeting = useTranslations('greeting')
+
+  const [greetingKey, setGreetingKey] = useState<string>('morning')
 
   const { isLoading: isBudgetChecking } = useCheckBudget(session?.user?.id)
 
   const fetchTransactions = async () => {
     if (!session?.user?.id) return
-    
+
     setIsLoading(true)
     const { data, error } = await supabase
       .from('transactions')
@@ -61,7 +68,17 @@ function DashboardClient() {
       `)
       .eq('user_id', session.user.id)
       .order('created_at', { ascending: false })
-    
+
+    const { data: budgetData } = await supabase
+      .from('main_budget')
+      .select('amount')
+      .eq('user_id', session.user.id)
+      .single()
+
+    if (budgetData) {
+      setBudget(budgetData.amount)
+    }
+
     if (error) {
       console.error('Error fetching transactions:', error)
     }
@@ -80,6 +97,11 @@ function DashboardClient() {
     if (session?.user?.id) {
       fetchTransactions()
     }
+
+    const hour = new Date().getHours()
+    if (hour >= 5 && hour < 12) setGreetingKey('morning')
+    else if (hour >= 12 && hour < 18) setGreetingKey('afternoon')
+    else setGreetingKey('evening')
   }, [session?.user?.id])
 
   const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
@@ -106,7 +128,7 @@ function DashboardClient() {
   const handleDeleteTransaction = async (id: string) => {
     try {
       const { error } = await supabase.from('transactions').delete().eq('id', id)
-      
+
       if (error) {
         console.error('Error deleting transaction:', error)
         handleToastMessage(tTransactions('toast.deleteFailed'), 'error')
@@ -127,6 +149,29 @@ function DashboardClient() {
     setEditingTransaction(transaction)
   }
 
+  // Calculations for KPI Cards
+  const currentMonthData = transactions.filter(transaction => {
+    const { start, end } = getCurrentMonthRange()
+    const transactionDate = new Date(transaction.created_at)
+    return transactionDate >= start && transactionDate <= end
+  })
+
+  const previousMonthData = transactions.filter(transaction => {
+    const { start, end } = getPreviousMonthRange()
+    const transactionDate = new Date(transaction.created_at)
+    return transactionDate >= start && transactionDate <= end
+  })
+
+  const totalExpenses = currentMonthData
+    .filter(transaction => transaction.type === 'expense')
+    .reduce((sum, transaction) => sum + transaction.amount, 0)
+
+  const previousMonthExpenses = previousMonthData
+    .filter(transaction => transaction.type === 'expense')
+    .reduce((sum, transaction) => sum + transaction.amount, 0)
+
+  const expensesTrend = calculatePercentageChange(previousMonthExpenses, totalExpenses)
+
   return (
     <div>
       {(isLoading || isBudgetChecking) ? (
@@ -142,27 +187,14 @@ function DashboardClient() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
-            <motion.h1 
+            <motion.h1
               className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
             >
-              {tDashboard('welcome', { name: session?.user?.user_metadata?.name ?? '' })}
+              {tGreeting(greetingKey)}, {session?.user?.user_metadata?.name ?? ''} 👋
             </motion.h1>
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-            >
-              <Button
-                text={tTransactions('addTransaction')}
-                variant="primary"
-                onClick={openAddModal}
-                icon={<Plus size={16} className="text-white" />}
-                className="hidden md:inline-flex" // скрыть на мобильных
-              />
-            </motion.div>
           </motion.div>
 
           <motion.div
@@ -172,7 +204,18 @@ function DashboardClient() {
             transition={{ duration: 0.28 }}
             className="mt-[30px] px-4 md:px-5 flex flex-col gap-5"
           >
-            <Counters onIconClick={handleIconClick} refreshTrigger={refreshCounters} />
+            <CompactKPICard
+              budget={budget}
+              totalExpenses={totalExpenses}
+              expensesTrend={expensesTrend}
+              onBudgetClick={handleIconClick}
+            />
+
+            <AiInsightTeaser
+              budget={budget}
+              totalExpenses={totalExpenses}
+              transactions={transactions}
+            />
 
             <motion.div
               style={{ willChange: 'opacity' }}
@@ -181,7 +224,7 @@ function DashboardClient() {
               transition={{ duration: 0.28 }}
               className="mt-8"
             >
-              <ChartsContainer showFilters={true} currency="USD" />
+              <SimplifiedChart />
             </motion.div>
 
             {isLoading ? (
@@ -201,52 +244,11 @@ function DashboardClient() {
                 transition={{ duration: 0.28 }}
                 className="mt-8"
               >
-                {/* Мобильный дашборд: последние 5 транзакций, заголовок и Show all */}
-                <div className="block md:hidden space-y-2">
-                  {(() => {
-                    const last5 = transactions.slice(0, 5)
-                    const headerDate = last5[0]?.created_at
-                    return (
-                      <>
-                        {headerDate && <DateHeader date={headerDate} />}
-                        <div className="space-y-1">
-                          {last5.map((t) => (
-                            <MobileTransactionCard
-                              key={t.id}
-                              transaction={t}
-                              onEdit={(tx) => openEditModal(tx)}
-                              onDelete={(id) => handleDeleteTransaction(id)}
-                            />
-                          ))}
-                        </div>
-                        <div className="mt-3">
-                          <Button
-                            text="Show all"
-                            variant="default"
-                            className="w-full"
-                            onClick={() => router.push('/transactions')}
-                          />
-                        </div>
-                      </>
-                    )
-                  })()}
-                </div>
-                {/* Десктоп: полная таблица транзакций */}
-                <div className="hidden md:block">
-                  <TransactionsTable 
-                    transactions={transactions} 
-                    onDeleteTransaction={handleDeleteTransaction}
-                    deleteModalConfig={{ 
-                      title: tDashboard('deleteModal.title'), 
-                      text: tDashboard('deleteModal.prompt') 
-                    }}
-                    onEditTransaction={async (payload) => {
-                      // Find full transaction object or construct it
-                      const tx = transactions.find(t => t.id === payload.id)
-                      if (tx) openEditModal(tx)
-                    }}
-                  />
-                </div>
+                <DashboardTransactionsTable
+                  transactions={transactions}
+                  onEdit={(tx) => openEditModal(tx)}
+                  onDelete={handleDeleteTransaction}
+                />
               </motion.div>
             )}
           </motion.div>

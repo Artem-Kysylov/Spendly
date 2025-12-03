@@ -10,15 +10,19 @@ type Props = {
   transaction: Transaction
   onEdit: (t: Transaction) => void
   onDelete: (id: string) => void
+  showDate?: boolean
 }
 
-export default function MobileTransactionCard({ transaction, onEdit, onDelete }: Props) {
+export default function MobileTransactionCard({ transaction, onEdit, onDelete, showDate = false }: Props) {
   const amountClass =
     transaction.type === 'expense'
       ? 'text-error'
       : 'text-success'
   const locale = useLocale()
-  const timeLabel = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(new Date(transaction.created_at))
+  const dateObj = new Date(transaction.created_at)
+  const timeLabel = new Intl.DateTimeFormat(locale, { hour: '2-digit', minute: '2-digit' }).format(dateObj)
+  const dateLabel = showDate ? new Intl.DateTimeFormat(locale, { month: 'short', day: 'numeric' }).format(dateObj) : ''
+  const displayDate = showDate ? `${dateLabel}, ${timeLabel}` : timeLabel
 
   return (
     <div className="bg-card rounded-xl border border-border p-4 space-y-3 shadow-sm">
@@ -30,7 +34,7 @@ export default function MobileTransactionCard({ transaction, onEdit, onDelete }:
           <div className="flex-1 min-w-0">
             <div className="font-medium truncate">{transaction.title}</div>
             <div className="text-xs text-muted-foreground">
-              {timeLabel}
+              {displayDate}
               {transaction.category_name ? ` • ${transaction.category_name}` : ''}
             </div>
           </div>

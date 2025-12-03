@@ -13,9 +13,10 @@ interface BudgetProgressBarProps {
   currency?: string
   accentColorHex?: string
   compact?: boolean
+  showLabels?: boolean
 }
 
-function BudgetProgressBar({ spentAmount, totalAmount, type, className, spentLabel, leftLabel, currency = 'USD', accentColorHex, compact = false }: BudgetProgressBarProps) {
+function BudgetProgressBar({ spentAmount, totalAmount, type, className, spentLabel, leftLabel, currency = 'USD', accentColorHex, compact = false, showLabels = true }: BudgetProgressBarProps) {
   const { isMobile } = useDeviceType()
   const percentage = totalAmount > 0 ? (spentAmount / totalAmount) * 100 : 0
   const remainingAmount = Math.max(totalAmount - spentAmount, 0)
@@ -70,14 +71,16 @@ function BudgetProgressBar({ spentAmount, totalAmount, type, className, spentLab
               style={{ width: `${Math.min(percentage, 100)}%` }}
             />
           </div>
-          <div className={cn("grid grid-cols-2 text-xs", labelColorClass)}>
-            <span className="font-medium text-left justify-self-start">
-              {formatCurrency(spentAmount, currency)} {spentLabel ?? (budgetType === 'income' ? 'collected' : 'spent')}
-            </span>
-            <span className="text-right justify-self-end">
-              {formatCurrency(remainingAmount, currency)} {leftLabel ?? (budgetType === 'income' ? 'left to goal' : 'left')}
-            </span>
-          </div>
+          {showLabels && (
+            <div className={cn("grid grid-cols-2 text-xs", labelColorClass)}>
+              <span className="font-medium text-left justify-self-start">
+                {formatCurrency(spentAmount, currency)} {spentLabel ?? (budgetType === 'income' ? 'collected' : 'spent')}
+              </span>
+              <span className="text-right justify-self-end">
+                {formatCurrency(remainingAmount, currency)} {leftLabel ?? (budgetType === 'income' ? 'left to goal' : 'left')}
+              </span>
+            </div>
+          )}
         </>
       )}
     </div>

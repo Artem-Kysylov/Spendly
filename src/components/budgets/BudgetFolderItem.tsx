@@ -64,9 +64,8 @@ function BudgetFolderItem({ id, emoji, name, amount, type, color_code, rolloverP
 
       {type === 'expense' && typeof rolloverPreviewCarry === 'number' && rolloverPreviewCarry !== 0 && (
         <div
-          className={`px-2 py-1 rounded-md text-xs font-semibold ${
-            rolloverPreviewCarry > 0 ? 'bg-primary/10 text-primary' : 'bg-error/10 text-error'
-          }`}
+          className={`px-2 py-1 rounded-md text-xs font-semibold ${rolloverPreviewCarry > 0 ? 'bg-primary/10 text-primary' : 'bg-error/10 text-error'
+            }`}
         >
           {rolloverPreviewCarry > 0 ? 'Перенос ' : 'Перерасход '}
           {formatCurrency(Math.abs(rolloverPreviewCarry), 'USD')}
@@ -83,25 +82,37 @@ function BudgetFolderItem({ id, emoji, name, amount, type, color_code, rolloverP
           leftLabel={tBudgets(type === 'income' ? 'labels.leftToGoal' : 'labels.left')}
           accentColorHex={color_code ?? undefined}
           compact
+          showLabels={false}
         />
       </div>
 
-      {/* Суммы spent/left над текстовыми метками */}
-      <div className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} grid grid-cols-2 text-xs w-full`}>
-        <span className="font-semibold text-left justify-self-start">
-          {formatCurrency(spentAmount, 'USD')}
+
+      {/* Десктоп: суммы и метки в один ряд */}
+      <div className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} hidden md:grid grid-cols-2 text-xs w-full`}>
+        <span className="text-left justify-self-start">
+          {formatCurrency(spentAmount, 'USD')} {tBudgets(type === 'income' ? 'labels.collected' : 'labels.spent')}
         </span>
-        <span className="font-semibold text-right justify-self-end">
-          {formatCurrency(Math.max(amount - spentAmount, 0), 'USD')}
+        <span className="text-right justify-self-end">
+          {formatCurrency(Math.max(amount - spentAmount, 0), 'USD')} {tBudgets(type === 'income' ? 'labels.leftToGoal' : 'labels.left')}
         </span>
       </div>
-      {/* Текстовые метки */}
-      <div className={`${color_code ? 'text-black dark:text-black' : 'text-gray-700 dark:text-white'} grid grid-cols-2 text-xs w-full`}>
+
+      {/* Мобилка: метки сверху */}
+      <div className={`${color_code ? 'text-black dark:text-black' : 'text-gray-700 dark:text-white'} grid md:hidden grid-cols-2 text-xs w-full capitalize`}>
         <span className="text-left justify-self-start">
           {tBudgets(type === 'income' ? 'labels.collected' : 'labels.spent')}
         </span>
         <span className="text-right justify-self-end">
           {tBudgets(type === 'income' ? 'labels.leftToGoal' : 'labels.left')}
+        </span>
+      </div>
+      {/* Мобилка: суммы снизу */}
+      <div className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} grid md:hidden grid-cols-2 text-xs w-full font-semibold`}>
+        <span className="text-left justify-self-start">
+          {formatCurrency(spentAmount, 'USD')}
+        </span>
+        <span className="text-right justify-self-end">
+          {formatCurrency(Math.max(amount - spentAmount, 0), 'USD')}
         </span>
       </div>
     </div>
