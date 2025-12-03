@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { LineChart, Line, ResponsiveContainer, Tooltip, YAxis } from 'recharts'
+import { LineChart, Line, ResponsiveContainer, Tooltip } from 'recharts'
 import { useLineChartData } from '@/hooks/useChartData'
 import { ChartFilters } from '@/types/types'
 import { useTranslations } from 'next-intl'
@@ -26,6 +26,20 @@ export default function SimplifiedChart() {
     }, [])
 
     const { data, isLoading } = useLineChartData(filters)
+
+    // Заполняем пропущенные дни нулями, чтобы линия была непрерывной
+    const filledData = useMemo(() => {
+        const range: Date[] = generateDateRange(filters.startDate, filters.endDate)
+        const byDate = new Map((data ?? []).map(d => [d.date, d.amount ?? 0]))
+        return range.map(d => {
+            const key = d.toISOString().split('T')[0]
+            return { date: key, amount: byDate.get(key) ?? 0 }
+        })
+    }, [data, filters.startDate, filters.endDate])
+
+    const total = Array.isArray(data)
+        ? data.reduce((sum, item: { amount?: number }) => sum + (item?.amount ?? 0), 0)
+        : 0
 
     if (isLoading) {
         return (
@@ -58,20 +72,6 @@ export default function SimplifiedChart() {
             </Card>
         )
     }
-
-    const total = Array.isArray(data)
-        ? data.reduce((sum, item: { amount?: number }) => sum + (item?.amount ?? 0), 0)
-        : 0
-
-    // Заполняем пропущенные дни нулями, чтобы линия была непрерывной
-    const filledData = useMemo(() => {
-        const range: Date[] = generateDateRange(filters.startDate, filters.endDate)
-        const byDate = new Map((data ?? []).map(d => [d.date, d.amount ?? 0]))
-        return range.map(d => {
-            const key = d.toISOString().split('T')[0]
-            return { date: key, amount: byDate.get(key) ?? 0 }
-        })
-    }, [data, filters.startDate, filters.endDate])
 
     return (
         <Card className="w-full overflow-hidden">
