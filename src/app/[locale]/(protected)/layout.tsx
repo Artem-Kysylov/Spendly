@@ -43,7 +43,7 @@ export default function ProtectedLayout({
     <ProtectedRoute>
         {/* Удалён глобальный AIAssistantProvider */}
         <AddTransactionProvider />
-        <div className="flex h-[100dvh] transition-colors duration-300">
+        <div className="flex h-[100dvh] min-h-[100dvh] transition-colors duration-300">
             <Sidebar />
             <div className="flex-1 flex flex-col lg:ml-64 transition-colors duration-300">
               <motion.div
@@ -60,7 +60,7 @@ export default function ProtectedLayout({
               <AnimatePresence mode="wait">
                 <motion.main
                   key={pathname}
-                  className="flex-1 overflow-auto overflow-x-hidden min-w-0 pb-[calc(env(safe-area-inset-bottom)+120px)] lg:pb-0 transition-colors duration-300"
+                  className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 pb-[calc(env(safe-area-inset-bottom)+106px)] lg:pb-0 transition-colors duration-300"
                   initial={pageVariants ? 'initial' : false}
                   animate={pageVariants ? 'animate' : { opacity: 1 }}
                   exit={pageVariants ? 'exit' : undefined}

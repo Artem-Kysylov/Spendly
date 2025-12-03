@@ -5,7 +5,7 @@ import { LineChart, Line, ResponsiveContainer, Tooltip, YAxis } from 'recharts'
 import { useLineChartData } from '@/hooks/useChartData'
 import { ChartFilters } from '@/types/types'
 import { useTranslations } from 'next-intl'
-import { formatCurrency } from '@/lib/chartUtils'
+import { formatCurrency, generateDateRange } from '@/lib/chartUtils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export default function SimplifiedChart() {
@@ -63,6 +63,16 @@ export default function SimplifiedChart() {
         ? data.reduce((sum, item: { amount?: number }) => sum + (item?.amount ?? 0), 0)
         : 0
 
+    // Заполняем пропущенные дни нулями, чтобы линия была непрерывной
+    const filledData = useMemo(() => {
+        const range: Date[] = generateDateRange(filters.startDate, filters.endDate)
+        const byDate = new Map((data ?? []).map(d => [d.date, d.amount ?? 0]))
+        return range.map(d => {
+            const key = d.toISOString().split('T')[0]
+            return { date: key, amount: byDate.get(key) ?? 0 }
+        })
+    }, [data, filters.startDate, filters.endDate])
+
     return (
         <Card className="w-full overflow-hidden">
             <CardHeader className="px-5 pt-5 pb-3 sm:px-6">
@@ -74,7 +84,7 @@ export default function SimplifiedChart() {
             <CardContent className="p-0">
                 <div className="h-[200px] w-full px-5 pb-5 min-w-0">
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                        <LineChart data={filledData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                             <Tooltip
                                 content={({ active, payload }) => {
                                     if (active && payload && payload.length) {
@@ -90,7 +100,7 @@ export default function SimplifiedChart() {
                                 }}
                             />
                             <Line
-                                type="natural"
+                                type="monotone"
                                 dataKey="amount"
                                 stroke="hsl(var(--primary))"
                                 strokeWidth={2}

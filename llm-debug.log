@@ -178,3 +178,7 @@
 2025-11-28T18:07:16.480Z [LLM_DEBUG gemini pre] {"requestId":"013fe23f-7e8d-441c-a89f-25ff5851b40f","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,2975]}
 2025-11-28T18:07:17.426Z [LLM_DEBUG gemini post] {"requestId":"bd0c87dd-fa8e-4dc2-8495-5f366e0380c6","model":"gemini-2.5-flash","candidatesLen":1,"firstCandidatePartsLen":1,"firstCandidatePartsLengths":[24],"safetyRatings":[],"finishReason":"STOP"}
 2025-11-28T18:07:17.715Z [LLM_DEBUG gemini post] {"requestId":"013fe23f-7e8d-441c-a89f-25ff5851b40f","model":"gemini-2.5-flash","candidatesLen":1,"firstCandidatePartsLen":1,"firstCandidatePartsLengths":[155],"safetyRatings":[],"finishReason":"STOP"}
+2025-12-03T14:05:24.887Z [LLM_DEBUG gemini pre] {"requestId":"fcbee37b-d36c-4230-949c-a2ab6104605e","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,2901]}
+2025-12-03T14:05:24.936Z [LLM_DEBUG gemini pre] {"requestId":"1b39508a-c223-4869-a8b0-b1d29098a041","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,2967]}
+2025-12-03T14:05:25.894Z [LLM_DEBUG gemini post] {"requestId":"1b39508a-c223-4869-a8b0-b1d29098a041","model":"gemini-2.5-flash","candidatesLen":1,"firstCandidatePartsLen":1,"firstCandidatePartsLengths":[27],"safetyRatings":[],"finishReason":"STOP"}
+2025-12-03T14:05:25.898Z [LLM_DEBUG gemini post] {"requestId":"fcbee37b-d36c-4230-949c-a2ab6104605e","model":"gemini-2.5-flash","candidatesLen":1,"firstCandidatePartsLen":1,"firstCandidatePartsLengths":[106],"safetyRatings":[],"finishReason":"STOP"}
