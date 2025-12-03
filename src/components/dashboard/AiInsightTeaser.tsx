@@ -28,13 +28,13 @@ export default function AiInsightTeaser({ budget, totalExpenses, transactions }:
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className={`rounded-lg border p-4 cursor-pointer flex items-center gap-3 ${getStyles()}`}
+            className={`rounded-lg border p-4 cursor-pointer flex items-center gap-3 min-w-0 overflow-hidden ${getStyles()}`}
             onClick={() => router.push('/ai-assistant')}
         >
             <div className="p-2 bg-white/50 dark:bg-black/20 rounded-full">
                 <Sparkles className="w-5 h-5" />
             </div>
-            <span className="font-medium text-sm">{message}</span>
+            <span className="font-medium text-sm flex-1 min-w-0 truncate">{message}</span>
         </motion.div>
     )
 }

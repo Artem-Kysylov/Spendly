@@ -47,9 +47,9 @@ export default function DashboardTransactionsTable({
     }
 
     return (
-        <div className="space-y-4 mb-24">
+        <div className="space-y-4 mb-24 min-w-0">
             {/* Header with title and Show All button */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between min-w-0">
                 <h3 className="font-semibold text-lg">{tDashboard('recentActivity')}</h3>
                 <Button
                     variant="ghost"
@@ -61,7 +61,7 @@ export default function DashboardTransactionsTable({
             </div>
 
             {/* Mobile version - cards */}
-            <div className="block md:hidden space-y-3">
+            <div className="block md:hidden space-y-3 min-w-0 overflow-x-hidden">
                 {recentTransactions.map(transaction => (
                     <MobileTransactionCard
                         key={transaction.id}

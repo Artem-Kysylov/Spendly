@@ -118,7 +118,7 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(({
         </CardHeader>
         <CardContent className="flex-1" style={{ minHeight: height }}>
           <div className="flex items-center justify-center h-full">
-            <div className="text-muted-foreground">No data available</div>
+            <div className="text-muted-foreground">{tCharts('states.noData')}</div>
           </div>
         </CardContent>
       </Card>

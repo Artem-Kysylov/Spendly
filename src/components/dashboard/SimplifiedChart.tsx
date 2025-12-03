@@ -29,7 +29,7 @@ export default function SimplifiedChart() {
 
     if (isLoading) {
         return (
-            <Card className="w-full">
+            <Card className="w-full overflow-hidden">
                 <CardHeader className="px-5 pt-5 pb-3 sm:px-6">
                     <CardTitle>{t('titles.analytics')}</CardTitle>
                 </CardHeader>
@@ -40,11 +40,31 @@ export default function SimplifiedChart() {
         )
     }
 
-    // Calculate total for the header
-    const total = data.reduce((sum, item) => sum + item.amount, 0)
+    // Пустое состояние: когда данных нет
+    if (!data || data.length === 0) {
+        return (
+            <Card className="w-full overflow-hidden">
+                <CardHeader className="px-5 pt-5 pb-3 sm:px-6">
+                    <CardTitle>{t('titles.analytics')}</CardTitle>
+                    <p className="text-sm text-muted-foreground">
+                        {t('labels.expenses')} • {formatCurrency(0)}
+                    </p>
+                </CardHeader>
+                <CardContent>
+                    <div className="h-[200px] w-full flex items-center justify-center">
+                        <span className="text-muted-foreground">{t('states.noExpensesData')}</span>
+                    </div>
+                </CardContent>
+            </Card>
+        )
+    }
+
+    const total = Array.isArray(data)
+        ? data.reduce((sum, item: { amount?: number }) => sum + (item?.amount ?? 0), 0)
+        : 0
 
     return (
-        <Card className="w-full">
+        <Card className="w-full overflow-hidden">
             <CardHeader className="px-5 pt-5 pb-3 sm:px-6">
                 <CardTitle>{t('titles.analytics')}</CardTitle>
                 <p className="text-sm text-muted-foreground">
@@ -52,7 +72,7 @@ export default function SimplifiedChart() {
                 </p>
             </CardHeader>
             <CardContent className="p-0">
-                <div className="h-[200px] w-full px-5 pb-5">
+                <div className="h-[200px] w-full px-5 pb-5 min-w-0">
                     <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                             <Tooltip

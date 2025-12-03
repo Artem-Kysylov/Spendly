@@ -182,7 +182,7 @@ function DashboardClient() {
             <ToastMessage text={toastMessage.text} type={toastMessage.type} />
           )}
           <motion.div
-            className="flex flex-col items-center gap-5 text-center mt-[30px] px-4 md:px-5 md:flex-row md:justify-between md:text-left"
+            className="w-full max-w-[500px] md:max-w-none mx-auto flex flex-col items-center gap-5 text-center mt-[30px] px-4 md:px-5 md:flex-row md:justify-between md:text-left"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
@@ -202,7 +202,7 @@ function DashboardClient() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.28 }}
-            className="mt-[30px] px-4 md:px-5 flex flex-col gap-5"
+            className="mt-[30px] px-4 md:px-5 w-full max-w-[500px] md:max-w-none mx-auto flex flex-col gap-5 overflow-x-hidden min-w-0"
           >
             <CompactKPICard
               budget={budget}
@@ -222,7 +222,7 @@ function DashboardClient() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.28 }}
-              className="mt-8"
+              className="mt-8 min-w-0 overflow-x-hidden"
             >
               <SimplifiedChart />
             </motion.div>
@@ -242,7 +242,7 @@ function DashboardClient() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.28 }}
-                className="mt-8"
+                className="mt-8 min-w-0 overflow-x-hidden"
               >
                 <DashboardTransactionsTable
                   transactions={transactions}

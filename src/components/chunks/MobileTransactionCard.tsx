@@ -25,7 +25,7 @@ export default function MobileTransactionCard({ transaction, onEdit, onDelete, s
   const displayDate = showDate ? `${dateLabel}, ${timeLabel}` : timeLabel
 
   return (
-    <div className="bg-card rounded-xl border border-border p-4 space-y-3 shadow-sm">
+    <div className="bg-card rounded-xl border border-border p-4 space-y-3 shadow-sm min-w-0 overflow-x-hidden">
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center text-lg">

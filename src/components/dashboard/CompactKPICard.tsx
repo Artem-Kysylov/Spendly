@@ -16,7 +16,7 @@ export default function CompactKPICard({
     budget,
     totalExpenses,
     expensesTrend,
-    onBudgetClick
+    onBudgetClick,
 }: CompactKPICardProps) {
     const tDashboard = useTranslations('dashboard')
     const tBudgets = useTranslations('budgets')
@@ -30,21 +30,29 @@ export default function CompactKPICard({
         return { safeToSpend, daysLeft }
     }, [budget, totalExpenses])
 
-    const budgetUsagePercentage = budget > 0 ? (totalExpenses / budget) * 100 : 0
     const remainingBudget = budget - totalExpenses
 
     return (
-        <div className="flex flex-row overflow-x-auto snap-x snap-mandatory scrollbar-hide md:grid md:grid-cols-3 gap-4 pb-4 md:pb-0">
+        <div className="kpi-scroll--hidden min-w-0 flex flex-row overflow-x-auto snap-x snap-mandatory md:grid md:grid-cols-3 gap-4 pb-2 md:pb-0">
             {/* Card 1: Total Budget */}
-            <div className="min-w-[85vw] md:min-w-0 snap-center bg-card border border-border rounded-xl p-4 flex flex-col justify-between h-[140px] relative group">
-                <div className="absolute top-3 right-3 cursor-pointer opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity" onClick={onBudgetClick}>
+            <div className="min-w-[74vw] md:min-w-0 snap-center bg-card border border-border rounded-xl p-4 flex flex-col justify-between h-[140px] relative group">
+                <button
+                    type="button"
+                    className="absolute top-3 right-3 cursor-pointer opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={onBudgetClick}
+                    aria-label={tBudgets('actions.edit') ?? 'Edit budget'}
+                >
                     <Pencil className="text-muted-foreground w-4 h-4 hover:text-primary" />
-                </div>
+                </button>
 
                 <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">{tDashboard('counters.totalBudget')}</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                        {tDashboard('counters.totalBudget')}
+                    </h3>
                     <div className="mt-2 flex items-baseline gap-2">
-                        <span className="text-2xl font-bold text-foreground">{formatCurrency(budget)}</span>
+                        <span className="text-2xl font-bold text-foreground">
+                            {formatCurrency(budget)}
+                        </span>
                     </div>
                 </div>
 
@@ -57,18 +65,26 @@ export default function CompactKPICard({
                         showLabels={false}
                     />
                     <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{formatCurrency(totalExpenses)} {tBudgets('labels.spent')}</span>
-                        <span>{formatCurrency(remainingBudget)} {tBudgets('labels.left')}</span>
+                        <span>
+                            {formatCurrency(totalExpenses)} {tBudgets('labels.spent')}
+                        </span>
+                        <span>
+                            {formatCurrency(remainingBudget)} {tBudgets('labels.left')}
+                        </span>
                     </div>
                 </div>
             </div>
 
             {/* Card 2: Total Expenses */}
-            <div className="min-w-[85vw] md:min-w-0 snap-center bg-card border border-border rounded-xl p-4 flex flex-col justify-between h-[140px]">
+            <div className="min-w-[74vw] md:min-w-0 snap-center bg-card border border-border rounded-xl p-4 flex flex-col justify-between h-[140px]">
                 <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">{tDashboard('counters.totalExpenses')}</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                        {tDashboard('counters.totalExpenses')}
+                    </h3>
                     <div className="mt-2">
-                        <span className="text-2xl font-bold text-foreground">{formatCurrency(totalExpenses)}</span>
+                        <span className="text-2xl font-bold text-foreground">
+                            {formatCurrency(totalExpenses)}
+                        </span>
                     </div>
                 </div>
                 <div className="flex items-center gap-1">
@@ -77,9 +93,11 @@ export default function CompactKPICard({
             </div>
 
             {/* Card 3: Daily Safe-to-Spend */}
-            <div className="min-w-[85vw] md:min-w-0 snap-center bg-card border border-border rounded-xl p-4 flex flex-col justify-between h-[140px]">
+            <div className="min-w-[74vw] md:min-w-0 snap-center bg-card border border-border rounded-xl p-4 flex flex-col justify-between h-[140px]">
                 <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">{tDashboard('counters.dailySafeToSpend')}</h3>
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                        {tDashboard('counters.dailySafeToSpend')}
+                    </h3>
                     <div className="mt-2">
                         <span className={`text-2xl font-bold ${safeToSpend < 0 ? 'text-red-500' : 'text-foreground'}`}>
                             {formatCurrency(safeToSpend)}
@@ -90,6 +108,11 @@ export default function CompactKPICard({
                     {daysLeft} days left in month
                 </div>
             </div>
+
+            <style>{`
+                .kpi-scroll--hidden { scrollbar-width: none; }
+                .kpi-scroll--hidden::-webkit-scrollbar { display: none; }
+            `}</style>
         </div>
     )
 }
