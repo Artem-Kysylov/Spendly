@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server'
-import { streamText, tool } from 'ai'
-import { z } from 'zod'
+import { streamText, tool, jsonSchema } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { getServerSupabaseClient } from '@/lib/serverSupabase'
 
@@ -9,17 +8,34 @@ const google = createGoogleGenerativeAI({
     apiKey: process.env.GOOGLE_API_KEY,
 })
 
-// Zod schema for transaction proposal
-const proposeTransactionSchema = z.object({
-    transactions: z.array(
-        z.object({
-            title: z.string().describe('Short description of the transaction (e.g., "Gas Station", "Coffee")'),
-            amount: z.number().positive().describe('Transaction amount (positive number)'),
-            type: z.enum(['expense', 'income']).describe('Transaction type'),
-            category_name: z.string().describe('Budget category name from the user\'s list'),
-            date: z.string().describe('Transaction date in ISO format (YYYY-MM-DD)'),
-        })
-    ),
+// JSON Schema for transaction proposal (с типами, чтобы инферился args в execute)
+const proposeTransactionSchema = jsonSchema<{
+    transactions: Array<{
+        title: string
+        amount: number
+        type: 'expense' | 'income'
+        category_name: string
+        date: string
+    }>
+}>({
+    type: 'object',
+    properties: {
+        transactions: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    title: { type: 'string', description: 'Short description of the transaction (e.g., "Gas Station", "Coffee")' },
+                    amount: { type: 'number', description: 'Transaction amount (positive number)' },
+                    type: { enum: ['expense', 'income'], description: 'Transaction type' },
+                    category_name: { type: 'string', description: 'Budget category name from the user\'s list' },
+                    date: { type: 'string', description: 'Transaction date in ISO format (YYYY-MM-DD)' }
+                },
+                required: ['title', 'amount', 'type', 'category_name', 'date']
+            }
+        }
+    },
+    required: ['transactions']
 })
 
 async function verifyUserId(userId: string): Promise<boolean> {
@@ -106,10 +122,8 @@ User: "Yesterday gas 500"
             tools: {
                 propose_transaction: tool({
                     description: 'Propose one or more transactions based on user input. This does NOT save to database.',
-                    parameters: proposeTransactionSchema,
+                    inputSchema: proposeTransactionSchema,
                     execute: async ({ transactions }) => {
-                        // This execute function is called server-side during streaming
-                        // We return the data which will be sent to the client
                         return {
                             success: true,
                             transactions,
@@ -117,10 +131,8 @@ User: "Yesterday gas 500"
                     },
                 }),
             },
-            maxSteps: 5, // Allow multiple tool calls
         })
-
-        return result.toDataStreamResponse()
+        return result.toTextStreamResponse()
     } catch (error) {
         console.error('Error in /api/chat:', error)
         return new Response(JSON.stringify({ error: 'Internal server error' }), {
