@@ -22,7 +22,7 @@ import TransactionModal from '@/components/modals/TransactionModal'
 import { ExpensesBarChart } from '@/components/charts/TransactionsBarChart'
 import ToastMessage from '@/components/ui-elements/ToastMessage'
 
-import type { Transaction, EditTransactionPayload, ToastMessageProps } from '@/types/types'
+import type { Transaction, ToastMessageProps } from '@/types/types'
 
 export default function TransactionsClient() {
   const { session } = UserAuth()
@@ -55,16 +55,15 @@ export default function TransactionsClient() {
   const {
     chartData,
     filters: chartFilters,
-    isChartLoading,
-    updateFilters: updateChartFilters
+    isChartLoading
   } = useTransactionsData()
 
   // UI State
-  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(true)
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false)
   const [isAiSheetOpen, setIsAiSheetOpen] = useState(false)
 
   // Intersection Observer
-  const observerTarget = useRef<HTMLDivElement>(null)
+  const observerTarget = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -134,6 +133,11 @@ export default function TransactionsClient() {
     openModal()
   }
 
+  // Десктоп: открыто, Мобайл: закрыто
+  useEffect(() => {
+    setIsAnalyticsOpen(!isMobile)
+  }, [isMobile])
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {toastMessage && (
@@ -190,21 +194,17 @@ export default function TransactionsClient() {
             </div>
 
             <Sheet open={isAiSheetOpen} onOpenChange={setIsAiSheetOpen}>
-              <SheetTrigger asChild>
-                <div onClick={(e) => {
-                  e.stopPropagation()
-                  setIsAiSheetOpen(true)
-                }}>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1.5"
-                    aria-label="AI Insights"
-                  >
-                    <Sparkles size={14} />
-                    <span className="text-xs font-medium">AI Insight</span>
-                  </Button>
-                </div>
+              <SheetTrigger>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1.5"
+                  aria-label="AI Insights"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Sparkles size={14} />
+                  <span className="text-xs font-medium">AI Insight</span>
+                </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
                 <SheetHeader>

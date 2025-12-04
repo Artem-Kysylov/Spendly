@@ -189,7 +189,7 @@ export default function AIAssistantPage() {
       )}
       {/* Инпут: обычный поток внизу контейнера, без sticky */}
       <div className="border-t border-border bg-background w-full">
-        <div className="p-0 sm:pb-safe">
+        <div className="pt-2 sm:pb-safe">
           <ChatInput
             onSendMessage={sendMessage}
             isThinking={isTyping}

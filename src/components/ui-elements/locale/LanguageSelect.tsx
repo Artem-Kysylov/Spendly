@@ -1,7 +1,13 @@
 'use client'
 
 import type { Language } from '@/types/locale'
-import { Select } from '@/components/ui/select'
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from '@/components/ui/select'
 
 type Props = {
   value?: Language
@@ -17,22 +23,30 @@ const LANGUAGES: Array<{ code: Language; label: string; emoji: string }> = [
   { code: 'hi', label: 'हिन्दी', emoji: '🇮🇳' },
   { code: 'id', label: 'Bahasa Indonesia', emoji: '🇮🇩' },
   { code: 'ja', label: '日本語', emoji: '🇯🇵' },
-  { code: 'ko', label: '한국어', emoji: '🇰🇷' }
+  { code: 'ko', label: '한국어', emoji: '🇰🇷' },
 ]
 
-export default function LanguageSelect({ value, onChange, placeholder = 'Select language', className }: Props) {
+export default function LanguageSelect({
+  value,
+  onChange,
+  placeholder = 'Select language',
+  className,
+}: Props) {
   return (
     <Select
       value={value}
-      onChange={(e) => onChange?.(e.target.value as Language)}
-      className={className}
+      onValueChange={(v) => onChange?.(v as Language)}
     >
-      {!value && <option value="" disabled>{placeholder}</option>}
-      {LANGUAGES.map((l) => (
-        <option key={l.code} value={l.code}>
-          {l.emoji} {l.label}
-        </option>
-      ))}
+      <SelectTrigger className={className}>
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent>
+        {LANGUAGES.map((l) => (
+          <SelectItem key={l.code} value={l.code}>
+            {l.emoji} {l.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
     </Select>
   )
 }

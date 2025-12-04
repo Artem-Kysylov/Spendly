@@ -339,60 +339,57 @@ export default function UserSettingsClient() {
           )}
         </div>
       </div>
-    </div >
 
-      {/* Sign Out Modal */ }
-  {
-    isSignOutModalOpen && (
-      <SignOutModal
-        title={tSettings('modals.signOut.title')}
-        text={tSettings('modals.signOut.text')}
-        onClose={closeSignOutModal}
-        signOut={signOut}
+      {/* Sign Out Modal */}
+      {isSignOutModalOpen && (
+        <SignOutModal
+          title={tSettings('modals.signOut.title')}
+          text={tSettings('modals.signOut.text')}
+          onClose={closeSignOutModal}
+          signOut={signOut}
+        />
+      )}
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditProfileModalOpen}
+        onClose={handleEditProfileClose}
+        onSuccess={() => {}}
       />
-    )
-  }
 
-  {/* Edit Profile Modal */ }
-  <EditProfileModal isOpen={isEditProfileModalOpen} onClose={handleEditProfileClose} onSuccess={() => { }} />
+      {/* App Install Modal */}
+      {isAppInstallModalOpen && (
+        <AppInstallModal isOpen={isAppInstallModalOpen} onClose={() => setIsAppInstallModalOpen(false)} />
+      )}
 
-  {/* App Install Modal */ }
-  {
-    isAppInstallModalOpen && (
-      <AppInstallModal isOpen={isAppInstallModalOpen} onClose={() => setIsAppInstallModalOpen(false)} />
-    )
-  }
+      {/* Unsubscribe Modal */}
+      {isUnsubscribeOpen && (
+        <UnsubscribeModal
+          open={isUnsubscribeOpen}
+          onClose={() => setIsUnsubscribeOpen(false)}
+          onConfirm={handleConfirmUnsubscribe}
+          isLoading={isUnsubscribing}
+        />
+      )}
 
-  {/* Unsubscribe Modal */ }
-  {
-    isUnsubscribeOpen && (
-      <UnsubscribeModal
-        open={isUnsubscribeOpen}
-        onClose={() => setIsUnsubscribeOpen(false)}
-        onConfirm={handleConfirmUnsubscribe}
-        isLoading={isUnsubscribing}
-      />
-    )
-  }
-
-  {/* Notifications Sheet — без изменений */ }
-  <Sheet open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
-    <SheetContent side="bottom" className="bg-background text-foreground h-[75vh]">
-      <SheetHeader className="px-4 py-4 border-b border-border justify-center">
-        <SheetTitle className="text-[18px] sm:text-[20px] font-semibold text-center">
-          {tSettings('notifications.title')}
-        </SheetTitle>
-      </SheetHeader>
-      <div className="p-4">
-        <NotificationSettings />
-      </div>
-      <SheetFooter className="px-4 py-3 border-t border-border">
-        <SheetClose className="h-10 px-4 w-full rounded-md border border-input bg-background text-sm text-center">
-          {tCommon('close')}
-        </SheetClose>
-      </SheetFooter>
-    </SheetContent>
-  </Sheet>
+      {/* Notifications Sheet */}
+      <Sheet open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
+        <SheetContent side="bottom" className="bg-background text-foreground h-[75vh]">
+          <SheetHeader className="px-4 py-4 border-b border-border justify-center">
+            <SheetTitle className="text-[18px] sm:text-[20px] font-semibold text-center">
+              {tSettings('notifications.title')}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="p-4">
+            <NotificationSettings />
+          </div>
+          <SheetFooter className="px-4 py-3 border-t border-border">
+            <SheetClose className="h-10 px-4 w-full rounded-md border border-input bg-background text-sm text-center">
+              {tCommon('close')}
+            </SheetClose>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
     </>
   )
 }
