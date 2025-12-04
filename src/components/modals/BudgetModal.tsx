@@ -217,10 +217,13 @@ const BudgetModal = ({
                     <span className="text-sm text-muted-foreground">{tRollover('modeLabel')}</span>
                     <select
                       value={rolloverMode}
-                      onChange={(e) => setRolloverMode(e.target.value as 'positive-only' | 'allow-negative')}
-                      className="w-full rounded-md border bg-background p-2"
+                      onChange={(e) =>
+                        setRolloverMode(e.target.value as 'positive-only' | 'allow-negative')
+                      }
+                      className="bg-background text-foreground h-[60px] px-[20px]"
                       disabled={!rolloverEnabled}
                     >
+                      {/* варианты значений */}
                       <option value="positive-only">{tRollover('positiveOnly')}</option>
                       <option value="allow-negative">{tRollover('allowNegative')}</option>
                     </select>
@@ -366,9 +369,7 @@ const BudgetModal = ({
                     <span className="text-sm text-muted-foreground">{tRollover('modeLabel')}</span>
                     <Select
                       value={rolloverMode}
-                      onChange={(e) => setRolloverMode(e.target.value as 'positive-only' | 'allow-negative')}
-                      className="bg-background text-foreground h-[60px] px-[20px]"
-                      disabled={!rolloverEnabled}
+                      onValueChange={(v) => setRolloverMode(v as 'positive-only' | 'allow-negative')}
                     >
                       <option value="positive-only">{tRollover('positiveOnly')}</option>
                       <option value="allow-negative">{tRollover('allowNegative')}</option>
@@ -511,8 +512,6 @@ const BudgetModal = ({
                   <select
                     value={rolloverMode}
                     onChange={(e) => setRolloverMode(e.target.value as 'positive-only' | 'allow-negative')}
-                    className="w-full rounded-md border bg-background p-2"
-                    disabled={!rolloverEnabled}
                   >
                     <option value="positive-only">{tRollover('positiveOnly')}</option>
                     <option value="allow-negative">{tRollover('allowNegative')}</option>
