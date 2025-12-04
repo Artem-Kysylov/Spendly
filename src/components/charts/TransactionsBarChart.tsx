@@ -42,10 +42,11 @@ interface ExpensesBarChartProps {
   error?: string | null
   emptyMessage?: string
   className?: string
+  layout?: 'horizontal' | 'vertical'
 }
 
 // Компонент ExpensesBarChart
-const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartProps>(({ 
+const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartProps>(({
   data,
   filters,
   title,
@@ -57,9 +58,10 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
   isLoading = false,
   error = null,
   emptyMessage = "No expenses data available",
-  className = ""
+  className = "",
+  layout = 'horizontal'
 }, ref) => {
-  
+
   const { text: tip, loading: tipLoading, error: tipError, isRateLimited, fetchSuggestion, abort } = useAISuggestions()
   const { subscriptionPlan } = useSubscription()
   const isPro = subscriptionPlan === 'pro'
@@ -202,16 +204,13 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
 
   return (
     <Card className={className} ref={ref}>
-      <CardHeader>
-        <CardTitle>{resolvedTitle}</CardTitle>
-        {description && <ChartDescription>{description}</ChartDescription>}
-      </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         {showUpgrade && <UpgradeCornerPanel />}
         <div style={{ width: '100%', height }}>
           <ResponsiveContainer width="100%" height="100%">
             <RechartsBarChart
               data={data}
+              layout={layout}
               margin={{
                 top: 20,
                 right: 30,
@@ -219,85 +218,57 @@ const ExpensesBarChartComponent = forwardRef<HTMLDivElement, ExpensesBarChartPro
                 bottom: 5,
               }}
             >
-              {showGrid && <CartesianGrid strokeDasharray="3 3" />}
-              <XAxis 
-                dataKey="period" 
-                tick={{ fontSize: 12 }}
-                axisLine={false}
-                tickLine={false}
-              />
-              <YAxis 
-                tick={{ fontSize: 12 }}
-                axisLine={false}
-                tickLine={false}
-                tickFormatter={(value) => formatCurrency(value, currency)}
-              />
-              {showTooltip && (
-                <Tooltip 
-                  content={<CustomTooltip currency={currency} />}
-                />
-              )}
-              <Bar 
-                dataKey="amount" 
-                fill="#8884d8"
-                radius={[4, 4, 0, 0]}
-              />
-            </RechartsBarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* AI Suggestions inside the card — matched to Counters */}
-        <div className="flex items-center gap-3 mt-5">
-          <div className="flex-1">
-            {tipLoading && (
-              <span className="text-black dark:text-white text-sm inline-flex items-center">
-                <span>💡 {tCharts('ai.thinking')}</span>
-                <span className="flex items-center gap-1 ml-2">
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </span>
-              </span>
-            )}
-            {!tipLoading && displayTip && (
-              <span className="text-black dark:text-white text-sm whitespace-pre-wrap">💡 {displayTip}</span>
-            )}
-            {!tipLoading && !displayTip && !tipError && (
-              <span className="text-black dark:text-white text-sm">💡 {tCharts('ai.tips')}</span>
-            )}
-            {tipError && <p className="text-red-600 text-xs mt-1">{tipError}</p>}
-          </div>
-
-          {/* Кнопка инсайта или заблокированный блок после одного превью в Free */}
-          {(!isPro && previewUsed) ? (
-            <div className="text-sm font-medium px-4 py-2 rounded-md bg-muted text-muted-foreground flex items-center gap-2">
-              <ProLockLabel />
-              <span>Полные инсайты доступны в Pro</span>
-              <a href="/payment" className="ml-2 underline text-primary">Upgrade to Pro</a>
-            </div>
-          ) : (
-            <button
-              onClick={tipLoading ? abort : refreshTip}
-              className={`text-sm font-medium px-4 py-2 rounded-md transition-colors flex items-center gap-2 ${tipLoading ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}
-              disabled={isRateLimited}
-            >
-              {tipLoading ? (
+              {showGrid && <CartesianGrid strokeDasharray="3 3" stroke="rgba(128, 128, 128, 0.1)" horizontal={layout === 'horizontal'} vertical={layout === 'vertical'} />}
+              {layout === 'horizontal' ? (
                 <>
-                  <svg className="w-[16px] h-[16px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="15" y1="9" x2="9" y2="15"></line>
-                    <line x1="9" y1="9" x2="15" y2="15"></line>
-                  </svg>
-                  <span>{tCharts('ai.stop')}</span>
+                  <XAxis
+                    dataKey="period"
+                    tick={{ fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
+                    type="category"
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(value) => formatCurrency(value, currency)}
+                    type="number"
+                  />
                 </>
               ) : (
                 <>
-                  <Image src="/sparkles.svg" alt="Sparkles" width={16} height={16} />
-                  <span>{tCharts('ai.getInsight')}</span>
+                  <XAxis
+                    type="number"
+                    tick={{ fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(value) => formatCurrency(value, currency)}
+                  />
+                  <YAxis
+                    dataKey="period"
+                    type="category"
+                    tick={{ fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={100}
+                  />
                 </>
               )}
-            </button>
-          )}
+              {showTooltip && (
+                <Tooltip
+                  content={<CustomTooltip currency={currency} />}
+                  cursor={{ fill: 'transparent' }}
+                />
+              )}
+              <Bar
+                dataKey="amount"
+                fill="#8884d8"
+                radius={layout === 'horizontal' ? [4, 4, 0, 0] : [0, 4, 4, 0]}
+                barSize={32}
+              />
+            </RechartsBarChart>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>

@@ -191,6 +191,9 @@
   "transactions": {
     "title": "Transactions📉",
     "addTransaction": "Add Transaction",
+    "search": {
+      "placeholder": "Search transactions..."
+    },
     "empty": {
       "title": "No transactions yet",
       "description": "Start by adding your first transaction",

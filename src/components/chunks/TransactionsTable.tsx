@@ -34,6 +34,7 @@ interface EnhancedTransactionsTableProps extends TransactionsTableProps {
   showFilters?: boolean
   emptyStateMessage?: string
   onTransactionUpdate?: () => void
+  onEditClick?: (transaction: Transaction) => void
 }
 
 function TransactionsTable({
@@ -46,7 +47,8 @@ function TransactionsTable({
   sortOrder = 'desc',
   showFilters = false,
   emptyStateMessage,
-  onTransactionUpdate
+  onTransactionUpdate,
+  onEditClick
 }: EnhancedTransactionsTableProps) {
   const [selectedTransactionId, setSelectedTransactionId] = useState<string | null>(null)
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
@@ -88,11 +90,6 @@ function TransactionsTable({
 
     return sortOrder === 'desc' ? -comparison : comparison
   })
-
-  const totalPages = Math.ceil(sortedTransactions.length / pageSize) || 1
-  const startIndex = (currentPage - 1) * pageSize
-  const endIndex = startIndex + pageSize
-  const pageItems = sortedTransactions.slice(startIndex, endIndex)
 
   const handleOpenModal = (id: string) => {
     setSelectedTransactionId(id)
@@ -161,7 +158,7 @@ function TransactionsTable({
 
       {/* Мобильная версия - карточки */}
       <div className="block md:hidden space-y-3">
-        {pageItems.map((transaction, index) => (
+        {sortedTransactions.map((transaction, index) => (
           <motion.div
             key={transaction.id}
             className="bg-card border border-border rounded-lg p-4"
@@ -182,7 +179,13 @@ function TransactionsTable({
               </div>
               <div className={`${transaction.type === 'expense' ? 'text-error' : 'text-success'} font-bold`}>${transaction.amount}</div>
               <div className="flex items-center gap-2">
-                <Button size="icon" variant="ghost" className="h-8 w-8 text-primary" onClick={() => { setEditingTransaction(transaction); setIsEditOpen(true) }}>
+                <Button size="icon" variant="ghost" className="h-8 w-8 text-primary" onClick={() => {
+                  if (onEditClick) {
+                    onEditClick(transaction)
+                  } else {
+                    setEditingTransaction(transaction); setIsEditOpen(true)
+                  }
+                }}>
                   <Pencil size={16} />
                 </Button>
                 <Button size="icon" variant="ghost" className="h-8 w-8 text-error" onClick={() => { setSelectedTransactionId(transaction.id); setIsModalOpen(true) }}>
@@ -192,14 +195,6 @@ function TransactionsTable({
             </div>
           </motion.div>
         ))}
-      </div>
-
-      <div className="mt-4 block md:hidden">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={(p) => setCurrentPage(p)}
-        />
       </div>
 
       {/* Десктопная версия - таблица */}
@@ -219,7 +214,7 @@ function TransactionsTable({
             <TableHead className="!text-[16px] font-semibold text-foreground">{tTransactions('table.headers.actions')}</TableHead>
           </TableHeader>
           <TableBody>
-            {pageItems.map((transaction, index) => (
+            {sortedTransactions.map((transaction, index) => (
               <motion.tr
                 key={transaction.id}
                 className="border-b border-border hover:bg-muted/30"
@@ -245,11 +240,10 @@ function TransactionsTable({
                 <TableCell className="text-foreground">${transaction.amount}</TableCell>
                 <TableCell>
                   <span
-                    className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium uppercase tracking-wide border ${
-                      transaction.type === 'expense'
-                        ? 'border-red-500 text-red-500 bg-transparent'
-                        : 'border-green-500 text-green-500 bg-transparent'
-                    }`}
+                    className={`inline-flex items-center px-2 py-1 rounded-full text-[10px] font-medium uppercase tracking-wide border ${transaction.type === 'expense'
+                      ? 'border-red-500 text-red-500 bg-transparent'
+                      : 'border-green-500 text-green-500 bg-transparent'
+                      }`}
                   >
                     {transaction.type}
                   </span>
@@ -264,8 +258,12 @@ function TransactionsTable({
                       variant="ghost"
                       className="h-8 w-8 text-primary hover:bg-blue-50"
                       onClick={() => {
-                        setEditingTransaction(transaction)
-                        setIsEditOpen(true)
+                        if (onEditClick) {
+                          onEditClick(transaction)
+                        } else {
+                          setEditingTransaction(transaction)
+                          setIsEditOpen(true)
+                        }
                       }}
                     >
                       <Pencil size={16} />
@@ -288,15 +286,6 @@ function TransactionsTable({
           </TableBody>
         </Table>
       </motion.div>
-
-      {/* Пагинация (только для десктоп-таблицы) */}
-      <div className="mt-4 hidden md:block">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={(p) => setCurrentPage(p)}
-        />
-      </div>
 
       {/* Delete modal */}
       {isModalOpen && selectedTransactionId && (

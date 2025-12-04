@@ -122,273 +122,277 @@ export default function UserSettingsClient() {
 
   return (
     <>
-      <div className="flex flex-col gap-6 px-4 md:px-5 pb-24">
-        <div className="w-full">
-          {/* Page Header */}
-          <motion.div
-            className="mt-[30px] mb-8"
+      <div className="flex flex-col gap-6 px-4 md:px-5 pb-8 max-w-4xl mx-auto w-full">
+        {/* Page Header */}
+        <motion.div
+          className="mt-[30px] mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, ease: 'easeOut' }}
+        >
+          <motion.h1
+            className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black dark:text-white"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
+          >
+            {tSettings('header.title')}
+          </motion.h1>
+          <motion.p
+            className="text-sm sm:text-base text-gray-600 dark:text-white mt-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: 'easeOut' }}
+            transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
           >
-            <motion.h1
-              className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black dark:text-white"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: 'easeOut', delay: 0.1 }}
-            >
-              {tSettings('header.title')}
-            </motion.h1>
-            <motion.p
-              className="text-sm sm:text-base text-gray-600 dark:text-white mt-2"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
-            >
-              {tSettings('header.subtitle')}
-            </motion.p>
-          </motion.div>
+            {tSettings('header.subtitle')}
+          </motion.p>
+        </motion.div>
 
-          {/* Settings Content */}
-          <div className="space-y-6">
-            {/* Profile Section */}
-            <ProfileCard onEditProfile={handleEditProfile} />
+        {/* Settings Content */}
+        <div className="space-y-6">
+          {/* Profile Section */}
+          <ProfileCard onEditProfile={handleEditProfile} />
 
-            {/* Subscription Section — мобильный паддинг 12px */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
-                    {tSettings('subscription.title')}
-                  </h2>
-                  <p className="text-sm text-gray-600 dark:text-white">
-                    {tSettings('subscription.description')}
-                  </p>
-                </div>
-                <span
-                  className={`text-xs px-2 py-1 rounded border ${
-                    subscriptionPlan === 'pro'
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-900'
-                      : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-900'
+          {/* Subscription Section — мобильный паддинг 12px */}
+          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
+                  {tSettings('subscription.title')}
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-white">
+                  {tSettings('subscription.description')}
+                </p>
+              </div>
+              <span
+                className={`text-xs px-2 py-1 rounded border ${subscriptionPlan === 'pro'
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-900'
+                  : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-900'
                   }`}
-                >
-                  {tSettings('subscription.currentPlan')}:{' '}
-                  {subscriptionPlan === 'pro' ? tPricing('pro.label') : tPricing('free.label')}
-                </span>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Free */}
-                <div className="rounded-lg border border-gray-200 dark:border-border p-3 md:p-5">
-                  <h3 className="font-medium text-secondary-black dark:text-white">{tPricing('free.label')}</h3>
-                  <p className="text-sm text-gray-600 dark:text-white mt-1">{tPricing('free.short')}</p>
-                  <div className="mt-4">
-                    <div className="text-2xl font-semibold text-secondary-black dark:text-white">$0</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">{tPricing('perMonth')}</div>
-                  </div>
-                  <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-white">
-                    <li>• {tPricing('free.features.track')}</li>
-                    <li>• {tPricing('free.features.charts')}</li>
-                    <li>• {tPricing('free.features.notifications')}</li>
-                  </ul>
+              >
+                {tSettings('subscription.currentPlan')}:{' '}
+                {subscriptionPlan === 'pro' ? tPricing('pro.label') : tPricing('free.label')}
+              </span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Free */}
+              <div className="rounded-lg border border-gray-200 dark:border-border p-3 md:p-5">
+                <h3 className="font-medium text-secondary-black dark:text-white">{tPricing('free.label')}</h3>
+                <p className="text-sm text-gray-600 dark:text-white mt-1">{tPricing('free.short')}</p>
+                <div className="mt-4">
+                  <div className="text-2xl font-semibold text-secondary-black dark:text-white">$0</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{tPricing('perMonth')}</div>
                 </div>
-                {/* Pro */}
-                <div className="rounded-lg border border-primary dark:border-primary p-3 md:p-5 bg-primary/5 dark:bg-primary/10">
-                  <h3 className="font-medium text-secondary-black dark:text-white">{tPricing('pro.label')}</h3>
-                  <p className="text-sm text-gray-600 dark:text-white mt-1">{tPricing('pro.short')}</p>
-                  <div className="mt-4">
-                    <div className="text-2xl font-semibold text-secondary-black dark:text-white">$7</div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">{tPricing('perMonth')}</div>
-                  </div>
-                  <ul className="mt-4 space-y-2 text-sm text-gray-800 dark:text-white">
-                    <li>• {tPricing('pro.features.aiUnlimited')}</li>
-                    <li>• {tPricing('pro.features.advancedCharts')}</li>
-                    <li>• {tPricing('pro.features.prioritySupport')}</li>
-                    <li>• {tPricing('pro.features.customGoals')}</li>
-                    <li>• {tPricing('pro.features.earlyAccess')}</li>
-                  </ul>
-                  <div className="mt-5">
-                    <Link href={{ pathname: '/payment' }} className="inline-flex w-full">
-                      <Button text={tCTA('upgradeToPro')} variant="primary" className="w-full" />
-                    </Link>
-                  </div>
+                <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-white">
+                  <li>• {tPricing('free.features.track')}</li>
+                  <li>• {tPricing('free.features.charts')}</li>
+                  <li>• {tPricing('free.features.notifications')}</li>
+                </ul>
+              </div>
+              {/* Pro */}
+              <div className="rounded-lg border border-primary dark:border-primary p-3 md:p-5 bg-primary/5 dark:bg-primary/10">
+                <h3 className="font-medium text-secondary-black dark:text-white">{tPricing('pro.label')}</h3>
+                <p className="text-sm text-gray-600 dark:text-white mt-1">{tPricing('pro.short')}</p>
+                <div className="mt-4">
+                  <div className="text-2xl font-semibold text-secondary-black dark:text-white">$7</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{tPricing('perMonth')}</div>
+                </div>
+                <ul className="mt-4 space-y-2 text-sm text-gray-800 dark:text-white">
+                  <li>• {tPricing('pro.features.aiUnlimited')}</li>
+                  <li>• {tPricing('pro.features.advancedCharts')}</li>
+                  <li>• {tPricing('pro.features.prioritySupport')}</li>
+                  <li>• {tPricing('pro.features.customGoals')}</li>
+                  <li>• {tPricing('pro.features.earlyAccess')}</li>
+                </ul>
+                <div className="mt-5">
+                  <Link href={{ pathname: '/payment' }} className="inline-flex w-full">
+                    <Button text={tCTA('upgradeToPro')} variant="primary" className="w-full" />
+                  </Link>
                 </div>
               </div>
             </div>
+          </div>
 
-            {/* Language Section — мобильный паддинг 12px */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
-                    {tSettings('language.title')}
-                  </h2>
-                  <p className="text-sm text-gray-600 dark:text-white">{tSettings('language.description')}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <LanguageSelect value={language} onChange={(l) => handleLanguageChange(l)} className="min-w-[180px]" />
-                  {isSavingLang ? <span className="text-xs text-muted-foreground">{tCommon('saving')}</span> : null}
-                </div>
+          {/* Language Section — мобильный паддинг 12px */}
+          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
+                  {tSettings('language.title')}
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-white">{tSettings('language.description')}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <LanguageSelect value={language} onChange={(l) => handleLanguageChange(l)} className="min-w-[180px]" />
+                {isSavingLang ? <span className="text-xs text-muted-foreground">{tCommon('saving')}</span> : null}
               </div>
             </div>
+          </div>
 
-            {/* Appearance Section — мобильный паддинг 12px */}
+          {/* Appearance Section — мобильный паддинг 12px */}
+          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">
+                  {tSettings('appearance.title')}
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-white">
+                  {tSettings('appearance.description')}
+                </p>
+              </div>
+              <ThemeSwitcher />
+            </div>
+          </div>
+
+          {/* Notifications Section — теперь открывается в Sheet */}
+          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-secondary-black mb-2 dark:text-white">
+                  {tSettings('notifications.title')}
+                </h2>
+                <p className="text-gray-600 dark:text-white text-sm">
+                  {tSettings('notifications.description')}
+                </p>
+              </div>
+              <Button
+                text={tSettings('notifications.title')}
+                variant="default"
+                onClick={() => setIsNotificationsOpen(true)}
+              />
+            </div>
+          </div>
+
+          {/* Transaction Templates Section — мобильный паддинг 12px */}
+          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+            <TransactionTemplatesSettings />
+          </div>
+
+          {/* Assistant Tone Section — мобильный паддинг 12px */}
+          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-secondary-black dark:text-white">{tAI('settings.title')}</h2>
+              <p className="text-sm text-gray-600 dark:text-white mt-1">{tAI('settings.description')}</p>
+            </div>
+            <ToneSettings />
+          </div>
+
+          {/* App Controls Section — мобильный паддинг 12px */}
+          {!isPWAInstalled && (
             <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">
-                    {tSettings('appearance.title')}
+                    {tSettings('appControls.title')}
                   </h2>
-                  <p className="text-sm text-gray-600 dark:text-white">
-                    {tSettings('appearance.description')}
-                  </p>
+                  <p className="text-sm text-gray-600 dark:text-white">{tSettings('appControls.description')}</p>
                 </div>
-                <ThemeSwitcher />
+                <Button text={tCTA('downloadApp')} variant="default" onClick={() => setIsAppInstallModalOpen(true)} />
               </div>
             </div>
+          )}
 
-            {/* Notifications Section — теперь открывается в Sheet */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-secondary-black mb-2 dark:text-white">
-                    {tSettings('notifications.title')}
-                  </h2>
-                  <p className="text-gray-600 dark:text-white text-sm">
-                    {tSettings('notifications.description')}
-                  </p>
-                </div>
-                <Button
-                  text={tSettings('notifications.title')}
-                  variant="default"
-                  onClick={() => setIsNotificationsOpen(true)}
-                />
-              </div>
-            </div>
-
-            {/* Transaction Templates Section — мобильный паддинг 12px */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
-              <TransactionTemplatesSettings />
-            </div>
-
-            {/* Assistant Tone Section — мобильный паддинг 12px */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
-              <div className="mb-6">
-                <h2 className="text-lg font-semibold text-secondary-black dark:text-white">{tAI('settings.title')}</h2>
-                <p className="text-sm text-gray-600 dark:text-white mt-1">{tAI('settings.description')}</p>
-              </div>
-              <ToneSettings />
-            </div>
-
-            {/* App Controls Section — мобильный паддинг 12px */}
-            {!isPWAInstalled && (
-              <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">
-                      {tSettings('appControls.title')}
-                    </h2>
-                    <p className="text-sm text-gray-600 dark:text-white">{tSettings('appControls.description')}</p>
-                  </div>
-                  <Button text={tCTA('downloadApp')} variant="default" onClick={() => setIsAppInstallModalOpen(true)} />
-                </div>
-              </div>
-            )}
-
-            {/* Account Section — мобильный паддинг 12px и без нижнего дивайдера */}
-            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-lg font-semibold text-secondary-black mb-4 dark:text-white">
-                    {tSettings('account.title')}
-                  </h2>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between py-3">
-                      <div>
-                        <h3 className="font-medium text-secondary-black dark:text-white">
-                          {tSettings('account.signOut.title')}
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-white">
-                          {tSettings('account.signOut.description')}
-                        </p>
-                      </div>
-                      <Button
-                        text={tCTA('signOut')}
-                        variant="ghost"
-                        icon={<LogOut size={16} />}
-                        onClick={openSignOutModal}
-                      />
+          {/* Account Section — мобильный паддинг 12px и без нижнего дивайдера */}
+          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-semibold text-secondary-black mb-4 dark:text-white">
+                  {tSettings('account.title')}
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between py-3">
+                    <div>
+                      <h3 className="font-medium text-secondary-black dark:text-white">
+                        {tSettings('account.signOut.title')}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-white">
+                        {tSettings('account.signOut.description')}
+                      </p>
                     </div>
+                    <Button
+                      text={tCTA('signOut')}
+                      variant="ghost"
+                      icon={<LogOut size={16} />}
+                      onClick={openSignOutModal}
+                    />
                   </div>
                 </div>
               </div>
             </div>
-
-            {/* Danger Zone Section — мобильный паддинг 12px */}
-            {subscriptionPlan === 'pro' && (
-              <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-red-600 dark:text-red-400">
-                    {tSettings('dangerZone.title')}
-                  </h2>
-                  <p className="text-sm text-gray-600 dark:text-white">{tSettings('dangerZone.description')}</p>
-                </div>
-                <Button
-                  text={tSettings('dangerZone.unsubscribe')}
-                  variant="destructive"
-                  onClick={() => setIsUnsubscribeOpen(true)}
-                />
-              </div>
-            )}
           </div>
+
+          {/* Danger Zone Section — мобильный паддинг 12px */}
+          {subscriptionPlan === 'pro' && (
+            <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold text-red-600 dark:text-red-400">
+                  {tSettings('dangerZone.title')}
+                </h2>
+                <p className="text-sm text-gray-600 dark:text-white">{tSettings('dangerZone.description')}</p>
+              </div>
+              <Button
+                text={tSettings('dangerZone.unsubscribe')}
+                variant="destructive"
+                onClick={() => setIsUnsubscribeOpen(true)}
+              />
+            </div>
+          )}
         </div>
       </div>
+    </div >
 
-      {/* Sign Out Modal */}
-      {isSignOutModalOpen && (
-        <SignOutModal
-          title={tSettings('modals.signOut.title')}
-          text={tSettings('modals.signOut.text')}
-          onClose={closeSignOutModal}
-          signOut={signOut}
-        />
-      )}
+      {/* Sign Out Modal */ }
+  {
+    isSignOutModalOpen && (
+      <SignOutModal
+        title={tSettings('modals.signOut.title')}
+        text={tSettings('modals.signOut.text')}
+        onClose={closeSignOutModal}
+        signOut={signOut}
+      />
+    )
+  }
 
-      {/* Edit Profile Modal */}
-      <EditProfileModal isOpen={isEditProfileModalOpen} onClose={handleEditProfileClose} onSuccess={() => {}} />
+  {/* Edit Profile Modal */ }
+  <EditProfileModal isOpen={isEditProfileModalOpen} onClose={handleEditProfileClose} onSuccess={() => { }} />
 
-      {/* App Install Modal */}
-      {isAppInstallModalOpen && (
-        <AppInstallModal isOpen={isAppInstallModalOpen} onClose={() => setIsAppInstallModalOpen(false)} />
-      )}
+  {/* App Install Modal */ }
+  {
+    isAppInstallModalOpen && (
+      <AppInstallModal isOpen={isAppInstallModalOpen} onClose={() => setIsAppInstallModalOpen(false)} />
+    )
+  }
 
-      {/* Unsubscribe Modal */}
-      {isUnsubscribeOpen && (
-        <UnsubscribeModal
-          open={isUnsubscribeOpen}
-          onClose={() => setIsUnsubscribeOpen(false)}
-          onConfirm={handleConfirmUnsubscribe}
-          isLoading={isUnsubscribing}
-        />
-      )}
+  {/* Unsubscribe Modal */ }
+  {
+    isUnsubscribeOpen && (
+      <UnsubscribeModal
+        open={isUnsubscribeOpen}
+        onClose={() => setIsUnsubscribeOpen(false)}
+        onConfirm={handleConfirmUnsubscribe}
+        isLoading={isUnsubscribing}
+      />
+    )
+  }
 
-      {/* Notifications Sheet — без изменений */}
-      <Sheet open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
-        <SheetContent side="bottom" className="bg-background text-foreground h-[75vh]">
-          <SheetHeader className="px-4 py-4 border-b border-border justify-center">
-            <SheetTitle className="text-[18px] sm:text-[20px] font-semibold text-center">
-              {tSettings('notifications.title')}
-            </SheetTitle>
-          </SheetHeader>
-          <div className="p-4">
-            <NotificationSettings />
-          </div>
-          <SheetFooter className="px-4 py-3 border-t border-border">
-            <SheetClose className="h-10 px-4 w-full rounded-md border border-input bg-background text-sm text-center">
-              {tCommon('close')}
-            </SheetClose>
-          </SheetFooter>
-        </SheetContent>
-      </Sheet>
+  {/* Notifications Sheet — без изменений */ }
+  <Sheet open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
+    <SheetContent side="bottom" className="bg-background text-foreground h-[75vh]">
+      <SheetHeader className="px-4 py-4 border-b border-border justify-center">
+        <SheetTitle className="text-[18px] sm:text-[20px] font-semibold text-center">
+          {tSettings('notifications.title')}
+        </SheetTitle>
+      </SheetHeader>
+      <div className="p-4">
+        <NotificationSettings />
+      </div>
+      <SheetFooter className="px-4 py-3 border-t border-border">
+        <SheetClose className="h-10 px-4 w-full rounded-md border border-input bg-background text-sm text-center">
+          {tCommon('close')}
+        </SheetClose>
+      </SheetFooter>
+    </SheetContent>
+  </Sheet>
     </>
   )
 }

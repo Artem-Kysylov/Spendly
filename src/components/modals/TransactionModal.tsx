@@ -63,12 +63,13 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId, initialDa
 
 
   // УБРАНО: повторное автосмещение фокуса таймером, чтобы не сбивать фокус пользователя
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     amountRef.current?.focus()
-  //   }, 60)
-  //   return () => clearTimeout(timer)
-  // }, [])
+  useEffect(() => {
+    // Small delay to ensure Drawer/Sheet animation completes before focusing
+    const timer = setTimeout(() => {
+      amountRef.current?.focus()
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [internalOpen])
 
   const fetchBudgetFolders = async () => {
     if (!session?.user?.id) return
@@ -94,34 +95,34 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId, initialDa
 
   useEffect(() => {
     fetchBudgetFolders()
-    ;(async () => {
-      if (!session?.user?.id) return
-      try {
-        const { data } = await supabase
-          .from('transaction_templates')
-          .select('id, title, amount, type, budget_folder_id')
-          .eq('user_id', session.user.id)
-          .order('updated_at', { ascending: false })
-        setTemplates((data || []).map((t: any) => ({
-          id: t.id,
-          title: t.title,
-          amount: Number(t.amount || 0),
-          type: t.type,
-          budget_folder_id: t.budget_folder_id ?? null,
-        })))
-      } catch { /* ignore */ }
+      ; (async () => {
+        if (!session?.user?.id) return
+        try {
+          const { data } = await supabase
+            .from('transaction_templates')
+            .select('id, title, amount, type, budget_folder_id')
+            .eq('user_id', session.user.id)
+            .order('updated_at', { ascending: false })
+          setTemplates((data || []).map((t: any) => ({
+            id: t.id,
+            title: t.title,
+            amount: Number(t.amount || 0),
+            type: t.type,
+            budget_folder_id: t.budget_folder_id ?? null,
+          })))
+        } catch { /* ignore */ }
 
-      try {
-        const { data } = await supabase
-          .from('transactions')
-          .select('title')
-          .eq('user_id', session.user.id)
-          .order('created_at', { ascending: false })
-          .limit(50)
-        const uniq = Array.from(new Set((data || []).map((r: any) => r.title).filter(Boolean)))
-        setRecentTitles(uniq)
-      } catch { /* ignore */ }
-    })()
+        try {
+          const { data } = await supabase
+            .from('transactions')
+            .select('title')
+            .eq('user_id', session.user.id)
+            .order('created_at', { ascending: false })
+            .limit(50)
+          const uniq = Array.from(new Set((data || []).map((r: any) => r.title).filter(Boolean)))
+          setRecentTitles(uniq)
+        } catch { /* ignore */ }
+      })()
   }, [session?.user?.id])
 
   // Применяем предзаполненный бюджет после загрузки списков
@@ -293,6 +294,7 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId, initialDa
                 </Tabs>
 
                 <TextInput
+                  key="amount-input"
                   type="number"
                   placeholder={tTransactions('table.headers.amount')}
                   value={amount}
@@ -304,6 +306,7 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId, initialDa
                 />
 
                 <TextInput
+                  key="title-input"
                   type="text"
                   placeholder={tModals('transaction.placeholder.title')}
                   value={transactionTitle}
