@@ -7,7 +7,7 @@ import type { RecurringRule } from '@/types/ai'
 import TextInput from '@/components/ui-elements/TextInput'
 import Button from '@/components/ui-elements/Button'
 import HybridDatePicker from '@/components/ui-elements/HybridDatePicker'
-import { Select } from '@/components/ui/select'
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select'
 import type { BudgetFolderItemProps } from '@/types/types'
 import { useTranslations } from 'next-intl'
 import { useSubscription } from '@/hooks/useSubscription'
@@ -227,17 +227,42 @@ export default function RecurringRulesSettings() {
           />
         </div>
 
+        {/* Create form — cadence */}
         <div className="flex flex-col gap-1">
           <label className="text-sm font-medium text-secondary-black dark:text-white">
             {tSettings('recurringRules.form.cadence.label')}
           </label>
+          <Select value={draft.cadence} onValueChange={(v) => setDraft(d => ({ ...d, cadence: v as 'weekly' | 'monthly' }))}>
+            <SelectTrigger className="h-10">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="weekly">{tSettings('recurringRules.form.cadence.options.weekly')}</SelectItem>
+              <SelectItem value="monthly">{tSettings('recurringRules.form.cadence.options.monthly')}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Create form — budget */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-medium text-secondary-black dark:text-white">
+            {tSettings('recurringRules.form.budget.label')}
+          </label>
           <Select
-            value={draft.cadence}
-            onChange={(e) => setDraft(d => ({ ...d, cadence: e.target.value as 'weekly' | 'monthly' }))}
-            className="h-10"
+            value={draft.budget_folder_id ?? 'unbudgeted'}
+            onValueChange={(v) => setDraft(d => ({ ...d, budget_folder_id: v }))}
           >
-            <option value="weekly">{tSettings('recurringRules.form.cadence.options.weekly')}</option>
-            <option value="monthly">{tSettings('recurringRules.form.cadence.options.monthly')}</option>
+            <SelectTrigger className="h-10">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="unbudgeted">{tSettings('recurringRules.form.budget.unbudgeted')}</SelectItem>
+              {budgets.map(b => (
+                <SelectItem key={b.id} value={b.id}>
+                  {b.emoji ? `${b.emoji} ${b.name}` : b.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
 
@@ -251,24 +276,6 @@ export default function RecurringRulesSettings() {
             placeholder={tSettings('recurringRules.form.nextDue.placeholder')}
             className="w-full"
           />
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-secondary-black dark:text-white">
-            {tSettings('recurringRules.form.budget.label')}
-          </label>
-          <Select
-            value={draft.budget_folder_id ?? 'unbudgeted'}
-            onChange={(e) => setDraft(d => ({ ...d, budget_folder_id: e.target.value }))}
-            className="h-10"
-          >
-            <option value="unbudgeted">{tSettings('recurringRules.form.budget.unbudgeted')}</option>
-            {budgets.map(b => (
-              <option key={b.id} value={b.id}>
-                {b.emoji ? `${b.emoji} ${b.name}` : b.name}
-              </option>
-            ))}
-          </Select>
         </div>
 
         <div className="md:col-span-5 flex items-center justify-end gap-2">
@@ -295,21 +302,27 @@ export default function RecurringRulesSettings() {
           <div key={rule.id} className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border rounded-md p-3">
             {editingId === rule.id ? (
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2 flex-1">
-                <TextInput
-                  type="text"
-                  placeholder={tSettings('recurringRules.form.title.placeholder')}
-                  value={rule.title_pattern}
-                  onChange={(e) => setRules(prev => prev.map(r => r.id === rule.id ? { ...r, title_pattern: e.target.value } : r))}
-                  className="h-10 px-3"
-                />
+                {/* cadence */}
                 <Select
                   value={rule.cadence}
-                  onChange={(e) => setRules(prev => prev.map(r => r.id === rule.id ? { ...r, cadence: e.target.value as 'weekly' | 'monthly' } : r))}
-                  className="h-10"
+                  onValueChange={(v) =>
+                    setRules(prev =>
+                      prev.map(r =>
+                        r.id === rule.id ? { ...r, cadence: v as 'weekly' | 'monthly' } : r
+                      )
+                    )
+                  }
                 >
-                  <option value="weekly">{tSettings('recurringRules.form.cadence.options.weekly')}</option>
-                  <option value="monthly">{tSettings('recurringRules.form.cadence.options.monthly')}</option>
+                  <SelectTrigger className="h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="weekly">{tSettings('recurringRules.form.cadence.options.weekly')}</SelectItem>
+                    <SelectItem value="monthly">{tSettings('recurringRules.form.cadence.options.monthly')}</SelectItem>
+                  </SelectContent>
                 </Select>
+
+                {/* avg amount */}
                 <TextInput
                   type="number"
                   placeholder={tSettings('recurringRules.form.avgAmount.label')}
@@ -317,17 +330,31 @@ export default function RecurringRulesSettings() {
                   onChange={(e) => setRules(prev => prev.map(r => r.id === rule.id ? { ...r, avg_amount: Number(e.target.value) } : r))}
                   className="h-10 px-3"
                 />
+
+                {/* budget */}
                 <Select
                   value={rule.budget_folder_id ?? 'unbudgeted'}
-                  onChange={(e) => setRules(prev => prev.map(r => r.id === rule.id ? { ...r, budget_folder_id: (e.target.value === 'unbudgeted' ? null : e.target.value) } : r))}
-                  className="h-10"
+                  onValueChange={(v) =>
+                    setRules(prev =>
+                      prev.map(r =>
+                        r.id === rule.id
+                          ? { ...r, budget_folder_id: v === 'unbudgeted' ? null : v }
+                          : r
+                      )
+                    )
+                  }
                 >
-                  <option value="unbudgeted">{tSettings('recurringRules.form.budget.unbudgeted')}</option>
-                  {budgets.map(b => (
-                    <option key={b.id} value={b.id}>
-                      {b.emoji ? `${b.emoji} ${b.name}` : b.name}
-                    </option>
-                  ))}
+                  <SelectTrigger className="h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unbudgeted">{tSettings('recurringRules.form.budget.unbudgeted')}</SelectItem>
+                    {budgets.map(b => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.emoji ? `${b.emoji} ${b.name}` : b.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
                 </Select>
               </div>
             ) : (

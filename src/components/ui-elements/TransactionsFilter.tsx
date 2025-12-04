@@ -1,7 +1,7 @@
 "use client"
 
 import React from 'react'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTranslations } from 'next-intl'
 
 export interface TransactionsFilterProps {
@@ -33,13 +33,16 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
         <div className="relative">
           <Select
             value={transactionType}
-            onChange={(e) => onTransactionTypeChange(e.target.value as 'Expenses' | 'Income')}
-            className="w-full sm:min-w-[140px] bg-white dark:bg-background text-black dark:text-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none border border-input"
+            onValueChange={(v) => onTransactionTypeChange(v as 'Expenses' | 'Income')}
           >
-            <option value="Expenses">{tCharts('labels.expenses')}</option>
-            <option value="Income">{tCharts('labels.income')}</option>
+            <SelectTrigger className="w-full sm:min-w-[140px] bg-white dark:bg-background text-black dark:text-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none border border-input" >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Expenses">{tCharts('labels.expenses')}</SelectItem>
+              <SelectItem value="Income">{tCharts('labels.income')}</SelectItem>
+            </SelectContent>
           </Select>
-          {/* Удалено: кастомный SVG‑чеврон */}
         </div>
       </div>
 
@@ -51,13 +54,16 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
         <div className="relative">
           <Select
             value={datePeriod}
-            onChange={(e) => onDatePeriodChange(e.target.value as 'Week' | 'Month')}
-            className="w-full sm:min-w-[140px] bg-white dark:bg-background text-black dark:text-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none border border-input"
+            onValueChange={(v) => onDatePeriodChange(v as 'Week' | 'Month')}
           >
-            <option value="Week">{tFilters('options.week')}</option>
-            <option value="Month">{tFilters('options.month')}</option>
+            <SelectTrigger className="w-full sm:min-w-[140px] bg-white dark:bg-background text-black dark:text-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none border border-input">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Week">{tFilters('options.week')}</SelectItem>
+              <SelectItem value="Month">{tFilters('options.month')}</SelectItem>
+            </SelectContent>
           </Select>
-          {/* Удалено: кастомный SVG‑чеврон */}
         </div>
       </div>
     </div>

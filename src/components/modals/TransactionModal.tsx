@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl'
 import Button from '@/components/ui-elements/Button'
 import TextInput from '@/components/ui-elements/TextInput'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog'
-import { Select } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Command, CommandList, CommandInput, CommandGroup, CommandItem, CommandEmpty } from '@/components/ui/command'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -257,8 +257,7 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId, initialDa
     e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-z\s]/g, '')
   }
 
-  const handleBudgetChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const budgetId = e.target.value
+  const handleBudgetChange = (budgetId: string) => {
     applyBudgetId(budgetId)
   }
 
@@ -361,22 +360,23 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId, initialDa
                   placeholder={tModals('transaction.date.placeholder')}
                 />
 
-                {/* Budget Category Selection */}
+                {/* Budget Category Selection — мобильная версия */}
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium text-secondary-black dark:text-white">
                     {tModals('transaction.select.label')}
                   </label>
-                  <Select
-                    value={selectedBudgetId}
-                    onChange={handleBudgetChange}
-                    className="bg-background text-foreground h-[60px] px-[20px]"
-                  >
-                    <option value="unbudgeted">{tModals('transaction.select.unbudgeted')}</option>
-                    {filteredBudgets.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.emoji ? `${b.emoji} ${b.name}` : b.name}
-                      </option>
-                    ))}
+                  <Select value={selectedBudgetId} onValueChange={handleBudgetChange}>
+                    <SelectTrigger className="bg-background text-foreground h-[60px] px-[20px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="unbudgeted">{tModals('transaction.select.unbudgeted')}</SelectItem>
+                      {filteredBudgets.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.emoji ? `${b.emoji} ${b.name}` : b.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
 
@@ -532,22 +532,23 @@ function TransactionModal({ title, onClose, onSubmit, initialBudgetId, initialDa
               placeholder={tModals('transaction.date.placeholder')}
             />
 
-            {/* Budget Category Selection */}
+            {/* Budget Category Selection — десктопная версия */}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium text-secondary-black dark:text-white">
                 {tModals('transaction.select.label')}
               </label>
-              <Select
-                value={selectedBudgetId}
-                onChange={handleBudgetChange}
-                className="bg-background text-foreground"
-              >
-                <option value="unbudgeted">{tModals('transaction.select.unbudgeted')}</option>
-                {filteredBudgets.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.emoji ? `${b.emoji} ${b.name}` : b.name}
-                  </option>
-                ))}
+              <Select value={selectedBudgetId} onValueChange={handleBudgetChange}>
+                <SelectTrigger className="bg-background text-foreground">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unbudgeted">{tModals('transaction.select.unbudgeted')}</SelectItem>
+                  {filteredBudgets.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>
+                      {b.emoji ? `${b.emoji} ${b.name}` : b.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
 
