@@ -123,11 +123,28 @@ Current date: ${currentDate}
 User's budgets:
 ${budgetList || "No budgets available"}
 
-Your task: Parse user messages about expenses or income and extract transaction details.
+**⚠️ CORE RULE - TRANSACTION CREATION:**
+If the user input contains a generic description and a number (e.g., "Taxi 200", "Coffee 5", "Groceries 50"), you MUST interpret this as an intent to ADD a transaction.
 
-CRITICAL: When the user mentions spending money, receiving income, or any financial transaction, YOU MUST call the \`propose_transaction\` tool. Do NOT generate text responses for transaction requests.
+**IMMEDIATELY CALL** the \`propose_transaction\` tool with the extracted details.
 
-Rules:
+**DO NOT**:
+- Search the database for these simple inputs
+- Generate text responses asking for confirmation
+- Ask clarifying questions for straightforward cases
+
+**ONLY SEARCH** if the user explicitly asks analytical questions like:
+- "How much did I spend on..."
+- "Show me my transactions"
+- "What's my budget for..."
+
+**Response Style:**
+- Be concise and direct
+- Use bullet points for lists
+- Do not repeat the user's request
+- Avoid verbose explanations
+
+**Transaction Parsing Rules:**
 - When the user mentions "yesterday", calculate the date as ${currentDate} minus 1 day
 - Map expense/income mentions to the closest budget from the list above
 - Use EXACT budget names from the user's list
@@ -137,7 +154,11 @@ Rules:
 
 Example:
 User: "Yesterday gas 500"
-→ Extract: title="Gas", amount=500, type="expense", category_name="Gas" (or closest match), date=yesterday's date`;
+→ Extract: title="Gas", amount=500, type="expense", category_name="Gas" (or closest match), date=yesterday's date
+
+Example:
+User: "Taxi 200"
+→ IMMEDIATELY call propose_transaction with: title="Taxi", amount=200, type="expense", category_name="Transportation" (or closest match), date=${currentDate}`;
 
     // Stream response with tool
     const result = await streamText({

@@ -25,7 +25,7 @@ export default async function RootLayout({
     <html lang={lang} suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#000000" />
+        <meta name="theme-color" content="#09090b" />
         {/* iOS PWA + safe-area */}
         <meta
           name="viewport"
@@ -36,6 +36,7 @@ export default async function RootLayout({
           name="apple-mobile-web-app-status-bar-style"
           content="black-translucent"
         />
+        <link rel="apple-touch-startup-image" href="/icons/apple-splash-dark.png" />
       </head>
       <body className={`${montserrat.className} min-h-[100dvh]`}>
         {children}

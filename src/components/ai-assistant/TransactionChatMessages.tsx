@@ -78,9 +78,8 @@ export function TransactionChatMessages({
       {messages.map((message) => (
         <div key={message.id}>
           <div
-            className={`flex items-start space-x-3 ${
-              message.role === "user" ? "justify-end" : "justify-start"
-            }`}
+            className={`flex items-start space-x-3 ${message.role === "user" ? "justify-end" : "justify-start"
+              }`}
           >
             {message.role === "assistant" && (
               <div className="w-7 h-7 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
@@ -92,18 +91,43 @@ export function TransactionChatMessages({
               {/* Text content */}
               {message.content && (
                 <div
-                  className={`w-fit p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words overflow-x-auto ${
-                    message.role === "user"
+                  className={`w-fit p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words overflow-x-auto ${message.role === "user"
                       ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md"
                       : "bg-gray-100 text-secondary-black rounded-bl-md border border-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                  }`}
+                    }`}
                 >
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkBreaks]}
                     rehypePlugins={[[rehypeSanitize, markdownSchema]]}
                     components={{
                       p: ({ children }) => (
-                        <p className="mb-2 leading-relaxed">{children}</p>
+                        <p className="mb-3 leading-relaxed last:mb-0">{children}</p>
+                      ),
+                      ul: ({ children }) => (
+                        <ul className="list-disc pl-5 space-y-2 mb-3">
+                          {children}
+                        </ul>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className="list-decimal pl-5 space-y-2 mb-3">
+                          {children}
+                        </ol>
+                      ),
+                      li: ({ children }) => (
+                        <li className="leading-relaxed mb-1">{children}</li>
+                      ),
+                      a: ({ href, children }) => (
+                        <a
+                          href={href as string}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-primary underline"
+                        >
+                          {children}
+                        </a>
+                      ),
+                      strong: ({ children }) => (
+                        <strong className="font-semibold">{children}</strong>
                       ),
                       code: ({ children }) => (
                         <code className="bg-muted px-1 py-0.5 rounded font-mono text-[12px]">
