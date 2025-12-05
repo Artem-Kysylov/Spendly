@@ -1,13 +1,13 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Copy, Check, Database, AlertCircle } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useState } from "react";
+import { Copy, Check, Database, AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const DatabaseSetupInstructions = () => {
-    const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState(false);
 
-    const sqlScript = `-- Создание типа для частоты уведомлений (если не существует)
+  const sqlScript = `-- Создание типа для частоты уведомлений (если не существует)
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'notification_frequency') THEN
@@ -101,79 +101,85 @@ BEGIN
     (target_user_id, 'Крупная трата', 'Обнаружена трата в размере $250. Проверьте детали транзакции', 'expense_warning', true),
     (target_user_id, 'Цель достигнута!', 'Поздравляем! Вы достигли цели по экономии на этот месяц', 'goal_achieved', true);
 END;
-$$ LANGUAGE 'plpgsql';`
+$$ LANGUAGE 'plpgsql';`;
 
-    const copyToClipboard = async () => {
-        try {
-            await navigator.clipboard.writeText(sqlScript)
-            setCopied(true)
-            setTimeout(() => setCopied(false), 1200)
-        } catch (err) {
-            console.error('Failed to copy text: ', err)
-        }
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(sqlScript);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1200);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
     }
+  };
 
-    return (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
-            <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                    <h3 className="font-semibold text-amber-800 mb-2">
-                        Требуется настройка базы данных
-                    </h3>
-                    <p className="text-amber-700 mb-4">
-                        Для работы системы уведомлений необходимо создать таблицы в базе данных Supabase.
-                    </p>
-                    
-                    <div className="space-y-4">
-                        <div>
-                            <h4 className="font-medium text-amber-800 mb-2">Инструкции:</h4>
-                            <ol className="list-decimal list-inside space-y-1 text-sm text-amber-700">
-                                <li>Откройте панель управления Supabase</li>
-                                <li>Перейдите в раздел "SQL Editor"</li>
-                                <li>Скопируйте и выполните SQL скрипт ниже</li>
-                                <li>Обновите страницу после выполнения</li>
-                            </ol>
-                        </div>
+  return (
+    <div className="bg-amber-50 border border-amber-200 rounded-lg p-6">
+      <div className="flex items-start gap-3">
+        <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+        <div className="flex-1">
+          <h3 className="font-semibold text-amber-800 mb-2">
+            Требуется настройка базы данных
+          </h3>
+          <p className="text-amber-700 mb-4">
+            Для работы системы уведомлений необходимо создать таблицы в базе
+            данных Supabase.
+          </p>
 
-                        <div className="bg-white rounded-lg border border-amber-200 p-4">
-                            <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                    <Database className="w-4 h-4 text-amber-600" />
-                                    <span className="text-sm font-medium text-amber-800">SQL Script</span>
-                                </div>
-                                <button
-                                    onClick={copyToClipboard}
-                                    className="flex items-center gap-2 px-3 py-1 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 rounded transition-colors"
-                                >
-                                    {copied ? (
-                                        <>
-                                            <Check className="w-4 h-4" />
-                                            Скопировано!
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Copy className="w-4 h-4" />
-                                            Копировать
-                                        </>
-                                    )}
-                                </button>
-                            </div>
-                            <pre className="text-xs text-gray-700 bg-gray-50 p-3 rounded border overflow-x-auto max-h-64">
-                                {sqlScript}
-                            </pre>
-                        </div>
-
-                        <div className="text-sm text-amber-700">
-                            <strong>Примечание:</strong> После выполнения SQL скрипта вы можете использовать функцию{' '}
-                            <code className="bg-amber-100 px-1 rounded">create_sample_notifications(user_id)</code>{' '}
-                            для создания тестовых уведомлений.
-                        </div>
-                    </div>
-                </div>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-medium text-amber-800 mb-2">Инструкции:</h4>
+              <ol className="list-decimal list-inside space-y-1 text-sm text-amber-700">
+                <li>Откройте панель управления Supabase</li>
+                <li>Перейдите в раздел "SQL Editor"</li>
+                <li>Скопируйте и выполните SQL скрипт ниже</li>
+                <li>Обновите страницу после выполнения</li>
+              </ol>
             </div>
-        </div>
-    )
-}
 
-export default DatabaseSetupInstructions
+            <div className="bg-white rounded-lg border border-amber-200 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Database className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm font-medium text-amber-800">
+                    SQL Script
+                  </span>
+                </div>
+                <button
+                  onClick={copyToClipboard}
+                  className="flex items-center gap-2 px-3 py-1 text-sm bg-amber-100 hover:bg-amber-200 text-amber-800 rounded transition-colors"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Скопировано!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      Копировать
+                    </>
+                  )}
+                </button>
+              </div>
+              <pre className="text-xs text-gray-700 bg-gray-50 p-3 rounded border overflow-x-auto max-h-64">
+                {sqlScript}
+              </pre>
+            </div>
+
+            <div className="text-sm text-amber-700">
+              <strong>Примечание:</strong> После выполнения SQL скрипта вы
+              можете использовать функцию{" "}
+              <code className="bg-amber-100 px-1 rounded">
+                create_sample_notifications(user_id)
+              </code>{" "}
+              для создания тестовых уведомлений.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DatabaseSetupInstructions;

@@ -1,19 +1,33 @@
-// Imports 
-import React from 'react'
+// Imports
+import React from "react";
 
 // Import types
-import { ButtonProps } from '../../types/types'
-import type { VariantProps } from "class-variance-authority"
+import { ButtonProps } from "../../types/types";
+import type { VariantProps } from "class-variance-authority";
 
-// Import components 
-import { Button as UIButton, buttonVariants } from "@/components/ui/button"
+// Import components
+import { Button as UIButton, buttonVariants } from "@/components/ui/button";
 
-type ButtonVariant = VariantProps<typeof buttonVariants>["variant"]
+type ButtonVariant = VariantProps<typeof buttonVariants>["variant"];
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ text, className = '', onClick, type = 'button', disabled, isLoading, icon, variant }, ref) => {
+  (
+    {
+      text,
+      className = "",
+      onClick,
+      type = "button",
+      disabled,
+      isLoading,
+      icon,
+      variant,
+    },
+    ref,
+  ) => {
     // Normalize alias: primary → default (shadcn)
-    const normalizedVariant = ((variant === 'primary' ? 'default' : (variant ?? 'default')) as ButtonVariant)
+    const normalizedVariant = (
+      variant === "primary" ? "default" : (variant ?? "default")
+    ) as ButtonVariant;
 
     return (
       <UIButton
@@ -28,9 +42,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {text}
       </UIButton>
-    )
-  }
-)
-Button.displayName = 'Button'
+    );
+  },
+);
+Button.displayName = "Button";
 
-export default Button
+export default Button;

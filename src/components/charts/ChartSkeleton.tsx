@@ -1,23 +1,23 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Skeleton } from '@/components/ui/skeleton'
+import React from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ChartSkeletonProps {
-  height?: number
-  showLegend?: boolean
-  type?: 'pie' | 'line' | 'bar'
+  height?: number;
+  showLegend?: boolean;
+  type?: "pie" | "line" | "bar";
 }
 
 export const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
   height = 300,
   showLegend = true,
-  type = 'line'
+  type = "line",
 }) => {
   // Детерминированные паттерны высот (без случайностей)
-  const lineHeights = [34, 58, 72, 46, 80, 38, 62]
-  const barHeights = [55, 80, 35, 65, 45]
+  const lineHeights = [34, 58, 72, 46, 80, 38, 62];
+  const barHeights = [55, 80, 35, 65, 45];
 
   return (
     <Card className="w-full">
@@ -27,11 +27,11 @@ export const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
       <CardContent>
         <div className="space-y-4">
           {/* Основная область графика */}
-          <div 
+          <div
             className="w-full flex items-center justify-center bg-muted/20 rounded-lg"
             style={{ height: `${height}px` }}
           >
-            {type === 'pie' && (
+            {type === "pie" && (
               <div className="relative">
                 <Skeleton className="h-32 w-32 rounded-full" />
                 <div className="absolute inset-4">
@@ -39,15 +39,17 @@ export const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
                 </div>
               </div>
             )}
-            
-            {type === 'line' && (
+
+            {type === "line" && (
               <div className="w-full h-full p-4 space-y-2">
                 <div className="flex justify-between items-end h-full">
                   {Array.from({ length: 7 }).map((_, i) => (
-                    <Skeleton 
-                      key={i} 
-                      className="w-8" 
-                      style={{ height: `${lineHeights[i % lineHeights.length]}%` }}
+                    <Skeleton
+                      key={i}
+                      className="w-8"
+                      style={{
+                        height: `${lineHeights[i % lineHeights.length]}%`,
+                      }}
                     />
                   ))}
                 </div>
@@ -58,15 +60,17 @@ export const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
                 </div>
               </div>
             )}
-            
-            {type === 'bar' && (
+
+            {type === "bar" && (
               <div className="w-full h-full p-4 space-y-2">
                 <div className="flex justify-between items-end h-full gap-2">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton 
-                      key={i} 
-                      className="flex-1" 
-                      style={{ height: `${barHeights[i % barHeights.length]}%` }}
+                    <Skeleton
+                      key={i}
+                      className="flex-1"
+                      style={{
+                        height: `${barHeights[i % barHeights.length]}%`,
+                      }}
                     />
                   ))}
                 </div>
@@ -78,11 +82,11 @@ export const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
               </div>
             )}
           </div>
-          
+
           {/* Легенда */}
           {showLegend && (
             <div className="flex flex-wrap gap-4 justify-center">
-              {Array.from({ length: type === 'pie' ? 4 : 2 }).map((_, i) => (
+              {Array.from({ length: type === "pie" ? 4 : 2 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-2">
                   <Skeleton className="h-3 w-3 rounded-full" />
                   <Skeleton className="h-4 w-16" />
@@ -93,5 +97,5 @@ export const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
         </div>
       </CardContent>
     </Card>
-  )
-}
+  );
+};

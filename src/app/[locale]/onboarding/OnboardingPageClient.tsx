@@ -1,19 +1,19 @@
-'use client'
+"use client";
 
-import { useEffect } from 'react'
-import { useRouter } from '@/i18n/routing'
-import { UserAuth } from '@/context/AuthContext'
-import Onboarding from '@/components/onboarding/Onboarding'
+import { useEffect } from "react";
+import { useRouter } from "@/i18n/routing";
+import { UserAuth } from "@/context/AuthContext";
+import Onboarding from "@/components/onboarding/Onboarding";
 
 export default function OnboardingPageClient() {
-  const { session, isReady } = UserAuth()
-  const router = useRouter()
+  const { session, isReady } = UserAuth();
+  const router = useRouter();
 
   useEffect(() => {
     if (isReady && session?.user?.user_metadata?.onboarding_completed) {
-      router.replace('/dashboard')
+      router.replace("/dashboard");
     }
-  }, [isReady, session, router])
+  }, [isReady, session, router]);
 
   return (
     <div
@@ -24,5 +24,5 @@ export default function OnboardingPageClient() {
         <Onboarding />
       </div>
     </div>
-  )
+  );
 }

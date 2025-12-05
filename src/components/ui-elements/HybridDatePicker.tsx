@@ -1,30 +1,47 @@
-'use client'
+"use client";
 
-import { useMemo, useState, Suspense, lazy } from 'react'
-import { format } from 'date-fns'
-import { enUS, ru, uk, id, ja, ko, hi } from 'date-fns/locale'
-import type { Locale as DateFnsLocale } from 'date-fns'
-import { Calendar as CalendarIcon } from 'lucide-react'
-import { Calendar } from '@/components/ui/calendar' // удаляем прямой импорт
-import { Popover, PopoverTrigger, PopoverContent, PopoverAnchor } from '@/components/ui/popover'
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from '@/components/ui/sheet'
-import Button from './Button'
-import CalendarQuickPresets from './CalendarQuickPresets'
-import { cn } from '@/lib/utils'
-import useDeviceType from '@/hooks/useDeviceType'
-import { useLocale } from 'next-intl'
-import { DayButton } from 'react-day-picker'
+import { useMemo, useState, Suspense, lazy } from "react";
+import { format } from "date-fns";
+import { enUS, ru, uk, id, ja, ko, hi } from "date-fns/locale";
+import type { Locale as DateFnsLocale } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar"; // удаляем прямой импорт
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  PopoverAnchor,
+} from "@/components/ui/popover";
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+  SheetClose,
+} from "@/components/ui/sheet";
+import Button from "./Button";
+import CalendarQuickPresets from "./CalendarQuickPresets";
+import { cn } from "@/lib/utils";
+import useDeviceType from "@/hooks/useDeviceType";
+import { useLocale } from "next-intl";
+import { DayButton } from "react-day-picker";
 
 interface HybridDatePickerProps {
-  selectedDate: Date
-  onDateSelect: (date: Date) => void
-  label?: string
-  placeholder?: string
-  disabled?: (date: Date) => boolean
-  className?: string
+  selectedDate: Date;
+  onDateSelect: (date: Date) => void;
+  label?: string;
+  placeholder?: string;
+  disabled?: (date: Date) => boolean;
+  className?: string;
 }
 
-function MobileDayButton({ className, children, ...props }: React.ComponentProps<typeof DayButton>) {
+function MobileDayButton({
+  className,
+  children,
+  ...props
+}: React.ComponentProps<typeof DayButton>) {
   return (
     <DayButton
       className={cn(
@@ -32,66 +49,92 @@ function MobileDayButton({ className, children, ...props }: React.ComponentProps
         "data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
         "aria-selected:bg-primary aria-selected:text-primary-foreground",
         "data-[disabled=true]:opacity-50",
-        className
+        className,
       )}
       {...props}
     >
       {children}
     </DayButton>
-  )
+  );
 }
 
 export default function HybridDatePicker({
   selectedDate,
   onDateSelect,
-  label = 'Pick up the date',
-  placeholder = 'Pick a date',
+  label = "Pick up the date",
+  placeholder = "Pick a date",
   disabled,
   className,
 }: HybridDatePickerProps) {
-  const { isMobile } = useDeviceType()
-  const localeCode = useLocale()
+  const { isMobile } = useDeviceType();
+  const localeCode = useLocale();
   const dfLocaleMap: Record<string, DateFnsLocale> = {
-    en: enUS, 'en-US': enUS,
-    ru, 'ru-RU': ru,
-    uk, 'uk-UA': uk,
-    id, 'id-ID': id,
-    ja, 'ja-JP': ja,
-    ko, 'ko-KR': ko,
-    hi, 'hi-IN': hi,
-  }
-  const dfLocale = dfLocaleMap[localeCode] ?? enUS
+    en: enUS,
+    "en-US": enUS,
+    ru,
+    "ru-RU": ru,
+    uk,
+    "uk-UA": uk,
+    id,
+    "id-ID": id,
+    ja,
+    "ja-JP": ja,
+    ko,
+    "ko-KR": ko,
+    hi,
+    "hi-IN": hi,
+  };
+  const dfLocale = dfLocaleMap[localeCode] ?? enUS;
 
   const normalizedDisabled = useMemo(() => {
-    return disabled ?? ((date: Date) => date > new Date() || date < new Date('1900-01-01'))
-  }, [disabled])
+    return (
+      disabled ??
+      ((date: Date) => date > new Date() || date < new Date("1900-01-01"))
+    );
+  }, [disabled]);
 
-  const [openDesktop, setOpenDesktop] = useState(false)
-  const [openMobile, setOpenMobile] = useState(false)
+  const [openDesktop, setOpenDesktop] = useState(false);
+  const [openMobile, setOpenMobile] = useState(false);
 
   const buttonElMobile = (
     <Button
       variant="outline"
-      className={cn('w-full justify-start text-left font-normal', !selectedDate && 'text-muted-foreground')}
-      text={selectedDate ? format(selectedDate, 'PPP', { locale: dfLocale }) : placeholder}
+      className={cn(
+        "w-full justify-start text-left font-normal",
+        !selectedDate && "text-muted-foreground",
+      )}
+      text={
+        selectedDate
+          ? format(selectedDate, "PPP", { locale: dfLocale })
+          : placeholder
+      }
       icon={<CalendarIcon className="mr-2 h-4 w-4" />}
       onClick={() => setOpenMobile(true)}
     />
-  )
+  );
 
   const buttonElDesktop = (
     <Button
       variant="outline"
-      className={cn('w-full justify-start text-left font-normal', !selectedDate && 'text-muted-foreground')}
-      text={selectedDate ? format(selectedDate, 'PPP', { locale: dfLocale }) : placeholder}
+      className={cn(
+        "w-full justify-start text-left font-normal",
+        !selectedDate && "text-muted-foreground",
+      )}
+      text={
+        selectedDate
+          ? format(selectedDate, "PPP", { locale: dfLocale })
+          : placeholder
+      }
       icon={<CalendarIcon className="mr-2 h-4 w-4" />}
     />
-  )
+  );
 
   return (
-    <div className={cn('flex flex-col gap-2', className)}>
+    <div className={cn("flex flex-col gap-2", className)}>
       {label && (
-        <label className="text-sm font-medium text-secondary-black dark:text-white">{label}</label>
+        <label className="text-sm font-medium text-secondary-black dark:text-white">
+          {label}
+        </label>
       )}
 
       {isMobile ? (
@@ -111,20 +154,26 @@ export default function HybridDatePicker({
             <div className="p-4 space-y-4">
               <CalendarQuickPresets
                 onSelect={(date) => {
-                  onDateSelect(date)
-                  setOpenMobile(false)
+                  onDateSelect(date);
+                  setOpenMobile(false);
                 }}
               />
               <div className="flex justify-center">
                 {openMobile ? (
-                  <Suspense fallback={<div className="h-40 w-full flex items-center justify-center text-muted-foreground">Loading calendar…</div>}>
+                  <Suspense
+                    fallback={
+                      <div className="h-40 w-full flex items-center justify-center text-muted-foreground">
+                        Loading calendar…
+                      </div>
+                    }
+                  >
                     <LazyCalendar
                       mode="single"
                       selected={selectedDate}
                       onSelect={(d) => {
                         if (d) {
-                          onDateSelect(d)
-                          setOpenMobile(false)
+                          onDateSelect(d);
+                          setOpenMobile(false);
                         }
                       }}
                       disabled={normalizedDisabled}
@@ -159,16 +208,27 @@ export default function HybridDatePicker({
               <div className="absolute inset-y-0 left-full w-0 pointer-events-none" />
             </PopoverAnchor>
             {/* Убираем фикс. ширину и внешнюю паддингу — отступы слева/справа становятся равными */}
-            <PopoverContent className="w-auto p-0" align="center" side="right" sideOffset={16}>
+            <PopoverContent
+              className="w-auto p-0"
+              align="center"
+              side="right"
+              sideOffset={16}
+            >
               {openDesktop ? (
-                <Suspense fallback={<div className="p-6 text-sm text-muted-foreground">Loading calendar…</div>}>
+                <Suspense
+                  fallback={
+                    <div className="p-6 text-sm text-muted-foreground">
+                      Loading calendar…
+                    </div>
+                  }
+                >
                   <LazyCalendar
                     mode="single"
                     selected={selectedDate}
                     onSelect={(d) => {
                       if (d) {
-                        onDateSelect(d)
-                        setOpenDesktop(false)
+                        onDateSelect(d);
+                        setOpenDesktop(false);
                       }
                     }}
                     disabled={normalizedDisabled}
@@ -186,10 +246,10 @@ export default function HybridDatePicker({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // Ленивая загрузка именованного экспорта через маппинг на default
 const LazyCalendar = lazy(() =>
-  import('@/components/ui/calendar').then(mod => ({ default: mod.Calendar }))
-)
+  import("@/components/ui/calendar").then((mod) => ({ default: mod.Calendar })),
+);

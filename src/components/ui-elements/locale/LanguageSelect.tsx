@@ -1,42 +1,39 @@
-'use client'
+"use client";
 
-import type { Language } from '@/types/locale'
+import type { Language } from "@/types/locale";
 import {
   Select,
   SelectTrigger,
   SelectContent,
   SelectItem,
   SelectValue,
-} from '@/components/ui/select'
+} from "@/components/ui/select";
 
 type Props = {
-  value?: Language
-  onChange?: (lang: Language) => void
-  placeholder?: string
-  className?: string
-}
+  value?: Language;
+  onChange?: (lang: Language) => void;
+  placeholder?: string;
+  className?: string;
+};
 
 const LANGUAGES: Array<{ code: Language; label: string; emoji: string }> = [
-  { code: 'en', label: 'English', emoji: '🇺🇸' },
-  { code: 'uk', label: 'Українська', emoji: '🇺🇦' },
-  { code: 'ru', label: 'Русский (СНГ)', emoji: '🇷🇺' },
-  { code: 'hi', label: 'हिन्दी', emoji: '🇮🇳' },
-  { code: 'id', label: 'Bahasa Indonesia', emoji: '🇮🇩' },
-  { code: 'ja', label: '日本語', emoji: '🇯🇵' },
-  { code: 'ko', label: '한국어', emoji: '🇰🇷' },
-]
+  { code: "en", label: "English", emoji: "🇺🇸" },
+  { code: "uk", label: "Українська", emoji: "🇺🇦" },
+  { code: "ru", label: "Русский (СНГ)", emoji: "🇷🇺" },
+  { code: "hi", label: "हिन्दी", emoji: "🇮🇳" },
+  { code: "id", label: "Bahasa Indonesia", emoji: "🇮🇩" },
+  { code: "ja", label: "日本語", emoji: "🇯🇵" },
+  { code: "ko", label: "한국어", emoji: "🇰🇷" },
+];
 
 export default function LanguageSelect({
   value,
   onChange,
-  placeholder = 'Select language',
+  placeholder = "Select language",
   className,
 }: Props) {
   return (
-    <Select
-      value={value}
-      onValueChange={(v) => onChange?.(v as Language)}
-    >
+    <Select value={value} onValueChange={(v) => onChange?.(v as Language)}>
       <SelectTrigger className={className}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
@@ -48,5 +45,5 @@ export default function LanguageSelect({
         ))}
       </SelectContent>
     </Select>
-  )
+  );
 }

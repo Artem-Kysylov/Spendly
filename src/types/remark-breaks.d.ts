@@ -1,1 +1,1 @@
-declare module 'remark-breaks';
+declare module "remark-breaks";

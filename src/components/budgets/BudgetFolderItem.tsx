@@ -1,51 +1,60 @@
-import React, { useState, useEffect } from 'react'
-import { supabase } from '../../lib/supabaseClient'
-import { UserAuth } from '../../context/AuthContext'
-import BudgetProgressBar from '../ui-elements/BudgetProgressBar'
-import type { BudgetFolderItemProps } from '../../types/types'
-import { useTranslations } from 'next-intl'
-import { formatCurrency } from '@/lib/chartUtils'
+import React, { useState, useEffect } from "react";
+import { supabase } from "../../lib/supabaseClient";
+import { UserAuth } from "../../context/AuthContext";
+import BudgetProgressBar from "../ui-elements/BudgetProgressBar";
+import type { BudgetFolderItemProps } from "../../types/types";
+import { useTranslations } from "next-intl";
+import { formatCurrency } from "@/lib/chartUtils";
 
-function BudgetFolderItem({ id, emoji, name, amount, type, color_code, rolloverPreviewCarry }: BudgetFolderItemProps) {
-  const { session } = UserAuth()
-  const [spentAmount, setSpentAmount] = useState(0)
-  const tBudgets = useTranslations('budgets')
+function BudgetFolderItem({
+  id,
+  emoji,
+  name,
+  amount,
+  type,
+  color_code,
+  rolloverPreviewCarry,
+}: BudgetFolderItemProps) {
+  const { session } = UserAuth();
+  const [spentAmount, setSpentAmount] = useState(0);
+  const tBudgets = useTranslations("budgets");
 
   const fetchSpentAmount = async () => {
-    if (!session?.user?.id || !id) return
+    if (!session?.user?.id || !id) return;
     try {
       const { data, error } = await supabase
-        .from('transactions')
-        .select('amount, type')
-        .eq('budget_folder_id', id)
-        .eq('user_id', session.user.id)
+        .from("transactions")
+        .select("amount, type")
+        .eq("budget_folder_id", id)
+        .eq("user_id", session.user.id);
 
       if (error) {
-        console.error('Error fetching spent amount:', error)
-        return
+        console.error("Error fetching spent amount:", error);
+        return;
       }
 
       // Суммируем транзакции по типу бюджета
       const total =
         data?.reduce((sum: number, tx: { amount: number; type: string }) => {
-          const matchesType = tx.type === (type === 'income' ? 'income' : 'expense')
-          return matchesType ? sum + tx.amount : sum
-        }, 0) || 0
+          const matchesType =
+            tx.type === (type === "income" ? "income" : "expense");
+          return matchesType ? sum + tx.amount : sum;
+        }, 0) || 0;
 
-      setSpentAmount(total)
+      setSpentAmount(total);
     } catch (err) {
-      console.error('Error:', err)
+      console.error("Error:", err);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchSpentAmount()
-    const handleBudgetUpdate = () => fetchSpentAmount()
-    window.addEventListener('budgetTransactionAdded', handleBudgetUpdate)
+    fetchSpentAmount();
+    const handleBudgetUpdate = () => fetchSpentAmount();
+    window.addEventListener("budgetTransactionAdded", handleBudgetUpdate);
     return () => {
-      window.removeEventListener('budgetTransactionAdded', handleBudgetUpdate)
-    }
-  }, [id, session?.user?.id])
+      window.removeEventListener("budgetTransactionAdded", handleBudgetUpdate);
+    };
+  }, [id, session?.user?.id]);
 
   return (
     <div
@@ -53,24 +62,33 @@ function BudgetFolderItem({ id, emoji, name, amount, type, color_code, rolloverP
       style={{ backgroundColor: color_code ? `#${color_code}` : undefined }}
     >
       <span className="text-[28px]">{emoji}</span>
-      <h3 className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} text-[16px] font-semibold text-center break-words leading-tight min-w-0`}>
+      <h3
+        className={`${color_code ? "text-black dark:text-black" : "text-foreground"} text-[16px] font-semibold text-center break-words leading-tight min-w-0`}
+      >
         {name}
       </h3>
 
       {/* Общая сумма сразу под названием */}
-      <p className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} text-[18px] font-semibold text-center leading-tight`}>
-        {formatCurrency(amount, 'USD')}
+      <p
+        className={`${color_code ? "text-black dark:text-black" : "text-foreground"} text-[18px] font-semibold text-center leading-tight`}
+      >
+        {formatCurrency(amount, "USD")}
       </p>
 
-      {type === 'expense' && typeof rolloverPreviewCarry === 'number' && rolloverPreviewCarry !== 0 && (
-        <div
-          className={`px-2 py-1 rounded-md text-xs font-semibold ${rolloverPreviewCarry > 0 ? 'bg-primary/10 text-primary' : 'bg-error/10 text-error'
+      {type === "expense" &&
+        typeof rolloverPreviewCarry === "number" &&
+        rolloverPreviewCarry !== 0 && (
+          <div
+            className={`px-2 py-1 rounded-md text-xs font-semibold ${
+              rolloverPreviewCarry > 0
+                ? "bg-primary/10 text-primary"
+                : "bg-error/10 text-error"
             }`}
-        >
-          {rolloverPreviewCarry > 0 ? 'Перенос ' : 'Перерасход '}
-          {formatCurrency(Math.abs(rolloverPreviewCarry), 'USD')}
-        </div>
-      )}
+          >
+            {rolloverPreviewCarry > 0 ? "Перенос " : "Перерасход "}
+            {formatCurrency(Math.abs(rolloverPreviewCarry), "USD")}
+          </div>
+        )}
 
       {/* Прогрессбар */}
       <div className="w-full mt-3">
@@ -78,45 +96,56 @@ function BudgetFolderItem({ id, emoji, name, amount, type, color_code, rolloverP
           spentAmount={spentAmount}
           totalAmount={amount}
           type={type}
-          spentLabel={tBudgets(type === 'income' ? 'labels.collected' : 'labels.spent')}
-          leftLabel={tBudgets(type === 'income' ? 'labels.leftToGoal' : 'labels.left')}
+          spentLabel={tBudgets(
+            type === "income" ? "labels.collected" : "labels.spent",
+          )}
+          leftLabel={tBudgets(
+            type === "income" ? "labels.leftToGoal" : "labels.left",
+          )}
           accentColorHex={color_code ?? undefined}
           compact
           showLabels={false}
         />
       </div>
 
-
       {/* Десктоп: суммы и метки в один ряд */}
-      <div className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} hidden md:grid grid-cols-2 text-xs w-full`}>
+      <div
+        className={`${color_code ? "text-black dark:text-black" : "text-foreground"} hidden md:grid grid-cols-2 text-xs w-full`}
+      >
         <span className="text-left justify-self-start">
-          {formatCurrency(spentAmount, 'USD')} {tBudgets(type === 'income' ? 'labels.collected' : 'labels.spent')}
+          {formatCurrency(spentAmount, "USD")}{" "}
+          {tBudgets(type === "income" ? "labels.collected" : "labels.spent")}
         </span>
         <span className="text-right justify-self-end">
-          {formatCurrency(Math.max(amount - spentAmount, 0), 'USD')} {tBudgets(type === 'income' ? 'labels.leftToGoal' : 'labels.left')}
+          {formatCurrency(Math.max(amount - spentAmount, 0), "USD")}{" "}
+          {tBudgets(type === "income" ? "labels.leftToGoal" : "labels.left")}
         </span>
       </div>
 
       {/* Мобилка: метки сверху */}
-      <div className={`${color_code ? 'text-black dark:text-black' : 'text-gray-700 dark:text-white'} grid md:hidden grid-cols-2 text-xs w-full capitalize`}>
+      <div
+        className={`${color_code ? "text-black dark:text-black" : "text-gray-700 dark:text-white"} grid md:hidden grid-cols-2 text-xs w-full capitalize`}
+      >
         <span className="text-left justify-self-start">
-          {tBudgets(type === 'income' ? 'labels.collected' : 'labels.spent')}
+          {tBudgets(type === "income" ? "labels.collected" : "labels.spent")}
         </span>
         <span className="text-right justify-self-end">
-          {tBudgets(type === 'income' ? 'labels.leftToGoal' : 'labels.left')}
+          {tBudgets(type === "income" ? "labels.leftToGoal" : "labels.left")}
         </span>
       </div>
       {/* Мобилка: суммы снизу */}
-      <div className={`${color_code ? 'text-black dark:text-black' : 'text-foreground'} grid md:hidden grid-cols-2 text-xs w-full font-semibold`}>
+      <div
+        className={`${color_code ? "text-black dark:text-black" : "text-foreground"} grid md:hidden grid-cols-2 text-xs w-full font-semibold`}
+      >
         <span className="text-left justify-self-start">
-          {formatCurrency(spentAmount, 'USD')}
+          {formatCurrency(spentAmount, "USD")}
         </span>
         <span className="text-right justify-self-end">
-          {formatCurrency(Math.max(amount - spentAmount, 0), 'USD')}
+          {formatCurrency(Math.max(amount - spentAmount, 0), "USD")}
         </span>
       </div>
     </div>
-  )
+  );
 }
 
-export default BudgetFolderItem
+export default BudgetFolderItem;

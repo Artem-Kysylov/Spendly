@@ -1,60 +1,64 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { motion } from 'motion/react'
-import Button from '@/components/ui-elements/Button'
-import ToastMessage from '@/components/ui-elements/ToastMessage'
-import type { ToastMessageProps } from '@/types/types'
-import { useTranslations, useLocale } from 'next-intl'
+import { useState } from "react";
+import { motion } from "motion/react";
+import Button from "@/components/ui-elements/Button";
+import ToastMessage from "@/components/ui-elements/ToastMessage";
+import type { ToastMessageProps } from "@/types/types";
+import { useTranslations, useLocale } from "next-intl";
 
 export default function PaymentClient() {
-  const [toast, setToast] = useState<ToastMessageProps | null>(null)
-  const tPayment = useTranslations('payment')
-  const tPricing = useTranslations('pricing')
-  const tCTA = useTranslations('cta')
-  const locale = useLocale()
-  const CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL
+  const [toast, setToast] = useState<ToastMessageProps | null>(null);
+  const tPayment = useTranslations("payment");
+  const tPricing = useTranslations("pricing");
+  const tCTA = useTranslations("cta");
+  const locale = useLocale();
+  const CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL;
 
   const handleUpgradeClick = async () => {
     try {
       // 1) Всегда предпочитаем UUID‑ссылку из ENV
       if (CHECKOUT_URL) {
-        console.log('[Payment] Using env checkout URL ->', CHECKOUT_URL)
-        if (CHECKOUT_URL.includes('/checkout/buy/')) {
-          console.warn('[Payment] Env contains legacy buy URL; skipping to avoid 404.')
-          setToast({ text: tPayment('toastComingSoon'), type: 'success' })
-          setTimeout(() => setToast(null), 3000)
-          return
+        console.log("[Payment] Using env checkout URL ->", CHECKOUT_URL);
+        if (CHECKOUT_URL.includes("/checkout/buy/")) {
+          console.warn(
+            "[Payment] Env contains legacy buy URL; skipping to avoid 404.",
+          );
+          setToast({ text: tPayment("toastComingSoon"), type: "success" });
+          setTimeout(() => setToast(null), 3000);
+          return;
         }
-        window.location.href = CHECKOUT_URL
-        return
+        window.location.href = CHECKOUT_URL;
+        return;
       }
 
       // 2) Если ENV нет — пробуем серверный API
-      const res = await fetch('/api/checkout-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/checkout-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ locale }),
-      })
-      if (!res.ok) throw new Error('Failed to create checkout')
+      });
+      if (!res.ok) throw new Error("Failed to create checkout");
 
-      const { url } = await res.json()
-      console.log('[Payment] Fresh checkout URL ->', url)
+      const { url } = await res.json();
+      console.log("[Payment] Fresh checkout URL ->", url);
 
-      if (typeof url !== 'string' || url.includes('/checkout/buy/')) {
-        console.warn('[Payment] API returned legacy buy link or invalid URL; skipping to avoid 404.')
-        setToast({ text: tPayment('toastComingSoon'), type: 'success' })
-        setTimeout(() => setToast(null), 3000)
-        return
+      if (typeof url !== "string" || url.includes("/checkout/buy/")) {
+        console.warn(
+          "[Payment] API returned legacy buy link or invalid URL; skipping to avoid 404.",
+        );
+        setToast({ text: tPayment("toastComingSoon"), type: "success" });
+        setTimeout(() => setToast(null), 3000);
+        return;
       }
 
-      window.location.href = url
+      window.location.href = url;
     } catch (e) {
-      console.warn('[Payment] No checkout URL available:', e)
-      setToast({ text: tPayment('toastComingSoon'), type: 'success' })
-      setTimeout(() => setToast(null), 3000)
+      console.warn("[Payment] No checkout URL available:", e);
+      setToast({ text: tPayment("toastComingSoon"), type: "success" });
+      setTimeout(() => setToast(null), 3000);
     }
-  }
+  };
 
   return (
     <div className="container mx-auto px-4 py-10">
@@ -64,13 +68,13 @@ export default function PaymentClient() {
         className="text-center mb-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
       >
         <h1 className="text-[28px] md:text-[34px] font-semibold text-secondary-black dark:text-white">
-          {tPayment('title')}
+          {tPayment("title")}
         </h1>
         <p className="mt-2 text-gray-600 dark:text-gray-300">
-          {tPayment('subtitle')}
+          {tPayment("subtitle")}
         </p>
       </motion.div>
 
@@ -80,13 +84,21 @@ export default function PaymentClient() {
           className="rounded-lg border border-gray-200 dark:border-border p-6 bg-white dark:bg-card"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
+          transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
         >
-          <h3 className="font-medium text-secondary-black dark:text-white">{tPricing('free.label')}</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{tPricing('free.short')}</p>
+          <h3 className="font-medium text-secondary-black dark:text-white">
+            {tPricing("free.label")}
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+            {tPricing("free.short")}
+          </p>
           <div className="mt-4">
-            <div className="text-2xl font-semibold text-secondary-black dark:text-white">$0</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">{tPricing('perMonth')}</div>
+            <div className="text-2xl font-semibold text-secondary-black dark:text-white">
+              $0
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {tPricing("perMonth")}
+            </div>
           </div>
           <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-white">
             <li>• Track expenses and budgets</li>
@@ -100,24 +112,32 @@ export default function PaymentClient() {
           className="rounded-lg border border-primary dark:border-primary p-6 bg-primary/5 dark:bg-primary/10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.2 }}
+          transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
         >
-          <h3 className="font-medium text-secondary-black dark:text-white">{tPricing('pro.label')}</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">{tPricing('pro.short')}</p>
+          <h3 className="font-medium text-secondary-black dark:text-white">
+            {tPricing("pro.label")}
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+            {tPricing("pro.short")}
+          </p>
           <div className="mt-4">
-            <div className="text-2xl font-semibold text-secondary-black dark:text-white">$7</div>
-            <div className="text-xs text-gray-500 dark:text-gray-400">{tPricing('perMonth')}</div>
+            <div className="text-2xl font-semibold text-secondary-black dark:text-white">
+              $7
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">
+              {tPricing("perMonth")}
+            </div>
           </div>
           <ul className="mt-4 space-y-2 text-sm text-gray-800 dark:text-white">
-            <li>• {tPricing('pro.features.aiUnlimited')}</li>
-            <li>• {tPricing('pro.features.advancedCharts')}</li>
-            <li>• {tPricing('pro.features.prioritySupport')}</li>
-            <li>• {tPricing('pro.features.customGoals')}</li>
-            <li>• {tPricing('pro.features.earlyAccess')}</li>
+            <li>• {tPricing("pro.features.aiUnlimited")}</li>
+            <li>• {tPricing("pro.features.advancedCharts")}</li>
+            <li>• {tPricing("pro.features.prioritySupport")}</li>
+            <li>• {tPricing("pro.features.customGoals")}</li>
+            <li>• {tPricing("pro.features.earlyAccess")}</li>
           </ul>
           <div className="mt-5">
             <Button
-              text={tCTA('upgradeToPro')}
+              text={tCTA("upgradeToPro")}
               variant="primary"
               onClick={handleUpgradeClick}
             />
@@ -125,5 +145,5 @@ export default function PaymentClient() {
         </motion.div>
       </div>
     </div>
-  )
+  );
 }

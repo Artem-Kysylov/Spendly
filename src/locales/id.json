@@ -274,7 +274,7 @@
     },
     "settings": {
       "proOnlyHint": "Nada asisten khusus tersedia di Pro. Tingkatkan untuk membuka kunci.",
-        "title": "Nada Spendly Pal",
+      "title": "Nada Spendly Pal",
       "description": "Pilih nada respons untuk asisten AI Anda."
     }
   },
@@ -400,17 +400,17 @@
     "createTitle": "Buat Anggaran"
   },
   "budgets": {
-        "rollover": {
-            "panelTitle": "Rollover",
-            "toggleLabel": "Aktifkan rollover",
-            "modeLabel": "Mode",
-            "positiveOnly": "Hanya positif",
-            "allowNegative": "Izinkan negatif"
-        },
-        "meta": {
-            "title": "Anggaran",
-            "description": "Buat dan kelola anggaran Anda."
-        },
+    "rollover": {
+      "panelTitle": "Rollover",
+      "toggleLabel": "Aktifkan rollover",
+      "modeLabel": "Mode",
+      "positiveOnly": "Hanya positif",
+      "allowNegative": "Izinkan negatif"
+    },
+    "meta": {
+      "title": "Anggaran",
+      "description": "Buat dan kelola anggaran Anda."
+    },
     "labels": {
       "spent": "terpakai",
       "left": "tersisa",

@@ -1,298 +1,330 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
-import { useRouter } from '@/i18n/routing'
-import { supabase } from '@/lib/supabaseClient'
-import { UserAuth } from '@/context/AuthContext'
-import useModal from '@/hooks/useModal'
-import BudgetDetailsInfo from '@/components/budgets/BudgetDetailsInfo'
-import BudgetDetailsForm from '@/components/budgets/BudgetDetailsForm'
-import BudgetDetailsControls from '@/components/budgets/BudgetDetailsControls'
-import Spinner from '@/components/ui-elements/Spinner'
-import ToastMessage from '@/components/ui-elements/ToastMessage'
-import DeleteModal from '@/components/modals/DeleteModal'
-import BudgetModal from '@/components/modals/BudgetModal'
-import TransactionsTable from '@/components/chunks/TransactionsTable'
-import { BudgetDetailsProps, Transaction, ToastMessageProps } from '@/types/types'
-import type { EditTransactionPayload } from '@/types/types'
-import { useTranslations } from 'next-intl'
-import TransactionModal from '@/components/modals/TransactionModal'
-import Button from '@/components/ui-elements/Button'
-import { Plus } from 'lucide-react'
-import MobileTransactionsList from '@/components/chunks/MobileTransactionsList'
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
+import { supabase } from "@/lib/supabaseClient";
+import { UserAuth } from "@/context/AuthContext";
+import useModal from "@/hooks/useModal";
+import BudgetDetailsInfo from "@/components/budgets/BudgetDetailsInfo";
+import BudgetDetailsForm from "@/components/budgets/BudgetDetailsForm";
+import BudgetDetailsControls from "@/components/budgets/BudgetDetailsControls";
+import Spinner from "@/components/ui-elements/Spinner";
+import ToastMessage from "@/components/ui-elements/ToastMessage";
+import DeleteModal from "@/components/modals/DeleteModal";
+import BudgetModal from "@/components/modals/BudgetModal";
+import TransactionsTable from "@/components/chunks/TransactionsTable";
+import {
+  BudgetDetailsProps,
+  Transaction,
+  ToastMessageProps,
+} from "@/types/types";
+import type { EditTransactionPayload } from "@/types/types";
+import { useTranslations } from "next-intl";
+import TransactionModal from "@/components/modals/TransactionModal";
+import Button from "@/components/ui-elements/Button";
+import { Plus } from "lucide-react";
+import MobileTransactionsList from "@/components/chunks/MobileTransactionsList";
 
 export default function BudgetDetailsClient() {
-  const { budgetId } = useParams<{ budgetId: string }>()
-  const id = budgetId as string
-  const router = useRouter()
-  const { session } = UserAuth()
+  const { budgetId } = useParams<{ budgetId: string }>();
+  const id = budgetId as string;
+  const router = useRouter();
+  const { session } = UserAuth();
 
-  const { isModalOpen: isDeleteModalOpen, openModal: openDeleteModal, closeModal: closeDeleteModal } = useModal()
-  const { isModalOpen: isEditModalOpen, openModal: openEditModal, closeModal: closeEditModal } = useModal()
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
-  const [isDeleting, setIsDeleting] = useState<boolean>(false)
-  const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
+  const {
+    isModalOpen: isDeleteModalOpen,
+    openModal: openDeleteModal,
+    closeModal: closeDeleteModal,
+  } = useModal();
+  const {
+    isModalOpen: isEditModalOpen,
+    openModal: openEditModal,
+    closeModal: closeEditModal,
+  } = useModal();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(
+    null,
+  );
   const [budgetDetails, setBudgetDetails] = useState<BudgetDetailsProps>({
-    emoji: '😊',
-    name: 'Loading...',
+    emoji: "😊",
+    name: "Loading...",
     amount: 0,
-    type: 'expense'
-  })
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false)
+    type: "expense",
+  });
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
 
-  const tBudgets = useTranslations('budgets')
-  const tCommon = useTranslations('common')
-  const tTransactions = useTranslations('transactions')
+  const tBudgets = useTranslations("budgets");
+  const tCommon = useTranslations("common");
+  const tTransactions = useTranslations("transactions");
 
-  const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
-    setToastMessage({ text, type })
-    setTimeout(() => setToastMessage(null), 3000)
-  }
+  const handleToastMessage = (
+    text: string,
+    type: ToastMessageProps["type"],
+  ) => {
+    setToastMessage({ text, type });
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   const fetchBudgetDetails = async () => {
-    if (!session?.user?.id || !id) return
+    if (!session?.user?.id || !id) return;
     try {
-      setIsLoading(true)
+      setIsLoading(true);
       const { data, error } = await supabase
-        .from('budget_folders')
-        .select('*')
-        .eq('id', id)
-        .eq('user_id', session.user.id)
-        .single()
+        .from("budget_folders")
+        .select("*")
+        .eq("id", id)
+        .eq("user_id", session.user.id)
+        .single();
       if (error) {
-        console.error('Error fetching budget details:', error)
-        return
+        console.error("Error fetching budget details:", error);
+        return;
       }
-      if (data) setBudgetDetails(data as BudgetDetailsProps)
+      if (data) setBudgetDetails(data as BudgetDetailsProps);
     } catch (error) {
-      console.error('Error:', error)
+      console.error("Error:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const fetchTransactions = async () => {
-    if (!session?.user?.id || !id) return
+    if (!session?.user?.id || !id) return;
     try {
       const { data, error } = await supabase
-        .from('transactions')
+        .from("transactions")
         .select(`*, budget_folders (emoji, name)`)
-        .eq('budget_folder_id', id)
-        .eq('user_id', session.user.id)
-        .order('created_at', { ascending: false })
+        .eq("budget_folder_id", id)
+        .eq("user_id", session.user.id)
+        .order("created_at", { ascending: false });
       if (error) {
-        console.error('Error fetching transactions:', error)
-        return
+        console.error("Error fetching transactions:", error);
+        return;
       }
-      const transformedData = data?.map(transaction => ({
-        ...transaction,
-        category_emoji: transaction.budget_folders?.emoji || null,
-        category_name: transaction.budget_folders?.name || null
-      })) || []
-      setTransactions(transformedData)
+      const transformedData =
+        data?.map((transaction) => ({
+          ...transaction,
+          category_emoji: transaction.budget_folders?.emoji || null,
+          category_name: transaction.budget_folders?.name || null,
+        })) || [];
+      setTransactions(transformedData);
     } catch (error) {
-      console.error('Error:', error)
+      console.error("Error:", error);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchBudgetDetails()
-    fetchTransactions()
+    fetchBudgetDetails();
+    fetchTransactions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id, id])
+  }, [session?.user?.id, id]);
 
-  const handleTransactionSubmit = async (title: string, amount: string, date: Date) => {
-    if (!session?.user?.id || !id) return
+  const handleTransactionSubmit = async (
+    title: string,
+    amount: string,
+    date: Date,
+  ) => {
+    if (!session?.user?.id || !id) return;
     try {
       const { data: budgetData, error: budgetError } = await supabase
-        .from('budget_folders')
-        .select('type')
-        .eq('id', id)
-        .single()
+        .from("budget_folders")
+        .select("type")
+        .eq("id", id)
+        .single();
       if (budgetError || !budgetData?.type) {
-        handleToastMessage(tBudgets('details.toast.failedDetermineType'), 'error')
-        return
+        handleToastMessage(
+          tBudgets("details.toast.failedDetermineType"),
+          "error",
+        );
+        return;
       }
-      setIsSubmitting(true)
+      setIsSubmitting(true);
       const { error: transactionError } = await supabase
-        .from('transactions')
+        .from("transactions")
         .insert({
           budget_folder_id: id,
           user_id: session.user.id,
           title,
           amount: Number(amount),
           type: budgetData.type,
-          created_at: date.toISOString()
+          created_at: date.toISOString(),
         })
-        .select()
+        .select();
       if (transactionError) {
-        handleToastMessage(tBudgets('details.toast.addFailed'), 'error')
-        return
+        handleToastMessage(tBudgets("details.toast.addFailed"), "error");
+        return;
       }
-      handleToastMessage(tBudgets('details.toast.addSuccess'), 'success')
-      fetchTransactions()
-      window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
+      handleToastMessage(tBudgets("details.toast.addSuccess"), "success");
+      fetchTransactions();
+      window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
     } catch (error) {
-      console.error('Error:', error)
-      handleToastMessage(tCommon('unexpectedError'), 'error')
+      console.error("Error:", error);
+      handleToastMessage(tCommon("unexpectedError"), "error");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleDeleteBudget = async () => {
-    if (!session?.user?.id || !id) return
+    if (!session?.user?.id || !id) return;
     try {
-      setIsDeleting(true)
+      setIsDeleting(true);
       const { error } = await supabase
-        .from('budget_folders')
+        .from("budget_folders")
         .delete()
-        .eq('id', id)
-        .eq('user_id', session.user.id)
+        .eq("id", id)
+        .eq("user_id", session.user.id);
       if (error) {
-        handleToastMessage(tBudgets('details.toast.deleteFailed'), 'error')
-        return
+        handleToastMessage(tBudgets("details.toast.deleteFailed"), "error");
+        return;
       }
-      handleToastMessage(tBudgets('details.toast.deleteSuccess'), 'success')
+      handleToastMessage(tBudgets("details.toast.deleteSuccess"), "success");
       setTimeout(() => {
-        router.push('/budgets')
-      }, 2000)
+        router.push("/budgets");
+      }, 2000);
     } catch (error) {
-      console.error('Error:', error)
-      handleToastMessage(tCommon('unexpectedError'), 'error')
+      console.error("Error:", error);
+      handleToastMessage(tCommon("unexpectedError"), "error");
     } finally {
-      setIsDeleting(false)
-      closeDeleteModal()
+      setIsDeleting(false);
+      closeDeleteModal();
     }
-  }
+  };
 
   const handleUpdateBudget = async (
     emoji: string,
     name: string,
     amount: number,
-    type: 'expense' | 'income',
+    type: "expense" | "income",
     color_code?: string | null,
     rolloverEnabled?: boolean,
-    rolloverMode?: 'positive-only' | 'allow-negative',
-    rolloverCap?: number | null
+    rolloverMode?: "positive-only" | "allow-negative",
+    rolloverCap?: number | null,
   ) => {
-    if (!session?.user?.id || !id) return
+    if (!session?.user?.id || !id) return;
     try {
-      setIsSubmitting(true)
+      setIsSubmitting(true);
       const { error: updateErr } = await supabase
-        .from('budget_folders')
+        .from("budget_folders")
         .update({
           emoji,
           name,
           amount,
           type,
           color_code: color_code ?? null,
-          rollover_enabled: type === 'expense' ? !!rolloverEnabled : false,
-          rollover_mode: type === 'expense' ? (rolloverMode ?? 'positive-only') : null,
-          rollover_cap: type === 'expense' ? (rolloverCap ?? null) : null,
+          rollover_enabled: type === "expense" ? !!rolloverEnabled : false,
+          rollover_mode:
+            type === "expense" ? (rolloverMode ?? "positive-only") : null,
+          rollover_cap: type === "expense" ? (rolloverCap ?? null) : null,
         })
-        .eq('id', id)
-        .eq('user_id', session.user.id)
-  
+        .eq("id", id)
+        .eq("user_id", session.user.id);
+
       if (updateErr) {
-        console.warn('Update with rollover fields failed, retrying without:', updateErr?.message)
+        console.warn(
+          "Update with rollover fields failed, retrying without:",
+          updateErr?.message,
+        );
         const { error: fallbackErr } = await supabase
-          .from('budget_folders')
+          .from("budget_folders")
           .update({ emoji, name, amount, type, color_code: color_code ?? null })
-          .eq('id', id)
-          .eq('user_id', session.user.id)
+          .eq("id", id)
+          .eq("user_id", session.user.id);
         if (fallbackErr) {
-          handleToastMessage(tBudgets('details.toast.updateFailed'), 'error')
-          return
+          handleToastMessage(tBudgets("details.toast.updateFailed"), "error");
+          return;
         }
       }
-  
-      handleToastMessage(tBudgets('details.toast.updateSuccess'), 'success')
-      closeEditModal()
-      fetchBudgetDetails()
+
+      handleToastMessage(tBudgets("details.toast.updateSuccess"), "success");
+      closeEditModal();
+      fetchBudgetDetails();
     } catch (error) {
-      console.error('Error:', error)
-      handleToastMessage(tCommon('unexpectedError'), 'error')
+      console.error("Error:", error);
+      handleToastMessage(tCommon("unexpectedError"), "error");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const handleDeleteTransaction = async (transactionId: string) => {
-    if (!session?.user?.id || !transactionId) return
+    if (!session?.user?.id || !transactionId) return;
     try {
       const { error } = await supabase
-        .from('transactions')
+        .from("transactions")
         .delete()
-        .eq('id', transactionId)
-        .eq('user_id', session.user.id)
+        .eq("id", transactionId)
+        .eq("user_id", session.user.id);
 
       if (error) {
-        console.error('Error deleting transaction:', error)
-        handleToastMessage(tCommon('unexpectedError'), 'error')
-        return
+        console.error("Error deleting transaction:", error);
+        handleToastMessage(tCommon("unexpectedError"), "error");
+        return;
       }
 
-      handleToastMessage(tBudgets('details.toast.deleteSuccess'), 'success')
-      await fetchTransactions()
+      handleToastMessage(tBudgets("details.toast.deleteSuccess"), "success");
+      await fetchTransactions();
     } catch (error) {
-      console.error('Error:', error)
-      handleToastMessage(tCommon('unexpectedError'), 'error')
+      console.error("Error:", error);
+      handleToastMessage(tCommon("unexpectedError"), "error");
     }
-  }
+  };
 
   const handleEditTransaction = async (payload: EditTransactionPayload) => {
-    if (!session?.user?.id || !payload?.id) return
+    if (!session?.user?.id || !payload?.id) return;
     try {
-      const updates: Partial<EditTransactionPayload> & { created_at?: string } = {
-        title: payload.title,
-        amount: payload.amount,
-        type: payload.type
-      }
+      const updates: Partial<EditTransactionPayload> & { created_at?: string } =
+        {
+          title: payload.title,
+          amount: payload.amount,
+          type: payload.type,
+        };
       if (payload.budget_folder_id !== undefined) {
-        updates.budget_folder_id = payload.budget_folder_id
+        updates.budget_folder_id = payload.budget_folder_id;
       }
       if (payload.created_at) {
-        updates.created_at = payload.created_at
+        updates.created_at = payload.created_at;
       }
 
       const { error } = await supabase
-        .from('transactions')
+        .from("transactions")
         .update(updates)
-        .eq('id', payload.id)
-        .eq('user_id', session.user.id)
+        .eq("id", payload.id)
+        .eq("user_id", session.user.id);
 
       if (error) {
-        console.error('Error updating transaction:', error)
-        handleToastMessage(tCommon('unexpectedError'), 'error')
-        return
+        console.error("Error updating transaction:", error);
+        handleToastMessage(tCommon("unexpectedError"), "error");
+        return;
       }
 
-      handleToastMessage(tBudgets('details.toast.updateSuccess'), 'success')
-      await fetchTransactions()
-      window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
+      handleToastMessage(tBudgets("details.toast.updateSuccess"), "success");
+      await fetchTransactions();
+      window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
     } catch (error) {
-      console.error('Unexpected error during update:', error)
-      handleToastMessage(tCommon('unexpectedError'), 'error')
+      console.error("Unexpected error during update:", error);
+      handleToastMessage(tCommon("unexpectedError"), "error");
     }
-  }
+  };
 
   const handleTransactionUpdateSuccess = async () => {
-    handleToastMessage(tBudgets('details.toast.updateSuccess'), 'success')
-    await fetchTransactions()
-    window.dispatchEvent(new CustomEvent('budgetTransactionAdded'))
-  }
+    handleToastMessage(tBudgets("details.toast.updateSuccess"), "success");
+    await fetchTransactions();
+    window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
+  };
 
   if (isLoading) {
-    return <Spinner />
+    return <Spinner />;
   }
 
   return (
     <div className="px-4 md:px-5 mt-[30px] space-y-6">
-      {toastMessage && <ToastMessage text={toastMessage.text} type={toastMessage.type} />}
+      {toastMessage && (
+        <ToastMessage text={toastMessage.text} type={toastMessage.type} />
+      )}
 
       <BudgetDetailsControls
         onDeleteClick={openDeleteModal}
@@ -312,7 +344,7 @@ export default function BudgetDetailsClient() {
           />
           <div className="mt-2">
             <Button
-              text={tTransactions('addTransaction')}
+              text={tTransactions("addTransaction")}
               variant="default"
               className="w-full"
               onClick={() => setIsAddModalOpen(true)}
@@ -357,8 +389,8 @@ export default function BudgetDetailsClient() {
 
       {isDeleteModalOpen && (
         <DeleteModal
-          title={tBudgets('details.deleteModal.title')}
-          text={tBudgets('details.deleteModal.text')}
+          title={tBudgets("details.deleteModal.title")}
+          text={tBudgets("details.deleteModal.text")}
           onClose={closeDeleteModal}
           onConfirm={handleDeleteBudget}
           isLoading={isDeleting}
@@ -367,15 +399,21 @@ export default function BudgetDetailsClient() {
 
       {isEditModalOpen && (
         <BudgetModal
-          title={tBudgets('details.editModal.title')}
+          title={tBudgets("details.editModal.title")}
           initialData={{
             emoji: budgetDetails.emoji,
             name: budgetDetails.name,
             amount: budgetDetails.amount,
             type: budgetDetails.type,
             color_code: budgetDetails.color_code ?? null,
-            rolloverEnabled: budgetDetails.rolloverEnabled ?? (budgetDetails as any).rollover_enabled ?? true,
-            rolloverMode: budgetDetails.rolloverMode ?? (budgetDetails as any).rollover_mode ?? 'positive-only'
+            rolloverEnabled:
+              budgetDetails.rolloverEnabled ??
+              (budgetDetails as any).rollover_enabled ??
+              true,
+            rolloverMode:
+              budgetDetails.rolloverMode ??
+              (budgetDetails as any).rollover_mode ??
+              "positive-only",
           }}
           onClose={closeEditModal}
           onSubmit={handleUpdateBudget}
@@ -386,15 +424,15 @@ export default function BudgetDetailsClient() {
 
       {isAddModalOpen && (
         <TransactionModal
-          title={tTransactions('modal.addTitle')}
+          title={tTransactions("modal.addTitle")}
           onClose={() => setIsAddModalOpen(false)}
-          onSubmit={(message: string, type: ToastMessageProps['type']) => {
-            handleToastMessage(message, type)
-            fetchTransactions()
+          onSubmit={(message: string, type: ToastMessageProps["type"]) => {
+            handleToastMessage(message, type);
+            fetchTransactions();
           }}
           initialBudgetId={id}
         />
       )}
     </div>
-  )
+  );
 }

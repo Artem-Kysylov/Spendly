@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import React from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 // Создание QueryClient с оптимальными настройками
 const createQueryClient = () => {
@@ -15,7 +15,7 @@ const createQueryClient = () => {
         // Повторные запросы при ошибках
         retry: 2,
         // Интервал между повторными запросами
-        retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
         // Рефетч при фокусе окна
         refetchOnWindowFocus: false,
         // Рефетч при переподключении
@@ -26,34 +26,32 @@ const createQueryClient = () => {
         retry: 1,
       },
     },
-  })
-}
+  });
+};
 
-let clientSingleton: QueryClient | undefined = undefined
+let clientSingleton: QueryClient | undefined = undefined;
 
 const getQueryClient = () => {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     // Server: всегда создаем новый query client
-    return createQueryClient()
+    return createQueryClient();
   } else {
     // Browser: создаем query client только один раз
     if (!clientSingleton) {
-      clientSingleton = createQueryClient()
+      clientSingleton = createQueryClient();
     }
-    return clientSingleton
+    return clientSingleton;
   }
-}
+};
 
 interface QueryProviderProps {
-  children: React.ReactNode
+  children: React.ReactNode;
 }
 
 export const QueryProvider: React.FC<QueryProviderProps> = ({ children }) => {
-  const queryClient = getQueryClient()
+  const queryClient = getQueryClient();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  )
-}
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
+};

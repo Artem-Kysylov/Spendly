@@ -1,24 +1,24 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { formatCurrency } from '@/lib/chartUtils'
+import React from "react";
+import { formatCurrency } from "@/lib/chartUtils";
 
 interface CustomTooltipProps {
-  active?: boolean
+  active?: boolean;
   payload?: Array<{
-    value: number
-    name: string
-    color: string
-  }>
-  label?: string
-  currency?: string
+    value: number;
+    name: string;
+    color: string;
+  }>;
+  label?: string;
+  currency?: string;
 }
 
-export const CustomTooltip: React.FC<CustomTooltipProps> = ({ 
-  active, 
-  payload, 
-  label, 
-  currency = 'USD' 
+export const CustomTooltip: React.FC<CustomTooltipProps> = ({
+  active,
+  payload,
+  label,
+  currency = "USD",
 }) => {
   if (active && payload && payload.length) {
     return (
@@ -30,7 +30,7 @@ export const CustomTooltip: React.FC<CustomTooltipProps> = ({
           </p>
         ))}
       </div>
-    )
+    );
   }
-  return null
-}
+  return null;
+};

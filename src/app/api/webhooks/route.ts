@@ -16,11 +16,17 @@ export async function POST(request: NextRequest) {
   }
 
   // Сравниваем HMAC(digest) и заголовок X-Signature, оба в hex
-  const hmacHex = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+  const hmacHex = crypto
+    .createHmac("sha256", secret)
+    .update(rawBody)
+    .digest("hex");
   const hmac = Buffer.from(hmacHex, "hex");
   const signature = Buffer.from(signatureHex, "hex");
 
-  if (hmac.length !== signature.length || !crypto.timingSafeEqual(hmac, signature)) {
+  if (
+    hmac.length !== signature.length ||
+    !crypto.timingSafeEqual(hmac, signature)
+  ) {
     return NextResponse.json("Invalid signature", { status: 400 });
   }
 
@@ -28,7 +34,7 @@ export async function POST(request: NextRequest) {
   const eventName = payload?.meta?.event_name ?? "unknown";
   console.log("[Lemon Squeezy webhook]", eventName, payload?.data?.attributes);
 
-  // Тут можно включать/отключать Pro-статус: 
+  // Тут можно включать/отключать Pro-статус:
   // subscription_payment_success -> активировать
   // subscription_cancelled/expired -> деактивировать
 
@@ -37,24 +43,27 @@ export async function POST(request: NextRequest) {
   if (customerEmail) {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
     );
     const { data: users } = await supabase
-      .from('auth.users') // Supabase REST exposes users via admin; alternatively use supabase.auth.admin
-      .select('id, email')
-      .ilike('email', customerEmail)
+      .from("auth.users") // Supabase REST exposes users via admin; alternatively use supabase.auth.admin
+      .select("id, email")
+      .ilike("email", customerEmail)
       .limit(1);
 
     const userId = users?.[0]?.id;
     if (userId) {
       const status =
-        eventName === 'subscription_payment_success' ? 'pro' :
-        eventName === 'subscription_cancelled' || eventName === 'subscription_expired' ? 'free' :
-        undefined;
+        eventName === "subscription_payment_success"
+          ? "pro"
+          : eventName === "subscription_cancelled" ||
+              eventName === "subscription_expired"
+            ? "free"
+            : undefined;
 
       if (status) {
         await supabase.auth.admin.updateUserById(userId, {
-          user_metadata: { subscription_status: status }
+          user_metadata: { subscription_status: status },
         });
       }
     }

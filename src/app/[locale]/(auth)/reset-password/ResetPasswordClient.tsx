@@ -1,173 +1,205 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { useRouter } from '@/i18n/routing'
-import { useSearchParams } from 'next/navigation'
-import Image from 'next/image'
-import { Link } from '@/i18n/routing'
-import { supabase } from '@/lib/supabaseClient'
-import { Input } from '@/components/ui/input'
-import Button from '@/components/ui-elements/Button'
-import { CheckCircle2 } from 'lucide-react'
-import { motion } from 'motion/react'
-import { useTranslations } from 'next-intl'
+import { useState, useEffect } from "react";
+import { useRouter } from "@/i18n/routing";
+import { useSearchParams } from "next/navigation";
+import Image from "next/image";
+import { Link } from "@/i18n/routing";
+import { supabase } from "@/lib/supabaseClient";
+import { Input } from "@/components/ui/input";
+import Button from "@/components/ui-elements/Button";
+import { CheckCircle2 } from "lucide-react";
+import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
 
 export default function ResetPasswordClient() {
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [stage, setStage] = useState<'form' | 'success'>('form')
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [stage, setStage] = useState<"form" | "success">("form");
 
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const tReset = useTranslations('resetPassword')
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tReset = useTranslations("resetPassword");
 
   useEffect(() => {
-    const accessToken = searchParams.get('access_token')
-    const refreshToken = searchParams.get('refresh_token')
+    const accessToken = searchParams.get("access_token");
+    const refreshToken = searchParams.get("refresh_token");
     if (accessToken && refreshToken) {
-      supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
     }
-  }, [searchParams])
+  }, [searchParams]);
 
   const validatePassword = (pwd: string) => ({
     len: pwd.length >= 6,
     lower: /[a-z]/.test(pwd),
     upper: /[A-Z]/.test(pwd),
     digit: /\d/.test(pwd),
-    symbol: /[!@#$%^&*(),.?":{}|<>]/.test(pwd)
-  })
+    symbol: /[!@#$%^&*(),.?":{}|<>]/.test(pwd),
+  });
 
-  const pwdCheck = validatePassword(password)
-  const isPasswordValid = Object.values(pwdCheck).every(Boolean)
+  const pwdCheck = validatePassword(password);
+  const isPasswordValid = Object.values(pwdCheck).every(Boolean);
 
   const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError(null)
+    e.preventDefault();
+    setError(null);
     if (!isPasswordValid) {
-      setError('Password does not meet requirements')
-      return
+      setError("Password does not meet requirements");
+      return;
     }
     if (password !== confirmPassword) {
-      setError('Passwords do not match')
-      return
+      setError("Passwords do not match");
+      return;
     }
     try {
-      setIsSubmitting(true)
-      const { error } = await supabase.auth.updateUser({ password })
+      setIsSubmitting(true);
+      const { error } = await supabase.auth.updateUser({ password });
       if (error) {
-        setError(error.message)
-        return
+        setError(error.message);
+        return;
       }
-      setStage('success')
-      setTimeout(() => router.push('/'), 3000)
+      setStage("success");
+      setTimeout(() => router.push("/"), 3000);
     } catch (err: any) {
-      setError(err?.message ?? 'Something went wrong, please try again')
+      setError(err?.message ?? "Something went wrong, please try again");
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
-    <div className="min-h-screen bg-cover bg-center" style={{ backgroundImage: "url('/Sign up screen-bg.png')" }}>
-      <motion.div 
+    <div
+      className="min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: "url('/Sign up screen-bg.png')" }}
+    >
+      <motion.div
         className="container mx-auto flex min-h-screen items-center justify-center p-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
-        <motion.div 
+        <motion.div
           className="w-full max-w-md rounded-[10px] border border-gray-200 bg-white text-gray-900 shadow-sm dark:bg-white dark:text-gray-900"
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
         >
           <div className="p-6 sm:p-8">
-            <motion.div 
+            <motion.div
               className="flex justify-center"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
             >
-              <Image src="/Spendly-logo.svg" alt="Spendly" width={120} height={32} priority />
+              <Image
+                src="/Spendly-logo.svg"
+                alt="Spendly"
+                width={120}
+                height={32}
+                priority
+              />
             </motion.div>
 
-            <motion.h1 
+            <motion.h1
               className="mt-6 mb-4 text-xl sm:text-2xl font-semibold text-center"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
             >
-              {tReset('title')}
+              {tReset("title")}
             </motion.h1>
 
-            {stage === 'form' && (
+            {stage === "form" && (
               <form onSubmit={onSubmit} className="space-y-4" noValidate>
                 <p className="text-sm text-gray-600">
-                  {tReset('instructions')}
+                  {tReset("instructions")}
                 </p>
                 <div>
-                  <label htmlFor="password" className="mb-1 block text-sm font-medium">
-                    {tReset('label.password')}
+                  <label
+                    htmlFor="password"
+                    className="mb-1 block text-sm font-medium"
+                  >
+                    {tReset("label.password")}
                   </label>
                   <div className="relative">
                     <Input
                       id="password"
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      placeholder={tReset('placeholder.password')}
+                      placeholder={tReset("placeholder.password")}
                       className="pr-10"
                     />
                   </div>
                 </div>
 
                 <div className="text-xs space-y-1">
-                  <div className={`flex items-center gap-2 ${pwdCheck.len ? 'text-green-600' : 'text-gray-400'}`}>
-                    <span>{pwdCheck.len ? '✓' : '○'}</span>
-                    <span>{tReset('requirements.minimumChars')}</span>
+                  <div
+                    className={`flex items-center gap-2 ${pwdCheck.len ? "text-green-600" : "text-gray-400"}`}
+                  >
+                    <span>{pwdCheck.len ? "✓" : "○"}</span>
+                    <span>{tReset("requirements.minimumChars")}</span>
                   </div>
-                  <div className={`flex items-center gap-2 ${pwdCheck.lower ? 'text-green-600' : 'text-gray-400'}`}>
-                    <span>{pwdCheck.lower ? '✓' : '○'}</span>
-                    <span>{tReset('requirements.lowercase')}</span>
+                  <div
+                    className={`flex items-center gap-2 ${pwdCheck.lower ? "text-green-600" : "text-gray-400"}`}
+                  >
+                    <span>{pwdCheck.lower ? "✓" : "○"}</span>
+                    <span>{tReset("requirements.lowercase")}</span>
                   </div>
-                  <div className={`flex items-center gap-2 ${pwdCheck.upper ? 'text-green-600' : 'text-gray-400'}`}>
-                    <span>{pwdCheck.upper ? '✓' : '○'}</span>
-                    <span>{tReset('requirements.uppercase')}</span>
+                  <div
+                    className={`flex items-center gap-2 ${pwdCheck.upper ? "text-green-600" : "text-gray-400"}`}
+                  >
+                    <span>{pwdCheck.upper ? "✓" : "○"}</span>
+                    <span>{tReset("requirements.uppercase")}</span>
                   </div>
-                  <div className={`flex items-center gap-2 ${pwdCheck.digit ? 'text-green-600' : 'text-gray-400'}`}>
-                    <span>{pwdCheck.digit ? '✓' : '○'}</span>
-                    <span>{tReset('requirements.number')}</span>
+                  <div
+                    className={`flex items-center gap-2 ${pwdCheck.digit ? "text-green-600" : "text-gray-400"}`}
+                  >
+                    <span>{pwdCheck.digit ? "✓" : "○"}</span>
+                    <span>{tReset("requirements.number")}</span>
                   </div>
-                  <div className={`flex items-center gap-2 ${pwdCheck.symbol ? 'text-green-600' : 'text-gray-400'}`}>
-                    <span>{pwdCheck.symbol ? '✓' : '○'}</span>
-                    <span>{tReset('requirements.special')}</span>
+                  <div
+                    className={`flex items-center gap-2 ${pwdCheck.symbol ? "text-green-600" : "text-gray-400"}`}
+                  >
+                    <span>{pwdCheck.symbol ? "✓" : "○"}</span>
+                    <span>{tReset("requirements.special")}</span>
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="confirmPassword" className="mb-1 block text-sm font-medium">
-                    {tReset('label.confirmPassword')}
+                  <label
+                    htmlFor="confirmPassword"
+                    className="mb-1 block text-sm font-medium"
+                  >
+                    {tReset("label.confirmPassword")}
                   </label>
                   <div className="relative">
                     <Input
                       id="confirmPassword"
-                      type={showConfirmPassword ? 'text' : 'password'}
+                      type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
-                      placeholder={tReset('placeholder.confirmPassword')}
+                      placeholder={tReset("placeholder.confirmPassword")}
                       className="pr-10"
                     />
                   </div>
                 </div>
 
                 {error && (
-                  <div role="alert" aria-live="polite" className="text-sm text-red-600">
+                  <div
+                    role="alert"
+                    aria-live="polite"
+                    className="text-sm text-red-600"
+                  >
                     {error}
                   </div>
                 )}
@@ -176,28 +208,42 @@ export default function ResetPasswordClient() {
                   type="submit"
                   variant="primary"
                   className="w-full"
-                  text={isSubmitting ? tReset('states.updating') : tReset('buttons.update')}
-                  disabled={!isPasswordValid || password !== confirmPassword || isSubmitting}
+                  text={
+                    isSubmitting
+                      ? tReset("states.updating")
+                      : tReset("buttons.update")
+                  }
+                  disabled={
+                    !isPasswordValid ||
+                    password !== confirmPassword ||
+                    isSubmitting
+                  }
                 />
 
                 <div className="text-center">
-                  <Link href={{ pathname: '/' }} className="text-blue-600 hover:text-blue-700 underline text-sm">
-                    {tReset('buttons.backToSignIn')}
+                  <Link
+                    href={{ pathname: "/" }}
+                    className="text-blue-600 hover:text-blue-700 underline text-sm"
+                  >
+                    {tReset("buttons.backToSignIn")}
                   </Link>
                 </div>
               </form>
             )}
 
-            {stage === 'success' && (
-              <motion.div 
-                className="flex flex-col items-center text-center space-y-4" 
+            {stage === "success" && (
+              <motion.div
+                className="flex flex-col items-center text-center space-y-4"
                 aria-live="polite"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: "easeOut" }}
               >
-                <CheckCircle2 className="h-14 w-14 text-emerald-500" aria-hidden="true" />
-                <motion.h2 
+                <CheckCircle2
+                  className="h-14 w-14 text-emerald-500"
+                  aria-hidden="true"
+                />
+                <motion.h2
                   className="text-xl font-semibold"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -206,10 +252,13 @@ export default function ResetPasswordClient() {
                   Password updated!
                 </motion.h2>
                 <p className="text-sm text-gray-600">
-                  {tReset('success.description')}
+                  {tReset("success.description")}
                 </p>
-                <Link href="/" className="text-blue-600 hover:text-blue-700 underline text-sm">
-                  {tReset('buttons.backToSignIn')}
+                <Link
+                  href="/"
+                  className="text-blue-600 hover:text-blue-700 underline text-sm"
+                >
+                  {tReset("buttons.backToSignIn")}
                 </Link>
               </motion.div>
             )}
@@ -217,5 +266,5 @@ export default function ResetPasswordClient() {
         </motion.div>
       </motion.div>
     </div>
-  )
+  );
 }

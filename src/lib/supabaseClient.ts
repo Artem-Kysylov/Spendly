@@ -5,10 +5,14 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl) {
-  throw new Error("Missing Supabase env var: NEXT_PUBLIC_SUPABASE_URL. Make sure it's set in .env.local");
+  throw new Error(
+    "Missing Supabase env var: NEXT_PUBLIC_SUPABASE_URL. Make sure it's set in .env.local",
+  );
 }
 if (!supabaseAnonKey) {
-  throw new Error("Missing Supabase env var: NEXT_PUBLIC_SUPABASE_ANON_KEY. Make sure it's set in .env.local");
+  throw new Error(
+    "Missing Supabase env var: NEXT_PUBLIC_SUPABASE_ANON_KEY. Make sure it's set in .env.local",
+  );
 }
 
 declare global {

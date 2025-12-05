@@ -1,36 +1,64 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog"
-import Button from '@/components/ui-elements/Button'
-import { X } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import Button from "@/components/ui-elements/Button";
+import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface UnsubscribeModalProps {
-  open: boolean
-  onClose: () => void
-  onConfirm: () => Promise<void> | void
-  isLoading?: boolean
+  open: boolean;
+  onClose: () => void;
+  onConfirm: () => Promise<void> | void;
+  isLoading?: boolean;
 }
 
-export default function UnsubscribeModal({ open, onClose, onConfirm, isLoading }: UnsubscribeModalProps) {
-  const tSettings = useTranslations('userSettings')
+export default function UnsubscribeModal({
+  open,
+  onClose,
+  onConfirm,
+  isLoading,
+}: UnsubscribeModalProps) {
+  const tSettings = useTranslations("userSettings");
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose() }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <DialogContent className="border">
         <DialogHeader>
           <DialogTitle className="text-secondary-black dark:text-white">
-            {tSettings('dangerZone.modal.title')}
+            {tSettings("dangerZone.modal.title")}
           </DialogTitle>
-          <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"><X size={22} /></DialogClose>
+          <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground">
+            <X size={22} />
+          </DialogClose>
         </DialogHeader>
         <p className="py-4 text-secondary-black dark:text-gray-300">
-          😢 {tSettings('dangerZone.description')}
+          😢 {tSettings("dangerZone.description")}
         </p>
         <DialogFooter>
           <div className="flex gap-2">
-            <Button text={tSettings('dangerZone.modal.cancel')} variant="ghost" onClick={onClose} />
-            <Button text={tSettings('dangerZone.modal.confirm')} variant="destructive" onClick={onConfirm} isLoading={isLoading} />
+            <Button
+              text={tSettings("dangerZone.modal.cancel")}
+              variant="ghost"
+              onClick={onClose}
+            />
+            <Button
+              text={tSettings("dangerZone.modal.confirm")}
+              variant="destructive"
+              onClick={onConfirm}
+              isLoading={isLoading}
+            />
           </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

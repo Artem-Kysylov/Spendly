@@ -1,12 +1,15 @@
-'use client'
+"use client";
 
 type Props = {
-  total: number
-  current: number
-}
+  total: number;
+  current: number;
+};
 
 export default function StepProgress({ total, current }: Props) {
-  const percent = Math.min(Math.max(((current + 1) / Math.max(total, 1)) * 100, 0), 100)
+  const percent = Math.min(
+    Math.max(((current + 1) / Math.max(total, 1)) * 100, 0),
+    100,
+  );
 
   return (
     <div className="w-full">
@@ -20,5 +23,5 @@ export default function StepProgress({ total, current }: Props) {
         />
       </div>
     </div>
-  )
+  );
 }

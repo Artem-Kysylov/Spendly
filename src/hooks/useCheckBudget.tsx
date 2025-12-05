@@ -1,51 +1,53 @@
 // Хук: useCheckBudget
-'use client';
-import { useState, useEffect } from 'react'
-import { useRouter } from '@/i18n/routing'
-import { supabase } from '../lib/supabaseClient'
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter } from "@/i18n/routing";
+import { supabase } from "../lib/supabaseClient";
 
 const useCheckBudget = (userId: string | undefined) => {
-    const router = useRouter()
-    const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const checkBudget = async () => {
-            if (!userId) {
-                setIsLoading(false)
-                return
-            }
+  useEffect(() => {
+    const checkBudget = async () => {
+      if (!userId) {
+        setIsLoading(false);
+        return;
+      }
 
-            try {
-                console.log('Checking main budget for user:', userId)
-                
-                const { data, error } = await supabase
-                    .from('main_budget') 
-                    .select('user_id')
-                    .eq('user_id', userId)
-                    .maybeSingle()
+      try {
+        console.log("Checking main budget for user:", userId);
 
-                console.log('Main budget response:', { data, error })
+        const { data, error } = await supabase
+          .from("main_budget")
+          .select("user_id")
+          .eq("user_id", userId)
+          .maybeSingle();
 
-                if (error) {
-                    console.error('Error checking main budget:', error)
-                    return
-                }
+        console.log("Main budget response:", { data, error });
 
-                if (!data) {
-                    console.log('No main budget found, redirecting to create budget page')
-                    router.push('/add-new-budget')
-                }
-            } catch (error) {
-                console.error('Error checking main budget:', error)
-            } finally {
-                setIsLoading(false)
-            }
+        if (error) {
+          console.error("Error checking main budget:", error);
+          return;
         }
 
-        checkBudget()
-    }, [userId, router])
+        if (!data) {
+          console.log(
+            "No main budget found, redirecting to create budget page",
+          );
+          router.push("/add-new-budget");
+        }
+      } catch (error) {
+        console.error("Error checking main budget:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    return { isLoading }
-}
+    checkBudget();
+  }, [userId, router]);
 
-export default useCheckBudget
+  return { isLoading };
+};
+
+export default useCheckBudget;

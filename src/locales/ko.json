@@ -41,17 +41,17 @@
     }
   },
   "budgets": {
-        "rollover": {
-            "panelTitle": "이월",
-            "toggleLabel": "이월 활성화",
-            "modeLabel": "모드",
-            "positiveOnly": "양수만",
-            "allowNegative": "음수 허용"
-        },
-        "meta": {
-            "title": "예산",
-            "description": "예산을 생성하고 관리합니다."
-        },
+    "rollover": {
+      "panelTitle": "이월",
+      "toggleLabel": "이월 활성화",
+      "modeLabel": "모드",
+      "positiveOnly": "양수만",
+      "allowNegative": "음수 허용"
+    },
+    "meta": {
+      "title": "예산",
+      "description": "예산을 생성하고 관리합니다."
+    },
     "list": {
       "card": {
         "createNew": "새 예산 만들기"

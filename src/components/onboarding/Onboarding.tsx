@@ -1,58 +1,58 @@
-'use client'
+"use client";
 
-import { useCallback, useMemo, useState } from 'react'
-import { AnimatePresence } from 'motion/react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
-import StepProgress from './StepProgress'
-import Controls from './Controls'
-import OnboardingStep from './OnboardingStep'
-import { steps as data } from './steps'
-import { useRouter } from '@/i18n/routing'
-import { supabase } from '@/lib/supabaseClient'
+import { useCallback, useMemo, useState } from "react";
+import { AnimatePresence } from "motion/react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import StepProgress from "./StepProgress";
+import Controls from "./Controls";
+import OnboardingStep from "./OnboardingStep";
+import { steps as data } from "./steps";
+import { useRouter } from "@/i18n/routing";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function Onboarding() {
-  const router = useRouter()
-  const [open, setOpen] = useState(true)
-  const [idx, setIdx] = useState(0)
+  const router = useRouter();
+  const [open, setOpen] = useState(true);
+  const [idx, setIdx] = useState(0);
 
-  const total = data.length
-  const isFirst = idx === 0
-  const isLast = idx === total - 1
+  const total = data.length;
+  const isFirst = idx === 0;
+  const isLast = idx === total - 1;
 
-  const current = useMemo(() => data[idx], [idx])
+  const current = useMemo(() => data[idx], [idx]);
 
   const markCompleted = useCallback(async () => {
     try {
-      await supabase.auth.updateUser({ data: { onboarding_completed: true } })
+      await supabase.auth.updateUser({ data: { onboarding_completed: true } });
     } catch {}
-  }, [])
+  }, []);
 
   const handleSkip = useCallback(async () => {
-    await markCompleted()
-    router.push('/setup/budget')
-  }, [markCompleted, router])
+    await markCompleted();
+    router.push("/setup/budget");
+  }, [markCompleted, router]);
 
   const handleNext = useCallback(async () => {
     if (isLast) {
-      await markCompleted()
-      router.push('/payment')
-      return
+      await markCompleted();
+      router.push("/payment");
+      return;
     }
-    setIdx((v) => Math.min(v + 1, total - 1))
-  }, [isLast, total, markCompleted, router])
+    setIdx((v) => Math.min(v + 1, total - 1));
+  }, [isLast, total, markCompleted, router]);
 
   const handlePrev = useCallback(() => {
-    setIdx((v) => Math.max(v - 1, 0))
-  }, [])
+    setIdx((v) => Math.max(v - 1, 0));
+  }, []);
 
   return (
     <Dialog
       open={open}
       onOpenChange={(o) => {
         if (!o) {
-          handleSkip()
+          handleSkip();
         } else {
-          setOpen(true)
+          setOpen(true);
         }
       }}
     >
@@ -85,5 +85,5 @@ export default function Onboarding() {
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

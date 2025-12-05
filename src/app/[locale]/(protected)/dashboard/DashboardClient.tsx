@@ -1,64 +1,70 @@
 // DashboardClient component
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { UserAuth } from '@/context/AuthContext'
-import { supabase } from '@/lib/supabaseClient'
-import { useRouter } from '@/i18n/routing'
-import { motion } from 'framer-motion'
-import { useTranslations } from 'next-intl'
+import { useEffect, useState } from "react";
+import { UserAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
+import { useRouter } from "@/i18n/routing";
+import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 
-import EmptyState from '@/components/chunks/EmptyState'
-import CompactKPICard from '@/components/dashboard/CompactKPICard'
-import AiInsightTeaser from '@/components/dashboard/AiInsightTeaser'
-import SimplifiedChart from '@/components/dashboard/SimplifiedChart'
-import DashboardTransactionsTable from '@/components/dashboard/DashboardTransactionsTable'
-import Spinner from '@/components/ui-elements/Spinner'
-import MainBudgetModal from '@/components/modals/MainBudgetModal'
-import ToastMessage from '@/components/ui-elements/ToastMessage'
-import Button from '@/components/ui-elements/Button'
-import TransactionModal from '@/components/modals/TransactionModal'
-import { Plus } from 'lucide-react'
+import EmptyState from "@/components/chunks/EmptyState";
+import CompactKPICard from "@/components/dashboard/CompactKPICard";
+import AiInsightTeaser from "@/components/dashboard/AiInsightTeaser";
+import SimplifiedChart from "@/components/dashboard/SimplifiedChart";
+import DashboardTransactionsTable from "@/components/dashboard/DashboardTransactionsTable";
+import Spinner from "@/components/ui-elements/Spinner";
+import MainBudgetModal from "@/components/modals/MainBudgetModal";
+import ToastMessage from "@/components/ui-elements/ToastMessage";
+import Button from "@/components/ui-elements/Button";
+import TransactionModal from "@/components/modals/TransactionModal";
+import { Plus } from "lucide-react";
 
+import useModal from "@/hooks/useModal";
+import useCheckBudget from "@/hooks/useCheckBudget";
 
-import useModal from '@/hooks/useModal'
-import useCheckBudget from '@/hooks/useCheckBudget'
-
-import { ToastMessageProps, Transaction } from '@/types/types'
-import type { EditTransactionPayload } from '@/types/types'
+import { ToastMessageProps, Transaction } from "@/types/types";
+import type { EditTransactionPayload } from "@/types/types";
 import {
   calculatePercentageChange,
   getPreviousMonthRange,
-  getCurrentMonthRange
-} from '@/lib/chartUtils'
+  getCurrentMonthRange,
+} from "@/lib/chartUtils";
 
 function DashboardClient() {
-  const { session } = UserAuth()
-  const router = useRouter()
-  const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [budget, setBudget] = useState<number>(0)
-  const [isLoading, setIsLoading] = useState<boolean>(true)
-  const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
-  const [refreshCounters, setRefreshCounters] = useState<number>(0)
-  const { isModalOpen, openModal, closeModal } = useModal()
-  const { isModalOpen: isAddOpen, openModal: openAddModal, closeModal: closeAddModal } = useModal()
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null)
+  const { session } = UserAuth();
+  const router = useRouter();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [budget, setBudget] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(
+    null,
+  );
+  const [refreshCounters, setRefreshCounters] = useState<number>(0);
+  const { isModalOpen, openModal, closeModal } = useModal();
+  const {
+    isModalOpen: isAddOpen,
+    openModal: openAddModal,
+    closeModal: closeAddModal,
+  } = useModal();
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
 
-  const tDashboard = useTranslations('dashboard')
-  const tTransactions = useTranslations('transactions')
-  const tCommon = useTranslations('common')
-  const tGreeting = useTranslations('greeting')
+  const tDashboard = useTranslations("dashboard");
+  const tTransactions = useTranslations("transactions");
+  const tCommon = useTranslations("common");
+  const tGreeting = useTranslations("greeting");
 
-  const [greetingKey, setGreetingKey] = useState<string>('morning')
+  const [greetingKey, setGreetingKey] = useState<string>("morning");
 
-  const { isLoading: isBudgetChecking } = useCheckBudget(session?.user?.id)
+  const { isLoading: isBudgetChecking } = useCheckBudget(session?.user?.id);
 
   const fetchTransactions = async () => {
-    if (!session?.user?.id) return
+    if (!session?.user?.id) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
     const { data, error } = await supabase
-      .from('transactions')
+      .from("transactions")
       .select(`
         *,
         budget_folders (
@@ -66,115 +72,127 @@ function DashboardClient() {
           name
         )
       `)
-      .eq('user_id', session.user.id)
-      .order('created_at', { ascending: false })
+      .eq("user_id", session.user.id)
+      .order("created_at", { ascending: false });
 
     const { data: budgetData } = await supabase
-      .from('main_budget')
-      .select('amount')
-      .eq('user_id', session.user.id)
-      .single()
+      .from("main_budget")
+      .select("amount")
+      .eq("user_id", session.user.id)
+      .single();
 
     if (budgetData) {
-      setBudget(budgetData.amount)
+      setBudget(budgetData.amount);
     }
 
     if (error) {
-      console.error('Error fetching transactions:', error)
+      console.error("Error fetching transactions:", error);
     }
 
-    const transformedData = (data ?? []).map(transaction => ({
+    const transformedData = (data ?? []).map((transaction) => ({
       ...transaction,
       category_emoji: transaction.budget_folders?.emoji || null,
       category_name: transaction.budget_folders?.name || null,
-    }))
+    }));
 
-    setTransactions(transformedData as Transaction[])
-    setTimeout(() => setIsLoading(false), 500)
-  }
+    setTransactions(transformedData as Transaction[]);
+    setTimeout(() => setIsLoading(false), 500);
+  };
 
   useEffect(() => {
     if (session?.user?.id) {
-      fetchTransactions()
+      fetchTransactions();
     }
 
-    const hour = new Date().getHours()
-    if (hour >= 5 && hour < 12) setGreetingKey('morning')
-    else if (hour >= 12 && hour < 18) setGreetingKey('afternoon')
-    else setGreetingKey('evening')
-  }, [session?.user?.id])
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) setGreetingKey("morning");
+    else if (hour >= 12 && hour < 18) setGreetingKey("afternoon");
+    else setGreetingKey("evening");
+  }, [session?.user?.id]);
 
-  const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
-    setToastMessage({ text, type })
+  const handleToastMessage = (
+    text: string,
+    type: ToastMessageProps["type"],
+  ) => {
+    setToastMessage({ text, type });
     setTimeout(() => {
-      setToastMessage(null)
-    }, 3000)
-  }
+      setToastMessage(null);
+    }, 3000);
+  };
 
-  const handleTransactionSubmit = (message: string, type: ToastMessageProps['type']) => {
-    handleToastMessage(message, type)
-    if (type === 'success') {
-      setRefreshCounters(prev => prev + 1)
+  const handleTransactionSubmit = (
+    message: string,
+    type: ToastMessageProps["type"],
+  ) => {
+    handleToastMessage(message, type);
+    if (type === "success") {
+      setRefreshCounters((prev) => prev + 1);
       setTimeout(() => {
-        fetchTransactions()
-      }, 1000)
+        fetchTransactions();
+      }, 1000);
     }
-  }
+  };
 
   const handleIconClick = () => {
-    openModal()
-  }
+    openModal();
+  };
 
   const handleDeleteTransaction = async (id: string) => {
     try {
-      const { error } = await supabase.from('transactions').delete().eq('id', id)
+      const { error } = await supabase
+        .from("transactions")
+        .delete()
+        .eq("id", id);
 
       if (error) {
-        console.error('Error deleting transaction:', error)
-        handleToastMessage(tTransactions('toast.deleteFailed'), 'error')
-        return
+        console.error("Error deleting transaction:", error);
+        handleToastMessage(tTransactions("toast.deleteFailed"), "error");
+        return;
       }
-      handleToastMessage(tTransactions('toast.deleteSuccess'), 'success')
+      handleToastMessage(tTransactions("toast.deleteSuccess"), "success");
       setTimeout(() => {
-        fetchTransactions()
-        setRefreshCounters(prev => prev + 1)
-      }, 1000)
+        fetchTransactions();
+        setRefreshCounters((prev) => prev + 1);
+      }, 1000);
     } catch (error) {
-      console.error('Unexpected error during deletion:', error)
-      handleToastMessage(tCommon('unexpectedError'), 'error')
+      console.error("Unexpected error during deletion:", error);
+      handleToastMessage(tCommon("unexpectedError"), "error");
     }
-  }
+  };
 
   const openEditModal = (transaction: Transaction) => {
-    setEditingTransaction(transaction)
-  }
+    setEditingTransaction(transaction);
+  };
 
   // Calculations for KPI Cards
-  const currentMonthData = transactions.filter(transaction => {
-    const { start, end } = getCurrentMonthRange()
-    const transactionDate = new Date(transaction.created_at)
-    return transactionDate >= start && transactionDate <= end
-  })
+  const currentMonthData = transactions.filter((transaction) => {
+    const { start, end } = getCurrentMonthRange();
+    const transactionDate = new Date(transaction.created_at);
+    return transactionDate >= start && transactionDate <= end;
+  });
 
-  const previousMonthData = transactions.filter(transaction => {
-    const { start, end } = getPreviousMonthRange()
-    const transactionDate = new Date(transaction.created_at)
-    return transactionDate >= start && transactionDate <= end
-  })
+  const previousMonthData = transactions.filter((transaction) => {
+    const { start, end } = getPreviousMonthRange();
+    const transactionDate = new Date(transaction.created_at);
+    return transactionDate >= start && transactionDate <= end;
+  });
 
   const totalExpenses = currentMonthData
-    .filter(transaction => transaction.type === 'expense')
-    .reduce((sum, transaction) => sum + transaction.amount, 0)
+    .filter((transaction) => transaction.type === "expense")
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
 
   const previousMonthExpenses = previousMonthData
-    .filter(transaction => transaction.type === 'expense')
-    .reduce((sum, transaction) => sum + transaction.amount, 0)
+    .filter((transaction) => transaction.type === "expense")
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
 
-  const expensesTrend = calculatePercentageChange(previousMonthExpenses, totalExpenses)
+  const expensesTrend = calculatePercentageChange(
+    previousMonthExpenses,
+    totalExpenses,
+  );
 
   return (
     <div>
-      {(isLoading || isBudgetChecking) ? (
+      {isLoading || isBudgetChecking ? (
         <Spinner />
       ) : (
         <>
@@ -193,12 +211,13 @@ function DashboardClient() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
             >
-              {tGreeting(greetingKey)}, {session?.user?.user_metadata?.name ?? ''} 👋
+              {tGreeting(greetingKey)},{" "}
+              {session?.user?.user_metadata?.name ?? ""} 👋
             </motion.h1>
           </motion.div>
 
           <motion.div
-            style={{ willChange: 'opacity' }}
+            style={{ willChange: "opacity" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.28 }}
@@ -218,7 +237,7 @@ function DashboardClient() {
             />
 
             <motion.div
-              style={{ willChange: 'opacity' }}
+              style={{ willChange: "opacity" }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.28 }}
@@ -231,14 +250,14 @@ function DashboardClient() {
               <Spinner />
             ) : transactions.length === 0 ? (
               <EmptyState
-                title={tTransactions('empty.title')}
-                description={tTransactions('empty.description')}
-                buttonText={tTransactions('addTransaction')}
+                title={tTransactions("empty.title")}
+                description={tTransactions("empty.description")}
+                buttonText={tTransactions("addTransaction")}
                 onButtonClick={openAddModal}
               />
             ) : (
               <motion.div
-                style={{ willChange: 'opacity' }}
+                style={{ willChange: "opacity" }}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.28 }}
@@ -255,34 +274,34 @@ function DashboardClient() {
 
           {isModalOpen && (
             <MainBudgetModal
-              title={tDashboard('mainBudget.editTitle')}
+              title={tDashboard("mainBudget.editTitle")}
               onSubmit={handleTransactionSubmit}
               onClose={closeModal}
             />
           )}
           {isAddOpen && (
             <TransactionModal
-              title={tTransactions('modal.addTitle')}
+              title={tTransactions("modal.addTitle")}
               onClose={closeAddModal}
               onSubmit={(message, type) => {
-                handleTransactionSubmit(message, type)
+                handleTransactionSubmit(message, type);
               }}
             />
           )}
           {editingTransaction && (
             <TransactionModal
-              title={tTransactions('table.modal.editTitle')}
+              title={tTransactions("table.modal.editTitle")}
               initialData={editingTransaction}
               onClose={() => setEditingTransaction(null)}
               onSubmit={(message, type) => {
-                handleTransactionSubmit(message, type)
+                handleTransactionSubmit(message, type);
               }}
             />
           )}
         </>
       )}
     </div>
-  )
+  );
 }
 
-export default DashboardClient
+export default DashboardClient;

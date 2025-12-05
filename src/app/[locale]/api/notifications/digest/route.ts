@@ -1,188 +1,222 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getServerSupabaseClient } from '@/lib/serverSupabase'
-import { DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
-import { getWeekRange, getLastWeekRange } from '@/lib/ai/stats'
-import { getTranslations } from 'next-intl/server'
-import { selectModel } from '@/lib/ai/routing'
-import { buildCountersPrompt } from '@/lib/ai/promptBuilders'
-import { streamOpenAIText } from '@/lib/llm/openai'
-import { streamGeminiText } from '@/lib/llm/google'
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSupabaseClient } from "@/lib/serverSupabase";
+import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
+import { getWeekRange, getLastWeekRange } from "@/lib/ai/stats";
+import { getTranslations } from "next-intl/server";
+import { selectModel } from "@/lib/ai/routing";
+import { buildCountersPrompt } from "@/lib/ai/promptBuilders";
+import { streamOpenAIText } from "@/lib/llm/openai";
+import { streamGeminiText } from "@/lib/llm/google";
 
 function isAuthorized(req: NextRequest): boolean {
-  const bearer = req.headers.get('authorization') || ''
-  const cronSecret = req.headers.get('x-cron-secret') ?? ''
-  const okByBearer = bearer.startsWith('Bearer ')
-      ? bearer.slice(7) === (process.env.SUPABASE_SERVICE_ROLE_KEY ?? '')
-      : false
+  const bearer = req.headers.get("authorization") || "";
+  const cronSecret = req.headers.get("x-cron-secret") ?? "";
+  const okByBearer = bearer.startsWith("Bearer ")
+    ? bearer.slice(7) === (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "")
+    : false;
   // ВСЕГДА boolean: есть CRON_SECRET и заголовок совпадает
-  const okBySecret = !!process.env.CRON_SECRET && cronSecret === process.env.CRON_SECRET
+  const okBySecret =
+    !!process.env.CRON_SECRET && cronSecret === process.env.CRON_SECRET;
 
-  return okByBearer || okBySecret
+  return okByBearer || okBySecret;
 }
 
 function formatCurrency(n: number, locale: string, currency: string) {
   try {
-    return new Intl.NumberFormat(locale || 'en-US', { style: 'currency', currency: currency || 'USD', maximumFractionDigits: 0 }).format(n || 0)
+    return new Intl.NumberFormat(locale || "en-US", {
+      style: "currency",
+      currency: currency || "USD",
+      maximumFractionDigits: 0,
+    }).format(n || 0);
   } catch {
-    return `$${Math.round(n || 0)}`
+    return `$${Math.round(n || 0)}`;
   }
 }
 
 export async function POST(req: NextRequest) {
   if (!isAuthorized(req)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = getServerSupabaseClient()
+  const supabase = getServerSupabaseClient();
   const localeCookie =
-    req.cookies.get('NEXT_LOCALE')?.value ||
-    req.cookies.get('spendly_locale')?.value ||
-    DEFAULT_LOCALE
-  const locale = isSupportedLanguage(localeCookie || '') ? (localeCookie as any) : DEFAULT_LOCALE
-  const t = await getTranslations({ locale, namespace: 'Notifications' })
-  const currency = 'USD' // Можно расширить и брать из профиля
+    req.cookies.get("NEXT_LOCALE")?.value ||
+    req.cookies.get("spendly_locale")?.value ||
+    DEFAULT_LOCALE;
+  const locale = isSupportedLanguage(localeCookie || "")
+    ? (localeCookie as any)
+    : DEFAULT_LOCALE;
+  const t = await getTranslations({ locale, namespace: "Notifications" });
+  const currency = "USD"; // Можно расширить и брать из профиля
 
   // Точки недели: текущая неделя (старт в понедельник) и прошлые периоды
-  const { start: thisWeekStart } = getWeekRange(new Date())
-  const { start: lastWeekStart, end: lastWeekEnd } = getLastWeekRange(thisWeekStart)
-  const { start: prevWeekStart, end: prevWeekEnd } = getLastWeekRange(lastWeekStart)
+  const { start: thisWeekStart } = getWeekRange(new Date());
+  const { start: lastWeekStart, end: lastWeekEnd } =
+    getLastWeekRange(thisWeekStart);
+  const { start: prevWeekStart, end: prevWeekEnd } =
+    getLastWeekRange(lastWeekStart);
 
   // 1) Выбираем активных пользователей по preferences
   const { data: prefs, error: prefsErr } = await supabase
-    .from('notification_preferences')
-    .select('user_id, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone')
-    .neq('engagement_frequency', 'disabled')
+    .from("notification_preferences")
+    .select(
+      "user_id, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone",
+    )
+    .neq("engagement_frequency", "disabled");
 
   if (prefsErr) {
-    console.error('digest: preferences error', prefsErr)
+    console.error("digest: preferences error", prefsErr);
     return NextResponse.json(
       {
-        error: 'Failed to fetch preferences',
+        error: "Failed to fetch preferences",
       },
       { status: 500 },
-    )
+    );
   }
 
-  const targets = (prefs || []).filter(p => p.push_enabled || p.email_enabled)
-  let created = 0
-  let skipped = 0
+  const targets = (prefs || []).filter(
+    (p) => p.push_enabled || p.email_enabled,
+  );
+  let created = 0;
+  let skipped = 0;
 
   for (const p of targets) {
-    const userId = p.user_id
+    const userId = p.user_id;
 
     // Идемпотентность: проверяем, не создавали ли дайджест за эту прошлую неделю
-    const idemKey = `weekly:${userId}:${lastWeekStart.toISOString().slice(0, 10)}`
+    const idemKey = `weekly:${userId}:${lastWeekStart.toISOString().slice(0, 10)}`;
     const { data: existing } = await supabase
-      .from('notification_queue')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('notification_type', 'weekly_reminder')
-      .gte('created_at', lastWeekStart.toISOString())
-      .lte('created_at', lastWeekEnd.toISOString())
-      .limit(1)
+      .from("notification_queue")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("notification_type", "weekly_reminder")
+      .gte("created_at", lastWeekStart.toISOString())
+      .lte("created_at", lastWeekEnd.toISOString())
+      .limit(1);
 
     if (existing && existing.length > 0) {
-      skipped++
-      continue
+      skipped++;
+      continue;
     }
 
     // Берём транзакции за прошлую и позапрошлую недели
     const { data: lastWeekTxs, error: lastErr } = await supabase
-      .from('transactions')
+      .from("transactions")
       .select(`
         id, title, amount, type, created_at, budget_folder_id,
         budget_folders ( name, emoji )
       `)
-      .eq('user_id', userId)
-      .gte('created_at', lastWeekStart.toISOString())
-      .lte('created_at', lastWeekEnd.toISOString())
+      .eq("user_id", userId)
+      .gte("created_at", lastWeekStart.toISOString())
+      .lte("created_at", lastWeekEnd.toISOString());
 
     if (lastErr) {
-      console.warn('digest: lastWeek tx error', lastErr)
-      skipped++
-      continue
+      console.warn("digest: lastWeek tx error", lastErr);
+      skipped++;
+      continue;
     }
 
     const { data: prevWeekTxs, error: prevErr } = await supabase
-      .from('transactions')
-      .select('id, title, amount, type, created_at, budget_folder_id')
-      .eq('user_id', userId)
-      .gte('created_at', prevWeekStart.toISOString())
-      .lte('created_at', prevWeekEnd.toISOString())
+      .from("transactions")
+      .select("id, title, amount, type, created_at, budget_folder_id")
+      .eq("user_id", userId)
+      .gte("created_at", prevWeekStart.toISOString())
+      .lte("created_at", prevWeekEnd.toISOString());
 
     if (prevErr) {
-      console.warn('digest: prevWeek tx error', prevErr)
+      console.warn("digest: prevWeek tx error", prevErr);
     }
 
-    const totalExpensesLast = (lastWeekTxs || []).filter(t => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0)
-    const totalIncomeLast = (lastWeekTxs || []).filter(t => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0)
+    const totalExpensesLast = (lastWeekTxs || [])
+      .filter((t) => t.type === "expense")
+      .reduce((s, t) => s + (t.amount || 0), 0);
+    const totalIncomeLast = (lastWeekTxs || [])
+      .filter((t) => t.type === "income")
+      .reduce((s, t) => s + (t.amount || 0), 0);
 
-    const totalExpensesPrev = (prevWeekTxs || []).filter(t => t.type === 'expense').reduce((s, t) => s + (t.amount || 0), 0)
-    const totalIncomePrev = (prevWeekTxs || []).filter(t => t.type === 'income').reduce((s, t) => s + (t.amount || 0), 0)
+    const totalExpensesPrev = (prevWeekTxs || [])
+      .filter((t) => t.type === "expense")
+      .reduce((s, t) => s + (t.amount || 0), 0);
+    const totalIncomePrev = (prevWeekTxs || [])
+      .filter((t) => t.type === "income")
+      .reduce((s, t) => s + (t.amount || 0), 0);
 
     // Топ‑категории (по расходам)
-    const byBudget = new Map<string, number>()
-    for (const t of (lastWeekTxs || [])) {
-      if (t.type !== 'expense') continue
-      const name = (Array.isArray(t.budget_folders) ? t.budget_folders[0]?.name : (t as any)?.budget_folders?.name) || 'Unassigned'
-      byBudget.set(name, (byBudget.get(name) || 0) + (t.amount || 0))
+    const byBudget = new Map<string, number>();
+    for (const t of lastWeekTxs || []) {
+      if (t.type !== "expense") continue;
+      const name =
+        (Array.isArray(t.budget_folders)
+          ? t.budget_folders[0]?.name
+          : (t as any)?.budget_folders?.name) || "Unassigned";
+      byBudget.set(name, (byBudget.get(name) || 0) + (t.amount || 0));
     }
     const topBudgets = Array.from(byBudget.entries())
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
+      .slice(0, 3);
 
     // Получаем план пользователя (free/pro)
-    const { data: userRes } = await supabase.auth.admin.getUserById(userId)
-    const isPro = (userRes?.user?.user_metadata as any)?.subscription_status === 'pro'
+    const { data: userRes } = await supabase.auth.admin.getUserById(userId);
+    const isPro =
+      (userRes?.user?.user_metadata as any)?.subscription_status === "pro";
 
     // Сводка по прошлой неделе (базовая, для Free и Pro)
-    const title = t('weekly.title')
+    const title = t("weekly.title");
     const topBudgetsText = topBudgets.length
-      ? `${t('weekly.top')}: ${topBudgets.map(([n, v]) => `${n} ${formatCurrency(v, locale, currency)}`).join(', ')}.`
-      : ''
+      ? `${t("weekly.top")}: ${topBudgets.map(([n, v]) => `${n} ${formatCurrency(v, locale, currency)}`).join(", ")}.`
+      : "";
     const bodyBasic =
-      `${t('weekly.lastWeek')} — ` +
-      `${t('weekly.expenses')} ${formatCurrency(totalExpensesLast, locale, currency)}, ` +
-      `${t('weekly.income')} ${formatCurrency(totalIncomeLast, locale, currency)}. ` +
-      topBudgetsText
+      `${t("weekly.lastWeek")} — ` +
+      `${t("weekly.expenses")} ${formatCurrency(totalExpensesLast, locale, currency)}, ` +
+      `${t("weekly.income")} ${formatCurrency(totalIncomeLast, locale, currency)}. ` +
+      topBudgetsText;
 
-    let body = bodyBasic
+    let body = bodyBasic;
 
     // Для Pro — добавляем краткие AI-инсайты, если есть ключи API
     if (isPro) {
       // Получаем основной бюджет (по желанию, для процента использования)
       const { data: mainBudgetRow } = await supabase
-        .from('main_budget')
-        .select('amount')
-        .eq('user_id', userId)
-        .maybeSingle()
-      const budget = Number(mainBudgetRow?.amount ?? 0)
+        .from("main_budget")
+        .select("amount")
+        .eq("user_id", userId)
+        .maybeSingle();
+      const budget = Number(mainBudgetRow?.amount ?? 0);
 
       // Метрики для buildCountersPrompt (на недельной выборке)
-      const expensesTrendPercent = totalExpensesPrev > 0
-        ? ((totalExpensesLast - totalExpensesPrev) / totalExpensesPrev) * 100
-        : (totalExpensesLast > 0 ? 100 : 0)
-      const incomeTrendPercent = totalIncomePrev > 0
-        ? ((totalIncomeLast - totalIncomePrev) / totalIncomePrev) * 100
-        : (totalIncomeLast > 0 ? 100 : 0)
-      const incomeCoveragePercent = totalIncomeLast > 0 ? (totalExpensesLast / totalIncomeLast) * 100 : 0
-      const budgetUsagePercentage = budget > 0 ? (totalExpensesLast / budget) * 100 : 0
-      const remainingBudget = Math.max(0, budget - totalExpensesLast)
-      const budgetStatus = budget <= 0
-        ? 'not-set'
-        : budgetUsagePercentage > 100
-        ? 'exceeded'
-        : budgetUsagePercentage > 80
-        ? 'warning'
-        : 'good'
+      const expensesTrendPercent =
+        totalExpensesPrev > 0
+          ? ((totalExpensesLast - totalExpensesPrev) / totalExpensesPrev) * 100
+          : totalExpensesLast > 0
+            ? 100
+            : 0;
+      const incomeTrendPercent =
+        totalIncomePrev > 0
+          ? ((totalIncomeLast - totalIncomePrev) / totalIncomePrev) * 100
+          : totalIncomeLast > 0
+            ? 100
+            : 0;
+      const incomeCoveragePercent =
+        totalIncomeLast > 0 ? (totalExpensesLast / totalIncomeLast) * 100 : 0;
+      const budgetUsagePercentage =
+        budget > 0 ? (totalExpensesLast / budget) * 100 : 0;
+      const remainingBudget = Math.max(0, budget - totalExpensesLast);
+      const budgetStatus =
+        budget <= 0
+          ? "not-set"
+          : budgetUsagePercentage > 100
+            ? "exceeded"
+            : budgetUsagePercentage > 80
+              ? "warning"
+              : "good";
 
-      const expensesDifferenceText = t('weekly.expensesDifference', {
+      const expensesDifferenceText = t("weekly.expensesDifference", {
         percent: Math.abs(expensesTrendPercent).toFixed(1),
-      })
+      });
 
-      const incomeDifferenceText = t('weekly.incomeDifference', {
+      const incomeDifferenceText = t("weekly.incomeDifference", {
         percent: Math.abs(incomeTrendPercent).toFixed(1),
-      })
+      });
 
       const prompt = buildCountersPrompt({
         budget,
@@ -199,45 +233,47 @@ export async function POST(req: NextRequest) {
         expensesDifferenceText,
         incomeDifferenceText,
         currency,
-        locale: (locale as any),
-      })
+        locale: locale as any,
+      });
 
-      const hasOpenAI = !!process.env.OPENAI_API_KEY
-      const hasGemini = !!process.env.GOOGLE_API_KEY
-      const model = selectModel(true, true) // Pro + сложный (аналитика)
-      const requestId = `digest_${userId}_${Date.now()}`
-      let aiText = ''
+      const hasOpenAI = !!process.env.OPENAI_API_KEY;
+      const hasGemini = !!process.env.GOOGLE_API_KEY;
+      const model = selectModel(true, true); // Pro + сложный (аналитика)
+      const requestId = `digest_${userId}_${Date.now()}`;
+      let aiText = "";
 
       try {
-        if (model.includes('gpt') && hasOpenAI) {
+        if (model.includes("gpt") && hasOpenAI) {
           const stream = streamOpenAIText({
-            model: process.env.OPENAI_MODEL ?? 'gpt-4-turbo',
+            model: process.env.OPENAI_MODEL ?? "gpt-4-turbo",
             prompt,
-            system: 'You are a helpful budgeting assistant. Reply in 2–3 concise sentences.',
+            system:
+              "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
             requestId,
-          })
-          const reader = stream.getReader()
-          const decoder = new TextDecoder()
+          });
+          const reader = stream.getReader();
+          const decoder = new TextDecoder();
           while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-            aiText += typeof value === 'string' ? value : decoder.decode(value)
-            if (aiText.length > 700) break
+            const { done, value } = await reader.read();
+            if (done) break;
+            aiText += typeof value === "string" ? value : decoder.decode(value);
+            if (aiText.length > 700) break;
           }
         } else if (hasGemini) {
           const stream = streamGeminiText({
-            model: process.env.GEMINI_MODEL ?? 'gemini-2.5-flash',
+            model: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
             prompt,
-            system: 'You are a helpful budgeting assistant. Reply in 2–3 concise sentences.',
+            system:
+              "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
             requestId,
-          })
-          const reader = stream.getReader()
-          const decoder = new TextDecoder()
+          });
+          const reader = stream.getReader();
+          const decoder = new TextDecoder();
           while (true) {
-            const { done, value } = await reader.read()
-            if (done) break
-            aiText += typeof value === 'string' ? value : decoder.decode(value)
-            if (aiText.length > 700) break
+            const { done, value } = await reader.read();
+            if (done) break;
+            aiText += typeof value === "string" ? value : decoder.decode(value);
+            if (aiText.length > 700) break;
           }
         }
       } catch {
@@ -245,103 +281,125 @@ export async function POST(req: NextRequest) {
       }
 
       if (aiText.trim().length > 0) {
-        body = `${bodyBasic} ${aiText.trim()}`
+        body = `${bodyBasic} ${aiText.trim()}`;
       }
     }
 
-    const actionUrl = '/dashboard?view=report&period=lastWeek'
-    const deepLink = actionUrl
+    const actionUrl = "/dashboard?view=report&period=lastWeek";
+    const deepLink = actionUrl;
 
     // In‑app уведомление
-    const { error: notifErr } = await supabase
-      .from('notifications')
-      .insert({
-        user_id: userId,
-        title,
-        message: body,
-        type: 'weekly_reminder',
-        metadata: {
-          week_start: lastWeekStart.toISOString().slice(0, 10),
-          transactions_count: (lastWeekTxs || []).length,
-          total_spent: totalExpensesLast,
-          currency,
-          deepLink,
-        },
-        is_read: false,
-      })
+    const { error: notifErr } = await supabase.from("notifications").insert({
+      user_id: userId,
+      title,
+      message: body,
+      type: "weekly_reminder",
+      metadata: {
+        week_start: lastWeekStart.toISOString().slice(0, 10),
+        transactions_count: (lastWeekTxs || []).length,
+        total_spent: totalExpensesLast,
+        currency,
+        deepLink,
+      },
+      is_read: false,
+    });
     if (notifErr) {
-      console.warn('digest: notif insert error', notifErr)
+      console.warn("digest: notif insert error", notifErr);
     }
 
     // Тихие часы: перенести scheduled_for на ближайшее разрешённое время
     const computeNextAllowedTime = (now: Date, pref: any) => {
-      if (!pref?.quiet_hours_enabled || !pref?.quiet_hours_start || !pref?.quiet_hours_end) return now
-      const [sh, sm] = String(pref.quiet_hours_start).split(':').map((x: string) => parseInt(x, 10))
-      const [eh, em] = String(pref.quiet_hours_end).split(':').map((x: string) => parseInt(x, 10))
-      const nowMin = now.getHours() * 60 + now.getMinutes()
-      const startMin = sh * 60 + sm
-      const endMin = eh * 60 + em
-      const inQuiet = startMin < endMin ? (nowMin >= startMin && nowMin < endMin) : (nowMin >= startMin || nowMin < endMin)
-      if (!inQuiet) return now
-      const next = new Date(now)
+      if (
+        !pref?.quiet_hours_enabled ||
+        !pref?.quiet_hours_start ||
+        !pref?.quiet_hours_end
+      )
+        return now;
+      const [sh, sm] = String(pref.quiet_hours_start)
+        .split(":")
+        .map((x: string) => parseInt(x, 10));
+      const [eh, em] = String(pref.quiet_hours_end)
+        .split(":")
+        .map((x: string) => parseInt(x, 10));
+      const nowMin = now.getHours() * 60 + now.getMinutes();
+      const startMin = sh * 60 + sm;
+      const endMin = eh * 60 + em;
+      const inQuiet =
+        startMin < endMin
+          ? nowMin >= startMin && nowMin < endMin
+          : nowMin >= startMin || nowMin < endMin;
+      if (!inQuiet) return now;
+      const next = new Date(now);
       if (startMin < endMin) {
-        next.setHours(eh, em, 0, 0)
+        next.setHours(eh, em, 0, 0);
       } else {
-        next.setDate(next.getDate() + (nowMin >= startMin ? 1 : 0))
-        next.setHours(eh, em, 0, 0)
+        next.setDate(next.getDate() + (nowMin >= startMin ? 1 : 0));
+        next.setHours(eh, em, 0, 0);
       }
-      return next
-    }
+      return next;
+    };
 
-    const scheduledAt = computeNextAllowedTime(new Date(), p).toISOString()
+    const scheduledAt = computeNextAllowedTime(new Date(), p).toISOString();
 
     // Задача в очередь + игнор дублей
     const { error: queueErr } = await supabase
-      .from('notification_queue')
+      .from("notification_queue")
       .insert({
         user_id: userId,
-        notification_type: 'weekly_reminder',
+        notification_type: "weekly_reminder",
         title,
         message: body,
-        data: { deepLink, tag: 'weekly_reminder', renotify: true, idempotent_key: idemKey },
+        data: {
+          deepLink,
+          tag: "weekly_reminder",
+          renotify: true,
+          idempotent_key: idemKey,
+        },
         action_url: actionUrl,
         send_push: !!p.push_enabled,
         send_email: !!p.email_enabled,
         scheduled_for: scheduledAt,
-        status: 'pending',
+        status: "pending",
         attempts: 0,
         max_attempts: 3,
-      })
+      });
 
     if (queueErr) {
-      if (String((queueErr as any).code) === '23505') {
+      if (String((queueErr as any).code) === "23505") {
         // Конфликт уникальности — игнорируем
-        skipped++
-        continue
+        skipped++;
+        continue;
       }
-      console.warn('digest: queue insert error', queueErr)
-      skipped++
-      continue
+      console.warn("digest: queue insert error", queueErr);
+      skipped++;
+      continue;
     }
 
-    const hasAIInsight = isPro && body !== bodyBasic
+    const hasAIInsight = isPro && body !== bodyBasic;
 
-    const { error: telemetryErr } = await supabase.from('telemetry_events').insert({
-      user_id: userId,
-      event_name: 'digest_generated',
-      payload: {
-        type: 'weekly_reminder',
-        is_pro: isPro,
-        has_ai_insight: hasAIInsight,
-      },
-    })
+    const { error: telemetryErr } = await supabase
+      .from("telemetry_events")
+      .insert({
+        user_id: userId,
+        event_name: "digest_generated",
+        payload: {
+          type: "weekly_reminder",
+          is_pro: isPro,
+          has_ai_insight: hasAIInsight,
+        },
+      });
 
     if (telemetryErr) {
-      console.warn('digest: telemetry insert error', telemetryErr)
+      console.warn("digest: telemetry insert error", telemetryErr);
     }
 
-    created++
+    created++;
   }
 
-  return NextResponse.json({ ok: true, created, skipped, period: { lastWeekStart, lastWeekEnd } })
+  return NextResponse.json({
+    ok: true,
+    created,
+    skipped,
+    period: { lastWeekStart, lastWeekEnd },
+  });
 }

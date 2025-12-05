@@ -4,15 +4,18 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import "./globals.css";
 import { AuthContextProvider } from "@/context/AuthContext";
 import { QueryProvider } from "@/context/QueryProvider";
-import { ToastProvider } from '@/components/ui/use-toast'
-import { Toaster } from '@/components/ui/toaster'
-import ServiceWorkerRegistration from '@/components/notifications/ServiceWorkerRegistration'
-import { LazyMotion, domAnimation } from 'framer-motion'
-import { NextIntlClientProvider } from 'next-intl'
-import { cookies } from 'next/headers'
-import { loadMessages, DEFAULT_LOCALE, isSupportedLanguage } from '@/i18n/config'
-import { getTranslations } from 'next-intl/server'
-
+import { ToastProvider } from "@/components/ui/use-toast";
+import { Toaster } from "@/components/ui/toaster";
+import ServiceWorkerRegistration from "@/components/notifications/ServiceWorkerRegistration";
+import { LazyMotion, domAnimation } from "framer-motion";
+import { NextIntlClientProvider } from "next-intl";
+import { cookies } from "next/headers";
+import {
+  loadMessages,
+  DEFAULT_LOCALE,
+  isSupportedLanguage,
+} from "@/i18n/config";
+import { getTranslations } from "next-intl/server";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -20,13 +23,20 @@ const montserrat = Montserrat({
   display: "swap", // Use 'swap' to avoid FOIT
 });
 
-export async function generateMetadata({params: {locale}}: {params: {locale: string}}): Promise<Metadata> {
-  const tMeta = await getTranslations({ locale, namespace: 'meta' })
+export async function generateMetadata({
+  params: { locale },
+}: {
+  params: { locale: string };
+}): Promise<Metadata> {
+  const tMeta = await getTranslations({ locale, namespace: "meta" });
 
-  const title = tMeta('app.title')
-  const description = tMeta('app.description')
-  const keywordsCsv = tMeta('app.keywords')
-  const keywords = (typeof keywordsCsv === 'string' ? keywordsCsv.split(',').map(s => s.trim()) : [])
+  const title = tMeta("app.title");
+  const description = tMeta("app.description");
+  const keywordsCsv = tMeta("app.keywords");
+  const keywords =
+    typeof keywordsCsv === "string"
+      ? keywordsCsv.split(",").map((s) => s.trim())
+      : [];
 
   return {
     title,
@@ -46,12 +56,20 @@ export async function generateMetadata({params: {locale}}: {params: {locale: str
     alternates: { canonical: "/" },
     icons: {
       icon: [
-        { url: '/icons/favicon.ico', sizes: '32x32', type: 'image/x-icon' },
-        { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-        { url: '/icons/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+        { url: "/icons/favicon.ico", sizes: "32x32", type: "image/x-icon" },
+        { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
       ],
-      apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
-      other: [{ rel: 'mask-icon', url: '/icons/icon-192x192.png', color: '#3b82f6' }],
+      apple: [
+        {
+          url: "/icons/apple-touch-icon.png",
+          sizes: "180x180",
+          type: "image/png",
+        },
+      ],
+      other: [
+        { rel: "mask-icon", url: "/icons/icon-192x192.png", color: "#3b82f6" },
+      ],
     },
     openGraph: {
       type: "website",
@@ -70,13 +88,13 @@ export async function generateMetadata({params: {locale}}: {params: {locale: str
       title: "Spendly",
     },
     verification: { google: "google-site-verification-token" },
-  }
+  };
 }
 
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#3b82f6" },
-    { media: "(prefers-color-scheme: dark)", color: "#1e40af" }
+    { media: "(prefers-color-scheme: dark)", color: "#1e40af" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -85,17 +103,17 @@ export const viewport: Viewport = {
   viewportFit: "cover",
   // Also supported by less commonly used
   // interactiveWidget: 'resizes-visual',
-}
+};
 
 export default async function RootLayout({
   children,
-  params: {locale}
+  params: { locale },
 }: {
-  children: React.ReactNode,
-  params: {locale: string}
+  children: React.ReactNode;
+  params: { locale: string };
 }) {
-  const resolvedLocale = isSupportedLanguage(locale) ? locale : DEFAULT_LOCALE
-  const messages = await loadMessages(resolvedLocale)
+  const resolvedLocale = isSupportedLanguage(locale) ? locale : DEFAULT_LOCALE;
+  const messages = await loadMessages(resolvedLocale);
 
   return (
     <div className={`${montserrat.className} transition-colors duration-300`}>
@@ -103,7 +121,10 @@ export default async function RootLayout({
         <QueryProvider>
           <ToastProvider>
             <AuthContextProvider>
-              <NextIntlClientProvider locale={resolvedLocale} messages={messages}>
+              <NextIntlClientProvider
+                locale={resolvedLocale}
+                messages={messages}
+              >
                 <ThemeProvider>
                   {children}
                   <ServiceWorkerRegistration />
@@ -115,5 +136,5 @@ export default async function RootLayout({
         </QueryProvider>
       </LazyMotion>
     </div>
-  )
+  );
 }

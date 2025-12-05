@@ -1,26 +1,30 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Check, ChevronDown, X } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import * as React from "react";
+import { Check, ChevronDown, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export interface MultiSelectOption {
-  label: string
-  value: string
-  icon?: React.ReactNode
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
 }
 
 interface MultiSelectProps {
-  options: MultiSelectOption[]
-  selected: string[]
-  onChange: (selected: string[]) => void
-  placeholder?: string
-  className?: string
-  disabled?: boolean
-  maxCount?: number
+  options: MultiSelectOption[];
+  selected: string[];
+  onChange: (selected: string[]) => void;
+  placeholder?: string;
+  className?: string;
+  disabled?: boolean;
+  maxCount?: number;
 }
 
 export function MultiSelect({
@@ -32,22 +36,24 @@ export function MultiSelect({
   disabled = false,
   maxCount = 3,
 }: MultiSelectProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
 
   const handleUnselect = (item: string) => {
-    onChange(selected.filter((i) => i !== item))
-  }
+    onChange(selected.filter((i) => i !== item));
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    const input = e.target as HTMLInputElement
+    const input = e.target as HTMLInputElement;
     if (input.value === "") {
       if (e.key === "Backspace") {
-        onChange(selected.slice(0, -1))
+        onChange(selected.slice(0, -1));
       }
     }
-  }
+  };
 
-  const selectables = options.filter((option) => !selected.includes(option.value))
+  const selectables = options.filter(
+    (option) => !selected.includes(option.value),
+  );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -59,7 +65,7 @@ export function MultiSelect({
           className={cn(
             "w-full justify-between text-left font-normal",
             !selected.length && "text-muted-foreground",
-            className
+            className,
           )}
           disabled={disabled}
         >
@@ -67,16 +73,16 @@ export function MultiSelect({
             {selected.length > 0 ? (
               <>
                 {selected.slice(0, maxCount).map((item) => {
-                  const option = options.find((opt) => opt.value === item)
+                  const option = options.find((opt) => opt.value === item);
                   return (
                     <Badge
                       variant="secondary"
                       key={item}
                       className="mr-1 mb-1"
                       onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        handleUnselect(item)
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleUnselect(item);
                       }}
                     >
                       {option?.icon}
@@ -85,23 +91,23 @@ export function MultiSelect({
                         className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                         onKeyDown={(e) => {
                           if (e.key === "Enter") {
-                            handleUnselect(item)
+                            handleUnselect(item);
                           }
                         }}
                         onMouseDown={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
+                          e.preventDefault();
+                          e.stopPropagation();
                         }}
                         onClick={(e) => {
-                          e.preventDefault()
-                          e.stopPropagation()
-                          handleUnselect(item)
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleUnselect(item);
                         }}
                       >
                         <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                       </button>
                     </Badge>
-                  )
+                  );
                 })}
                 {selected.length > maxCount && (
                   <Badge variant="secondary" className="mr-1 mb-1">
@@ -124,18 +130,20 @@ export function MultiSelect({
                 <div
                   key={option.value}
                   onClick={() => {
-                    onChange([...selected, option.value])
-                    setOpen(true)
+                    onChange([...selected, option.value]);
+                    setOpen(true);
                   }}
                   className={cn(
                     "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
-                    "cursor-pointer"
+                    "cursor-pointer",
                   )}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      selected.includes(option.value) ? "opacity-100" : "opacity-0"
+                      selected.includes(option.value)
+                        ? "opacity-100"
+                        : "opacity-0",
                     )}
                   />
                   {option.icon && <span className="mr-2">{option.icon}</span>}
@@ -151,5 +159,5 @@ export function MultiSelect({
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

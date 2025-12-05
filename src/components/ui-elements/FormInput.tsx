@@ -1,33 +1,33 @@
-'use client'
+"use client";
 
-import React from 'react'
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
+import React from "react";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface FormInputProps {
-  label: string
-  type?: 'text' | 'password' | 'email' | 'number'
-  placeholder?: string
-  value: string
-  onChange: (value: string) => void
-  error?: string
-  disabled?: boolean
-  className?: string
+  label: string;
+  type?: "text" | "password" | "email" | "number";
+  placeholder?: string;
+  value: string;
+  onChange: (value: string) => void;
+  error?: string;
+  disabled?: boolean;
+  className?: string;
 }
 
 const FormInput: React.FC<FormInputProps> = ({
   label,
-  type = 'text',
+  type = "text",
   placeholder,
   value,
   onChange,
   error,
   disabled,
-  className
+  className,
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value)
-  }
+    onChange(e.target.value);
+  };
 
   return (
     <div className="space-y-2">
@@ -43,14 +43,12 @@ const FormInput: React.FC<FormInputProps> = ({
         className={cn(
           "h-[50px] px-[20px]",
           error && "border-red-500 focus:border-red-500",
-          className
+          className,
         )}
       />
-      {error && (
-        <p className="text-sm text-red-500">{error}</p>
-      )}
+      {error && <p className="text-sm text-red-500">{error}</p>}
     </div>
-  )
-}
+  );
+};
 
-export default FormInput
+export default FormInput;

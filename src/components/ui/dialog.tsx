@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { createPortal } from "react-dom"
-import { cn } from "@/lib/utils"
-import { AnimatePresence, motion } from "motion/react"
+import * as React from "react";
+import { createPortal } from "react-dom";
+import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "motion/react";
 
 type DialogContextValue = {
-  open: boolean
-  onOpenChange?: (open: boolean) => void
-}
-const DialogContext = React.createContext<DialogContextValue | null>(null)
+  open: boolean;
+  onOpenChange?: (open: boolean) => void;
+};
+const DialogContext = React.createContext<DialogContextValue | null>(null);
 
 export interface DialogProps {
-  open: boolean
-  onOpenChange?: (open: boolean) => void
-  children: React.ReactNode
+  open: boolean;
+  onOpenChange?: (open: boolean) => void;
+  children: React.ReactNode;
 }
 
 export function Dialog({ open, onOpenChange, children }: DialogProps) {
@@ -22,13 +22,13 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
     <DialogContext.Provider value={{ open, onOpenChange }}>
       {children}
     </DialogContext.Provider>
-  )
+  );
 }
 
 function useDialog() {
-  const ctx = React.useContext(DialogContext)
-  if (!ctx) throw new Error("Dialog components must be used within <Dialog>")
-  return ctx
+  const ctx = React.useContext(DialogContext);
+  if (!ctx) throw new Error("Dialog components must be used within <Dialog>");
+  return ctx;
 }
 
 export function DialogContent({
@@ -36,9 +36,9 @@ export function DialogContent({
   children,
   overlayClassName,
 }: React.HTMLAttributes<HTMLDivElement> & { overlayClassName?: string }) {
-  const { open, onOpenChange } = useDialog()
+  const { open, onOpenChange } = useDialog();
 
-  if (typeof document === "undefined") return null
+  if (typeof document === "undefined") return null;
 
   return createPortal(
     <AnimatePresence initial={false}>
@@ -56,7 +56,7 @@ export function DialogContent({
           <motion.div
             className={cn(
               "fixed inset-0 bg-foreground/50 dark:bg-black/70 backdrop-blur-[1px] z-0",
-              overlayClassName
+              overlayClassName,
             )}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -79,24 +79,62 @@ export function DialogContent({
         </motion.div>
       )}
     </AnimatePresence>,
-    document.body
-  )
+    document.body,
+  );
 }
 
-export function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex flex-col space-y-1.5 text-center sm:text-left", className)} {...props} />
+export function DialogHeader({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col space-y-1.5 text-center sm:text-left",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
-export function DialogTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn("text-lg font-semibold leading-none tracking-tight", className)} {...props} />
+export function DialogTitle({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLHeadingElement>) {
+  return (
+    <h3
+      className={cn(
+        "text-lg font-semibold leading-none tracking-tight",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
-export function DialogDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
-  return <p className={cn("text-sm text-muted-foreground", className)} {...props} />
+export function DialogDescription({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLParagraphElement>) {
+  return (
+    <p className={cn("text-sm text-muted-foreground", className)} {...props} />
+  );
 }
 
-export function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)} {...props} />
+export function DialogFooter({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        "mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
 export function DialogClose({
@@ -104,17 +142,17 @@ export function DialogClose({
   children,
   ...props
 }: React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  const { onOpenChange } = useDialog()
+  const { onOpenChange } = useDialog();
   return (
     <button
       type="button"
       className={className}
       onClick={(e) => {
-        props.onClick?.(e)
-        onOpenChange?.(false)
+        props.onClick?.(e);
+        onOpenChange?.(false);
       }}
     >
       {children}
     </button>
-  )
+  );
 }

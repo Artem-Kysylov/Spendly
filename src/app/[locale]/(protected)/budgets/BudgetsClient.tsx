@@ -1,109 +1,127 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useMemo } from 'react'
-import { supabase } from '@/lib/supabaseClient'
-import { UserAuth } from '@/context/AuthContext'
-import { Link } from '@/i18n/routing'
-import { useBudgets } from '@/hooks/useBudgets'
-import { motion } from 'motion/react'
-import { useTranslations } from 'next-intl'
-import useModal from '@/hooks/useModal'
-import NewBudget from '@/components/budgets/AddNewBudget'
-import NewBudgetModal from '@/components/modals/BudgetModal'
-import ToastMessage from '@/components/ui-elements/ToastMessage'
-import BudgetFolderItem from '@/components/budgets/BudgetFolderItem'
-import { ToastMessageProps, BudgetFolderItemProps } from '@/types/types'
-import { useSubscription } from '@/hooks/useSubscription'
-import UpgradeCornerPanel from '@/components/free/UpgradeCornerPanel'
-import useDeviceType from '@/hooks/useDeviceType'
-import { useTransactionsData } from '@/hooks/useTransactionsData'
-import BudgetComparisonChart from '@/components/budgets/BudgetComparisonChart'
-import { BarChart3 } from 'lucide-react'
-import { getPreviousMonthRange } from '@/lib/dateUtils'
-import { computeCarry } from '@/lib/budgetRollover'
+import { useState, useEffect, useMemo } from "react";
+import { supabase } from "@/lib/supabaseClient";
+import { UserAuth } from "@/context/AuthContext";
+import { Link } from "@/i18n/routing";
+import { useBudgets } from "@/hooks/useBudgets";
+import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
+import useModal from "@/hooks/useModal";
+import NewBudget from "@/components/budgets/AddNewBudget";
+import NewBudgetModal from "@/components/modals/BudgetModal";
+import ToastMessage from "@/components/ui-elements/ToastMessage";
+import BudgetFolderItem from "@/components/budgets/BudgetFolderItem";
+import { ToastMessageProps, BudgetFolderItemProps } from "@/types/types";
+import { useSubscription } from "@/hooks/useSubscription";
+import UpgradeCornerPanel from "@/components/free/UpgradeCornerPanel";
+import useDeviceType from "@/hooks/useDeviceType";
+import { useTransactionsData } from "@/hooks/useTransactionsData";
+import BudgetComparisonChart from "@/components/budgets/BudgetComparisonChart";
+import { BarChart3 } from "lucide-react";
+import { getPreviousMonthRange } from "@/lib/dateUtils";
+import { computeCarry } from "@/lib/budgetRollover";
 export default function BudgetsClient() {
-  const { session } = UserAuth()
-  const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(null)
-  const [budgetFolders, setBudgetFolders] = useState<BudgetFolderItemProps[]>([])
-  const { isModalOpen, openModal, closeModal } = useModal()
-  const tBudgets = useTranslations('budgets')
-  const tCommon = useTranslations('common')
-  const { subscriptionPlan } = useSubscription()
-  const [showUpgrade, setShowUpgrade] = useState(false)
+  const { session } = UserAuth();
+  const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(
+    null,
+  );
+  const [budgetFolders, setBudgetFolders] = useState<BudgetFolderItemProps[]>(
+    [],
+  );
+  const { isModalOpen, openModal, closeModal } = useModal();
+  const tBudgets = useTranslations("budgets");
+  const tCommon = useTranslations("common");
+  const { subscriptionPlan } = useSubscription();
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   // Тип устройства и состояние ховера для графика
-  const { isDesktop } = useDeviceType()
-  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false)
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
+  const { isDesktop } = useDeviceType();
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   // Транзакции для расчета потраченного по бюджетам
-  const { allTransactions, isLoading: isTransactionsLoading } = useTransactionsData({
-    period: 'Month',
-    dataType: 'Expenses',
-  })
+  const { allTransactions, isLoading: isTransactionsLoading } =
+    useTransactionsData({
+      period: "Month",
+      dataType: "Expenses",
+    });
 
   const spentByBudget = useMemo(() => {
-    const acc: Record<string, number> = {}
+    const acc: Record<string, number> = {};
     for (const t of allTransactions) {
-      if (t.type === 'expense' && t.budget_folder_id) {
-        acc[t.budget_folder_id] = (acc[t.budget_folder_id] || 0) + t.amount
+      if (t.type === "expense" && t.budget_folder_id) {
+        acc[t.budget_folder_id] = (acc[t.budget_folder_id] || 0) + t.amount;
       }
     }
-    return acc
-  }, [allTransactions])
+    return acc;
+  }, [allTransactions]);
 
   // Синхронизация папок бюджета с хуком
-  const { budgets, isLoading: isBudgetsLoading, refetch } = useBudgets()
+  const { budgets, isLoading: isBudgetsLoading, refetch } = useBudgets();
   useEffect(() => {
-    setBudgetFolders(budgets)
-  }, [budgets])
+    setBudgetFolders(budgets);
+  }, [budgets]);
 
   // Лимит для Free плана (например, 3 бюджета)
-  const isLimitReached = subscriptionPlan === 'free' && budgetFolders.length >= 3
+  const isLimitReached =
+    subscriptionPlan === "free" && budgetFolders.length >= 3;
 
   // Тосты
-  const handleToastMessage = (text: string, type: ToastMessageProps['type']) => {
-    setToastMessage({ text, type })
-    setTimeout(() => setToastMessage(null), 3000)
-  }
+  const handleToastMessage = (
+    text: string,
+    type: ToastMessageProps["type"],
+  ) => {
+    setToastMessage({ text, type });
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   // Ограничение показа апгрейд‑попапа
   const canShowUpgradePopup = () => {
     try {
-      const count = parseInt(window.localStorage.getItem('spendly:upgrade_popup_count') || '0', 10)
-      return count < 3
+      const count = parseInt(
+        window.localStorage.getItem("spendly:upgrade_popup_count") || "0",
+        10,
+      );
+      return count < 3;
     } catch {
-      return true
+      return true;
     }
-  }
+  };
 
   const markUpgradePopupShown = () => {
     try {
-      const count = parseInt(window.localStorage.getItem('spendly:upgrade_popup_count') || '0', 10)
-      window.localStorage.setItem('spendly:upgrade_popup_count', String(count + 1))
+      const count = parseInt(
+        window.localStorage.getItem("spendly:upgrade_popup_count") || "0",
+        10,
+      );
+      window.localStorage.setItem(
+        "spendly:upgrade_popup_count",
+        String(count + 1),
+      );
     } catch {
       // no-op
     }
-  }
+  };
 
   // Создание новой папки бюджета (используется в модалке)
   const handleBudgetSubmit = async (
     emoji: string,
     name: string,
     amount: number,
-    type: 'expense' | 'income',
+    type: "expense" | "income",
     color_code?: string | null,
     rolloverEnabled?: boolean,
-    rolloverMode?: 'positive-only' | 'allow-negative',
-    rolloverCap?: number | null
+    rolloverMode?: "positive-only" | "allow-negative",
+    rolloverCap?: number | null,
   ): Promise<void> => {
     if (!session?.user?.id) {
-      throw new Error('Not authenticated')
+      throw new Error("Not authenticated");
     }
     try {
       // первичная попытка — с колонками переноса
       const { error: insertErr } = await supabase
-        .from('budget_folders')
+        .from("budget_folders")
         .insert({
           user_id: session.user.id,
           emoji,
@@ -111,16 +129,20 @@ export default function BudgetsClient() {
           amount,
           type,
           color_code: color_code ?? null,
-          rollover_enabled: type === 'expense' ? !!rolloverEnabled : false,
-          rollover_mode: type === 'expense' ? (rolloverMode ?? 'positive-only') : null,
-          rollover_cap: type === 'expense' ? (rolloverCap ?? null) : null,
+          rollover_enabled: type === "expense" ? !!rolloverEnabled : false,
+          rollover_mode:
+            type === "expense" ? (rolloverMode ?? "positive-only") : null,
+          rollover_cap: type === "expense" ? (rolloverCap ?? null) : null,
         })
-        .select()
+        .select();
       if (insertErr) {
         // если колонок нет — повторяем без них
-        console.warn('Insert with rollover fields failed, retrying without:', insertErr?.message)
+        console.warn(
+          "Insert with rollover fields failed, retrying without:",
+          insertErr?.message,
+        );
         const { error: fallbackErr } = await supabase
-          .from('budget_folders')
+          .from("budget_folders")
           .insert({
             user_id: session.user.id,
             emoji,
@@ -129,18 +151,18 @@ export default function BudgetsClient() {
             type,
             color_code: color_code ?? null,
           })
-          .select()
-        if (fallbackErr) throw fallbackErr
+          .select();
+        if (fallbackErr) throw fallbackErr;
       }
 
-      handleToastMessage(tBudgets('list.toast.createSuccess'), 'success')
-      await refetch()
+      handleToastMessage(tBudgets("list.toast.createSuccess"), "success");
+      await refetch();
     } catch (err) {
-      console.error('Error creating budget folder:', err)
-      handleToastMessage(tCommon('unexpectedError'), 'error')
-      throw err
+      console.error("Error creating budget folder:", err);
+      handleToastMessage(tCommon("unexpectedError"), "error");
+      throw err;
     }
-  }
+  };
 
   // Данные для сравнительного графика
   const chartData = useMemo(() => {
@@ -148,77 +170,85 @@ export default function BudgetsClient() {
       category: folder.emoji ? `${folder.emoji} ${folder.name}` : folder.name,
       amount: spentByBudget[folder.id] || 0,
       // цвет бара = цвет бюджета, иначе primary
-      fill: folder.color_code ? `#${folder.color_code}` : 'hsl(var(--primary))',
+      fill: folder.color_code ? `#${folder.color_code}` : "hsl(var(--primary))",
       emoji: folder.emoji,
-    }))
-  }, [budgetFolders, spentByBudget])
+    }));
+  }, [budgetFolders, spentByBudget]);
 
-  const [prevSpentByBudget, setPrevSpentByBudget] = useState<Record<string, number>>({})
-  const [rolloverPreviewById, setRolloverPreviewById] = useState<Record<string, number>>({})
+  const [prevSpentByBudget, setPrevSpentByBudget] = useState<
+    Record<string, number>
+  >({});
+  const [rolloverPreviewById, setRolloverPreviewById] = useState<
+    Record<string, number>
+  >({});
 
   useEffect(() => {
     const fetchPrevMonthSpent = async () => {
-      if (!session?.user?.id) return
-      const { start, end } = getPreviousMonthRange()
+      if (!session?.user?.id) return;
+      const { start, end } = getPreviousMonthRange();
       const { data, error } = await supabase
-        .from('transactions')
-        .select('amount, type, budget_folder_id, created_at')
-        .eq('user_id', session.user.id)
-        .gte('created_at', start.toISOString())
-        .lte('created_at', end.toISOString())
+        .from("transactions")
+        .select("amount, type, budget_folder_id, created_at")
+        .eq("user_id", session.user.id)
+        .gte("created_at", start.toISOString())
+        .lte("created_at", end.toISOString());
       if (error) {
-        console.error('Error fetching previous month transactions:', error)
-        return
+        console.error("Error fetching previous month transactions:", error);
+        return;
       }
-      const acc: Record<string, number> = {}
+      const acc: Record<string, number> = {};
       for (const t of data || []) {
-        if (t.type === 'expense' && t.budget_folder_id) {
-          acc[t.budget_folder_id] = (acc[t.budget_folder_id] || 0) + t.amount
+        if (t.type === "expense" && t.budget_folder_id) {
+          acc[t.budget_folder_id] = (acc[t.budget_folder_id] || 0) + t.amount;
         }
       }
-      setPrevSpentByBudget(acc)
-    }
-    fetchPrevMonthSpent()
-  }, [session?.user?.id])
+      setPrevSpentByBudget(acc);
+    };
+    fetchPrevMonthSpent();
+  }, [session?.user?.id]);
 
   useEffect(() => {
-    const next: Record<string, number> = {}
+    const next: Record<string, number> = {};
     for (const folder of budgetFolders) {
-      if (folder.type === 'expense') {
-        const prev = prevSpentByBudget[folder.id] || 0
-        const mode = (folder as any).rollover_mode ?? 'positive-only'
-        const cap = (folder as any).rollover_cap ?? null
-        const enabled = (folder as any).rollover_enabled ?? true
-        next[folder.id] = enabled ? computeCarry(folder.amount, prev, mode, cap) : 0
+      if (folder.type === "expense") {
+        const prev = prevSpentByBudget[folder.id] || 0;
+        const mode = (folder as any).rollover_mode ?? "positive-only";
+        const cap = (folder as any).rollover_cap ?? null;
+        const enabled = (folder as any).rollover_enabled ?? true;
+        next[folder.id] = enabled
+          ? computeCarry(folder.amount, prev, mode, cap)
+          : 0;
       }
     }
-    setRolloverPreviewById(next)
-  }, [budgetFolders, prevSpentByBudget])
+    setRolloverPreviewById(next);
+  }, [budgetFolders, prevSpentByBudget]);
 
   const rolloverTotals = useMemo(() => {
-    let positive = 0
-    let negative = 0
+    let positive = 0;
+    let negative = 0;
     for (const folder of budgetFolders) {
-      const carry = rolloverPreviewById[folder.id]
-      if (typeof carry !== 'number') continue
-      if (carry >= 0) positive += carry
-      else negative += -carry
+      const carry = rolloverPreviewById[folder.id];
+      if (typeof carry !== "number") continue;
+      if (carry >= 0) positive += carry;
+      else negative += -carry;
     }
-    return { positive, negative }
-  }, [budgetFolders, rolloverPreviewById])
+    return { positive, negative };
+  }, [budgetFolders, rolloverPreviewById]);
 
   return (
-    <div className='mt-[30px] px-4 md:px-5 pb-20'>
-      {toastMessage && <ToastMessage text={toastMessage.text} type={toastMessage.type} />}
+    <div className="mt-[30px] px-4 md:px-5 pb-20">
+      {toastMessage && (
+        <ToastMessage text={toastMessage.text} type={toastMessage.type} />
+      )}
       {showUpgrade && <UpgradeCornerPanel />}
 
       {/* Аналитика: мобильная — скрываема; десктоп — всегда видна */}
       <motion.div
-        style={{ willChange: 'opacity' }}
+        style={{ willChange: "opacity" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.28 }}
-        className='mb-6'
+        className="mb-6"
       >
         {isDesktop ? (
           <BudgetComparisonChart
@@ -235,15 +265,15 @@ export default function BudgetsClient() {
             >
               <span className="text-sm font-medium flex items-center gap-2 text-foreground">
                 <BarChart3 className="w-4 h-4 text-foreground" aria-hidden />
-                {isAnalyticsOpen ? 'Hide Analytics' : 'Show Analytics'}
+                {isAnalyticsOpen ? "Hide Analytics" : "Show Analytics"}
               </span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="currentColor"
-                className={`h-5 w-5 text-muted-foreground transition-transform ${isAnalyticsOpen ? 'rotate-180' : 'rotate-0'}`}
+                className={`h-5 w-5 text-muted-foreground transition-transform ${isAnalyticsOpen ? "rotate-180" : "rotate-0"}`}
               >
-                <path d="M12 15.5a1 1 0 0 1-.71-.29l-5.5-5.5a1 1 0 1 1 1.42-1.42L12 12.38l4.79-4.79a1 1 0 0 1 1.42 1.42l-5.5 5.5a1 1 0 0 1-.71.29z"/>
+                <path d="M12 15.5a1 1 0 0 1-.71-.29l-5.5-5.5a1 1 0 1 1 1.42-1.42L12 12.38l4.79-4.79a1 1 0 0 1 1.42 1.42l-5.5 5.5a1 1 0 0 1-.71.29z" />
               </svg>
             </button>
             {isAnalyticsOpen && (
@@ -265,20 +295,23 @@ export default function BudgetsClient() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          style={{ willChange: 'opacity, transform' }}
-          className='w-full mb-5'
+          style={{ willChange: "opacity, transform" }}
+          className="w-full mb-5"
         >
           <NewBudget
             onClick={() => {
               if (isLimitReached) {
-                handleToastMessage(tBudgets('list.toast.limitReached'), 'error')
+                handleToastMessage(
+                  tBudgets("list.toast.limitReached"),
+                  "error",
+                );
                 if (canShowUpgradePopup()) {
-                  setShowUpgrade(true)
-                  markUpgradePopupShown()
+                  setShowUpgrade(true);
+                  markUpgradePopupShown();
                 }
-                return
+                return;
               }
-              openModal()
+              openModal();
             }}
             disabled={isLimitReached}
           />
@@ -287,16 +320,16 @@ export default function BudgetsClient() {
 
       {/* Карточки бюджетов: на десктопе 4 в ряд, первой идёт кнопка создания */}
       <motion.div
-        style={{ willChange: 'opacity' }}
+        style={{ willChange: "opacity" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.28 }}
-        className='grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-6'
+        className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-6"
       >
         {isDesktop && (
           <motion.div
-            style={{ willChange: 'opacity, transform' }}
-            className='w-full cursor-pointer'
+            style={{ willChange: "opacity, transform" }}
+            className="w-full cursor-pointer"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
@@ -304,14 +337,17 @@ export default function BudgetsClient() {
             <NewBudget
               onClick={() => {
                 if (isLimitReached) {
-                  handleToastMessage(tBudgets('list.toast.limitReached'), 'error')
+                  handleToastMessage(
+                    tBudgets("list.toast.limitReached"),
+                    "error",
+                  );
                   if (canShowUpgradePopup()) {
-                    setShowUpgrade(true)
-                    markUpgradePopupShown()
+                    setShowUpgrade(true);
+                    markUpgradePopupShown();
                   }
-                  return
+                  return;
                 }
-                openModal()
+                openModal();
               }}
               disabled={isLimitReached}
             />
@@ -319,13 +355,15 @@ export default function BudgetsClient() {
         )}
 
         {budgetFolders.map((folder, index) => (
-          <motion.div 
-            key={folder.id} 
-            style={{ willChange: 'opacity, transform' }} 
-            className={`w-full cursor-pointer ${hoveredIndex === index ? 'ring-2 ring-primary/80 bg-primary/5 scale-[1.01] transition' : ''}`}
+          <motion.div
+            key={folder.id}
+            style={{ willChange: "opacity, transform" }}
+            className={`w-full cursor-pointer ${hoveredIndex === index ? "ring-2 ring-primary/80 bg-primary/5 scale-[1.01] transition" : ""}`}
           >
             {/* типизированный маршрут для next-intl */}
-            <Link href={{ pathname: '/budgets/[id]', params: { id: folder.id } }}>
+            <Link
+              href={{ pathname: "/budgets/[id]", params: { id: folder.id } }}
+            >
               <BudgetFolderItem
                 id={folder.id}
                 emoji={folder.emoji}
@@ -343,12 +381,12 @@ export default function BudgetsClient() {
       {/* Модалка создания */}
       {isModalOpen && (
         <NewBudgetModal
-          title={tBudgets('list.modal.createTitle')}
+          title={tBudgets("list.modal.createTitle")}
           onClose={closeModal}
           onSubmit={handleBudgetSubmit}
           handleToastMessage={handleToastMessage}
         />
       )}
     </div>
-  )
+  );
 }

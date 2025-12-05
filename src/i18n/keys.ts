@@ -1,124 +1,307 @@
 export type TranslationNamespace =
-  | 'common' | 'layout' | 'BudgetSetup'
-  | 'assistant' | 'charts' | 'filters'
-  | 'transactions' | 'dashboard' | 'budgets'
-  | 'auth' | 'forgotPassword' | 'resetPassword'
-  | 'modals' | 'setup' | 'notifications'
-  | 'errors' | 'profile' | 'payment' | 'userSettings'
-  | 'meta' | 'pages'
+  | "common"
+  | "layout"
+  | "BudgetSetup"
+  | "assistant"
+  | "charts"
+  | "filters"
+  | "transactions"
+  | "dashboard"
+  | "budgets"
+  | "auth"
+  | "forgotPassword"
+  | "resetPassword"
+  | "modals"
+  | "setup"
+  | "notifications"
+  | "errors"
+  | "profile"
+  | "payment"
+  | "userSettings"
+  | "meta"
+  | "pages";
 
 export type TranslationKeys =
-  | 'common' | 'layout' | 'BudgetSetup'
-  | 'assistant' | 'charts' | 'filters'
-  | 'transactions' | 'dashboard' | 'budgets'
-  | 'auth' | 'forgotPassword' | 'resetPassword'
-  | 'modals' | 'setup' | 'notifications'
-  | 'errors' | 'profile' | 'payment' | 'userSettings'
-  | 'meta' | 'pages'
+  | "common"
+  | "layout"
+  | "BudgetSetup"
+  | "assistant"
+  | "charts"
+  | "filters"
+  | "transactions"
+  | "dashboard"
+  | "budgets"
+  | "auth"
+  | "forgotPassword"
+  | "resetPassword"
+  | "modals"
+  | "setup"
+  | "notifications"
+  | "errors"
+  | "profile"
+  | "payment"
+  | "userSettings"
+  | "meta"
+  | "pages";
 
 export type NamespaceKeys = {
-  common: 'saving' | 'unexpectedError' | 'errorLabel' | 'cancel' | 'save' | 'submit' | 'close' | 'pagination.previous' | 'pagination.next'
-  BudgetSetup: 'title' | 'selectCountry' | 'selectCurrency' | 'customAmount' | 'save' | 'autodetected' | 'searchCountry' | 'searchCurrency' | 'clearSelection'
-  assistant: 'title' | 'rateLimited' | 'welcomeTitle' | 'welcomeDesc' | 'confirm.title'
-    | 'confirm.fields.title' | 'confirm.fields.budget' | 'confirm.fields.amount'
-    | 'actions.accept' | 'actions.decline' | 'actions.abort' | 'actions.send'
-    | 'buttons.close' | 'buttons.ask' | 'input.placeholder'
-    | 'tone.label' | 'tone.select_label'
-    | 'tone.options.neutral' | 'tone.options.friendly' | 'tone.options.formal' | 'tone.options.playful'
-    | 'presets.header' | 'presets.showWeek' | 'presets.saveMoney' | 'presets.analyzePatterns'
-    | 'presets.createBudgetPlan' | 'presets.showBiggest' | 'presets.compareMonths'
-    | 'insights.title' | 'insights.beta'
-    | 'toasts.usedNOfDailyLimit' | 'toasts.limitReached'
-  charts: 'titles.analytics' | 'titles.comparisonBar' | 'bar.titleByCategory' | 'line.titleOverTime'
-    | 'states.loading' | 'states.loadingData' | 'states.noData' | 'states.noExpensesData'
-    | 'labels.expenses' | 'labels.income' | 'labels.for'
-    | 'transactionsBar.title'
-    | 'ai.thinking' | 'ai.tips' | 'ai.stop' | 'ai.getInsight' | 'ai.placeholder' | 'ai.wait' | 'ai.rateLimited' | 'ai.noData'
-    | 'comparison.vsLastMonth'
-    | 'comparison.labels.current' | 'comparison.labels.previous'
-    | 'comparison.defaultTitle' | 'comparison.defaultDescription'
-    | 'comparison.titles.weekly' | 'comparison.titles.monthly'
-    | 'comparison.descriptions.weekly.expenses' | 'comparison.descriptions.weekly.income'
-    | 'comparison.descriptions.monthly.expenses' | 'comparison.descriptions.monthly.income'
+  common:
+    | "saving"
+    | "unexpectedError"
+    | "errorLabel"
+    | "cancel"
+    | "save"
+    | "submit"
+    | "close"
+    | "pagination.previous"
+    | "pagination.next";
+  BudgetSetup:
+    | "title"
+    | "selectCountry"
+    | "selectCurrency"
+    | "customAmount"
+    | "save"
+    | "autodetected"
+    | "searchCountry"
+    | "searchCurrency"
+    | "clearSelection";
+  assistant:
+    | "title"
+    | "rateLimited"
+    | "welcomeTitle"
+    | "welcomeDesc"
+    | "confirm.title"
+    | "confirm.fields.title"
+    | "confirm.fields.budget"
+    | "confirm.fields.amount"
+    | "actions.accept"
+    | "actions.decline"
+    | "actions.abort"
+    | "actions.send"
+    | "buttons.close"
+    | "buttons.ask"
+    | "input.placeholder"
+    | "tone.label"
+    | "tone.select_label"
+    | "tone.options.neutral"
+    | "tone.options.friendly"
+    | "tone.options.formal"
+    | "tone.options.playful"
+    | "presets.header"
+    | "presets.showWeek"
+    | "presets.saveMoney"
+    | "presets.analyzePatterns"
+    | "presets.createBudgetPlan"
+    | "presets.showBiggest"
+    | "presets.compareMonths"
+    | "insights.title"
+    | "insights.beta"
+    | "toasts.usedNOfDailyLimit"
+    | "toasts.limitReached";
+  charts:
+    | "titles.analytics"
+    | "titles.comparisonBar"
+    | "bar.titleByCategory"
+    | "line.titleOverTime"
+    | "states.loading"
+    | "states.loadingData"
+    | "states.noData"
+    | "states.noExpensesData"
+    | "labels.expenses"
+    | "labels.income"
+    | "labels.for"
+    | "transactionsBar.title"
+    | "ai.thinking"
+    | "ai.tips"
+    | "ai.stop"
+    | "ai.getInsight"
+    | "ai.placeholder"
+    | "ai.wait"
+    | "ai.rateLimited"
+    | "ai.noData"
+    | "comparison.vsLastMonth"
+    | "comparison.labels.current"
+    | "comparison.labels.previous"
+    | "comparison.defaultTitle"
+    | "comparison.defaultDescription"
+    | "comparison.titles.weekly"
+    | "comparison.titles.monthly"
+    | "comparison.descriptions.weekly.expenses"
+    | "comparison.descriptions.weekly.income"
+    | "comparison.descriptions.monthly.expenses"
+    | "comparison.descriptions.monthly.income";
   transactions:
-    | 'title' | 'addTransaction'
-    | 'empty.title' | 'empty.description' | 'empty.filtered'
-    | 'modal.addTitle'
-    | 'toast.deleteFailed' | 'toast.deleteSuccess' | 'toast.updateFailed' | 'toast.updateSuccess'
-    | 'table.headers.title' | 'table.headers.budget' | 'table.headers.amount' | 'table.headers.type' | 'table.headers.date' | 'table.headers.actions'
-    | 'table.unbudgeted' | 'table.empty.default'
-    | 'table.modal.deleteTitle' | 'table.modal.deletePrompt' | 'table.modal.editTitle'
+    | "title"
+    | "addTransaction"
+    | "empty.title"
+    | "empty.description"
+    | "empty.filtered"
+    | "modal.addTitle"
+    | "toast.deleteFailed"
+    | "toast.deleteSuccess"
+    | "toast.updateFailed"
+    | "toast.updateSuccess"
+    | "table.headers.title"
+    | "table.headers.budget"
+    | "table.headers.amount"
+    | "table.headers.type"
+    | "table.headers.date"
+    | "table.headers.actions"
+    | "table.unbudgeted"
+    | "table.empty.default"
+    | "table.modal.deleteTitle"
+    | "table.modal.deletePrompt"
+    | "table.modal.editTitle";
   dashboard:
-    | 'welcome'
-    | 'deleteModal.title' | 'deleteModal.prompt'
-    | 'mainBudget.editTitle'
-    | 'counters.totalBudget' | 'counters.totalExpenses' | 'counters.totalIncome'
-    | 'counters.remaining' | 'counters.usedPercent'
-    | 'counters.overBudget'
-    | 'counters.status.exceeded' | 'counters.status.warning' | 'counters.status.notSet'
-    | 'counters.ofBudget'
-    | 'counters.coversExpenses'
-  modals: 'appInstall.title' | 'budget.pickEmojiOptional' | 'budget.placeholder.name' | 'budget.placeholder.amountUSD'
-    | 'budget.type.expense' | 'budget.type.income' | 'budget.toast.saveFailed'
-    | 'budget.pickColor' | 'budget.color.none'
-    | 'mainBudget.placeholder.amountUSD'
-    | 'transaction.placeholder.title' | 'transaction.placeholder.amountUSD'
-    | 'transaction.date.label' | 'transaction.date.placeholder'
-    | 'transaction.select.label' | 'transaction.select.unbudgeted'
-    | 'transaction.search.placeholder' | 'transaction.loadingBudgets' | 'transaction.noResults'
-    | 'transaction.type.expense' | 'transaction.type.income'
-    | 'editProfile.title' | 'editProfile.toast.updateSuccess' | 'editProfile.toast.updateFailed'
+    | "welcome"
+    | "deleteModal.title"
+    | "deleteModal.prompt"
+    | "mainBudget.editTitle"
+    | "counters.totalBudget"
+    | "counters.totalExpenses"
+    | "counters.totalIncome"
+    | "counters.remaining"
+    | "counters.usedPercent"
+    | "counters.overBudget"
+    | "counters.status.exceeded"
+    | "counters.status.warning"
+    | "counters.status.notSet"
+    | "counters.ofBudget"
+    | "counters.coversExpenses";
+  modals:
+    | "appInstall.title"
+    | "budget.pickEmojiOptional"
+    | "budget.placeholder.name"
+    | "budget.placeholder.amountUSD"
+    | "budget.type.expense"
+    | "budget.type.income"
+    | "budget.toast.saveFailed"
+    | "budget.pickColor"
+    | "budget.color.none"
+    | "mainBudget.placeholder.amountUSD"
+    | "transaction.placeholder.title"
+    | "transaction.placeholder.amountUSD"
+    | "transaction.date.label"
+    | "transaction.date.placeholder"
+    | "transaction.select.label"
+    | "transaction.select.unbudgeted"
+    | "transaction.search.placeholder"
+    | "transaction.loadingBudgets"
+    | "transaction.noResults"
+    | "transaction.type.expense"
+    | "transaction.type.income"
+    | "editProfile.title"
+    | "editProfile.toast.updateSuccess"
+    | "editProfile.toast.updateFailed";
   notifications:
-    | 'bell.aria' | 'bell.title' | 'bell.markAllRead' | 'bell.viewAll'
-    | 'bell.setup.title' | 'bell.setup.subtitle'
-    | 'bell.empty.title' | 'bell.empty.description'
-    | 'settings.push.title' | 'settings.push.description'
-    | 'frequency.title' | 'frequency.aria'
-    | 'frequency.disabled.label' | 'frequency.disabled.description'
-    | 'frequency.gentle.label' | 'frequency.gentle.description'
-    | 'frequency.aggressive.label' | 'frequency.aggressive.description'
-    | 'frequency.relentless.label' | 'frequency.relentless.description'
-    | 'toasts.preferencesSaved' | 'toasts.preferencesSaveFailed'
-    | 'toasts.pushEnabled' | 'toasts.pushDisabled' | 'toasts.pushStatusFailed'
-    | 'authRequired.title' | 'authRequired.description' | 'authRequired.signIn'
-    | 'a11y.togglePush'
-  errors: 'selectImageFile' | 'fileTooLarge5mb' | 'uploadAvatarFailed' | 'removeAvatarFailed'
-    | 'auth.invalidAuthHeader' | 'auth.notAuthenticated'
-    | 'common.internalServerError'
-    | 'notifications.titleRequired' | 'notifications.invalidAction'
-    | 'notifications.fetchFailed' | 'notifications.createFailed' | 'notifications.updateFailed'
-    | 'notifications.queueAddFailed' | 'notifications.queueFetchFailed'
-    | 'notifications.subscriptionInvalid' | 'notifications.subscriptionSaveFailed'
-    | 'notifications.deactivateFailed'
-  profile: 'avatar.upload' | 'avatar.change' | 'avatar.cancel' | 'avatar.alt'
-  meta: 'app.title' | 'app.description' | 'app.keywords'
+    | "bell.aria"
+    | "bell.title"
+    | "bell.markAllRead"
+    | "bell.viewAll"
+    | "bell.setup.title"
+    | "bell.setup.subtitle"
+    | "bell.empty.title"
+    | "bell.empty.description"
+    | "settings.push.title"
+    | "settings.push.description"
+    | "frequency.title"
+    | "frequency.aria"
+    | "frequency.disabled.label"
+    | "frequency.disabled.description"
+    | "frequency.gentle.label"
+    | "frequency.gentle.description"
+    | "frequency.aggressive.label"
+    | "frequency.aggressive.description"
+    | "frequency.relentless.label"
+    | "frequency.relentless.description"
+    | "toasts.preferencesSaved"
+    | "toasts.preferencesSaveFailed"
+    | "toasts.pushEnabled"
+    | "toasts.pushDisabled"
+    | "toasts.pushStatusFailed"
+    | "authRequired.title"
+    | "authRequired.description"
+    | "authRequired.signIn"
+    | "a11y.togglePush";
+  errors:
+    | "selectImageFile"
+    | "fileTooLarge5mb"
+    | "uploadAvatarFailed"
+    | "removeAvatarFailed"
+    | "auth.invalidAuthHeader"
+    | "auth.notAuthenticated"
+    | "common.internalServerError"
+    | "notifications.titleRequired"
+    | "notifications.invalidAction"
+    | "notifications.fetchFailed"
+    | "notifications.createFailed"
+    | "notifications.updateFailed"
+    | "notifications.queueAddFailed"
+    | "notifications.queueFetchFailed"
+    | "notifications.subscriptionInvalid"
+    | "notifications.subscriptionSaveFailed"
+    | "notifications.deactivateFailed";
+  profile: "avatar.upload" | "avatar.change" | "avatar.cancel" | "avatar.alt";
+  meta: "app.title" | "app.description" | "app.keywords";
   pages:
-    | 'auth.home.meta.title' | 'auth.home.meta.description'
-    | 'auth.forgotPassword.meta.title' | 'auth.forgotPassword.meta.description'
-    | 'auth.resetPassword.meta.title' | 'auth.resetPassword.meta.description'
-    | 'dashboard.meta.title' | 'dashboard.meta.description'
-    | 'transactions.meta.title' | 'transactions.meta.description'
-    | 'budgets.meta.title' | 'budgets.meta.description'
-    | 'budgetDetails.meta.title' | 'budgetDetails.meta.description'
-    | 'budgetDetails.meta.titleWithName' | 'budgetDetails.meta.descriptionWithName'
-    | 'addBudget.meta.title' | 'addBudget.meta.description'
-    | 'userSettings.meta.title' | 'userSettings.meta.description'
-    | 'payment.meta.title' | 'payment.meta.description'
-    | 'onboarding.meta.title' | 'onboarding.meta.description'
-    | 'setup.budget.meta.title' | 'setup.budget.meta.description'
-    | 'test.meta.title' | 'test.meta.description'
-    | 'notFound.meta.title' | 'notFound.meta.description'
+    | "auth.home.meta.title"
+    | "auth.home.meta.description"
+    | "auth.forgotPassword.meta.title"
+    | "auth.forgotPassword.meta.description"
+    | "auth.resetPassword.meta.title"
+    | "auth.resetPassword.meta.description"
+    | "dashboard.meta.title"
+    | "dashboard.meta.description"
+    | "transactions.meta.title"
+    | "transactions.meta.description"
+    | "budgets.meta.title"
+    | "budgets.meta.description"
+    | "budgetDetails.meta.title"
+    | "budgetDetails.meta.description"
+    | "budgetDetails.meta.titleWithName"
+    | "budgetDetails.meta.descriptionWithName"
+    | "addBudget.meta.title"
+    | "addBudget.meta.description"
+    | "userSettings.meta.title"
+    | "userSettings.meta.description"
+    | "payment.meta.title"
+    | "payment.meta.description"
+    | "onboarding.meta.title"
+    | "onboarding.meta.description"
+    | "setup.budget.meta.title"
+    | "setup.budget.meta.description"
+    | "test.meta.title"
+    | "test.meta.description"
+    | "notFound.meta.title"
+    | "notFound.meta.description";
   budgets:
-    | 'list.modal.createTitle' | 'list.card.createNew'
-    | 'list.toast.failedLoad' | 'list.toast.failedCreate' | 'list.toast.createSuccess' | 'list.toast.limitReached'
-    | 'labels.spent' | 'labels.left'
-    | 'details.controls.goToBudgets' | 'details.controls.editBudget' | 'details.controls.deleteBudget'
-    | 'details.deleteModal.title' | 'details.deleteModal.text' | 'details.editModal.title'
-    | 'details.toast.failedDetermineType' | 'details.toast.typeMissing'
-    | 'details.toast.addFailed' | 'details.toast.addSuccess'
-    | 'details.toast.deleteFailed' | 'details.toast.deleteSuccess'
-    | 'details.toast.updateFailed' | 'details.toast.updateSuccess'
-    | 'weekly.title' | 'weekly.body'
-    | 'push_subscribed' | 'push_failed' | 'permission_denied'
-    | 'budget_80' | 'budget_100'
-}
+    | "list.modal.createTitle"
+    | "list.card.createNew"
+    | "list.toast.failedLoad"
+    | "list.toast.failedCreate"
+    | "list.toast.createSuccess"
+    | "list.toast.limitReached"
+    | "labels.spent"
+    | "labels.left"
+    | "details.controls.goToBudgets"
+    | "details.controls.editBudget"
+    | "details.controls.deleteBudget"
+    | "details.deleteModal.title"
+    | "details.deleteModal.text"
+    | "details.editModal.title"
+    | "details.toast.failedDetermineType"
+    | "details.toast.typeMissing"
+    | "details.toast.addFailed"
+    | "details.toast.addSuccess"
+    | "details.toast.deleteFailed"
+    | "details.toast.deleteSuccess"
+    | "details.toast.updateFailed"
+    | "details.toast.updateSuccess"
+    | "weekly.title"
+    | "weekly.body"
+    | "push_subscribed"
+    | "push_failed"
+    | "permission_denied"
+    | "budget_80"
+    | "budget_100";
+};

@@ -475,17 +475,17 @@
     }
   },
   "budgets": {
-        "rollover": {
-            "panelTitle": "ロールオーバー",
-            "toggleLabel": "ロールオーバーを有効にする",
-            "modeLabel": "モード",
-            "positiveOnly": "正のみ",
-            "allowNegative": "負を許可"
-        },
-        "meta": {
-            "title": "予算",
-            "description": "予算を作成および管理します。"
-        },
+    "rollover": {
+      "panelTitle": "ロールオーバー",
+      "toggleLabel": "ロールオーバーを有効にする",
+      "modeLabel": "モード",
+      "positiveOnly": "正のみ",
+      "allowNegative": "負を許可"
+    },
+    "meta": {
+      "title": "予算",
+      "description": "予算を作成および管理します。"
+    },
     "list": {
       "modal": {
         "createTitle": "新しい予算を作成💸"
