@@ -4,6 +4,7 @@ import React from 'react'
 import { BarChart } from '@/components/charts/BarChart'
 import { useTranslations } from 'next-intl'
 import type { BarChartData } from '@/types/types'
+import useDeviceType from '@/hooks/useDeviceType'
 
 type Props = {
   data: BarChartData[]
@@ -27,6 +28,11 @@ export default function BudgetComparisonChart({
   onBarLeave,
 }: Props) {
   const tCharts = useTranslations('charts')
+  const { isMobile } = useDeviceType()
+  const orientation = isMobile ? 'horizontal' : 'vertical'
+  const chartHeight = isMobile
+    ? Math.max(280, Math.min(600, data.length * 40))  // как было для горизонтального
+    : 360  // фиксированная высота для вертикального десктопа
 
   return (
     <BarChart
@@ -35,14 +41,14 @@ export default function BudgetComparisonChart({
       description={description}
       showGrid
       showTooltip
-      height={Math.max(280, Math.min(600, data.length * 40))}
+      height={chartHeight}
       currency={currency}
       isLoading={isLoading}
       error={error}
       className={className}
       onBarHover={onBarHover}
       onBarLeave={onBarLeave}
-      orientation="horizontal"  // горизонтальный график для страницы бюджетов
+      orientation={orientation}
     />
   )
 }

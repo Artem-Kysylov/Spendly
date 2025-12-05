@@ -217,13 +217,9 @@ const BudgetModal = ({
                     <span className="text-sm text-muted-foreground">{tRollover('modeLabel')}</span>
                     <select
                       value={rolloverMode}
-                      onChange={(e) =>
-                        setRolloverMode(e.target.value as 'positive-only' | 'allow-negative')
-                      }
-                      className="bg-background text-foreground h-[60px] px-[20px]"
-                      disabled={!rolloverEnabled}
+                      onChange={(e) => setRolloverMode(e.target.value as 'positive-only' | 'allow-negative')}
+                      className="bg-background text-foreground h-10 px-3 border border-input rounded-md appearance-none"
                     >
-                      {/* варианты значений */}
                       <option value="positive-only">{tRollover('positiveOnly')}</option>
                       <option value="allow-negative">{tRollover('allowNegative')}</option>
                     </select>
@@ -512,6 +508,8 @@ const BudgetModal = ({
                   <select
                     value={rolloverMode}
                     onChange={(e) => setRolloverMode(e.target.value as 'positive-only' | 'allow-negative')}
+                    className="bg-background text-foreground h-[60px] px-[20px] border border-input rounded-md"
+                    disabled={!rolloverEnabled}
                   >
                     <option value="positive-only">{tRollover('positiveOnly')}</option>
                     <option value="allow-negative">{tRollover('allowNegative')}</option>

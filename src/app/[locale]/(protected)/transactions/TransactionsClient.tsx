@@ -347,17 +347,6 @@ export default function TransactionsClient() {
         )}
       </div>
 
-      {/* FAB for Mobile */}
-      <div className="fixed bottom-6 right-6 md:hidden z-50">
-        <Button
-          variant="default"
-          onClick={handleAddClick}
-          className="h-14 w-14 rounded-full shadow-lg p-0 flex items-center justify-center"
-        >
-          <Plus size={24} className="text-white" />
-        </Button>
-      </div>
-
       {isModalOpen && (
         <TransactionModal
           title={editingTransaction ? t('modal.editTitle') : t('modal.addTitle')}
