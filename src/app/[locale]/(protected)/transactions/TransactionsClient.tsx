@@ -21,6 +21,10 @@ import {
 import { useTransactionsData } from "@/hooks/useTransactionsData";
 import { UserAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
+import {
+  generateSpendingInsights,
+  type SpendingInsights,
+} from "@/app/[locale]/actions/get-insights";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,6 +84,13 @@ export default function TransactionsClient() {
   // UI State
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isAiSheetOpen, setIsAiSheetOpen] = useState(false);
+
+  // AI Insights State
+  const [insightsData, setInsightsData] = useState<SpendingInsights | null>(
+    null,
+  );
+  const [isInsightsLoading, setIsInsightsLoading] = useState(false);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
 
   // Intersection Observer
   const observerTarget = useRef<HTMLDivElement | null>(null);
@@ -161,6 +172,35 @@ export default function TransactionsClient() {
   const handleAddClick = () => {
     setEditingTransaction(null);
     openModal();
+  };
+
+  const handleAiSheetOpen = async () => {
+    if (!session?.user?.id) return;
+
+    setIsAiSheetOpen(true);
+    setIsInsightsLoading(true);
+    setInsightsError(null);
+
+    try {
+      const endDate = new Date();
+      const startDate = new Date();
+      startDate.setDate(endDate.getDate() - 30); // Last 30 days
+
+      const data = await generateSpendingInsights({
+        userId: session.user.id,
+        startDate,
+        endDate,
+      });
+
+      setInsightsData(data);
+    } catch (error) {
+      console.error("Failed to fetch AI insights:", error);
+      setInsightsError(
+        "Failed to generate insights. Please try again later.",
+      );
+    } finally {
+      setIsInsightsLoading(false);
+    }
   };
 
   // Десктоп: открыто, Мобайл: закрыто
@@ -248,7 +288,10 @@ export default function TransactionsClient() {
                   size="sm"
                   className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1.5"
                   aria-label="AI Insights"
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAiSheetOpen();
+                  }}
                 >
                   <Sparkles size={14} />
                   <span className="text-xs font-medium">AI Insight</span>
@@ -264,29 +307,91 @@ export default function TransactionsClient() {
                     AI Spending Insights
                   </SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 space-y-4">
-                  <div className="p-4 bg-muted/50 rounded-lg text-sm leading-relaxed text-foreground">
-                    <p className="mb-2 font-medium">
-                      Here's a breakdown of your spending habits:
-                    </p>
-                    <ul className="list-disc pl-4 space-y-2 text-muted-foreground">
-                      <li>
-                        Your spending is <strong>12% lower</strong> than last
-                        week. Great job! 📉
-                      </li>
-                      <li>
-                        Top category: <strong>Food & Dining</strong> ($145.20).
-                        Maybe cook at home more? 🍔
-                      </li>
-                      <li>
-                        You have <strong>3 recurring subscriptions</strong> due
-                        next week. 📅
-                      </li>
-                    </ul>
-                  </div>
-                  <div className="text-xs text-muted-foreground text-center">
-                    AI-generated based on your recent transactions.
-                  </div>
+                <div className="mt-6 px-1">
+                  {isInsightsLoading ? (
+                    <div className="space-y-3">
+                      <Skeleton className="h-32 w-full rounded-lg" />
+                      <Skeleton className="h-20 w-full rounded-lg" />
+                      <Skeleton className="h-16 w-full rounded-lg" />
+                    </div>
+                  ) : insightsError ? (
+                    <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
+                      {insightsError}
+                    </div>
+                  ) : insightsData ? (
+                    <div className="space-y-3">
+                      {/* Trend Card */}
+                      <div className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <div className="text-2xl">
+                            {insightsData.trend.direction === "down"
+                              ? "📉"
+                              : insightsData.trend.direction === "up"
+                                ? "📈"
+                                : "➡️"}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-foreground">
+                              Spending Trend
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {insightsData.trend.message}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Top Category Card */}
+                      <div className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <div className="text-2xl">
+                            {insightsData.topCategory.emoji}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-foreground">
+                              Top Category: {insightsData.topCategory.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              $
+                              {insightsData.topCategory.amount.toLocaleString(
+                                undefined,
+                                {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                },
+                              )}
+                            </p>
+                            <p className="text-sm text-muted-foreground mt-2">
+                              {insightsData.topCategory.advice}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Financial Tip Card */}
+                      <div className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <div className="text-2xl">💡</div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-foreground mb-2">
+                              Financial Tip
+                            </p>
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              {insightsData.generalTip}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="text-xs text-muted-foreground text-center pt-2">
+                        AI-generated based on your recent transactions.
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-muted/50 rounded-lg text-sm text-center text-muted-foreground">
+                      Click the button to generate insights
+                    </div>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>

@@ -268,7 +268,10 @@
       "toggleLabel": "Enable rollover",
       "modeLabel": "Mode",
       "positiveOnly": "Positive only",
-      "allowNegative": "Allow negative"
+      "allowNegative": "Allow negative",
+      "label": "Rollover",
+      "positive": "Rollover from last month",
+      "negative": "Overspending from last month"
     },
     "meta": {
       "title": "Budgets",

@@ -19,6 +19,7 @@ function BudgetDetailsInfo({
   amount,
   type,
   color_code,
+  rolloverPreviewCarry,
 }: BudgetDetailsProps) {
   const { session } = UserAuth();
   const [spentAmount, setSpentAmount] = useState(0);
@@ -70,7 +71,8 @@ function BudgetDetailsInfo({
     return () => {
       window.removeEventListener("budgetTransactionAdded", handleBudgetUpdate);
     };
-  }, [id, session?.user?.id]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, session?.user?.id, type]);
 
   return (
     <motion.div
@@ -104,6 +106,36 @@ function BudgetDetailsInfo({
       >
         ${amount}
       </motion.p>
+
+      {/* Rollover indicator */}
+      {type === "expense" &&
+        typeof rolloverPreviewCarry === "number" &&
+        rolloverPreviewCarry !== 0 && (
+          <motion.div
+            className={`mt-2 px-3 py-2 rounded-md text-sm ${rolloverPreviewCarry > 0
+              ? "bg-primary/10 text-primary border border-primary/20"
+              : "bg-destructive/10 text-destructive border border-destructive/20"
+              }`}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.5, ease: "easeOut" }}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <span className="font-medium">
+                {tBudgets(
+                  rolloverPreviewCarry > 0
+                    ? "rollover.positive"
+                    : "rollover.negative"
+                )}
+                :
+              </span>
+              <span className="font-semibold">
+                {rolloverPreviewCarry > 0 ? "+" : ""}$
+                {Math.abs(rolloverPreviewCarry).toFixed(2)}
+              </span>
+            </div>
+          </motion.div>
+        )}
 
       {/* Inline warnings for expense budgets */}
       {type === "expense" && percentage >= 80 && (

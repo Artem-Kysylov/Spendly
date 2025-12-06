@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
 import { supabase } from "@/lib/supabaseClient";
 import { UserAuth } from "@/context/AuthContext";
 import useModal from "@/hooks/useModal";
+import { useBudgetTransactionsInfinite } from "@/hooks/useBudgetTransactionsInfinite";
 import BudgetDetailsInfo from "@/components/budgets/BudgetDetailsInfo";
 import BudgetDetailsForm from "@/components/budgets/BudgetDetailsForm";
 import BudgetDetailsControls from "@/components/budgets/BudgetDetailsControls";
@@ -24,7 +25,9 @@ import { useTranslations } from "next-intl";
 import TransactionModal from "@/components/modals/TransactionModal";
 import Button from "@/components/ui-elements/Button";
 import { Plus } from "lucide-react";
-import MobileTransactionsList from "@/components/chunks/MobileTransactionsList";
+import MobileTransactionCard from "@/components/chunks/MobileTransactionCard";
+import { getPreviousMonthRange } from "@/lib/dateUtils";
+import { computeCarry } from "@/lib/budgetRollover";
 
 export default function BudgetDetailsClient() {
   const { budgetId } = useParams<{ budgetId: string }>();
@@ -54,8 +57,44 @@ export default function BudgetDetailsClient() {
     amount: 0,
     type: "expense",
   });
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [rolloverPreview, setRolloverPreview] = useState<number>(0);
+
+  // Infinite scroll hook
+  const {
+    transactions,
+    groupedTransactions,
+    isLoading: isTransactionsLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch: refetchTransactions,
+  } = useBudgetTransactionsInfinite({ budgetId: id });
+
+  // Intersection Observer for infinite scroll
+  const observerTarget = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (
+          entries[0].isIntersecting &&
+          hasNextPage &&
+          !isFetchingNextPage &&
+          !isTransactionsLoading
+        ) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, isTransactionsLoading, fetchNextPage]);
 
   const tBudgets = useTranslations("budgets");
   const tCommon = useTranslations("common");
@@ -91,36 +130,54 @@ export default function BudgetDetailsClient() {
     }
   };
 
-  const fetchTransactions = async () => {
-    if (!session?.user?.id || !id) return;
+  const fetchRolloverPreview = async () => {
+    if (!session?.user?.id || !id || budgetDetails.type !== "expense") return;
+
     try {
+      const { start, end } = getPreviousMonthRange();
       const { data, error } = await supabase
         .from("transactions")
-        .select(`*, budget_folders (emoji, name)`)
+        .select("amount, type")
         .eq("budget_folder_id", id)
         .eq("user_id", session.user.id)
-        .order("created_at", { ascending: false });
+        .eq("type", "expense")
+        .gte("created_at", start.toISOString())
+        .lte("created_at", end.toISOString());
+
       if (error) {
-        console.error("Error fetching transactions:", error);
+        console.error("Error fetching previous month transactions:", error);
         return;
       }
-      const transformedData =
-        data?.map((transaction) => ({
-          ...transaction,
-          category_emoji: transaction.budget_folders?.emoji || null,
-          category_name: transaction.budget_folders?.name || null,
-        })) || [];
-      setTransactions(transformedData);
+
+      const prevSpent = data?.reduce((sum, tx) => sum + tx.amount, 0) || 0;
+
+      // Get rollover settings from budgetDetails
+      const rolloverEnabled = (budgetDetails as any).rollover_enabled ?? true;
+      const rolloverMode = (budgetDetails as any).rollover_mode ?? "positive-only";
+      const rolloverCap = (budgetDetails as any).rollover_cap ?? null;
+
+      const carry = rolloverEnabled
+        ? computeCarry(budgetDetails.amount, prevSpent, rolloverMode, rolloverCap)
+        : 0;
+
+      setRolloverPreview(carry);
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error calculating rollover:", error);
     }
   };
 
   useEffect(() => {
     fetchBudgetDetails();
-    fetchTransactions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session?.user?.id, id]);
+
+  useEffect(() => {
+    // Fetch rollover preview after budget details are loaded
+    if (budgetDetails.name !== "Loading..." && budgetDetails.type === "expense") {
+      fetchRolloverPreview();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [budgetDetails, session?.user?.id, id]);
 
   const handleTransactionSubmit = async (
     title: string,
@@ -158,7 +215,7 @@ export default function BudgetDetailsClient() {
         return;
       }
       handleToastMessage(tBudgets("details.toast.addSuccess"), "success");
-      fetchTransactions();
+      refetchTransactions();
       window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
     } catch (error) {
       console.error("Error:", error);
@@ -266,7 +323,7 @@ export default function BudgetDetailsClient() {
       }
 
       handleToastMessage(tBudgets("details.toast.deleteSuccess"), "success");
-      await fetchTransactions();
+      refetchTransactions();
     } catch (error) {
       console.error("Error:", error);
       handleToastMessage(tCommon("unexpectedError"), "error");
@@ -277,11 +334,11 @@ export default function BudgetDetailsClient() {
     if (!session?.user?.id || !payload?.id) return;
     try {
       const updates: Partial<EditTransactionPayload> & { created_at?: string } =
-        {
-          title: payload.title,
-          amount: payload.amount,
-          type: payload.type,
-        };
+      {
+        title: payload.title,
+        amount: payload.amount,
+        type: payload.type,
+      };
       if (payload.budget_folder_id !== undefined) {
         updates.budget_folder_id = payload.budget_folder_id;
       }
@@ -302,7 +359,7 @@ export default function BudgetDetailsClient() {
       }
 
       handleToastMessage(tBudgets("details.toast.updateSuccess"), "success");
-      await fetchTransactions();
+      refetchTransactions();
       window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
     } catch (error) {
       console.error("Unexpected error during update:", error);
@@ -312,7 +369,7 @@ export default function BudgetDetailsClient() {
 
   const handleTransactionUpdateSuccess = async () => {
     handleToastMessage(tBudgets("details.toast.updateSuccess"), "success");
-    await fetchTransactions();
+    refetchTransactions();
     window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
   };
 
@@ -341,6 +398,7 @@ export default function BudgetDetailsClient() {
             amount={budgetDetails.amount}
             type={budgetDetails.type}
             color_code={budgetDetails.color_code ?? null}
+            rolloverPreviewCarry={rolloverPreview}
           />
           <div className="mt-2">
             <Button
@@ -351,14 +409,56 @@ export default function BudgetDetailsClient() {
               icon={<Plus className="h-4 w-4" />}
             />
           </div>
-          <div>
-            <MobileTransactionsList
-              transactions={transactions}
-              onDeleteTransaction={handleDeleteTransaction}
-              onEditTransaction={handleEditTransaction}
-              onTransactionUpdateSuccess={handleTransactionUpdateSuccess}
-              allowTypeChange={false}
-            />
+          <div className="space-y-6">
+            {isTransactionsLoading && transactions.length === 0 ? (
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => (
+                  <div key={i} className="h-20 w-full rounded-xl bg-muted animate-pulse" />
+                ))}
+              </div>
+            ) : transactions.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground text-sm">
+                  {tTransactions("empty.description")}
+                </p>
+              </div>
+            ) : (
+              <>
+                {Object.entries(groupedTransactions).map(([date, items]) => (
+                  <div key={date} className="space-y-3">
+                    <div className="sticky top-[70px] z-[5] bg-background/95 backdrop-blur py-2 px-1 text-sm font-semibold text-muted-foreground border-b border-border/50">
+                      {date}
+                    </div>
+                    <div className="space-y-3">
+                      {items.map((transaction) => (
+                        <MobileTransactionCard
+                          key={transaction.id}
+                          transaction={transaction}
+                          onEdit={(tx) => handleEditTransaction({
+                            id: tx.id,
+                            title: tx.title,
+                            amount: tx.amount,
+                            type: tx.type,
+                            budget_folder_id: tx.budget_folder_id,
+                            created_at: tx.created_at,
+                          })}
+                          onDelete={handleDeleteTransaction}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                {/* Loading Indicator for Next Page */}
+                <div ref={observerTarget} className="py-4 flex justify-center">
+                  {isFetchingNextPage && (
+                    <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                      Loading more...
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -372,6 +472,7 @@ export default function BudgetDetailsClient() {
           amount={budgetDetails.amount}
           type={budgetDetails.type}
           color_code={budgetDetails.color_code ?? null}
+          rolloverPreviewCarry={rolloverPreview}
         />
         <BudgetDetailsForm
           isSubmitting={isSubmitting}
@@ -379,12 +480,37 @@ export default function BudgetDetailsClient() {
         />
       </div>
 
-      <div className="hidden md:block">
-        <TransactionsTable
-          transactions={transactions}
-          onDeleteTransaction={handleDeleteTransaction}
-          onEditTransaction={handleEditTransaction}
-        />
+      <div className="hidden md:block space-y-4">
+        {isTransactionsLoading && transactions.length === 0 ? (
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-20 w-full rounded-xl bg-muted animate-pulse" />
+            ))}
+          </div>
+        ) : transactions.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-sm">
+              {tTransactions("empty.description")}
+            </p>
+          </div>
+        ) : (
+          <>
+            <TransactionsTable
+              transactions={transactions}
+              onDeleteTransaction={handleDeleteTransaction}
+              onEditTransaction={handleEditTransaction}
+            />
+            {/* Loading Indicator for Next Page */}
+            <div ref={observerTarget} className="py-4 flex justify-center">
+              {isFetchingNextPage && (
+                <div className="flex items-center gap-2 text-muted-foreground text-sm">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                  Loading more...
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {isDeleteModalOpen && (
@@ -428,7 +554,7 @@ export default function BudgetDetailsClient() {
           onClose={() => setIsAddModalOpen(false)}
           onSubmit={(message: string, type: ToastMessageProps["type"]) => {
             handleToastMessage(message, type);
-            fetchTransactions();
+            refetchTransactions();
           }}
           initialBudgetId={id}
         />

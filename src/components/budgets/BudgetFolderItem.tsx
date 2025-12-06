@@ -13,7 +13,6 @@ function BudgetFolderItem({
   amount,
   type,
   color_code,
-  rolloverPreviewCarry,
 }: BudgetFolderItemProps) {
   const { session } = UserAuth();
   const [spentAmount, setSpentAmount] = useState(0);
@@ -74,21 +73,6 @@ function BudgetFolderItem({
       >
         {formatCurrency(amount, "USD")}
       </p>
-
-      {type === "expense" &&
-        typeof rolloverPreviewCarry === "number" &&
-        rolloverPreviewCarry !== 0 && (
-          <div
-            className={`px-2 py-1 rounded-md text-xs font-semibold ${
-              rolloverPreviewCarry > 0
-                ? "bg-primary/10 text-primary"
-                : "bg-error/10 text-error"
-            }`}
-          >
-            {rolloverPreviewCarry > 0 ? "Перенос " : "Перерасход "}
-            {formatCurrency(Math.abs(rolloverPreviewCarry), "USD")}
-          </div>
-        )}
 
       {/* Прогрессбар */}
       <div className="w-full mt-3">

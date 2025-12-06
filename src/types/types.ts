@@ -12,12 +12,12 @@ export interface ButtonProps {
   icon?: ReactNode;
   title?: string;
   variant?:
-    | "default"
-    | "primary"
-    | "secondary"
-    | "outline"
-    | "ghost"
-    | "destructive";
+  | "default"
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "ghost"
+  | "destructive";
 }
 
 export interface AuthContextType {
@@ -137,14 +137,14 @@ export interface TextInputProps {
   label?: string;
   error?: string;
   inputMode?:
-    | "search"
-    | "text"
-    | "decimal"
-    | "none"
-    | "email"
-    | "tel"
-    | "url"
-    | "numeric";
+  | "search"
+  | "text"
+  | "decimal"
+  | "none"
+  | "email"
+  | "tel"
+  | "url"
+  | "numeric";
   autoFocus?: boolean;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
   enterKeyHint?: "done" | "go" | "next" | "search" | "send";
@@ -226,6 +226,7 @@ export interface BudgetDetailsProps {
   color_code?: string | null;
   rolloverEnabled?: boolean;
   rolloverMode?: RolloverMode;
+  rolloverPreviewCarry?: number;
   rolloverCap?: number | null;
 }
 
@@ -417,11 +418,11 @@ export interface ExportOptions {
     enabled: boolean;
     text?: string;
     position?:
-      | "top-left"
-      | "top-right"
-      | "bottom-left"
-      | "bottom-right"
-      | "center";
+    | "top-left"
+    | "top-right"
+    | "bottom-left"
+    | "bottom-right"
+    | "center";
     opacity?: number;
     fontSize?: number;
     color?: string;
@@ -619,14 +620,14 @@ export interface Notification {
   title: string;
   message: string;
   type:
-    | "budget_alert"
-    | "weekly_reminder"
-    | "expense_warning"
-    | "goal_achieved"
-    | "info"
-    | "success"
-    | "warning"
-    | "error";
+  | "budget_alert"
+  | "weekly_reminder"
+  | "expense_warning"
+  | "goal_achieved"
+  | "info"
+  | "success"
+  | "warning"
+  | "error";
   is_read: boolean;
   created_at: string;
   metadata?: {
