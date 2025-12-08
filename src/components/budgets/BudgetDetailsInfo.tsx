@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { supabase } from "../../lib/supabaseClient";
 import { UserAuth } from "../../context/AuthContext";
 import { useTranslations } from "next-intl";
+import { Sparkles } from "lucide-react";
 
 // Import components
 import BudgetProgressBar from "../ui-elements/BudgetProgressBar";
@@ -137,28 +138,26 @@ function BudgetDetailsInfo({
           </motion.div>
         )}
 
-      {/* Inline warnings for expense budgets */}
       {type === "expense" && percentage >= 80 && (
         <div
           className={`mt-3 p-3 rounded border ${percentage >= 100 ? "bg-red-50 border-red-200 text-red-700" : "bg-amber-50 border-amber-200 text-amber-700"}`}
         >
-          <div className="text-sm font-medium">
+          <div className="text-sm font-medium mb-2">
             {percentage >= 100 ? tN("budget_100") : tN("budget_80")}
           </div>
-          <div className="mt-2 flex gap-2">
-            <button
-              onClick={() => router.push("/transactions")}
-              className="text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20"
-            >
-              {tBudgets("details.inlineWarning.reduceExpenses")}
-            </button>
-            <button
-              onClick={() => router.push("/dashboard")}
-              className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
-            >
-              {tBudgets("details.inlineWarning.openReport")}
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              // Navigate to AI Assistant with a query param
+              router.push(`/ai-assistant?message=Help me save on ${name} budget` as any);
+            }}
+            className={`w-full flex items-center justify-center gap-2 text-sm px-3 py-2 rounded-md font-medium transition-colors ${percentage >= 100
+              ? "bg-red-100 text-red-800 hover:bg-red-200"
+              : "bg-amber-100 text-amber-800 hover:bg-amber-200"
+              }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            Ask AI how to save
+          </button>
         </div>
       )}
 

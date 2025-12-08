@@ -64,7 +64,12 @@ export function useAISuggestions() {
             );
           } else if (res.status === 429) {
             setIsRateLimited(true);
-            setError(tAssistant("rateLimited"));
+            const retryAfter = Number(res.headers.get("Retry-After") ?? "0");
+            setError(
+              retryAfter > 0
+                ? `${tAssistant("rateLimited")} (${retryAfter}s)`
+                : tAssistant("rateLimited"),
+            );
             if (!isPro && Number.isFinite(dailyLimitHeader)) {
               toast({
                 title: tAssistant("toasts.limitReached", {

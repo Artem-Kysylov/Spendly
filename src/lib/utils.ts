@@ -10,7 +10,7 @@ export function normalizeBudgetName(name: string): string {
     .toLowerCase()
     .normalize("NFKD") // Unicode decomposition
     .replace(/[\u0300-\u036f]/g, "") // Strip diacritics
-    .replace(/[^a-z0-9\s-]/g, "") // Keep letters/digits/spaces/hyphens
+    .replace(/[^\p{L}\p{N}\s-]/gu, "") // Сохраняем любые буквы/цифры/пробелы/дефисы
     .replace(/\s+/g, " ") // Collapse spaces
     .trim();
 }

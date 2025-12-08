@@ -452,8 +452,27 @@ export const aiResponse = async (req: AIRequest): Promise<AIResponse> => {
     message,
     confirm = false,
     actionPayload,
-  } = req;
-  // Лимиты: перенесены в API-маршрут
+    locale } = req;
+  // Локализация (server-side)
+  const { DEFAULT_LOCALE, isSupportedLanguage, loadMessages } = await import("@/i18n/config");
+  const lang = isSupportedLanguage(locale ?? "") ? (locale as any) : DEFAULT_LOCALE;
+  const messages = await loadMessages(lang);
+  const a = messages?.assistant ?? {};
+  const errTexts = a?.errors ?? {};
+  const tParseFailed =
+    errTexts?.parseFailed ||
+    'Unable to create a transaction. Check the input and make sure the budget exists. Use: Add "Title" 12.34 to <Budget> budget.';
+  const tBudgetNotFound = (name: string) =>
+    (errTexts?.budgetNotFound || 'Budget "{name}" was not found. Please check the name or create it.').replace("{name}", name);
+
+  // Небольшая эвристика: сообщение похоже на добавление?
+  const looksLikeAddAttempt = (msg: string) => {
+    const m = (msg || "").trim().toLowerCase();
+    const addCandidates = ["add", "ad", "добав", "дод", "tambah", "tambahkan", "追加", "추가", "जोड़"];
+    const hasBudgetToken = /\b(budget|бюджет)\b/i.test(msg);
+    const hasNumberOrCurrency = /(?:\d+[.,]?\d*)|[$€£₽₹₴]/.test(msg);
+    return addCandidates.some((a) => m.startsWith(a)) || (hasBudgetToken && hasNumberOrCurrency);
+  };
 
   const ctx = await prepareUserContext(userId);
 
@@ -462,16 +481,18 @@ export const aiResponse = async (req: AIRequest): Promise<AIResponse> => {
     if (!parsed.budget_folder_id) {
       return {
         kind: "message",
-        message: `Budget "${parsed.budget_name}" was not found. Please create it or specify an existing budget.`,
+        message: tBudgetNotFound(parsed.budget_name),
         model: "gemini-2.5-flash",
       };
     }
-    const action: AIAction = {
-      type: "add_transaction",
-      payload: parsed,
-    };
+    const action: AIAction = { type: "add_transaction", payload: parsed };
     const confirmText = `Confirm adding $${parsed.amount.toFixed(2)} "${parsed.title}" to ${parsed.budget_name}? Reply Yes/No.`;
     return { kind: "action", action, confirmText };
+  }
+
+  // Если похоже на попытку добавления, но парсер не понял — дружелюбная подсказка без LLM
+  if (!parsed && looksLikeAddAttempt(message)) {
+    return { kind: "message", message: tParseFailed, model: "gemini-2.5-flash" };
   }
 
   // Подтверждение сохранения подписки

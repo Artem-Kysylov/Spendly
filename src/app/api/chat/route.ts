@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { streamText, tool, jsonSchema } from "ai";
+import { streamText, tool } from "ai";
+import { z } from "zod";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
 
@@ -8,51 +9,22 @@ const google = createGoogleGenerativeAI({
   apiKey: process.env.GOOGLE_API_KEY,
 });
 
-// JSON Schema for transaction proposal (с типами, чтобы инферился args в execute)
-const proposeTransactionSchema = jsonSchema<{
-  transactions: Array<{
-    title: string;
-    amount: number;
-    type: "expense" | "income";
-    category_name: string;
-    date: string;
-  }>;
-}>({
-  type: "object",
-  properties: {
-    transactions: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          title: {
-            type: "string",
-            description:
-              'Short description of the transaction (e.g., "Gas Station", "Coffee")',
-          },
-          amount: {
-            type: "number",
-            description: "Transaction amount (positive number)",
-          },
-          type: {
-            type: "string",
-            description: 'The type of transaction: "expense" or "income"',
-          },
-          category_name: {
-            type: "string",
-            description: "The closest matching budget name from the user's list",
-          },
-          date: {
-            type: "string",
-            description: "Transaction date in ISO format (YYYY-MM-DD)",
-          },
-        },
-        required: ["title", "amount", "type", "category_name", "date"],
-      },
-    },
-  },
-  required: ["transactions"],
+export const maxDuration = 60;
+
+// Zod Schema for transaction proposal
+const proposeTransactionSchema = z.object({
+  transactions: z.array(
+    z.object({
+      title: z.string().describe('Short description of the transaction (e.g., "Gas Station", "Coffee")'),
+      amount: z.number().describe("Transaction amount (positive number)"),
+      type: z.enum(["expense", "income"]).describe('The type of transaction: "expense" or "income"'),
+      category_name: z.string().describe("The closest matching budget name from the user's list"),
+      date: z.string().describe("Transaction date in ISO format (YYYY-MM-DD)"),
+    })
+  ),
 });
+
+
 
 async function verifyUserId(userId: string): Promise<boolean> {
   try {
@@ -63,6 +35,19 @@ async function verifyUserId(userId: string): Promise<boolean> {
     return false;
   }
 }
+
+// Tool definition
+const proposeTransactionTool = tool({
+  description: "Propose one or more transactions based on user input. This does NOT save to database.",
+  parameters: proposeTransactionSchema,
+  execute: async (args: any) => {
+    const { transactions } = args as unknown as z.infer<typeof proposeTransactionSchema>;
+    return {
+      success: true,
+      transactions,
+    };
+  },
+} as any);
 
 export async function POST(req: NextRequest) {
   try {
@@ -115,50 +100,42 @@ export async function POST(req: NextRequest) {
       .map((b) => `${b.emoji || "📁"} ${b.name} (${b.type})`)
       .join("\n");
 
-    // Construct system prompt
-    const systemPrompt = `You are Spendly Pal, a financial assistant.
+    // Construct system prompt with override rule at the very top
+    const overrideRule = `You are Spendly Pal. Today is ${currentDate}. !!! IMPORTANT RULE !!! If the user sends a message formatted as [Item] [Amount] (e.g., 'Taxi 200', 'Coffee 5', 'Lunch 150'), you MUST interpret this as a command to ADD a transaction. - DO NOT search for past data. - DO NOT say 'No data found'. - IMMEDIATELY call the \`propose_transaction\` tool. !!!`;
+
+    const systemPrompt = `${overrideRule}
+
+You are Spendly Pal, a financial assistant.
 
 Current date: ${currentDate}
 
 User's budgets:
 ${budgetList || "No budgets available"}
 
-**⚠️ CORE RULE - TRANSACTION CREATION:**
-If the user input contains a generic description and a number (e.g., "Taxi 200", "Coffee 5", "Groceries 50"), you MUST interpret this as an intent to ADD a transaction.
+**PRIMARY DIRECTIVE:** You are a Transaction Manager first, and an Analyst second.
 
-**IMMEDIATELY CALL** the \`propose_transaction\` tool with the extracted details.
+**TRIGGER RULE:** If the user's message contains a **Subject** (e.g., "Food", "Taxi") and a **Number** (e.g., "200", "50"), you MUST interpret this as a request to **ADD A TRANSACTION**.
 
-**DO NOT**:
-- Search the database for these simple inputs
-- Generate text responses asking for confirmation
-- Ask clarifying questions for straightforward cases
+**FORBIDDEN:**
+- Do NOT search the database for "Taxi 200".
+- Do NOT say "I cannot find information".
+- Do NOT ask for confirmation if the intent is clear (Subject + Number).
 
-**ONLY SEARCH** if the user explicitly asks analytical questions like:
-- "How much did I spend on..."
-- "Show me my transactions"
-- "What's my budget for..."
+**ACTION:**
+- IMMEDIATELY call the \`propose_transaction\` tool with the extracted details.
 
-**Response Style:**
-- Be concise and direct
-- Use bullet points for lists
-- Do not repeat the user's request
-- Avoid verbose explanations
+**Example:**
+- User: "Lunch 50" -> Tool Call: { title: "Lunch", amount: 50, category_name: "Food", ... }
 
 **Transaction Parsing Rules:**
-- When the user mentions "yesterday", calculate the date as ${currentDate} minus 1 day
-- Map expense/income mentions to the closest budget from the list above
-- Use EXACT budget names from the user's list
-- Default to "expense" type unless explicitly stated as income
-- Return multiple transactions if multiple items are mentioned
-- For the "type" field, use exactly "expense" or "income" (lowercase)
+- Map expenses to the closest budget from the User's budgets list above.
+- Default to "expense" type unless explicitly "income".
+- "Yesterday" = ${currentDate} - 1 day.
 
-Example:
-User: "Yesterday gas 500"
-→ Extract: title="Gas", amount=500, type="expense", category_name="Gas" (or closest match), date=yesterday's date
-
-Example:
-User: "Taxi 200"
-→ IMMEDIATELY call propose_transaction with: title="Taxi", amount=200, type="expense", category_name="Transportation" (or closest match), date=${currentDate}`;
+**Response Style (for when you DO generate text):**
+- Be concise.
+- Use bullet points.
+- No "wall of text".`;
 
     // Stream response with tool
     const result = await streamText({
@@ -166,19 +143,10 @@ User: "Taxi 200"
       system: systemPrompt,
       prompt: message,
       tools: {
-        propose_transaction: tool({
-          description:
-            "Propose one or more transactions based on user input. This does NOT save to database.",
-          inputSchema: proposeTransactionSchema,
-          execute: async ({ transactions }) => {
-            return {
-              success: true,
-              transactions,
-            };
-          },
-        }),
+        propose_transaction: proposeTransactionTool,
       },
-    });
+      maxSteps: 5,
+    } as any); // Cast to any to resolve generic inference issues with tools and maxSteps
     return result.toTextStreamResponse();
   } catch (error) {
     console.error("Error in /api/chat:", error);

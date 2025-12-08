@@ -6,15 +6,23 @@ import type { BudgetFolder } from "@/types/ai";
 export const parseAddCommand = (text: string, budgets: Array<BudgetFolder>) => {
   const lower = text.toLowerCase();
 
-  // Поддержка валютных символов и запятой как десятичного разделителя
-  const regex =
-    /add\s+(?:(?:([a-z0-9\s-]+)\s+))?(?:[$€₽]?\s*)?(\d+(?:[.,]\d+)?)\s+(?:to|into)\s+([a-z0-9\s-]+)\s+budget/i;
+  // Поддержка разных языков (add/ad/добав../дод../tambah/追加/추가/जोड़..) и budget/бюджет
+  const addWords =
+    "(add|ad|добав(?:ить|ь)?|додат(?:и|ь)?|додай|tambah(?:kan)?|追加|추가|जोड़(?:ें)?)";
+  const toWords = "(?:to|into|в|у|ke|に|에)";
+  const budgetWords = "(?:budget|бюджет)";
+
+  const regex = new RegExp(
+    `${addWords}\\s+(?:(?:"([^"]+)"|([\\p{L}0-9\\s\\-.,()#]+))\\s+)?(?:[$€₽₹₴]?\\s*)?(\\d+(?:[.,]\\d+)?)\\s+${toWords}\\s+([\\p{L}0-9\\s\\-]+)\\s+${budgetWords}`,
+    "iu",
+  );
   const match = lower.match(regex);
   if (!match) return null;
 
-  const rawTitle = match[1] ? match[1].trim() : "Transaction";
-  const amount = Number((match[2] || "0").replace(",", "."));
-  const rawBudgetName = (match[3] || "").trim();
+  // Правильные индексы групп:
+  const rawTitle = (match[2] || match[3]) ? (match[2] || match[3]).trim() : "Transaction";
+  const amount = Number((match[4] || "0").replace(",", "."));
+  const rawBudgetName = (match[5] || "").trim();
 
   if (!isFinite(amount) || amount <= 0) return null;
 
@@ -36,7 +44,8 @@ export const parseAddCommand = (text: string, budgets: Array<BudgetFolder>) => {
 
 export function sanitizeTitle(input: string): string {
   const trimmed = input.trim().replace(/\s+/g, " ");
-  const cleaned = trimmed.replace(/[^a-z0-9\s\-.,()#]/gi, "");
+  // Разрешаем Unicode буквы, цифры и базовую пунктуацию
+  const cleaned = trimmed.replace(/[^\p{L}0-9\s\-.,()#]/gu, "");
   const MAX_LEN = 60;
   return cleaned.length > MAX_LEN ? cleaned.slice(0, MAX_LEN) : cleaned;
 }

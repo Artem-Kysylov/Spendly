@@ -230,11 +230,12 @@ export default function TransactionForm({
         }
       }
 
-      toast({
-        title: initialData ? "Transaction updated" : "Transaction added",
-        description: `Successfully ${initialData ? "updated" : "added"} transaction.`,
-        variant: "default",
-      });
+      // Toast is handled by the parent component via onSuccess -> onSubmit
+      // toast({
+      //   title: initialData ? "Transaction updated" : "Transaction added",
+      //   description: `Successfully ${initialData ? "updated" : "added"} transaction.`,
+      //   variant: "default",
+      // });
 
       // Refresh data
       router.refresh();

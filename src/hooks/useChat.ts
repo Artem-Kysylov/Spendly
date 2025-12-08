@@ -440,9 +440,15 @@ export const useChat = (): UseChatReturn => {
 
         if (response.status === 429) {
           trackEvent("ai_limit_hit");
-          const cooldownMs = 3000;
+          const retryAfter = Number(response.headers.get("Retry-After") ?? "0");
+          const cooldownMs =
+            Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 3000;
           setRateLimitedUntil(Date.now() + cooldownMs);
-          const msg = tAssistant("rateLimited");
+
+          const baseMsg = tAssistant("rateLimited");
+          const msg =
+            retryAfter > 0 ? `${baseMsg} (${retryAfter}s)` : baseMsg;
+
           const aiMessage: ChatMessage = {
             id: (Date.now() + 1).toString(),
             content: msg,
@@ -710,6 +716,7 @@ export const useChat = (): UseChatReturn => {
     async (confirm: boolean) => {
       if (!pendingAction || !session?.user?.id) return;
 
+      // Отмена действия — как было
       if (!confirm) {
         const aiMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
@@ -719,30 +726,92 @@ export const useChat = (): UseChatReturn => {
         };
         setMessages((prev) => [...prev, aiMessage]);
         setPendingAction(null);
-        await persistMessage(
-          "assistant",
-          aiMessage.content,
-          currentSessionId || undefined,
-        );
+        await persistMessage("assistant", aiMessage.content, currentSessionId || undefined);
         return;
       }
 
-      // Простая подтверждалка: здесь можно вызвать бэкенд для выполнения действия
-      const aiMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        content: "Action confirmed and processed.",
-        role: "assistant",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, aiMessage]);
-      setPendingAction(null);
-      await persistMessage(
-        "assistant",
-        aiMessage.content,
-        currentSessionId || undefined,
-      );
+      // Подтверждение: шлём confirm=true на /api/assistant
+      try {
+        const res = await fetch(getAssistantApiUrl(locale), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            userId: session.user.id,
+            isPro: subscriptionPlan === "pro",
+            enableLimits: true,
+            confirm: true,
+            actionType:
+              pendingAction.type === "add_transaction"
+                ? "add_transaction"
+                : "save_recurring_rule",
+            actionPayload: pendingAction.payload,
+            tone: subscriptionPlan === "pro" ? assistantTone : "neutral",
+            sessionId: currentSessionId || undefined,
+          }),
+        });
+
+        if (res.status === 429) {
+          const retryAfter = Number(res.headers.get("Retry-After") ?? "0");
+          const baseMsg = tAssistant("rateLimited");
+          const msg = retryAfter > 0 ? `${baseMsg} (${retryAfter}s)` : baseMsg;
+          const aiMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            content: msg,
+            role: "assistant",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          setPendingAction(null);
+          await persistMessage("assistant", aiMessage.content, currentSessionId || undefined);
+          return;
+        }
+
+        const ct = res.headers.get("content-type") || "";
+        if (ct.includes("application/json")) {
+          const json = (await res.json()) as { kind?: "message"; message?: string };
+          const text = json?.message || "Action confirmed and processed.";
+          const aiMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            content: text,
+            role: "assistant",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          setPendingAction(null);
+          await persistMessage("assistant", aiMessage.content, currentSessionId || undefined);
+        } else {
+          const aiMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            content: "Failed to process action. Please try again.",
+            role: "assistant",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          setPendingAction(null);
+          await persistMessage("assistant", aiMessage.content, currentSessionId || undefined);
+        }
+      } catch {
+        const aiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          content: "Network error while confirming the action. Please try again.",
+          role: "assistant",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+        setPendingAction(null);
+        await persistMessage("assistant", aiMessage.content, currentSessionId || undefined);
+      }
     },
-    [pendingAction, session?.user?.id, currentSessionId, persistMessage],
+    [
+      pendingAction,
+      session?.user?.id,
+      subscriptionPlan,
+      assistantTone,
+      locale,
+      currentSessionId,
+      persistMessage,
+      tAssistant,
+    ],
   );
 
   const newChat = useCallback(() => {

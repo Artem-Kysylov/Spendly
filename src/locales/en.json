@@ -32,7 +32,9 @@
     "pagination": {
       "previous": "Previous",
       "next": "Next"
-    }
+    },
+    "today": "Today",
+    "yesterday": "Yesterday"
   },
   "cta": {
     "upgradeToPro": "Upgrade to Pro",
@@ -587,6 +589,11 @@
       "showBiggest": "Show biggest expenses",
       "compareMonths": "Compare this month vs last"
     },
+    "errors": {
+      "parseFailed": "Couldn't create a transaction. Check your input and if the budget exists. Format: Add \"Title\" 12.34 to <Budget> budget.",
+      "budgetNotFound": "Budget \"{name}\" was not found. Check the name or create one."
+    },
+    "tipAddTransaction": "Tip: add transactions like so — Add \"Title\" 12.34 to \"Budget\" budget. Examples: Add \"Lunch\" 12.50 to food budget; Add \"Taxi\" 200 to transport budget. Comma and currency symbols are supported.",
     "insights": {
       "title": "AI Insights",
       "beta": "Beta",

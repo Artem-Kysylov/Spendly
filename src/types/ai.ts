@@ -34,6 +34,7 @@ export interface AIRequest {
   message: string;
   confirm?: boolean;
   actionPayload?: AIAction["payload"];
+  locale?: string; // NEW: для локализации server-side ответов
 }
 
 // Доменные типы

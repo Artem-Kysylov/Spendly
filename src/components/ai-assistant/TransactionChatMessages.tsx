@@ -73,6 +73,16 @@ export function TransactionChatMessages({
     },
   };
 
+  // Hack: Preprocess AI content to fix broken markdown tables
+  const preprocessContent = (content: string) => {
+    if (!content) return "";
+    // Fix tables: Replace "||-" or "||---" with "|\n|---" (insert newline)
+    let clean = content.replace(/\|\s*\|[-:]/g, (match) => {
+      return match.replace("||", "|\n|");
+    });
+    return clean;
+  };
+
   return (
     <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4">
       {messages.map((message) => (
@@ -92,51 +102,59 @@ export function TransactionChatMessages({
               {message.content && (
                 <div
                   className={`w-fit p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words overflow-x-auto ${message.role === "user"
-                      ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md"
-                      : "bg-gray-100 text-secondary-black rounded-bl-md border border-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                    ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md"
+                    : "bg-gray-100 text-secondary-black rounded-bl-md border border-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700"
                     }`}
                 >
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkBreaks]}
                     rehypePlugins={[[rehypeSanitize, markdownSchema]]}
                     components={{
-                      p: ({ children }) => (
-                        <p className="mb-3 leading-relaxed last:mb-0">{children}</p>
+                      // Text styling
+                      p: ({ node, ...props }) => (
+                        <p className="mb-3 last:mb-0" {...props} />
                       ),
-                      ul: ({ children }) => (
-                        <ul className="list-disc pl-5 space-y-2 mb-3">
-                          {children}
-                        </ul>
+                      ul: ({ node, ...props }) => (
+                        <ul className="my-2 ml-6 list-disc [&>li]:mt-1" {...props} />
                       ),
-                      ol: ({ children }) => (
-                        <ol className="list-decimal pl-5 space-y-2 mb-3">
-                          {children}
-                        </ol>
+                      ol: ({ node, ...props }) => (
+                        <ol className="my-2 ml-6 list-decimal [&>li]:mt-1" {...props} />
                       ),
-                      li: ({ children }) => (
-                        <li className="leading-relaxed mb-1">{children}</li>
+                      li: ({ node, ...props }) => (
+                        <li className="leading-normal" {...props} />
                       ),
-                      a: ({ href, children }) => (
-                        <a
-                          href={href as string}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-primary underline"
-                        >
-                          {children}
-                        </a>
+                      strong: ({ node, ...props }) => (
+                        <strong className="font-semibold" {...props} />
                       ),
-                      strong: ({ children }) => (
-                        <strong className="font-semibold">{children}</strong>
+                      a: ({ node, ...props }) => (
+                        <a className="font-medium underline underline-offset-4 text-primary" {...props} />
                       ),
-                      code: ({ children }) => (
-                        <code className="bg-muted px-1 py-0.5 rounded font-mono text-[12px]">
-                          {children}
-                        </code>
+                      // Table styling
+                      table: ({ node, ...props }) => (
+                        <div className="my-4 w-full overflow-hidden rounded-md border border-border">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm" {...props} />
+                          </div>
+                        </div>
+                      ),
+                      thead: ({ node, ...props }) => (
+                        <thead className="bg-muted/80 font-medium" {...props} />
+                      ),
+                      tbody: ({ node, ...props }) => (
+                        <tbody className="divide-y divide-border bg-background/50" {...props} />
+                      ),
+                      tr: ({ node, ...props }) => (
+                        <tr className="transition-colors hover:bg-muted/50" {...props} />
+                      ),
+                      th: ({ node, ...props }) => (
+                        <th className="px-4 py-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0" {...props} />
+                      ),
+                      td: ({ node, ...props }) => (
+                        <td className="px-4 py-2 align-middle [&:has([role=checkbox])]:pr-0" {...props} />
                       ),
                     }}
                   >
-                    {message.content}
+                    {preprocessContent(message.content)}
                   </ReactMarkdown>
                 </div>
               )}

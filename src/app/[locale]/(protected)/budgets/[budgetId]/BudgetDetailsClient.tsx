@@ -322,7 +322,7 @@ export default function BudgetDetailsClient() {
         return;
       }
 
-      handleToastMessage(tBudgets("details.toast.deleteSuccess"), "success");
+      handleToastMessage(tTransactions("toast.deleteSuccess"), "success");
       refetchTransactions();
     } catch (error) {
       console.error("Error:", error);

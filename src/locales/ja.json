@@ -264,6 +264,35 @@
       "title": "Spendly Pal のトーン",
       "description": "AI アシスタントの応答トーンを選択します。"
     },
+    "errors": {
+      "parseFailed": "トランザクションを作成できませんでした。入力を確認し、予算が存在するか確認してください。フォーマット: Add \"タイトル\" 12.34 to <予算> budget.",
+      "budgetNotFound": "予算「{name}」が見つかりませんでした。名前を確認するか、新しく作成してください。"
+    },
+    "tipAddTransaction": "ヒント: Add \"タイトル\" 12.34 to \"Budget\" budget のようにトランザクションを追加します。例: Add \"ランチ\" 12.50 to food budget; Add \"タクシー\" 200 to transport budget。コンマと通貨記号がサポートされています。",
+    "insights": {
+      "title": "AI インサイト",
+      "beta": "ベータ"
+    },
+    "tone": {
+      "label": "トーン",
+      "select_label": "AI アシスタントのトーンを選択",
+      "options": {
+        "neutral": "ニュートラル",
+        "friendly": "フレンドリー",
+        "formal": "フォーマル",
+        "playful": "遊び心のある"
+      }
+    },
+    "settings": {
+      "proOnlyHint": "カスタムアシスタントトーンはProで利用可能です。アップグレードしてロックを解除してください。",
+      "title": "Spendly Pal のトーン",
+      "description": "AI アシスタントの応答トーンを選択します。"
+    },
+    "errors": {
+      "parseFailed": "取引を作成できませんでした。入力内容や予算の有無を確認してください。形式: Add \"タイトル\" 12.34 to <Budget> budget。",
+      "budgetNotFound": "予算 \"{name}\" が見つかりません。名前を確認するか、予算を作成してください。"
+    },
+    "tipAddTransaction": "ヒント: 次の形式で取引を追加できます — Add \"タイトル\" 12.34 to <Budget> budget。例: Add \"ランチ\" 12.50 to food budget、Add \"タクシー\" 200 to transport budget。カンマや通貨記号も使えます。",
     "freeTier": {
       "requestsLimit": "無料：1日5リクエスト。Pro — 無制限。"
     }

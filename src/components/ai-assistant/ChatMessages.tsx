@@ -100,6 +100,16 @@ export const ChatMessages = ({
     return parts;
   };
 
+  // Hack: Preprocess AI content to fix broken markdown tables
+  const preprocessContent = (content: string) => {
+    if (!content) return "";
+    // Fix tables: Replace "||-" or "||---" with "|\n|---" (insert newline)
+    let clean = content.replace(/\|\s*\|[-:]/g, (match) => {
+      return match.replace("||", "|\n|");
+    });
+    return clean;
+  };
+
   const markdownSchema = {
     ...defaultSchema,
     tagNames: [
@@ -168,74 +178,60 @@ export const ChatMessages = ({
                 </div>
               )}
               <div
-                className={`w-fit max-w-[85%] p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words overflow-x-auto ${
-                  message.role === "user"
-                    ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md"
-                    : "bg-gray-100 text-secondary-black rounded-bl-md border border-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                }`}
+                className={`w-fit max-w-[85%] p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words overflow-x-auto ${message.role === "user"
+                  ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md"
+                  : "bg-gray-100 text-secondary-black rounded-bl-md border border-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+                  }`}
               >
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm, remarkBreaks]}
                   rehypePlugins={[[rehypeSanitize, markdownSchema]]}
                   components={{
-                    p: ({ children }) => (
-                      <p className="mb-3 leading-relaxed">{children}</p>
+                    // Text styling
+                    p: ({ node, ...props }) => (
+                      <p className="mb-3 last:mb-0" {...props} />
                     ),
-                    ul: ({ children }) => (
-                      <ul className="list-disc pl-5 space-y-2 mb-3">
-                        {children}
-                      </ul>
+                    ul: ({ node, ...props }) => (
+                      <ul className="my-2 ml-6 list-disc [&>li]:mt-1" {...props} />
                     ),
-                    ol: ({ children }) => (
-                      <ol className="list-decimal pl-5 space-y-2 mb-3">
-                        {children}
-                      </ol>
+                    ol: ({ node, ...props }) => (
+                      <ol className="my-2 ml-6 list-decimal [&>li]:mt-1" {...props} />
                     ),
-                    li: ({ children }) => (
-                      <li className="leading-relaxed mb-1">{children}</li>
+                    li: ({ node, ...props }) => (
+                      <li className="leading-normal" {...props} />
                     ),
-                    a: ({ href, children }) => (
-                      <a
-                        href={href as string}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-primary underline"
-                      >
-                        {children}
-                      </a>
+                    strong: ({ node, ...props }) => (
+                      <strong className="font-semibold" {...props} />
                     ),
-                    code: ({ children }) => (
-                      <code className="bg-muted px-1 py-0.5 rounded font-mono text-[12px]">
-                        {children}
-                      </code>
+                    a: ({ node, ...props }) => (
+                      <a className="font-medium underline underline-offset-4 text-primary" {...props} />
                     ),
-                    pre: ({ children }) => (
-                      <pre className="bg-muted p-2 rounded overflow-x-auto text-[12px]">
-                        {children}
-                      </pre>
-                    ),
-                    table: ({ children }) => (
-                      <div className="overflow-x-auto my-2">
-                        <table className="w-full border-collapse min-w-[300px]">
-                          {children}
-                        </table>
+                    // Table styling
+                    table: ({ node, ...props }) => (
+                      <div className="my-4 w-full overflow-hidden rounded-md border border-border">
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm" {...props} />
+                        </div>
                       </div>
                     ),
-                    thead: ({ children }) => (
-                      <thead className="bg-muted">{children}</thead>
+                    thead: ({ node, ...props }) => (
+                      <thead className="bg-muted/80 font-medium" {...props} />
                     ),
-                    th: ({ children }) => (
-                      <th className="border px-2 py-1 text-left">{children}</th>
+                    tbody: ({ node, ...props }) => (
+                      <tbody className="divide-y divide-border bg-background/50" {...props} />
                     ),
-                    td: ({ children }) => (
-                      <td className="border px-2 py-1">{children}</td>
+                    tr: ({ node, ...props }) => (
+                      <tr className="transition-colors hover:bg-muted/50" {...props} />
                     ),
-                    strong: ({ children }) => (
-                      <strong className="font-semibold">{children}</strong>
+                    th: ({ node, ...props }) => (
+                      <th className="px-4 py-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0" {...props} />
+                    ),
+                    td: ({ node, ...props }) => (
+                      <td className="px-4 py-2 align-middle [&:has([role=checkbox])]:pr-0" {...props} />
                     ),
                   }}
                 >
-                  {normalizeMarkdown(message.content)}
+                  {preprocessContent(normalizeMarkdown(message.content))}
                 </ReactMarkdown>
                 <div
                   className={`text-xs mt-2 ${message.role === "user" ? "text-blue-200 dark:text-blue-100" : "text-gray-500 dark:text-gray-400"}`}
@@ -308,7 +304,7 @@ export const ChatMessages = ({
               }}
               budgets={budgets}
               onSuccess={() => onConfirmAction?.(true)}
-              onError={() => {}} // Handle error if needed
+              onError={() => { }} // Handle error if needed
             />
           </div>
         </div>

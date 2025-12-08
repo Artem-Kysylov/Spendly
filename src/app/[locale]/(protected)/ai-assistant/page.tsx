@@ -15,6 +15,7 @@ import { ToneSelect } from "@/components/ai-assistant/ToneSelect";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ChevronLeft, Pencil } from "lucide-react";
 import { useBudgets } from "@/hooks/useBudgets";
+import { useUIStore } from "@/store/ui-store";
 
 export default function AIAssistantPage() {
   const {
@@ -34,6 +35,7 @@ export default function AIAssistantPage() {
     confirmAction,
   } = useChat();
   const tAI = useTranslations("assistant");
+  const t = useTranslations();
   const { isDesktop } = useDeviceType();
   const { session } = UserAuth();
   const [sessions, setSessions] = useState<
@@ -41,6 +43,7 @@ export default function AIAssistantPage() {
   >([]);
   const [historyOpen, setHistoryOpen] = useState(false);
   const { budgets } = useBudgets();
+  const { isTabBarVisible } = useUIStore();
 
   const refreshSessions = useCallback(async () => {
     const userId = session?.user?.id;
@@ -173,7 +176,7 @@ export default function AIAssistantPage() {
 
   const ChatPane = (
     <div
-      className={`h-full flex flex-col min-h-0 overflow-x-hidden min-w-0 pb-[calc(env(safe-area-inset-bottom)+12px)]`}
+      className={`h-[100dvh] flex flex-col min-h-0 overflow-x-hidden min-w-0 md:h-full`}
     >
       {!isDesktop && (
         <div className="sticky top-0 z-20 px-0 pt-2 pb-2 border-b border-border bg-background flex items-center justify-between w-full">
@@ -200,22 +203,24 @@ export default function AIAssistantPage() {
         </div>
       )}
       {messages.length === 0 ? (
-        <div className="flex-1 min-h-0 flex flex-col items-center justify-center px-4">
-          <div className="w-full max-w-[560px]">
-            <div className="text-center mb-4">
-              <div className="text-3xl mb-3">✨</div>
-              <h4 className="font-semibold mb-2">{tAI("welcomeTitle")}</h4>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {tAI("welcomeDesc")}
-              </p>
-              <div className="mt-4 px-4 py-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
-                <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
-                  💡 <strong>Tip:</strong> You can add transactions directly here. Just type something like "Lunch 500" or "Taxi 200" and I'll help you save it.
+        <div className="flex-1 min-h-0 overflow-y-auto w-full">
+          <div className="flex flex-col items-center justify-center min-h-full px-4 py-8">
+            <div className="w-full max-w-[560px]">
+              <div className="text-center mb-4">
+                <div className="text-3xl mb-3">✨</div>
+                <h4 className="font-semibold mb-2">{tAI("welcomeTitle")}</h4>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {tAI("welcomeDesc")}
                 </p>
+                <div className="mt-4 px-4 py-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                    💡 {tAI("tipAddTransaction")}
+                  </p>
+                </div>
               </div>
             </div>
+            <ChatPresets onSelectPreset={sendMessage} />
           </div>
-          <ChatPresets onSelectPreset={sendMessage} />
         </div>
       ) : (
         <div className="flex-1 min-h-0 min-w-0 flex flex-col">
@@ -229,8 +234,15 @@ export default function AIAssistantPage() {
         </div>
       )}
       {/* Инпут: обычный поток внизу контейнера, без sticky */}
-      <div className="border-t border-border bg-background w-full">
-        <div className="pt-2 sm:pb-safe">
+      {/* Инпут: обычный поток внизу контейнера, sticky bottom-0, с минимальным отступом снизу */}
+      {/* Инпут: обычный поток внизу контейнера, sticky bottom-0, с минимальным отступом снизу */}
+      <div
+        className={`shrink-0 z-10 bg-background border-t border-border md:pb-0 transition-[padding] duration-200 ${isTabBarVisible && !isDesktop
+            ? "pb-[calc(env(safe-area-inset-bottom)+64px)]"
+            : "pb-[env(safe-area-inset-bottom)]"
+          }`}
+      >
+        <div className="pt-2 px-2">
           <ChatInput
             onSendMessage={sendMessage}
             isThinking={isTyping}

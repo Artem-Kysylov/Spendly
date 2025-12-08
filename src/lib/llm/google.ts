@@ -84,102 +84,55 @@ export function streamGeminiText({
           temperature: 0.3,
           topP: 0.9,
           candidateCount: 1,
-          // Увеличиваем лимит ответных токенов, чтобы снизить вероятность finishReason=MAX_TOKENS без текста
           maxOutputTokens: 2048,
         },
       };
 
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      // Добавлен: ретраи при 429/503
+      const maxAttempts = Number(process.env.GEMINI_MAX_ATTEMPTS ?? "3");
+      let res: Response | null = null;
 
-      if (!res.ok) {
-        const errText = await res.text().catch(() => "");
-        if (debug) {
-          logLLMDebug("[Gemini] HTTP error", {
-            status: res.status,
-            statusText: res.statusText,
-            bodyLen: errText.length,
-          });
-        }
-        controller.enqueue(
-          `Error from Gemini (${res.status} ${res.statusText}). Please try again later.`,
-        );
-        controller.close();
-        return;
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) break;
+
+        const shouldRetry = res.status === 429 || res.status === 503;
+        if (!shouldRetry || attempt === maxAttempts) break;
+
+        const retryAfter = res.headers.get("retry-after");
+        const baseDelay =
+          retryAfter && /^\d+(\.\d+)?$/.test(retryAfter)
+            ? Math.ceil(Number(retryAfter) * 1000)
+            : 400 * attempt;
+        const jitter = Math.floor(Math.random() * 300);
+        await new Promise((r) => setTimeout(r, baseDelay + jitter));
       }
 
-      // Парсим обычный JSON-ответ и отдаём текст как единый поток
-      const json = await res.json().catch(() => null);
-      if (!json) {
-        if (debug) {
-          console.debug("[Gemini] Failed to parse response JSON");
-        }
-        controller.enqueue("Error: failed to parse Gemini response JSON");
-        controller.close();
-        return;
+      if (!res || !res.ok) {
+        // Вместо стрима ошибки — пробрасываем её в роут
+        const status = res?.status ?? 0;
+        const statusText = res?.statusText ?? "Unknown";
+        throw new Error(`GeminiHttp:${status}:${statusText}`);
       }
 
-      const candidates = (json as any)?.candidates ?? [];
-      // Диагностика (оставляем как было)
+      const errText = await res.text().catch(() => "");
       if (debug) {
-        try {
-          const firstParts = candidates?.[0]?.content?.parts ?? [];
-          const firstPartsLengths = firstParts.map((p: any) =>
-            typeof p?.text === "string" ? p.text.length : 0,
-          );
-          const blockReason = (json as any)?.promptFeedback?.blockReason;
-          const safetyRatings =
-            (json as any)?.promptFeedback?.safetyRatings ?? [];
-          const finishReason = candidates?.[0]?.finishReason;
-          logLLMDebug("[LLM_DEBUG gemini post]", {
-            requestId,
-            model,
-            candidatesLen: Array.isArray(candidates) ? candidates.length : 0,
-            firstCandidatePartsLen: firstParts.length,
-            firstCandidatePartsLengths: firstPartsLengths,
-            blockReason,
-            safetyRatings,
-            finishReason,
-          });
-        } catch {
-          // no-op
-        }
+        logLLMDebug("[Gemini] HTTP error", {
+          status: res.status,
+          statusText: res.statusText,
+          bodyLen: errText.length,
+        });
       }
-
-      // Собираем весь текст кандидатов
-      let fullText = "";
-      for (const c of candidates) {
-        const parts = c?.content?.parts ?? [];
-        for (const p of parts) {
-          const t = p?.text;
-          if (typeof t === "string" && t.length > 0) {
-            fullText += t;
-          }
-        }
-      }
-
-      if (fullText.trim().length === 0) {
-        const blockReason = (json as any)?.promptFeedback?.blockReason;
-        const candidatesCount = Array.isArray(candidates)
-          ? candidates.length
-          : 0;
-        controller.enqueue(
-          `LLM provider returned empty text candidates.${blockReason ? ` Blocked: ${blockReason}.` : ""} Candidates: ${candidatesCount}.`,
-        );
-        controller.close();
-        return;
-      }
-
-      // Поточная отдача: режем на чанки и отправляем с небольшой задержкой
-      const chunks = fullText.match(/.{1,80}/g) ?? [fullText];
-      for (const chunk of chunks) {
-        controller.enqueue(chunk);
-        await new Promise((r) => setTimeout(r, 35));
-      }
+      controller.enqueue(
+        `Error from Gemini (${res.status} ${res.statusText}). Please try again later.`,
+      );
       controller.close();
+      return;
     },
   });
 }

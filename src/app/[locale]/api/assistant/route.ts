@@ -18,6 +18,7 @@ import { getServerSupabaseClient } from "@/lib/serverSupabase";
 import { streamOpenAIText } from "@/lib/llm/openai";
 import { streamGeminiText } from "@/lib/llm/google";
 
+// Модульная область файла (добавляем RPM‑щит)
 // Минимальный стрим: нарезка строки по частям
 function streamText(text: string) {
   const encoder = new TextEncoder();
@@ -407,10 +408,33 @@ export async function POST(req: NextRequest) {
     isPro,
     enableLimits,
     message: safeMessage,
+    locale, // передаём текущую локаль
   });
   if (pre.kind === "action") {
     return new Response(JSON.stringify(pre), {
       headers: { "Content-Type": "application/json" },
+    });
+  } else if (pre.kind === "message") {
+    await logUsage({
+      userId,
+      provider: "canonical",
+      model: "pre",
+      promptLength: safeMessage.length,
+      responseLength: pre.message.length,
+      success: true,
+      intent,
+      period: periodDetected,
+      bypassUsed: true,
+    });
+    return new Response(JSON.stringify(pre), {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Provider": "canonical",
+        "X-Model": "pre",
+        "X-Request-Id": requestId,
+        "X-Daily-Limit": String(limits.dailyLimit),
+        "X-Usage-Used": String(Math.min(limits.used + 1, limits.dailyLimit)),
+      },
     });
   }
 
@@ -610,6 +634,13 @@ export async function POST(req: NextRequest) {
     }
   } catch (e) {
     const msg = e instanceof Error ? e.message : "Unknown provider error";
+
+    // Корректная отдача 429/503 от Gemini без fallback на OpenAI
+    const isGemini429 =
+      provider === "gemini" && typeof msg === "string" && /^GeminiHttp:429/.test(msg);
+    const isGemini503 =
+      provider === "gemini" && typeof msg === "string" && /^GeminiHttp:503/.test(msg);
+
     await logUsage({
       userId,
       provider,
@@ -624,11 +655,60 @@ export async function POST(req: NextRequest) {
       intent,
       period: periodDetected,
       bypassUsed: false,
-      blockReason: "provider_error",
+      blockReason: isGemini429
+        ? "rate_limited"
+        : isGemini503
+          ? "unavailable"
+          : "provider_error",
     });
+
+    if (isGemini429 || isGemini503) {
+      const status = isGemini429 ? 429 : 503;
+      const payload = {
+        error: isGemini429 ? "provider_rate_limited" : "provider_unavailable",
+        message:
+          isGemini429
+            ? "Gemini is rate-limited. Please try again later."
+            : "Gemini service is temporarily unavailable. Please try again later.",
+      };
+      return new Response(JSON.stringify(payload), {
+        status,
+        headers: {
+          "Content-Type": "application/json",
+          "X-Provider": "gemini",
+          "X-Model": process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
+          "X-Request-Id": requestId,
+        },
+      });
+    }
+
+    // Прочие ошибки — 500
     return new Response(JSON.stringify({ error: msg }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });
   }
+}
+
+// Модульная область файла (добавляем RPM‑щит)
+const GEMINI_RPM_LIMIT = Number(process.env.GEMINI_RPM_LIMIT ?? "5");
+const RPM_WINDOW_MS = 60_000;
+
+type RpmState = { windowStart: number; count: number };
+const geminiRpm: RpmState = { windowStart: Date.now(), count: 0 };
+
+function checkGeminiRpm(): { ok: boolean; retryAfterSec: number } {
+  const now = Date.now();
+  if (now - geminiRpm.windowStart >= RPM_WINDOW_MS) {
+    geminiRpm.windowStart = now;
+    geminiRpm.count = 0;
+  }
+  if (geminiRpm.count >= GEMINI_RPM_LIMIT) {
+    const retryAfterSec = Math.ceil(
+      (geminiRpm.windowStart + RPM_WINDOW_MS - now) / 1000,
+    );
+    return { ok: false, retryAfterSec };
+  }
+  geminiRpm.count += 1;
+  return { ok: true, retryAfterSec: 0 };
 }

@@ -286,6 +286,11 @@
       "showBiggest": "सबसे बड़े खर्च की श्रेणियाँ",
       "compareMonths": "इस महीने को पिछले से तुलना"
     },
+    "errors": {
+      "parseFailed": "लेन-देन नहीं बना सका। अपनी जानकारी जांचें और देखें कि बजट मौजूद है। प्रारूप: Add \"शीर्षक\" 12.34 to \"बजट\" budget.",
+      "budgetNotFound": "बजट \"{name}\" नहीं मिला। नाम जांचें या एक बनाएं।"
+    },
+    "tipAddTransaction": "टिप: इस तरह से लेन-देन जोड़ें — Add \"शीर्षक\" 12.34 to &lt;Budget&gt; budget. उदाहरण: Add \"दोपहर का भोजन\" 12.50 to food budget; Add \"टैक्सी\" 200 to transport budget. अल्पविराम और मुद्रा चिह्न समर्थित हैं।",
     "insights": {
       "title": "AI इनसाइट्स",
       "beta": "बीटा",
@@ -337,7 +342,12 @@
     "toasts": {
       "usedNOfDailyLimit": "आज आपने {count}/{limit} AI संदेश उपयोग किए।",
       "limitReached": "आज के AI संदेशों की सीमा पूरी हो गई है।"
-    }
+    },
+    "errors": {
+      "parseFailed": "लेन-देन बन नहीं पाया। कृपया इनपुट जाँचें और सुनिश्चित करें कि बजट मौजूद है। प्रारूप: Add \"शीर्षक\" 12.34 to <Budget> budget.",
+      "budgetNotFound": "बजट \"{name}\" नहीं मिला। कृपया नाम जाँचें या नया बजट बनाएँ।"
+    },
+    "tipAddTransaction": "टिप: लेन-देन जोड़ने के लिए — Add \"शीर्षक\" 12.34 to <Budget> budget प्रयोग करें। उदाहरण: Add \"Lunch\" 12.50 to food budget; Add \"Taxi\" 200 to transport budget. कॉमा और मुद्रा चिह्न समर्थित हैं."
   },
   "notFound": {
     "title": "क्षमा करें, यह पेज मौजूद नहीं है",

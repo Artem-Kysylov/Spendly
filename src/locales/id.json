@@ -276,7 +276,12 @@
       "proOnlyHint": "Nada asisten khusus tersedia di Pro. Tingkatkan untuk membuka kunci.",
       "title": "Nada Spendly Pal",
       "description": "Pilih nada respons untuk asisten AI Anda."
-    }
+    },
+    "errors": {
+      "parseFailed": "Tidak dapat membuat transaksi. Periksa input atau pastikan anggaran ada. Format: Add \"Judul\" 12.34 to <Budget> budget.",
+      "budgetNotFound": "Anggaran \"{name}\" tidak ditemukan. Periksa nama atau buat anggaran tersebut."
+    },
+    "tipAddTransaction": "Tip: Tambahkan transaksi dengan — Add \"Judul\" 12.34 to \"Budget\" budget. Contoh: Add \"Makan siang\" 12.50 to food budget; Add \"Taksi\" 200 to transport budget. Mendukung koma dan simbol mata uang."
   },
   "notFound": {
     "title": "Maaf, halaman ini tidak ada",
@@ -468,7 +473,6 @@
       "title": "Batas paket Gratis tercapai",
       "description": "Anda telah mencapai batas paket Gratis.",
       "budgets": "Hingga 3 anggaran di Gratis. Upgrade untuk tanpa batas.",
-      "assistant": "Hingga 10 pesan AI di Gratis. Upgrade untuk tanpa batas.",
       "cta": "Upgrade ke Pro"
     }
   }
