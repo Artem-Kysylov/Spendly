@@ -446,6 +446,39 @@
       "cta": "Upgrade to Pro"
     }
   },
+  "onboarding": {
+    "title": "Onboarding",
+    "autodetected": "Auto-detected",
+    "intro": {
+      "welcome": "Welcome! I’ll walk you through a quick setup.",
+      "firstTransactionPrompt": "Let’s add your first transaction to get started."
+    },
+    "actions": {
+      "addFirstTransaction": "Add first transaction",
+      "back": "Back",
+      "next": "Next",
+      "finish": "Finish"
+    },
+    "currency": {
+      "choosePrompt": "Choose your country and currency for correct formatting."
+    },
+    "budget": {
+      "createPrompt": "Set your main monthly budget.",
+      "saved": "Budget saved successfully!"
+    },
+    "finish": {
+      "summary": "All set! You can now explore your dashboard."
+    },
+    "transaction": {
+      "modalTitle": "Add Transaction",
+      "added": "Transaction added successfully!"
+    },
+    "errors": {
+      "authRequired": "Please sign in to continue.",
+      "budgetSaveFailed": "Failed to save budget. Please try again.",
+      "unexpected": "An unexpected error occurred."
+    }
+  },
   "modals": {
     "appInstall": {
       "title": "Get Spendly on your device"

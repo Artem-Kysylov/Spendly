@@ -22,6 +22,7 @@ import { Check, Edit2, Loader2 } from "lucide-react";
 import { saveProposedTransaction } from "@/app/[locale]/actions/transaction";
 import { UserAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
+import { HybridDatePicker } from "../ui-elements";
 
 interface Budget {
   id: string;
@@ -63,7 +64,29 @@ export function TransactionProposalCard({
   const [title, setTitle] = useState(proposal.title);
   const [amount, setAmount] = useState(proposal.amount.toString());
   const [selectedBudgetId, setSelectedBudgetId] = useState<string>("");
-  const [date, setDate] = useState(proposal.date);
+
+  // Парсим строку даты из предложения и нормализуем в Date
+  const parseInitialDate = (s: string): Date => {
+    const d1 = new Date(s);
+    if (!isNaN(d1.getTime())) return d1;
+    // Поддержка формата DD.MM.YYYY
+    const m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (m) {
+      const dd = Number(m[1]), mm = Number(m[2]) - 1, yyyy = Number(m[3]);
+      const d = new Date(yyyy, mm, dd);
+      if (!isNaN(d.getTime())) return d;
+    }
+    // Поддержка YYYY-MM-DD
+    const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m2) {
+      const yyyy = Number(m2[1]), mm = Number(m2[2]) - 1, dd = Number(m2[3]);
+      const d = new Date(yyyy, mm, dd);
+      if (!isNaN(d.getTime())) return d;
+    }
+    return new Date();
+  };
+
+  const [selectedDate, setSelectedDate] = useState<Date>(() => parseInitialDate(proposal.date));
 
   // Smart mapping: Find budget by category_name (case-insensitive)
   const mappedBudget = useMemo(() => {
@@ -101,7 +124,7 @@ export function TransactionProposalCard({
         amount: parseFloat(amount),
         type: proposal.type,
         budget_folder_id: selectedBudgetId,
-        created_at: date,
+        created_at: selectedDate.toISOString(), // сохраняем ISO
       });
 
       if (result.success) {
@@ -137,8 +160,8 @@ export function TransactionProposalCard({
     }).format(value);
   };
 
-  const formatDate = (isoDate: string) => {
-    return new Date(isoDate).toLocaleDateString("en-US", {
+  const formatDate = (d: Date) => {
+    return d.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -226,11 +249,11 @@ export function TransactionProposalCard({
 
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
+              <HybridDatePicker
+                selectedDate={selectedDate}
+                onDateSelect={setSelectedDate}
+                label="Date"
+                placeholder="Choose date"
               />
             </div>
           </>
@@ -267,7 +290,7 @@ export function TransactionProposalCard({
 
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Date</span>
-              <span className="font-medium">{formatDate(date)}</span>
+              <span className="font-medium">{formatDate(selectedDate)}</span>
             </div>
           </div>
         )}

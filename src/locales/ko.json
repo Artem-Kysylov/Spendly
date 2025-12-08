@@ -40,6 +40,39 @@
       "cta": "Pro로 업그레이드"
     }
   },
+  "onboarding": {
+    "title": "온보딩",
+    "autodetected": "자동 감지",
+    "intro": {
+      "welcome": "환영합니다! 짧은 설정 과정을 안내합니다.",
+      "firstTransactionPrompt": "먼저 첫 거래를 추가해 시작해 봅시다."
+    },
+    "actions": {
+      "addFirstTransaction": "첫 거래 추가",
+      "back": "뒤로",
+      "next": "다음",
+      "finish": "완료"
+    },
+    "currency": {
+      "choosePrompt": "국가와 통화를 선택해 올바르게 표시합니다."
+    },
+    "budget": {
+      "createPrompt": "메인 월간 예산을 설정하세요.",
+      "saved": "예산이 성공적으로 저장되었습니다!"
+    },
+    "finish": {
+      "summary": "모든 준비가 완료되었습니다! 대시보드로 이동하세요."
+    },
+    "transaction": {
+      "modalTitle": "거래 추가",
+      "added": "거래가 성공적으로 추가되었습니다!"
+    },
+    "errors": {
+      "authRequired": "계속하려면 로그인하세요.",
+      "budgetSaveFailed": "예산 저장에 실패했습니다. 다시 시도하세요.",
+      "unexpected": "예기치 않은 오류가 발생했습니다."
+    }
+  },
   "budgets": {
     "rollover": {
       "panelTitle": "이월",

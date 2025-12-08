@@ -7,6 +7,8 @@ import { UserAuth } from "@/context/AuthContext";
 import CreateMainBudget from "@/components/budgets/CreateMainBudget";
 import ToastMessage from "@/components/ui-elements/ToastMessage";
 import { useTranslations } from "next-intl";
+import { saveUserLocaleSettings } from "@/app/[locale]/actions/saveUserLocaleSettings";
+import type { UserLocaleSettings } from "@/types/locale";
 
 export default function BudgetSetupClient() {
   const { session, isReady } = UserAuth();
@@ -24,7 +26,7 @@ export default function BudgetSetupClient() {
     }
   }, [isReady, session, router]);
 
-  const onSubmit = async (budget: string) => {
+  const onSubmit = async (budget: string, settings?: UserLocaleSettings) => {
     if (!session?.user?.id) {
       setToast({ text: tSetupBudget("toast.signInRequired"), type: "error" });
       return;
@@ -35,6 +37,21 @@ export default function BudgetSetupClient() {
       if (!amount || amount <= 0) {
         setToast({ text: tSetupBudget("toast.invalidAmount"), type: "error" });
         return;
+      }
+
+      // Persist user locale settings (country, currency, locale)
+      try {
+        if (settings) {
+          await saveUserLocaleSettings({
+            userId: session.user.id,
+            country: settings.country,
+            currency: settings.currency,
+            locale: settings.locale,
+          });
+        }
+      } catch (e) {
+        // If locale save fails (e.g., missing users table), continue with budget save
+        console.warn("Failed to save locale settings:", e);
       }
 
       const { error } = await supabase

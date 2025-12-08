@@ -9,6 +9,39 @@
       "aiAssistant": "Asisten AI"
     }
   },
+  "onboarding": {
+    "title": "Onboarding",
+    "autodetected": "Terdeteksi otomatis",
+    "intro": {
+      "welcome": "Selamat datang! Saya akan memandu setup singkat.",
+      "firstTransactionPrompt": "Mari tambahkan transaksi pertama untuk memulai."
+    },
+    "actions": {
+      "addFirstTransaction": "Tambah transaksi pertama",
+      "back": "Kembali",
+      "next": "Berikutnya",
+      "finish": "Selesai"
+    },
+    "currency": {
+      "choosePrompt": "Pilih negara dan mata uang untuk format yang benar."
+    },
+    "budget": {
+      "createPrompt": "Tetapkan anggaran bulanan utama Anda.",
+      "saved": "Anggaran berhasil disimpan!"
+    },
+    "finish": {
+      "summary": "Semua siap! Anda dapat membuka dasbor."
+    },
+    "transaction": {
+      "modalTitle": "Tambah Transaksi",
+      "added": "Transaksi berhasil ditambahkan!"
+    },
+    "errors": {
+      "authRequired": "Silakan masuk untuk melanjutkan.",
+      "budgetSaveFailed": "Gagal menyimpan anggaran. Coba lagi.",
+      "unexpected": "Terjadi kesalahan tak terduga."
+    }
+  },
   "cta": {
     "upgradeToPro": "Tingkatkan ke Pro",
     "downloadApp": "Unduh Aplikasi",

@@ -22,11 +22,7 @@ import PeriodicUpgradeBanner from "@/components/free/PeriodicUpgradeBanner";
 import { useSubscription } from "@/hooks/useSubscription";
 import { UserAuth } from "@/context/AuthContext";
 
-export default function ProtectedLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ProtectedLayout({ children }: { children: React.ReactNode; }) {
   const { isDesktop, isMobile, isTablet } = useDeviceType();
   const pathname = usePathname();
   const prefersReduced = useReducedMotion();
@@ -67,7 +63,7 @@ export default function ProtectedLayout({
           <AnimatePresence mode="wait">
             <motion.main
               key={pathname}
-              className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 pb-[calc(env(safe-area-inset-bottom)+130px)] lg:pb-0 transition-colors duration-300"
+              className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 pb-[calc(env(safe-area-inset-bottom)+106px)] lg:pb-0 transition-colors duration-300"
               initial={pageVariants ? "initial" : false}
               animate={pageVariants ? "animate" : { opacity: 1 }}
               exit={pageVariants ? "exit" : undefined}

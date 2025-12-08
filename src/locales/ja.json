@@ -26,6 +26,39 @@
       "cta": "Pro にアップグレード"
     }
   },
+  "onboarding": {
+    "title": "オンボーディング",
+    "autodetected": "自動検出",
+    "intro": {
+      "welcome": "ようこそ！短いセットアップをご案内します。",
+      "firstTransactionPrompt": "まずは最初の取引を追加しましょう。"
+    },
+    "actions": {
+      "addFirstTransaction": "最初の取引を追加",
+      "back": "戻る",
+      "next": "次へ",
+      "finish": "完了"
+    },
+    "currency": {
+      "choosePrompt": "国と通貨を選択して正しく表示します。"
+    },
+    "budget": {
+      "createPrompt": "メインの月次予算を設定してください。",
+      "saved": "予算が保存されました！"
+    },
+    "finish": {
+      "summary": "準備完了！ダッシュボードへ進めます。"
+    },
+    "transaction": {
+      "modalTitle": "取引を追加",
+      "added": "取引が正常に追加されました！"
+    },
+    "errors": {
+      "authRequired": "続行するにはサインインしてください。",
+      "budgetSaveFailed": "予算の保存に失敗しました。もう一度お試しください。",
+      "unexpected": "予期しないエラーが発生しました。"
+    }
+  },
   "cta": {
     "upgradeToPro": "Pro にアップグレード",
     "downloadApp": "アプリをダウンロード",
