@@ -100,14 +100,64 @@ export const ChatMessages = ({
     return parts;
   };
 
-  // Hack: Preprocess AI content to fix broken markdown tables
+  // Robust Markdown preprocessing: fix GFM tables and section breaks
   const preprocessContent = (content: string) => {
     if (!content) return "";
-    // Fix tables: Replace "||-" or "||---" with "|\n|---" (insert newline)
-    let clean = content.replace(/\|\s*\|[-:]/g, (match) => {
-      return match.replace("||", "|\n|");
-    });
-    return clean;
+    let s = content.replace(/\r\n/g, "\n");
+
+    // Normalize stuck rows: model sometimes emits "||" instead of newline
+    s = s.replace(/\|\|/g, "|\n|");
+
+    const lines = s.split("\n");
+    const out: string[] = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
+
+      // If a heading and table header are glued (e.g., "Monthly Comparison| Period | Total |"), split them
+      if (!line.trim().startsWith("|") && line.includes("|")) {
+        const idx = line.indexOf("|");
+        const heading = line.slice(0, idx).trim();
+        const header = line.slice(idx).trim();
+        if (heading) {
+          out.push(`**${heading}**`);
+          out.push("");
+        }
+        line = header;
+      }
+
+      // Normalize table header/data rows to start/end with pipes
+      if (line.includes("|")) {
+        let row = line.trim();
+        if (!row.startsWith("|")) row = "|" + row;
+        if (!row.endsWith("|")) row = row + "|";
+        out.push(row);
+
+        // Insert alignment row after header if missing
+        const next = lines[i + 1] ?? "";
+        const looksLikeAlign = /^\s*\|?([\s:=-]+(?:\|[\s:=-]+)+)\|?\s*$/.test(next);
+        const looksLikeHeader = /^(\|\s*[^|]+)+\|$/.test(row);
+        if (!looksLikeAlign && looksLikeHeader) {
+          const colCount = row.split("|").filter(Boolean).length;
+          const align = "|" + Array(colCount).fill("---").join("|") + "|";
+          out.push(align);
+        } else if (looksLikeAlign) {
+          const normalized = next.trim().startsWith("|") ? next.trim() : "|" + next.trim() + "|";
+          out.push(normalized);
+          i++;
+        }
+        continue;
+      }
+
+      out.push(line);
+    }
+
+    s = out.join("\n");
+
+    // Ensure section headers break out of tables
+    s = s.replace(/(\n|^)\s*(Insight|Tip|Advice)\s*\**\s*:/gi, "\n\n**$2**: ");
+
+    return s;
   };
 
   const markdownSchema = {
@@ -178,18 +228,18 @@ export const ChatMessages = ({
                 </div>
               )}
               <div
-                className={`w-fit max-w-[85%] p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words overflow-x-auto ${message.role === "user"
-                  ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md"
-                  : "bg-gray-100 text-secondary-black rounded-bl-md border border-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                  }`}
-              >
+            className={`w-fit max-w-[85%] p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words whitespace-pre-wrap overflow-x-auto ${message.role === "user"
+              ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md"
+              : "bg-gray-100 text-secondary-black rounded-bl-md border border-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700"
+              }`}
+          >
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm, remarkBreaks]}
                   rehypePlugins={[[rehypeSanitize, markdownSchema]]}
                   components={{
                     // Text styling
                     p: ({ node, ...props }) => (
-                      <p className="mb-3 last:mb-0" {...props} />
+                      <p className="mb-3 whitespace-pre-wrap last:mb-0" {...props} />
                     ),
                     ul: ({ node, ...props }) => (
                       <ul className="my-2 ml-6 list-disc [&>li]:mt-1" {...props} />

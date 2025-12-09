@@ -523,7 +523,5 @@ export const aiResponse = async (req: AIRequest): Promise<AIResponse> => {
   const complex = isComplexRequest(message);
   const model = selectModel(isPro, complex);
 
-  const summary = `Model: ${model}. Last 30 transactions loaded. Last month transactions: ${ctx.lastMonthTxs.length}. Ask me to add items using "add ... to ... budget".`;
-
-  return { kind: "message", message: summary, model };
+  return { kind: "message", message: "", model };
 };

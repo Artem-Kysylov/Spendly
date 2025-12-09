@@ -114,23 +114,37 @@ export function streamGeminiText({
       }
 
       if (!res || !res.ok) {
-        // Вместо стрима ошибки — пробрасываем её в роут
         const status = res?.status ?? 0;
         const statusText = res?.statusText ?? "Unknown";
         throw new Error(`GeminiHttp:${status}:${statusText}`);
       }
 
-      const errText = await res.text().catch(() => "");
-      if (debug) {
-        logLLMDebug("[Gemini] HTTP error", {
-          status: res.status,
-          statusText: res.statusText,
-          bodyLen: errText.length,
-        });
+      const data = await res.json().catch(() => null);
+      let text = "";
+      try {
+        const candidates = (data as any)?.candidates || [];
+        if (Array.isArray(candidates) && candidates.length > 0) {
+          const parts = candidates[0]?.content?.parts || [];
+          text = parts
+            .map((p: any) => (typeof p?.text === "string" ? p.text : ""))
+            .join("");
+        }
+      } catch {
+        /* no-op */
       }
-      controller.enqueue(
-        `Error from Gemini (${res.status} ${res.statusText}). Please try again later.`,
-      );
+
+      if (!text || text.trim().length === 0) {
+        controller.enqueue("LLM provider returned empty text candidates.");
+        controller.close();
+        return;
+      }
+
+      const CHUNK_SIZE = 60;
+      const chunks = text.match(new RegExp(`.{1,${CHUNK_SIZE}}`, "g")) || [text];
+      for (const chunk of chunks) {
+        controller.enqueue(chunk);
+        await new Promise((r) => setTimeout(r, 50));
+      }
       controller.close();
       return;
     },

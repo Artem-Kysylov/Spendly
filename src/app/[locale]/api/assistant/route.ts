@@ -414,7 +414,7 @@ export async function POST(req: NextRequest) {
     return new Response(JSON.stringify(pre), {
       headers: { "Content-Type": "application/json" },
     });
-  } else if (pre.kind === "message") {
+  } else if (pre.kind === "message" && pre.message && pre.message.trim().length > 0) {
     await logUsage({
       userId,
       provider: "canonical",
