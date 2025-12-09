@@ -49,11 +49,13 @@ function MobileTabBar() {
         exit={prefersReduced ? undefined : { opacity: 0, y: 20 }}
         transition={navTransition}
         style={{ willChange: "opacity, transform" }}
-        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 h-[106px] pb-safe-bottom border-t border-border bg-white dark:bg-card lg:hidden z-50`}
+        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 h-[106px] border-t border-border bg-white dark:bg-card lg:hidden z-50`}
         aria-label="Bottom navigation"
       >
-        {/* 5-элементная сетка: [Дашборд] [Транзакции] [FAB +] [Бюджеты] [AI] */}
-        <ul className="h-full grid grid-cols-5 pt-1 -translate-y-[5px]">
+        {/* Внутренний враппер с Safe Area для iOS */}
+        <div className="pb-[env(safe-area-inset-bottom)]">
+          {/* 5-элементная сетка: [Дашборд] [Транзакции] [FAB +] [Бюджеты] [AI] */}
+          <ul className="h-full grid grid-cols-5 pt-1 -translate-y-[5px]">
           {/* Дашборд */}
           <li className="flex items-center justify-center">
             <Link
@@ -150,7 +152,8 @@ function MobileTabBar() {
               </span>
             </button>
           </li>
-        </ul>
+          </ul>
+        </div>
       </motion.nav>
     </AnimatePresence>
   );
