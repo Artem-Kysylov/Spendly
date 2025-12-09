@@ -223,12 +223,12 @@ function DashboardClient() {
             transition={{ duration: 0.28 }}
             className="mt-[30px] px-4 sm:px-4 md:px-5 w-full max-w-[500px] md:max-w-none mx-auto flex flex-col gap-5 overflow-x-hidden min-w-0"
           >
-            <CompactKPICard
+            {/* <CompactKPICard
               budget={budget}
               totalExpenses={totalExpenses}
               expensesTrend={expensesTrend}
               onBudgetClick={handleIconClick}
-            />
+            /> */}
 
             <AiInsightTeaser
               budget={budget}
