@@ -49,13 +49,13 @@ function MobileTabBar() {
         exit={prefersReduced ? undefined : { opacity: 0, y: 20 }}
         transition={navTransition}
         style={{ willChange: "opacity, transform" }}
-        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 h-[106px] border-t border-border bg-white dark:bg-card lg:hidden z-50`}
+        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 lg:hidden z-50 border-t border-border bg-background dark:bg-card h-[calc(84px+env(safe-area-inset-bottom))]`}
         aria-label="Bottom navigation"
       >
         {/* Внутренний враппер с Safe Area для iOS */}
-        <div className="pb-[env(safe-area-inset-bottom)]">
+        <div className="h-full pb-[env(safe-area-inset-bottom)]">
           {/* 5-элементная сетка: [Дашборд] [Транзакции] [FAB +] [Бюджеты] [AI] */}
-          <ul className="h-full grid grid-cols-5 pt-1 -translate-y-[5px]">
+          <ul className="h-full grid grid-cols-5 pt-1 pb-2">
           {/* Дашборд */}
           <li className="flex items-center justify-center">
             <Link

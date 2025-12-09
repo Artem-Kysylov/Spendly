@@ -63,7 +63,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           <AnimatePresence mode="wait">
             <motion.main
               key={pathname}
-              className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 pb-[calc(env(safe-area-inset-bottom)+130px)] lg:pb-0 transition-colors duration-300"
+              className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 pb-[calc(env(safe-area-inset-bottom)+96px)] lg:pb-0 transition-colors duration-300"
               initial={pageVariants ? "initial" : false}
               animate={pageVariants ? "animate" : { opacity: 1 }}
               exit={pageVariants ? "exit" : undefined}
