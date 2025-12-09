@@ -58,6 +58,7 @@ export default function BudgetDetailsClient() {
     type: "expense",
   });
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [rolloverPreview, setRolloverPreview] = useState<number>(0);
 
   // Infinite scroll hook
@@ -296,7 +297,7 @@ export default function BudgetDetailsClient() {
         }
       }
 
-      handleToastMessage(tBudgets("details.toast.updateSuccess"), "success");
+      handleToastMessage("Budget updated successfully!", "success");
       closeEditModal();
       fetchBudgetDetails();
     } catch (error) {
@@ -358,7 +359,7 @@ export default function BudgetDetailsClient() {
         return;
       }
 
-      handleToastMessage(tBudgets("details.toast.updateSuccess"), "success");
+      handleToastMessage("Transaction updated successfully!", "success");
       refetchTransactions();
       window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
     } catch (error) {
@@ -368,7 +369,7 @@ export default function BudgetDetailsClient() {
   };
 
   const handleTransactionUpdateSuccess = async () => {
-    handleToastMessage(tBudgets("details.toast.updateSuccess"), "success");
+    handleToastMessage("Transaction updated successfully!", "success");
     refetchTransactions();
     window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
   };
@@ -434,14 +435,7 @@ export default function BudgetDetailsClient() {
                         <MobileTransactionCard
                           key={transaction.id}
                           transaction={transaction}
-                          onEdit={(tx) => handleEditTransaction({
-                            id: tx.id,
-                            title: tx.title,
-                            amount: tx.amount,
-                            type: tx.type,
-                            budget_folder_id: tx.budget_folder_id,
-                            created_at: tx.created_at,
-                          })}
+                          onEdit={(tx) => setEditingTransaction(tx)}
                           onDelete={handleDeleteTransaction}
                         />
                       ))}
@@ -499,6 +493,7 @@ export default function BudgetDetailsClient() {
               transactions={transactions}
               onDeleteTransaction={handleDeleteTransaction}
               onEditTransaction={handleEditTransaction}
+              onEditClick={(tx) => setEditingTransaction(tx)}
             />
             {/* Loading Indicator for Next Page */}
             <div ref={observerTarget} className="py-4 flex justify-center">
@@ -557,6 +552,19 @@ export default function BudgetDetailsClient() {
             refetchTransactions();
           }}
           initialBudgetId={id}
+        />
+      )}
+
+      {editingTransaction && (
+        <TransactionModal
+          title={tTransactions("table.modal.editTitle")}
+          initialData={editingTransaction}
+          onClose={() => setEditingTransaction(null)}
+          onSubmit={(message: string, type: ToastMessageProps["type"]) => {
+            handleToastMessage(message, type);
+            refetchTransactions();
+            setEditingTransaction(null);
+          }}
         />
       )}
     </div>

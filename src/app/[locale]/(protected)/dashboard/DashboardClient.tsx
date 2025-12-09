@@ -221,7 +221,7 @@ function DashboardClient() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.28 }}
-            className="mt-[30px] px-3 sm:px-3 md:px-5 w-full max-w-[500px] md:max-w-none mx-auto flex flex-col gap-5 overflow-x-hidden min-w-0"
+            className="mt-[30px] px-3 sm:px-3 md:px-5 w-full max-w-[500px] md:max-w-none mx-auto flex flex-col gap-4 overflow-x-hidden min-w-0 justify-start"
           >
             <CompactKPICard
               budget={budget}
