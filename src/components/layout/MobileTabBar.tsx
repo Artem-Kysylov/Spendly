@@ -49,7 +49,7 @@ function MobileTabBar() {
         exit={prefersReduced ? undefined : { opacity: 0, y: 20 }}
         transition={navTransition}
         style={{ willChange: "opacity, transform" }}
-        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 h-[calc(106px+env(safe-area-inset-bottom))] border-t border-border bg-white dark:bg-card lg:hidden z-50 pb-[env(safe-area-inset-bottom)]`}
+        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 h-[calc(106px+env(safe-area-inset-bottom))] border-t border-border bg-white dark:bg-card lg:hidden z-50`}
         aria-label="Bottom navigation"
       >
         {/* 5-элементная сетка: [Дашборд] [Транзакции] [FAB +] [Бюджеты] [AI] */}
@@ -61,8 +61,8 @@ function MobileTabBar() {
               aria-label={tLayout("sidebar.dashboard")}
               aria-current={pathname === "/dashboard" ? "page" : undefined}
               className={`flex flex-col items-center justify-center h-full w-full gap-0.5 transition-colors ${pathname === "/dashboard"
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                ? "text-primary"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               <LayoutDashboard className="h-6 w-6" />
@@ -79,8 +79,8 @@ function MobileTabBar() {
               aria-label={tLayout("sidebar.transactions")}
               aria-current={pathname === "/transactions" ? "page" : undefined}
               className={`flex flex-col items-center justify-center h-full w-full gap-0.5 transition-colors ${pathname === "/transactions"
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                ? "text-primary"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               <CreditCard className="h-6 w-6" />
@@ -111,8 +111,8 @@ function MobileTabBar() {
               aria-label={tLayout("sidebar.budgets")}
               aria-current={pathname === "/budgets" ? "page" : undefined}
               className={`flex flex-col items-center justify-center h-full w-full gap-0.5 transition-colors ${pathname === "/budgets"
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-foreground"
+                ? "text-primary"
+                : "text-muted-foreground hover:text-foreground"
                 }`}
             >
               <Wallet className="h-6 w-6" />
