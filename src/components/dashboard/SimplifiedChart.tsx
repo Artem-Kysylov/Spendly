@@ -47,7 +47,7 @@ export default function SimplifiedChart() {
   if (isLoading) {
     return (
       <Card className="w-full overflow-hidden">
-        <CardHeader className="px-5 pt-5 pb-3 sm:px-6">
+        <CardHeader className="px-4 pt-5 pb-3 sm:px-5">
           <CardTitle>{t("titles.analytics")}</CardTitle>
         </CardHeader>
         <CardContent>
@@ -61,7 +61,7 @@ export default function SimplifiedChart() {
   if (!data || data.length === 0) {
     return (
       <Card className="w-full overflow-hidden">
-        <CardHeader className="px-5 pt-5 pb-3 sm:px-6">
+        <CardHeader className="px-4 pt-5 pb-3 sm:px-5">
           <CardTitle>{t("titles.analytics")}</CardTitle>
           <p className="text-sm text-muted-foreground">
             {t("labels.expenses")} • {formatCurrency(0)}
@@ -80,18 +80,18 @@ export default function SimplifiedChart() {
 
   return (
     <Card className="w-full overflow-hidden">
-      <CardHeader className="px-5 pt-5 pb-3 sm:px-6">
+      <CardHeader className="px-4 pt-5 pb-3 sm:px-5">
         <CardTitle>{t("titles.analytics")}</CardTitle>
         <p className="text-sm text-muted-foreground">
           {t("labels.expenses")} • {formatCurrency(total)}
         </p>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="h-[200px] w-full px-5 pb-5 min-w-0">
+        <div className="h-[200px] w-full px-4 pb-5 min-w-0 overflow-x-hidden">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={filledData}
-              margin={{ top: 10, right: 10, left: 0, bottom: 0 }}
+              margin={{ top: 10, right: 0, left: 0, bottom: 0 }}
             >
               <Tooltip
                 content={({ active, payload }) => {

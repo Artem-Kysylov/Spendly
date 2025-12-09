@@ -33,7 +33,7 @@ export default function CompactKPICard({
   const remainingBudget = budget - totalExpenses;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 w-full min-w-0">
       {/* Card 1: Total Budget */}
       <div className="bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-between h-[110px] md:h-[140px] relative group">
         <button
