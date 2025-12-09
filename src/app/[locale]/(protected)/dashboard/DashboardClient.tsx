@@ -200,7 +200,7 @@ function DashboardClient() {
             <ToastMessage text={toastMessage.text} type={toastMessage.type} />
           )}
           <motion.div
-            className="w-full max-w-[500px] md:max-w-none mx-auto flex flex-col items-center gap-5 text-center mt-[30px] px-3 sm:px-3 md:px-5 md:flex-row md:justify-between md:text-left"
+            className="w-full max-w-[500px] md:max-w-none mx-auto flex flex-col items-center gap-5 text-center mt-[30px] px-4 md:px-5 md:flex-row md:justify-between md:text-left"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
@@ -221,7 +221,7 @@ function DashboardClient() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.28 }}
-            className="mt-[30px] px-3 sm:px-3 md:px-5 w-full max-w-[500px] md:max-w-none mx-auto flex flex-col gap-5 overflow-x-hidden min-w-0"
+            className="mt-[30px] px-4 md:px-5 w-full max-w-[500px] md:max-w-none mx-auto flex flex-col gap-5 overflow-x-hidden min-w-0"
           >
             <CompactKPICard
               budget={budget}
