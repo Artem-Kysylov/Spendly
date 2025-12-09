@@ -236,7 +236,7 @@ function DashboardClient() {
               transactions={transactions}
             />
 
-            <motion.div
+            {/* <motion.div
               style={{ willChange: "opacity" }}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -244,7 +244,7 @@ function DashboardClient() {
               className="mt-8 min-w-0 overflow-x-hidden"
             >
               <SimplifiedChart />
-            </motion.div>
+            </motion.div> */}
 
             {isLoading ? (
               <Spinner />

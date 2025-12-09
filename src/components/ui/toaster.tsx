@@ -7,11 +7,11 @@ export function Toaster() {
   const { toasts, dismiss } = useToast();
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 w-full sm:w-auto px-4 sm:px-0 pointer-events-none [&>*]:pointer-events-auto">
+    <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+8px)] left-0 right-0 sm:right-4 sm:left-auto z-50 flex flex-col gap-2 w-full sm:w-auto px-4 sm:px-0 pointer-events-none [&>*]:pointer-events-auto">
       {toasts.map((t) => {
         const variant = t.variant ?? "default";
         const base =
-          "w-[400px] h-[65px] rounded-lg shadow-lg px-4 py-3 flex items-center gap-3";
+          "w-full sm:w-[400px] h-[65px] rounded-lg shadow-lg px-4 py-3 flex items-center gap-3 mx-auto";
         const color =
           variant === "success"
             ? "bg-success text-success-foreground"
