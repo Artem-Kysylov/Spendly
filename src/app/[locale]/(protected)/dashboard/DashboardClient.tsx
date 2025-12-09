@@ -230,11 +230,11 @@ function DashboardClient() {
               onBudgetClick={handleIconClick}
             />
 
-            {/* <AiInsightTeaser
+            <AiInsightTeaser
               budget={budget}
               totalExpenses={totalExpenses}
               transactions={transactions}
-            /> */}
+            />
 
             <motion.div
               style={{ willChange: "opacity" }}
