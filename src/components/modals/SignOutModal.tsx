@@ -42,8 +42,8 @@ const SignOutModal = ({ title, text, onClose, signOut }: SignOutModalProps) => {
           </DialogClose>
         </DialogHeader>
         <p className="py-4 text-secondary-black dark:text-gray-300">{text}</p>
-        <DialogFooter>
-          <div className="flex gap-2">
+        <DialogFooter className="justify-center sm:justify-center">
+          <div className="flex items-center justify-center gap-2">
             <Button
               text={tCommon("cancel")}
               variant="ghost"

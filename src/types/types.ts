@@ -587,6 +587,8 @@ export interface UseChatReturn {
   // Новый: текущий тон и setter
   assistantTone: AssistantTone;
   setAssistantTone: (tone: AssistantTone) => Promise<void> | void;
+  // Валюта интерфейса ассистента
+  currency?: string;
 
   // Новый: текущая AI-сессия и работа с историей
   currentSessionId: string | null;

@@ -22,6 +22,7 @@ const AIAssistantProvider: React.FC = () => {
     pendingActionPayload,
     assistantTone,
     setAssistantTone,
+    currency,
   } = useChat();
   const { isDesktop } = useDeviceType();
 
@@ -53,6 +54,7 @@ const AIAssistantProvider: React.FC = () => {
             pendingAction={pendingActionPayload}
             assistantTone={assistantTone}
             onToneChange={setAssistantTone}
+            currency={currency}
           />
         </SheetContent>
       </Sheet>

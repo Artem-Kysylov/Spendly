@@ -8,6 +8,7 @@ import { PresetChipsRow } from "./PresetChipsRow";
 import { useTranslations } from "next-intl";
 import { SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useSubscription } from "@/hooks/useSubscription";
+import { formatMoney } from "@/lib/format/money";
 import UpgradeCornerPanel from "@/components/free/UpgradeCornerPanel";
 
 export const AIChatWindow = ({
@@ -23,6 +24,7 @@ export const AIChatWindow = ({
   pendingAction,
   assistantTone,
   onToneChange,
+  currency,
 }: {
   isOpen: boolean;
   messages: ChatMessage[];
@@ -47,11 +49,12 @@ export const AIChatWindow = ({
   onToneChange: (
     tone: "neutral" | "friendly" | "formal" | "playful",
   ) => void | Promise<void>;
+  currency?: string;
 }) => {
-  if (!isOpen) return null;
   const tAI = useTranslations("assistant");
   const { subscriptionPlan } = useSubscription();
   const isFree = subscriptionPlan === "free";
+  if (!isOpen) return null;
 
   return (
     <>
@@ -100,7 +103,7 @@ export const AIChatWindow = ({
             ) : (
               <div className="min-h-0 flex flex-col">
                 <div className="overflow-y-auto">
-                  <ChatMessages messages={messages} isTyping={isTyping} />
+                  <ChatMessages messages={messages} isTyping={isTyping} currency={currency} />
                 </div>
               </div>
             )}
@@ -113,7 +116,7 @@ export const AIChatWindow = ({
             )}
           </div>
 
-          {/* Нижняя строка: поле ввода, без absolute */}
+          {/* Нижняя строка: поле ввода, фиксированная снизу */}
           {hasPendingAction && !isTyping && (
             <div className="px-4 py-3 border-t border-border bg-background">
               <div className="text-sm font-semibold text-secondary-black dark:text-white mb-1">
@@ -139,7 +142,7 @@ export const AIChatWindow = ({
                         <span className="text-gray-500 dark:text-gray-400">
                           {tAI("confirm.fields.amount")}:
                         </span>{" "}
-                        ${Number(pendingAction.amount ?? 0).toFixed(2)}
+                        {formatMoney(Number(pendingAction.amount ?? 0), currency || "USD", navigator.language || "en-US")}
                       </div>
                     </>
                   )}
@@ -161,7 +164,7 @@ export const AIChatWindow = ({
                         <span className="text-gray-500 dark:text-gray-400">
                           Avg amount:
                         </span>{" "}
-                        ${Number(pendingAction.avg_amount ?? 0).toFixed(2)}
+                        {formatMoney(Number(pendingAction.avg_amount ?? 0), currency || "USD", navigator.language || "en-US")}
                       </div>
                       <div>
                         <span className="text-gray-500 dark:text-gray-400">
@@ -173,14 +176,16 @@ export const AIChatWindow = ({
                   )}
                 </div>
               )}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <button
+                  type="button"
                   className="px-3 py-1 rounded bg-green-600 text-white text-sm"
                   onClick={() => onConfirmAction(true)}
                 >
                   {tAI("actions.accept")}
                 </button>
                 <button
+                  type="button"
                   className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 text-secondary-black dark:text-white text-sm"
                   onClick={() => onConfirmAction(false)}
                 >
@@ -190,7 +195,7 @@ export const AIChatWindow = ({
             </div>
           )}
 
-          <div className="bg-background flex-shrink-0 border-t border-border px-4 pb-2 pt-4">
+          <div className="bg-background flex-shrink-0 border-t border-border px-4 pb-[env(safe-area-inset-bottom)] pt-4 sticky bottom-0 z-20">
             <div className="flex items-center gap-2">
               <div className="flex-1">
                 <ChatInput

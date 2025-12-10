@@ -121,6 +121,8 @@ export function streamOpenAIText({
               if (typeof delta === "string" && delta.length > 0) {
                 controller.enqueue(delta);
                 totalTextLen += delta.length;
+                const jitter = Math.floor(Math.random() * 40);
+                await new Promise((r) => setTimeout(r, 75 + jitter));
               }
             } catch {
               // skip

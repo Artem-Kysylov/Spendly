@@ -92,19 +92,29 @@ export function streamGeminiText({
       const maxAttempts = Number(process.env.GEMINI_MAX_ATTEMPTS ?? "3");
       let res: Response | null = null;
 
+      const timeoutMs = Number(process.env.GEMINI_TIMEOUT_MS ?? "10000");
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-        res = await fetch(url, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        const ac = new AbortController();
+        const t = setTimeout(() => ac.abort(), timeoutMs);
+        try {
+          res = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            signal: ac.signal,
+          });
+        } catch {
+          res = null;
+        } finally {
+          clearTimeout(t);
+        }
 
-        if (res.ok) break;
+        if (res && res.ok) break;
 
-        const shouldRetry = res.status === 429 || res.status === 503;
+        const shouldRetry = !res || res.status === 429 || res.status === 503;
         if (!shouldRetry || attempt === maxAttempts) break;
 
-        const retryAfter = res.headers.get("retry-after");
+        const retryAfter = res?.headers?.get("retry-after") || "";
         const baseDelay =
           retryAfter && /^\d+(\.\d+)?$/.test(retryAfter)
             ? Math.ceil(Number(retryAfter) * 1000)
@@ -114,8 +124,8 @@ export function streamGeminiText({
       }
 
       if (!res || !res.ok) {
-        const status = res?.status ?? 0;
-        const statusText = res?.statusText ?? "Unknown";
+        const status = res?.status ?? 503;
+        const statusText = res ? res.statusText : "Timeout";
         throw new Error(`GeminiHttp:${status}:${statusText}`);
       }
 
@@ -139,11 +149,12 @@ export function streamGeminiText({
         return;
       }
 
-      const CHUNK_SIZE = 60;
+      const CHUNK_SIZE = 48;
       const chunks = text.match(new RegExp(`.{1,${CHUNK_SIZE}}`, "g")) || [text];
       for (const chunk of chunks) {
         controller.enqueue(chunk);
-        await new Promise((r) => setTimeout(r, 50));
+        const jitter = Math.floor(Math.random() * 40);
+        await new Promise((r) => setTimeout(r, 80 + jitter));
       }
       controller.close();
       return;

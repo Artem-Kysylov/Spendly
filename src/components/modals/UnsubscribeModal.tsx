@@ -43,8 +43,8 @@ export default function UnsubscribeModal({
         <p className="py-4 text-secondary-black dark:text-gray-300">
           😢 {tSettings("dangerZone.description")}
         </p>
-        <DialogFooter>
-          <div className="flex gap-2">
+        <DialogFooter className="justify-center sm:justify-center">
+          <div className="flex items-center justify-center gap-2">
             <Button
               text={tSettings("dangerZone.modal.cancel")}
               variant="ghost"

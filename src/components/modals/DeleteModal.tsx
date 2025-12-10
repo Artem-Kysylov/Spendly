@@ -59,8 +59,8 @@ const DeleteModal = ({
           </DialogClose>
         </DialogHeader>
         <p className="py-4">{text}</p>
-        <DialogFooter>
-          <form onSubmit={handleSubmit} className="flex gap-2">
+        <DialogFooter className="justify-center sm:justify-center">
+          <form onSubmit={handleSubmit} className="flex items-center justify-center gap-2">
             <Button
               variant="ghost"
               text={tCommon("cancel")}

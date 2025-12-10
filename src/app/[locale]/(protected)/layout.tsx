@@ -5,9 +5,7 @@ import React from "react";
 import TopBar from "@/components/layout/TopBar";
 import Sidebar from "@/components/layout/Sidebar";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
-import {
-  AIAssistantProvider,
-} from "@/components/ai-assistant";
+import { AIAssistantProvider } from "@/components/ai-assistant";
 import MobileTabBar from "@/components/layout/MobileTabBar";
 import AddTransactionProvider from "@/components/layout/AddTransactionProvider";
 import useDeviceType from "@/hooks/useDeviceType";
@@ -63,13 +61,19 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           <AnimatePresence mode="wait">
             <motion.main
               key={pathname}
-              className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 pb-[calc(env(safe-area-inset-bottom)+96px)] lg:pb-0 transition-colors duration-300"
+              className={`${pathname?.includes("/ai-assistant") && isDesktop ? "flex-1 overflow-hidden min-w-0 min-h-0 transition-colors duration-300 overscroll-none" : "flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 pb-[calc(env(safe-area-inset-bottom)+96px)] lg:pb-0 transition-colors duration-300"}`}
               initial={pageVariants ? "initial" : false}
               animate={pageVariants ? "animate" : { opacity: 1 }}
               exit={pageVariants ? "exit" : undefined}
               variants={pageVariants}
               transition={transition}
-              style={{ willChange: "opacity, transform" }}
+              style={{
+                willChange: "opacity, transform",
+                touchAction:
+                  pathname?.includes("/ai-assistant") && isDesktop
+                    ? "pan-y"
+                    : undefined,
+              }}
             >
               {children}
             </motion.main>

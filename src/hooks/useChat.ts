@@ -1,7 +1,6 @@
-// Хук: useChat — переписан полностью, с корректной областью видимости и синхронизацией
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { ChatMessage, UseChatReturn } from "@/types/types";
 import { UserAuth } from "@/context/AuthContext";
 import { useTranslations, useLocale } from "next-intl";
@@ -68,6 +67,7 @@ export const useChat = (): UseChatReturn => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [uiCurrency, setUICurrency] = useState<string>("USD");
 
   const { session } = UserAuth();
   const [abortController, setAbortController] =
@@ -81,6 +81,40 @@ export const useChat = (): UseChatReturn => {
   const locale = useLocale();
   const { subscriptionPlan } = useSubscription();
   const { toast } = useToast();
+  const PRESET_CACHE_TTL_MS = 45000;
+  const presetPrompts = useMemo(() => [
+    tAssistant("presets.showWeek"),
+    tAssistant("presets.saveMoney"),
+    tAssistant("presets.analyzePatterns"),
+    tAssistant("presets.createBudgetPlan"),
+    tAssistant("presets.showBiggest"),
+    tAssistant("presets.compareMonths"),
+  ], [tAssistant]);
+  const isPresetMessage = useCallback((text: string) => {
+    const s = (text || "").trim();
+    return presetPrompts.includes(s);
+  }, [presetPrompts]);
+  const readPresetCache = (): Record<string, { ts: number; text: string }> => {
+    try {
+      const raw = window.localStorage.getItem("spendly:ai_preset_cache") || "{}";
+      const obj = JSON.parse(raw);
+      return typeof obj === "object" && obj ? obj : {};
+    } catch { return {}; }
+  };
+  const writePresetCache = (prompt: string, text: string) => {
+    try {
+      const cache = readPresetCache();
+      cache[prompt] = { ts: Date.now(), text };
+      window.localStorage.setItem("spendly:ai_preset_cache", JSON.stringify(cache));
+    } catch {}
+  };
+  const getCachedPreset = (prompt: string): string | null => {
+    const cache = readPresetCache();
+    const entry = cache[prompt];
+    if (!entry) return null;
+    if (Date.now() - entry.ts > PRESET_CACHE_TTL_MS) return null;
+    return entry.text;
+  };
   const openChat = useCallback(() => setIsOpen(true), []);
   const closeChat = useCallback(() => setIsOpen(false), []);
 
@@ -100,6 +134,7 @@ export const useChat = (): UseChatReturn => {
   const [assistantTone, setAssistantToneState] =
     useState<AssistantTone>("neutral");
   const persistTimer = useRef<number | null>(null);
+  const skipNextLoadRef = useRef(false);
 
   useEffect(() => {
     const initTone = async () => {
@@ -251,9 +286,12 @@ export const useChat = (): UseChatReturn => {
   }, []);
 
   useEffect(() => {
-    if (currentSessionId) {
-      void loadSessionMessages(currentSessionId);
+    if (!currentSessionId) return;
+    if (skipNextLoadRef.current) {
+      skipNextLoadRef.current = false;
+      return;
     }
+    void loadSessionMessages(currentSessionId);
   }, [currentSessionId, loadSessionMessages]);
 
   // Авто‑титул: короткий заголовок 3–4 слова
@@ -320,6 +358,7 @@ export const useChat = (): UseChatReturn => {
   const saveLocalSession = useCallback(
     (firstMessage: string) => {
       const sid = `local-${Date.now()}`;
+      skipNextLoadRef.current = true;
       setCurrentSessionId(sid);
       try {
         const raw = window.localStorage.getItem("spendly:ai_sessions") || "[]";
@@ -359,6 +398,7 @@ export const useChat = (): UseChatReturn => {
         return saveLocalSession(firstMessage);
       }
       const sessionId = data.id as string;
+      skipNextLoadRef.current = true;
       setCurrentSessionId(sessionId);
       void generateAutoTitle(firstMessage, sessionId);
       trackEvent("ai_session_created", { sessionId });
@@ -408,6 +448,21 @@ export const useChat = (): UseChatReturn => {
       const controller = new AbortController();
       setAbortController(controller);
 
+      const cachedText = isPresetMessage(content) ? getCachedPreset(content) : null;
+      if (cachedText) {
+        const aiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          content: cachedText,
+          role: "assistant",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+        await persistMessage("assistant", cachedText, sid);
+        setIsTyping(false);
+        setAbortController(null);
+        return;
+      }
+
       try {
         const response = await fetch(getAssistantApiUrl(locale), {
           method: "POST",
@@ -423,6 +478,8 @@ export const useChat = (): UseChatReturn => {
         });
 
         const contentType = response.headers.get("content-type") || "";
+        const headerCurrency = response.headers.get("X-Currency") || "";
+        if (headerCurrency) setUICurrency(headerCurrency);
 
         if (!response.ok) {
           if (contentType.includes("text/html") || response.status === 404) {
@@ -469,6 +526,38 @@ export const useChat = (): UseChatReturn => {
           return;
         }
 
+        if (response.status === 503) {
+          let msg = "Assistant is temporarily unavailable. Please try again later.";
+          try {
+            const json = (await response.json().catch(() => null)) as any;
+            if (json && typeof json.message === "string") msg = json.message;
+          } catch {}
+          const aiMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            content: msg,
+            role: "assistant",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          return;
+        }
+        if (response.status >= 500) {
+          let msg = "Assistant encountered an error. Please try again later.";
+          try {
+            const json = (await response.json().catch(() => null)) as any;
+            if (json && typeof json.error === "string") msg = json.error;
+            else if (json && typeof json.message === "string") msg = json.message;
+          } catch {}
+          const aiMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            content: msg,
+            role: "assistant",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          return;
+        }
+
         if (contentType.includes("application/json")) {
           const json = (await response.json()) as AssistantJSON;
 
@@ -493,6 +582,7 @@ export const useChat = (): UseChatReturn => {
               };
               setMessages((prev) => [...prev, aiMessage]);
               await persistMessage("assistant", json.message, sid);
+              if (isPresetMessage(content)) writePresetCache(content, json.message);
             }
             return;
           }
@@ -505,6 +595,7 @@ export const useChat = (): UseChatReturn => {
               typeof json.currency === "string"
                 ? json.currency
                 : respCurrencyHeader || "USD";
+            setUICurrency(currency);
 
             const nf = new Intl.NumberFormat(respLocale, {
               style: "currency",
@@ -686,9 +777,21 @@ export const useChat = (): UseChatReturn => {
           await persistMessage("assistant", friendly, sid);
         } else {
           await persistMessage("assistant", acc, sid);
+          if (isPresetMessage(content)) writePresetCache(content, acc);
         }
       } catch (error) {
         console.error("Error sending message:", error);
+        const isRu = (navigator.language || "en-US").toLowerCase().startsWith("ru");
+        const msg = isRu
+          ? "Ассистент временно недоступен. Попробуйте повторить позже."
+          : "Assistant is temporarily unavailable. Please try again later.";
+        const aiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          content: msg,
+          role: "assistant",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, aiMessage]);
       } finally {
         setIsTyping(false);
         setAbortController(null);
@@ -991,6 +1094,7 @@ export const useChat = (): UseChatReturn => {
     pendingActionPayload,
     assistantTone,
     setAssistantTone,
+    currency: uiCurrency,
     currentSessionId,
     loadSessionMessages,
     newChat,
