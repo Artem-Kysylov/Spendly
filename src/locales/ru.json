@@ -280,7 +280,8 @@
       "thisWeek": "Эта неделя",
       "lastWeek": "Прошлая неделя",
       "thisMonth": "Этот месяц",
-      "lastMonth": "Прошлый месяц"
+      "lastMonth": "Прошлый месяц",
+      "insight": "Совет"
     },
     "table": {
       "period": "Период",

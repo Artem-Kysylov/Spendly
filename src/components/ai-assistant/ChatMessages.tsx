@@ -41,18 +41,25 @@ const cleanContent = (text: string) => {
 
   // 5. Specific fix for "Insight" label merging with previous text
   // Step 1: Normalize all "Insight" variations to "💡 Insight"
-  cleaned = cleaned.replace(/\*\*(Insight)\*\*/g, '$1');
-  cleaned = cleaned.replace(/(Insight[-:]|###\s*Insight)/g, 'Insight');
+  // First, strip existing bold chars from Insight/Совет to clean slate
+  cleaned = cleaned.replace(/\*\*(Insight|Совет)\*\*/g, '$1');
+
+  // Now replace "Insight" keywords with bold version
+  cleaned = cleaned.replace(/(Insight[-:]|###\s*Insight|Совет[-:]|###\s*Совет)/g, '$1');
+
+  // Normalize simple "Insight" or "Совет" to not have punctuation if it was stripped above?
+  cleaned = cleaned.replace(/(Insight|Совет)[-:]/g, '$1');
+  cleaned = cleaned.replace(/###\s*(Insight|Совет)/g, '$1');
 
   // Step 2: Ensure double newline BEFORE Insight
-  cleaned = cleaned.replace(/([^\n])(Insight)/g, '$1\n\n$2');
+  cleaned = cleaned.replace(/([^\n])(Insight|Совет)/g, '$1\n\n$2');
 
-  // Step 3: Add emoji and BOLD to "Insight"
-  cleaned = cleaned.replace(/^Insight/gm, '**💡 Insight**');
-  cleaned = cleaned.replace(/\nInsight/g, '\n**💡 Insight**');
+  // Step 3: Add emoji and BOLD to "Insight" or "Совет"
+  cleaned = cleaned.replace(/^(Insight|Совет)/gm, '**💡 $1**');
+  cleaned = cleaned.replace(/\n(Insight|Совет)/g, '\n**💡 $1**');
 
   // Step 4: Ensure space AFTER Insight
-  cleaned = cleaned.replace(/(\*\*💡 Insight\*\*)(?=[^\s])/g, '$1 ');
+  cleaned = cleaned.replace(/(\*\*💡 (Insight|Совет)\*\*)(?=[^\s])/g, '$1 ');
 
   // 6. Generic Fix: Ensure space after ANY bold text if followed by non-space/non-newline
   // This addresses "Insight**Text" issues generally

@@ -25,7 +25,6 @@ export default function AIAssistantPage() {
     abort,
     assistantTone,
     setAssistantTone,
-    hasPendingAction,
     isRateLimited,
     currentSessionId,
     loadSessionMessages,
@@ -35,7 +34,6 @@ export default function AIAssistantPage() {
     confirmAction,
   } = useChat();
   const tAI = useTranslations("assistant");
-  const t = useTranslations();
   const { isDesktop } = useDeviceType();
   const { session } = UserAuth();
   const [sessions, setSessions] = useState<
@@ -212,20 +210,9 @@ export default function AIAssistantPage() {
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {tAI("welcomeDesc")}
                 </p>
-                <div className="mt-4 border border-dashed border-white/10 bg-white/5 rounded-xl p-4">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <h5 className="text-sm font-semibold text-muted-foreground">
-                      {t("chat.empty_state.quick_add_title")}
-                    </h5>
-                  </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed mb-2">
-                    {t("chat.empty_state.quick_add_desc")}
-                  </p>
-                  <p className="text-xs font-mono text-muted-foreground bg-muted/30 px-2 py-1 rounded">
-                    Add [Item] [Amount] [Budget]
-                  </p>
-                  <p className="text-xs text-muted-foreground/70 mt-2 italic">
-                    {t("chat.empty_state.pattern_example")}
+                <div className="mt-4 px-4 py-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
+                    💡 {tAI("tipAddTransaction")}
                   </p>
                 </div>
               </div>
@@ -238,9 +225,6 @@ export default function AIAssistantPage() {
           <ChatMessages
             messages={messages}
             isTyping={isTyping}
-            pendingAction={pendingActionPayload as any}
-            budgets={budgets}
-            onConfirmAction={confirmAction}
           />
         </div>
       )}

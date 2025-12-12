@@ -191,7 +191,7 @@ ${budgetList || "No budgets available"}
    - **ALWAYS** put a newline between the header row and the separator row.
    - **ALWAYS** put a newline between the separator row and the first data row.
    - Columns: Category, Amount.
-3. **INSIGHT:** Always end with \`### 💡 Insight\` on a new line.
+3. **INSIGHT:** Always end with \`### 💡 ${t('labels.insight') || 'Insight'}\` on a new line.
 4. **BREVITY:** Be extremely concise. Max 2-3 sentences per section.
 
 **Response Style:**
@@ -200,7 +200,7 @@ ${tonePrompt}
 - Keep responses short and actionable.
 - **SPACING:** Use double line breaks between sections.
 - **INSIGHT REQUIREMENT:** End EVERY analytical response with:
-  \`### 💡 Insight\` followed by a short, actionable tip.`;
+  \`### 💡 ${t('labels.insight') || 'Insight'}\` followed by a short, actionable tip.`;
 
     // Stream response with tool
     const result = await streamText({
