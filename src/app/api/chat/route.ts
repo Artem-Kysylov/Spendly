@@ -3,6 +3,7 @@ import { streamText, tool } from "ai";
 import { z } from "zod";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
+import { getTranslations } from "next-intl/server";
 
 // Initialize Google AI provider
 const google = createGoogleGenerativeAI({
@@ -52,7 +53,7 @@ const proposeTransactionTool = tool({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { userId, message } = body || {};
+    const { userId, message, locale = 'en' } = body || {};
 
     // Validate request
     if (!userId || !message) {
@@ -95,15 +96,66 @@ export async function POST(req: NextRequest) {
     // Get current date for context
     const currentDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
+    // Load translations for AI response terminology
+    const t = await getTranslations({ locale, namespace: 'assistant' });
+
     // Build budget list for system prompt
     const budgetList = (budgets || [])
       .map((b) => `${b.emoji || "📁"} ${b.name} (${b.type})`)
       .join("\n");
 
+    // Construct localization context block
+    const localizationContext = `**LOCALIZATION:** You are responding in ${locale.toUpperCase()} language.
+When formatting your response, you MUST use these exact localized terms:
+
+- For analysis headers:
+  * Spending Analysis: "${t('headings.spendingAnalysis')}"
+  * Weekly Summary: "${t('headings.weeklySummary')}"
+  * Monthly Comparison: "${t('headings.monthlyComparison')}"
+
+- For time period labels:
+  * This Week: "${t('labels.thisWeek')}"
+  * Last Week: "${t('labels.lastWeek')}"
+  * This Month: "${t('labels.thisMonth')}"
+  * Last Month: "${t('labels.lastMonth')}"
+
+- For table column headers:
+  * Period: "${t('table.period')}"
+  * Total Spending: "${t('table.totalSpending')}"
+  * Difference: "${t('table.difference')}"
+  * Category: "${t('table.category')}"
+  * Item: "${t('table.item')}"
+  * Top Categories: "${t('table.topCategories')}"
+  * Top Expenses: "${t('table.topExpenses')}"
+
+Use these terms EXACTLY as shown when creating tables, lists, or structured output.`;
+
     // Construct system prompt with override rule at the very top
     const overrideRule = `You are Spendly Pal. Today is ${currentDate}. !!! IMPORTANT RULE !!! If the user sends a message formatted as [Item] [Amount] (e.g., 'Taxi 200', 'Coffee 5', 'Lunch 150'), you MUST interpret this as a command to ADD a transaction. - DO NOT search for past data. - DO NOT say 'No data found'. - IMMEDIATELY call the \`propose_transaction\` tool. !!!`;
 
+    // Tone customization
+    let tonePrompt = "";
+    if (body.tone === "playful") {
+      tonePrompt = `
+- **TONE:** Playful, fun, and energetic! 🚀
+- **EMOJIS:** Use emojis LIBERALLY in every sentence! 🌟🎉
+- Make the user smile while being helpful.`;
+    } else if (body.tone === "formal") {
+      tonePrompt = `
+- **TONE:** Professional, concise, and objective.
+- **EMOJIS:** Do NOT use emojis.
+- Focus on data and clarity.`;
+    } else {
+      // Default / Friendly
+      tonePrompt = `
+- **TONE:** Friendly, enthusiastic, and helpful.
+- **EMOJIS:** Use emojis to be engaging (but don't overdo it). 😊
+`;
+    }
+
     const systemPrompt = `${overrideRule}
+
+${localizationContext}
 
 You are Spendly Pal, a financial assistant.
 
@@ -132,10 +184,23 @@ ${budgetList || "No budgets available"}
 - Default to "expense" type unless explicitly "income".
 - "Yesterday" = ${currentDate} - 1 day.
 
-**Response Style (for when you DO generate text):**
-- Be concise.
-- Use bullet points.
-- No "wall of text".`;
+**FORMATTING RULES:**
+1. **NO PARAGRAPHS.** Use bullet points (\`-\`) for almost everything.
+2. **TABLES:** CRITICAL: Use proper Markdown syntax.
+   - Header row must be separated from data by \`|---|---| \`.
+   - **ALWAYS** put a newline between the header row and the separator row.
+   - **ALWAYS** put a newline between the separator row and the first data row.
+   - Columns: Category, Amount.
+3. **INSIGHT:** Always end with \`### 💡 Insight\` on a new line.
+4. **BREVITY:** Be extremely concise. Max 2-3 sentences per section.
+
+**Response Style:**
+${tonePrompt}
+- Use bullet points, not paragraphs.
+- Keep responses short and actionable.
+- **SPACING:** Use double line breaks between sections.
+- **INSIGHT REQUIREMENT:** End EVERY analytical response with:
+  \`### 💡 Insight\` followed by a short, actionable tip.`;
 
     // Stream response with tool
     const result = await streamText({

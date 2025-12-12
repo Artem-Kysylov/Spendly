@@ -19,49 +19,49 @@ import { useToast } from "@/components/ui/use-toast";
 
 type PendingAction =
   | {
-      type: "add_transaction";
-      payload: {
-        title: string;
-        amount: number;
-        budget_folder_id: string | null;
-        budget_name: string;
-      };
-    }
-  | {
-      type: "save_recurring_rule";
-      payload: {
-        title_pattern: string;
-        budget_folder_id: string | null;
-        avg_amount: number;
-        cadence: "weekly" | "monthly";
-        next_due_date: string;
-      };
+    type: "add_transaction";
+    payload: {
+      title: string;
+      amount: number;
+      budget_folder_id: string | null;
+      budget_name: string;
     };
+  }
+  | {
+    type: "save_recurring_rule";
+    payload: {
+      title_pattern: string;
+      budget_folder_id: string | null;
+      avg_amount: number;
+      cadence: "weekly" | "monthly";
+      next_due_date: string;
+    };
+  };
 
 // JSON‑ответ ассистента: либо стандартный AIResponse (action/message), либо «канонический» контракт при обходе LLM
 type AssistantJSON =
   | AIResponse
   | {
-      intent: string;
-      period?: string;
-      currency?: string;
-      totals?: Record<string, unknown>;
-      breakdown?: Array<{
-        name?: string;
-        title?: string;
-        category?: string;
-        amount?: number | string;
-      }>;
-      topExpenses?: Array<{
-        title?: string;
-        name?: string;
-        category?: string;
-        amount?: number | string;
-        date?: string;
-      }>;
-      text?: string;
-      shouldRefetch?: boolean;
-    };
+    intent: string;
+    period?: string;
+    currency?: string;
+    totals?: Record<string, unknown>;
+    breakdown?: Array<{
+      name?: string;
+      title?: string;
+      category?: string;
+      amount?: number | string;
+    }>;
+    topExpenses?: Array<{
+      title?: string;
+      name?: string;
+      category?: string;
+      amount?: number | string;
+      date?: string;
+    }>;
+    text?: string;
+    shouldRefetch?: boolean;
+  };
 
 export const useChat = (): UseChatReturn => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -106,7 +106,7 @@ export const useChat = (): UseChatReturn => {
       const cache = readPresetCache();
       cache[prompt] = { ts: Date.now(), text };
       window.localStorage.setItem("spendly:ai_preset_cache", JSON.stringify(cache));
-    } catch {}
+    } catch { }
   };
   const getCachedPreset = (prompt: string): string | null => {
     const cache = readPresetCache();
@@ -196,7 +196,7 @@ export const useChat = (): UseChatReturn => {
         window.dispatchEvent(
           new CustomEvent("ai:sessionUpdated", { detail: { id: sid } }),
         );
-      } catch {}
+      } catch { }
     },
     [],
   );
@@ -335,7 +335,7 @@ export const useChat = (): UseChatReturn => {
                 window.dispatchEvent(
                   new CustomEvent("ai:sessionUpdated", { detail: { id: sid } }),
                 );
-              } catch {}
+              } catch { }
             } else {
               await supabase
                 .from("ai_chat_sessions")
@@ -374,7 +374,7 @@ export const useChat = (): UseChatReturn => {
         window.dispatchEvent(
           new CustomEvent("ai:sessionCreated", { detail: { id: sid } }),
         );
-      } catch {}
+      } catch { }
       void generateAutoTitle(firstMessage, sid);
       trackEvent("ai_session_created", { sessionId: sid });
       return sid;
@@ -473,6 +473,7 @@ export const useChat = (): UseChatReturn => {
             enableLimits: true,
             message: content,
             tone: subscriptionPlan === "pro" ? assistantTone : "neutral",
+            locale,
           }),
           signal: controller.signal,
         });
@@ -531,7 +532,7 @@ export const useChat = (): UseChatReturn => {
           try {
             const json = (await response.json().catch(() => null)) as any;
             if (json && typeof json.message === "string") msg = json.message;
-          } catch {}
+          } catch { }
           const aiMessage: ChatMessage = {
             id: (Date.now() + 1).toString(),
             content: msg,
@@ -547,7 +548,7 @@ export const useChat = (): UseChatReturn => {
             const json = (await response.json().catch(() => null)) as any;
             if (json && typeof json.error === "string") msg = json.error;
             else if (json && typeof json.message === "string") msg = json.message;
-          } catch {}
+          } catch { }
           const aiMessage: ChatMessage = {
             id: (Date.now() + 1).toString(),
             content: msg,
@@ -613,9 +614,9 @@ export const useChat = (): UseChatReturn => {
               typeof json.period === "string" ? json.period : "unknown";
             const period: Period =
               periodRaw === "thisWeek" ||
-              periodRaw === "lastWeek" ||
-              periodRaw === "thisMonth" ||
-              periodRaw === "lastMonth"
+                periodRaw === "lastWeek" ||
+                periodRaw === "thisMonth" ||
+                periodRaw === "lastMonth"
                 ? (periodRaw as Period)
                 : "unknown";
             const periodLabel = canonicalPeriodLabel(period, respLocale);
@@ -1065,18 +1066,18 @@ export const useChat = (): UseChatReturn => {
   const pendingActionPayload = pendingAction
     ? pendingAction.type === "add_transaction"
       ? {
-          title: pendingAction.payload.title,
-          amount: pendingAction.payload.amount,
-          budget_folder_id: pendingAction.payload.budget_folder_id,
-          budget_name: pendingAction.payload.budget_name,
-        }
+        title: pendingAction.payload.title,
+        amount: pendingAction.payload.amount,
+        budget_folder_id: pendingAction.payload.budget_folder_id,
+        budget_name: pendingAction.payload.budget_name,
+      }
       : {
-          title_pattern: pendingAction.payload.title_pattern,
-          avg_amount: pendingAction.payload.avg_amount,
-          cadence: pendingAction.payload.cadence,
-          next_due_date: pendingAction.payload.next_due_date,
-          budget_folder_id: pendingAction.payload.budget_folder_id,
-        }
+        title_pattern: pendingAction.payload.title_pattern,
+        avg_amount: pendingAction.payload.avg_amount,
+        cadence: pendingAction.payload.cadence,
+        next_due_date: pendingAction.payload.next_due_date,
+        budget_folder_id: pendingAction.payload.budget_folder_id,
+      }
     : null;
 
   return {

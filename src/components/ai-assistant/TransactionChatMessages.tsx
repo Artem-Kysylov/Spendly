@@ -1,234 +1,186 @@
-"use client";
 
-import { useEffect, useRef } from "react";
-import { User, Bot } from "lucide-react";
-import { UserAuth } from "@/context/AuthContext";
-import { TransactionProposalCard } from "./TransactionProposalCard";
+import { Message } from "@/hooks/useTransactionChat";
+import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
-import type { Message } from "@/hooks/useTransactionChat";
-
-interface Budget {
-  id: string;
-  name: string;
-  emoji?: string;
-  type: "expense" | "income";
-}
+import { useEffect, useRef } from "react";
+import { TransactionProposalCard } from "./TransactionProposalCard";
+import { Loader2 } from "lucide-react";
 
 interface TransactionChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
-  budgets: Budget[];
-  onTransactionSuccess?: () => void;
-  onTransactionError?: (error: string) => void;
+  budgets: any[];
+  onTransactionSuccess: () => void;
+  onTransactionError: (error: string) => void;
 }
 
-export function TransactionChatMessages({
+// Minimal cleaner to fix "AI laziness" with newlines
+const cleanContent = (text: string) => {
+  if (!text) return "";
+  let cleaned = text;
+
+  // 1. CRITICAL: Aggressive fix for "AI laziness" where it puts double pipes instead of newline
+  // Matches "||" anywhere and forces it to be "|\n|"
+  cleaned = cleaned.replace(/\|\|/g, "|\n|");
+
+  // 2. Ensure newline before Table Header starts
+  // NEW SAFE REGEX: Only add newline if the line explicitly DOES NOT start with a pipe
+  cleaned = cleaned.replace(/^([^|\n]+)(\|.*\|)/gm, '$1\n\n$2');
+
+  // 2b. SEPARATE Header Row from Separator Row
+  cleaned = cleaned.replace(/(\|\s*[^\n]+\s*)\|(\s*\|[-:]+)/g, '$1\n$2');
+
+  // 3. Ensure double newline before Headers (###)
+  cleaned = cleaned.replace(/([^\n])(#{1,3})/g, '$1\n\n$2');
+
+  // 4. Ensure double newline before Lists
+  cleaned = cleaned.replace(/([^\n])(\s)([\*\-])(?=\s)/g, '$1\n\n$3');
+
+  // 5. Specific fix for "Insight" label merging with previous text
+  // Step 1: Normalize all "Insight" variations to "💡 Insight"
+  cleaned = cleaned.replace(/\*\*(Insight)\*\*/g, '$1');
+  cleaned = cleaned.replace(/(Insight[-:]|###\s*Insight)/g, 'Insight');
+
+  // Step 2: Ensure double newline BEFORE Insight
+  cleaned = cleaned.replace(/([^\n])(Insight)/g, '$1\n\n$2');
+
+  // Step 3: Add emoji and BOLD to "Insight"
+  cleaned = cleaned.replace(/^Insight/gm, '**💡 Insight**');
+  cleaned = cleaned.replace(/\nInsight/g, '\n**💡 Insight**');
+
+  // Step 4: Ensure space AFTER Insight
+  cleaned = cleaned.replace(/(\*\*💡 Insight\*\*)(?=[^\s])/g, '$1 ');
+
+  // 6. Generic Fix: Ensure space after ANY bold text
+  cleaned = cleaned.replace(/(\*\*[^*]+\*\*)(?=[^\s\n.,:;!?])/g, '$1 ');
+
+  // 7. Fix "Period" or "This Week" merging
+  cleaned = cleaned.replace(/([^\n])((?:This|Last)\s(?:Week|Month)[-:])/g, '$1\n\n$2');
+
+  return cleaned;
+};
+
+export const TransactionChatMessages = ({
   messages,
   isLoading,
   budgets,
   onTransactionSuccess,
   onTransactionError,
-}: TransactionChatMessagesProps) {
-  const { session } = UserAuth();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+}: TransactionChatMessagesProps) => {
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
-  };
-
+  // Auto-scroll to bottom
   useEffect(() => {
-    scrollToBottom();
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
-  const userAvatar = session?.user?.user_metadata?.avatar_url;
-  const displayName =
-    session?.user?.user_metadata?.full_name ||
-    session?.user?.user_metadata?.name ||
-    session?.user?.email ||
-    "U";
-  const userInitial = displayName.charAt(0).toUpperCase();
-
-  const markdownSchema = {
-    ...defaultSchema,
-    tagNames: [
-      ...(defaultSchema.tagNames || []),
-      "table",
-      "thead",
-      "tbody",
-      "tr",
-      "th",
-      "td",
-    ],
-    attributes: {
-      ...defaultSchema.attributes,
-      a: ["href", "title", "target", "rel"],
-      code: ["className"],
-      pre: ["className"],
-    },
-  };
-
-  // Hack: Preprocess AI content to fix broken markdown tables
-  const preprocessContent = (content: string) => {
-    if (!content) return "";
-    // Fix tables: Replace "||-" or "||---" with "|\n|---" (insert newline)
-    let clean = content.replace(/\|\s*\|[-:]/g, (match) => {
-      return match.replace("||", "|\n|");
-    });
-    return clean;
-  };
-
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4">
-      {messages.map((message) => (
-        <div key={message.id}>
-          <div
-            className={`flex items-start space-x-3 ${message.role === "user" ? "justify-end" : "justify-start"
-              }`}
-          >
-            {message.role === "assistant" && (
-              <div className="w-7 h-7 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
-                <Bot className="w-4 h-4 text-secondary-black dark:text-white" />
-              </div>
-            )}
+    <div className="flex flex-col gap-4 p-4">
+      {messages.map((message) => {
+        const isUser = message.role === "user";
 
-            <div className="flex flex-col gap-3 max-w-[85%]">
-              {/* Text content */}
-              {message.content && (
-                <div
-                  className={`w-fit p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words overflow-x-auto ${message.role === "user"
-                    ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md"
-                    : "bg-gray-100 text-secondary-black rounded-bl-md border border-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700"
-                    }`}
-                >
+        // Handle normal text content
+        const content = message.content;
+
+        return (
+          <div
+            key={message.id}
+            className={cn(
+              "flex flex-col max-w-[90%] md:max-w-xl",
+              isUser ? "self-end items-end" : "self-start items-start"
+            )}
+          >
+            {/* Render Text Bubble if there is content */}
+            {content && (
+              <div
+                className={cn(
+                  "rounded-2xl px-4 py-3 shadow-sm w-full mb-2",
+                  isUser
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted/50"
+                )}
+              >
+                <div className={cn(
+                  "prose prose-sm dark:prose-invert max-w-none leading-relaxed",
+                  "prose-headings:mt-4 prose-headings:mb-2 prose-headings:font-bold",
+                  "prose-p:my-2",
+                  "prose-ul:my-2 prose-li:my-0",
+                  "prose-table:my-2",
+                  isUser && "prose-headings:text-primary-foreground prose-p:text-primary-foreground prose-li:text-primary-foreground prose-strong:text-primary-foreground"
+                )}>
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm, remarkBreaks]}
-                    rehypePlugins={[[rehypeSanitize, markdownSchema]]}
                     components={{
-                      // Text styling
-                      p: ({ node, ...props }) => (
-                        <p className="mb-3 last:mb-0" {...props} />
-                      ),
-                      ul: ({ node, ...props }) => (
-                        <ul className="my-2 ml-6 list-disc [&>li]:mt-1" {...props} />
-                      ),
-                      ol: ({ node, ...props }) => (
-                        <ol className="my-2 ml-6 list-decimal [&>li]:mt-1" {...props} />
-                      ),
-                      li: ({ node, ...props }) => (
-                        <li className="leading-normal" {...props} />
-                      ),
-                      strong: ({ node, ...props }) => (
-                        <strong className="font-semibold" {...props} />
-                      ),
-                      a: ({ node, ...props }) => (
-                        <a className="font-medium underline underline-offset-4 text-primary" {...props} />
-                      ),
-                      // Table styling
                       table: ({ node, ...props }) => (
-                        <div className="my-4 w-full overflow-hidden rounded-md border border-border">
+                        <div className="my-4 w-full overflow-hidden rounded-lg border border-border bg-card shadow-sm">
                           <div className="overflow-x-auto">
-                            <table className="w-full text-sm" {...props} />
+                            <table className="w-full text-sm border-collapse" {...props} />
                           </div>
                         </div>
                       ),
-                      thead: ({ node, ...props }) => (
-                        <thead className="bg-muted/80 font-medium" {...props} />
-                      ),
-                      tbody: ({ node, ...props }) => (
-                        <tbody className="divide-y divide-border bg-background/50" {...props} />
-                      ),
-                      tr: ({ node, ...props }) => (
-                        <tr className="transition-colors hover:bg-muted/50" {...props} />
-                      ),
+                      // Add clear borders to cells to distinguish from plain text
                       th: ({ node, ...props }) => (
-                        <th className="px-4 py-2 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0" {...props} />
+                        <th className="px-4 py-2 text-left font-semibold bg-muted/50 border-b border-border" {...props} />
                       ),
                       td: ({ node, ...props }) => (
-                        <td className="px-4 py-2 align-middle [&:has([role=checkbox])]:pr-0" {...props} />
+                        <td className="px-4 py-2 align-top border-b border-border" {...props} />
                       ),
+                      a: ({ node, ...props }) => (
+                        <a target="_blank" rel="noopener noreferrer" className="underline font-medium" {...props} />
+                      )
                     }}
                   >
-                    {preprocessContent(message.content)}
+                    {cleanContent(content)}
                   </ReactMarkdown>
                 </div>
-              )}
-
-              {/* Tool invocations (Transaction Proposals) */}
-              {message.toolInvocations?.map((toolInvocation: any) => {
-                if (
-                  toolInvocation.toolName === "propose_transaction" &&
-                  toolInvocation.state === "result"
-                ) {
-                  const result = toolInvocation.result;
-                  if (result?.success && result?.transactions) {
-                    return result.transactions.map(
-                      (transaction: any, idx: number) => (
-                        <TransactionProposalCard
-                          key={`${toolInvocation.toolCallId}-${idx}`}
-                          proposal={transaction}
-                          budgets={budgets}
-                          onSuccess={onTransactionSuccess}
-                          onError={onTransactionError}
-                        />
-                      ),
-                    );
-                  }
-                }
-                return null;
-              })}
-            </div>
-
-            {message.role === "user" && (
-              <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm overflow-hidden">
-                {userAvatar ? (
-                  <img
-                    src={userAvatar}
-                    alt="User avatar"
-                    className="w-full h-full object-cover rounded-full"
-                    referrerPolicy="no-referrer"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-indigo-600 dark:bg-indigo-400 flex items-center justify-center">
-                    <span className="text-white text-xs font-semibold">
-                      {userInitial}
-                    </span>
-                  </div>
-                )}
               </div>
             )}
-          </div>
-        </div>
-      ))}
 
-      {/* Loading Indicator */}
-      {isLoading && (
-        <div className="flex items-start space-x-3 animate-in fade-in-0 duration-300">
-          <div className="w-7 h-7 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
-            <Bot className="w-4 h-4 text-secondary-black dark:text-white" />
+            {/* Render Tool Invocations (Transaction Cards) */}
+            {message.toolInvocations?.map((toolInvocation) => {
+              if (toolInvocation.toolName === 'propose_transaction') {
+                const { result } = toolInvocation;
+                // Since 'args' is the proposal, we can use it directly even if result is pending
+                // But usually we wait for result or use optimistic args. 
+                // The proposal card expects a specific shape.
+                // Assuming toolInvocation.args matches ProposedTransaction shape partially or fully.
+
+                // If the tool has a result, it means it was executed? 
+                // Actually propose_transaction usually returns the proposed transaction data confirming it was "proposed".
+                // Or maybe the AI calls it to ASK user to confirm.
+
+                // Let's assume toolInvocation.args contains the proposal details
+                // formatted as: { title, amount, type, category_name, date }
+
+                const proposal = toolInvocation.args as any;
+
+                return (
+                  <div key={toolInvocation.toolCallId} className="w-full mt-2">
+                    <TransactionProposalCard
+                      proposal={proposal}
+                      budgets={budgets}
+                      onSuccess={onTransactionSuccess}
+                      onError={onTransactionError}
+                    />
+                  </div>
+                );
+              }
+              return null;
+            })}
           </div>
-          <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-2xl rounded-bl-md border border-gray-200 dark:border-gray-700 shadow-sm">
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce"></div>
-              <div
-                className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce"
-                style={{ animationDelay: "0.1s" }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce"
-                style={{ animationDelay: "0.2s" }}
-              ></div>
-            </div>
-          </div>
+        );
+      })}
+
+      {isLoading && messages[messages.length - 1]?.role === "user" && (
+        <div className="self-start flex items-center gap-2 p-4 bg-muted/50 rounded-2xl w-16">
+          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
         </div>
       )}
-
-      <div ref={messagesEndRef} />
+      <div ref={bottomRef} className="h-1" />
     </div>
   );
-}
+};

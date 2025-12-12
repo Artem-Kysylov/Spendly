@@ -546,6 +546,7 @@ export interface ChatMessage {
   content: string;
   role: "user" | "assistant";
   timestamp: Date;
+  toolInvocations?: any[];
 }
 
 export interface ChatState {

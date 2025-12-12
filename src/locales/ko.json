@@ -159,7 +159,6 @@
     },
     "perMonth": "월"
   },
-
   "auth": {
     "tabs": {
       "signin": "로그인",
@@ -196,6 +195,26 @@
         "budget": "예산",
         "amount": "금액"
       }
+    },
+    "headings": {
+      "spendingAnalysis": "지출 분석",
+      "weeklySummary": "주간 요약",
+      "monthlyComparison": "월간 비교"
+    },
+    "labels": {
+      "thisWeek": "이번 주",
+      "lastWeek": "지난 주",
+      "thisMonth": "이번 달",
+      "lastMonth": "지난 달"
+    },
+    "table": {
+      "period": "기간",
+      "totalSpending": "총 지출",
+      "difference": "차이",
+      "category": "카테고리",
+      "item": "항목",
+      "topCategories": "상위 카테고리",
+      "topExpenses": "상위 지출"
     },
     "buttons": {
       "newChat": "새 채팅"
@@ -377,7 +396,6 @@
     "successMessage": "Spendly Pro를 지원해주셔서 감사합니다!",
     "goToDashboard": "대시보드로 이동"
   },
-
   "recurring": {
     "dueTodayTitle": "오늘 예정된 정기결제: {name}",
     "dueSoonTitle": "곧 예정된 정기결제: {name}",
@@ -554,15 +572,33 @@
       "title": "반복 규칙",
       "description": "자동 감지된 구독 및 반복 결제를 관리하세요.",
       "form": {
-        "title": { "label": "제목 / 패턴", "placeholder": "제목 / 패턴" },
-        "avgAmount": { "label": "평균 금액", "placeholder": "평균 금액" },
+        "title": {
+          "label": "제목 / 패턴",
+          "placeholder": "제목 / 패턴"
+        },
+        "avgAmount": {
+          "label": "평균 금액",
+          "placeholder": "평균 금액"
+        },
         "cadence": {
           "label": "주기",
-          "options": { "weekly": "매주", "monthly": "매월" }
+          "options": {
+            "weekly": "매주",
+            "monthly": "매월"
+          }
         },
-        "nextDue": { "label": "다음 결제일", "placeholder": "날짜 선택" },
-        "budget": { "label": "예산", "unbudgeted": "예산 미지정" },
-        "btn": { "add": "규칙 추가", "saving": "저장 중…" }
+        "nextDue": {
+          "label": "다음 결제일",
+          "placeholder": "날짜 선택"
+        },
+        "budget": {
+          "label": "예산",
+          "unbudgeted": "예산 미지정"
+        },
+        "btn": {
+          "add": "규칙 추가",
+          "saving": "저장 중…"
+        }
       },
       "list": {
         "loading": "규칙 불러오는 중…",
@@ -673,6 +709,13 @@
       "sqlScript": "SQL 스크립트",
       "copy": "복사",
       "copied": "복사됨!"
+    }
+  },
+  "chat": {
+    "empty_state": {
+      "quick_add_title": "⚡️ 빠른 추가",
+      "quick_add_desc": "이 순서대로 세부 정보를 입력하세요:",
+      "pattern_example": "예시: Add 커피 50 음식"
     }
   }
 }

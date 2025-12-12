@@ -271,6 +271,26 @@
         "amount": "Сумма"
       }
     },
+    "headings": {
+      "spendingAnalysis": "Анализ расходов",
+      "weeklySummary": "Недельная сводка",
+      "monthlyComparison": "Сравнение по месяцам"
+    },
+    "labels": {
+      "thisWeek": "Эта неделя",
+      "lastWeek": "Прошлая неделя",
+      "thisMonth": "Этот месяц",
+      "lastMonth": "Прошлый месяц"
+    },
+    "table": {
+      "period": "Период",
+      "totalSpending": "Всего потрачено",
+      "difference": "Разница",
+      "category": "Категория",
+      "item": "Элемент",
+      "topCategories": "Топ категорий",
+      "topExpenses": "Топ расходов"
+    },
     "buttons": {
       "close": "Закрыть AI-ассистента",
       "ask": "Спросить AI",
@@ -760,5 +780,12 @@
     "dueTodayTitle": "Регулярный платёж сегодня: {name}",
     "dueSoonTitle": "Скоро регулярный платёж: {name}",
     "message": "Срок {date}. Примерно {amount}."
+  },
+  "chat": {
+    "empty_state": {
+      "quick_add_title": "⚡️ Быстрое добавление",
+      "quick_add_desc": "Просто напишите данные в таком порядке:",
+      "pattern_example": "Пример: Add Кофе 50 Еда"
+    }
   }
 }

@@ -1,519 +1,154 @@
-"use client";
-
-import { useEffect, useRef, Children } from "react";
 import { ChatMessage } from "@/types/types";
-import { User, Bot } from "lucide-react";
-import { UserAuth } from "@/context/AuthContext";
-import { useTranslations, useLocale } from "next-intl";
+import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
-import { TransactionProposalCard } from "./TransactionProposalCard";
-import { currencySymbol as currencySymUtil } from "@/prompts/spendlyPal/promptBuilder";
-
-interface Budget {
-  id: string;
-  name: string;
-  emoji?: string;
-  type: "expense" | "income";
-}
-
-interface PendingActionPayload {
-  title: string;
-  amount: number;
-  budget_folder_id: string | null;
-  budget_name: string;
-}
+import { useEffect, useRef } from "react";
 
 interface ChatMessagesProps {
   messages: ChatMessage[];
-  isTyping: boolean;
-  pendingAction?: PendingActionPayload | null;
-  budgets?: Budget[];
-  onConfirmAction?: (confirmed: boolean) => void;
+  isTyping?: boolean;
   currency?: string;
 }
+
+// Minimal cleaner to fix "AI laziness" with newlines
+const cleanContent = (text: string) => {
+  if (!text) return "";
+  let cleaned = text;
+
+  // 1. CRITICAL: Aggressive fix for "AI laziness" where it puts double pipes instead of newline
+  // Matches "||" anywhere and forces it to be "|\n|"
+  cleaned = cleaned.replace(/\|\|/g, "|\n|");
+
+  // 2. Ensure newline before Table Header starts
+  // OLD DESTRUCTIVE REGEX: cleaned = cleaned.replace(/([^\n])\|(?=.*\|)/g, '$1\n\n|');
+  // NEW SAFE REGEX: Only add newline if the line explicitly DOES NOT start with a pipe using multiline start anchor
+  // Look for: Start of line -> (optional whitespace) -> Content that is NOT a pipe -> Pipe
+  // We want to turn "Some text | Header |" into "Some text\n\n| Header |"
+  // But leave "| Cell | Cell |" alone.
+  cleaned = cleaned.replace(/^([^|\n]+)(\|.*\|)/gm, '$1\n\n$2');
+
+  // 2b. SEPARATE Header Row from Separator Row
+  // Match: "| Header | Header |\n|---|---|" or similar attached lines
+  // Fix: Find "|...|...|" followed immediately by "|...|" or "|---|"
+  cleaned = cleaned.replace(/(\|\s*[^\n]+\s*)\|(\s*\|[-:]+)/g, '$1\n$2');
+
+  // 3. Ensure double newline before Headers (###)
+  cleaned = cleaned.replace(/([^\n])(#{1,3})/g, '$1\n\n$2');
+
+  // 4. Ensure double newline before Lists
+  cleaned = cleaned.replace(/([^\n])(\s)([\*\-])(?=\s)/g, '$1\n\n$3');
+
+  // 5. Specific fix for "Insight" label merging with previous text
+  // Step 1: Normalize all "Insight" variations to "💡 Insight"
+  cleaned = cleaned.replace(/\*\*(Insight)\*\*/g, '$1');
+  cleaned = cleaned.replace(/(Insight[-:]|###\s*Insight)/g, 'Insight');
+
+  // Step 2: Ensure double newline BEFORE Insight
+  cleaned = cleaned.replace(/([^\n])(Insight)/g, '$1\n\n$2');
+
+  // Step 3: Add emoji and BOLD to "Insight"
+  cleaned = cleaned.replace(/^Insight/gm, '**💡 Insight**');
+  cleaned = cleaned.replace(/\nInsight/g, '\n**💡 Insight**');
+
+  // Step 4: Ensure space AFTER Insight
+  cleaned = cleaned.replace(/(\*\*💡 Insight\*\*)(?=[^\s])/g, '$1 ');
+
+  // 6. Generic Fix: Ensure space after ANY bold text if followed by non-space/non-newline
+  // This addresses "Insight**Text" issues generally
+  cleaned = cleaned.replace(/(\*\*[^*]+\*\*)(?=[^\s\n.,:;!?])/g, '$1 ');
+
+  // 7. Fix "Period" or "This Week" merging
+  cleaned = cleaned.replace(/([^\n])((?:This|Last)\s(?:Week|Month)[-:])/g, '$1\n\n$2');
+
+  return cleaned;
+};
 
 export const ChatMessages = ({
   messages,
   isTyping,
-  pendingAction,
-  budgets = [],
-  onConfirmAction,
-  currency,
 }: ChatMessagesProps) => {
-  const { session } = UserAuth();
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const tAI = useTranslations("assistant");
-  const locale = useLocale();
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "auto", block: "end" });
-  };
-
+  // Auto-scroll to bottom
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, isTyping, pendingAction]);
-
-  // Получаем аватар пользователя
-  const userAvatar = session?.user?.user_metadata?.avatar_url;
-  const displayName =
-    session?.user?.user_metadata?.full_name ||
-    session?.user?.user_metadata?.name ||
-    session?.user?.email ||
-    "U";
-  const userInitial = displayName.charAt(0).toUpperCase();
-
-  const isSameDay = (a: Date, b: Date) =>
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate();
-
-  const dayLabel = (d: Date) => {
-    const now = new Date();
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
-    if (isSameDay(d, now)) return tAI("dates.today");
-    if (isSameDay(d, yesterday)) return tAI("dates.yesterday");
-    const sameYear = d.getFullYear() === now.getFullYear();
-    const monthOpt = locale.toLowerCase().startsWith("ru") ? "long" : "short";
-    const fmtOpts: Intl.DateTimeFormatOptions = sameYear
-      ? { day: "numeric", month: monthOpt }
-      : { day: "numeric", month: monthOpt, year: "numeric" };
-    return new Intl.DateTimeFormat(locale, fmtOpts).format(d);
-  };
-
-  const renderMarkdownLite = (text: string) => {
-    // bold **text**, inline code `code`, link [label](url)
-    const parts = text.split("\n").map((line, i) => {
-      const withBold = line.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-      const withCode = withBold.replace(/`([^`]+?)`/g, "<code>$1</code>");
-      const withLinks = withCode.replace(
-        /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,
-        '<a href="$2" target="_blank" rel="noreferrer">$1</a>',
-      );
-      return (
-        <p
-          key={i}
-          className="text-sm whitespace-pre-wrap leading-relaxed"
-          dangerouslySetInnerHTML={{ __html: withLinks }}
-        />
-      );
-    });
-    return parts;
-  };
-
-  const preprocessContent = (content: string) => {
-    if (!content) return "";
-    let s = content.replace(/\r\n/g, "\n");
-    s = s.replace(/\|\|/g, "|\n|");
-
-    const lines = s.split("\n");
-    const out: string[] = [];
-    let inTable = false;
-    let alignmentInserted = false;
-
-    const isRow = (t: string) => t.includes("|");
-    const normalizeRow = (t: string) => {
-      let r = t.trim();
-      if (!r.startsWith("|")) r = "|" + r;
-      if (!r.endsWith("|")) r = r + "|";
-      return r;
-    };
-    const isAlignment = (t: string) => /^\s*\|?([\s:=-]+(?:\|[\s:=-]+)+)\|?\s*$/.test(t);
-    const getColCount = (row: string) => row.split("|").filter(Boolean).length;
-
-    for (let i = 0; i < lines.length; i++) {
-      let line = lines[i];
-      const trimmed = line.trim();
-
-      if (!trimmed) {
-        out.push("");
-        inTable = false;
-        alignmentInserted = false;
-        continue;
-      }
-
-      if (!trimmed.startsWith("|") && line.includes("|")) {
-        const idx = line.indexOf("|");
-        const heading = line.slice(0, idx).trim();
-        const header = line.slice(idx).trim();
-        if (heading) {
-          out.push(`**${heading}**`);
-          out.push("");
-        }
-        line = header;
-      }
-
-      if (isRow(line)) {
-        const row = normalizeRow(line);
-        out.push(row);
-        if (!inTable) {
-          inTable = true;
-          const next = lines[i + 1] ?? "";
-          if (!isAlignment(next)) {
-            const align = "|" + Array(getColCount(row)).fill("---").join("|") + "|";
-            out.push(align);
-            alignmentInserted = true;
-          }
-        } else if (!alignmentInserted) {
-          const next = lines[i + 1] ?? "";
-          if (isAlignment(next)) {
-            const normalized = next.trim().startsWith("|") ? next.trim() : "|" + next.trim() + "|";
-            out.push(normalized);
-            alignmentInserted = true;
-            i++;
-          }
-        }
-        continue;
-      }
-
-      if (inTable) {
-        out.push("");
-        inTable = false;
-        alignmentInserted = false;
-      }
-
-      out.push(line);
-    }
-
-    s = out.join("\n");
-
-    // Ensure section headers break out of tables
-    s = s.replace(/(^|\n)\s*(Insight|Tip|Advice)\b\s*(\*\*)?\s*:?/gi, "\n\n**$2**: ");
-
-    // Format numeric tokens with locale grouping
-    const isRu = String(locale).toLowerCase().startsWith("ru");
-    const sym = currencySymUtil(currency || "USD");
-    const formatLine = (line: string) =>
-      line.replace(/(\$)?(\d{1,3}(?:[\d\s,.]*\d)?(?:[.,]\d{2})?)/g, (m, dollar, num) => {
-        const raw = num.replace(/\s+/g, "").replace(/,/g, "");
-        const n = Number(raw.replace(",", "."));
-        if (!Number.isFinite(n)) return m;
-        const hasDecimals = /[.,]\d{2}$/.test(num);
-        const fmt = new Intl.NumberFormat(isRu ? "ru-RU" : "en-US", {
-          minimumFractionDigits: hasDecimals ? 2 : 0,
-          maximumFractionDigits: hasDecimals ? 2 : 0,
-        }).format(n);
-        return dollar ? `${sym}${fmt}` : fmt;
-      });
-    s = s.split("\n").map(formatLine).join("\n");
-
-    // Localize section headings when Russian locale
-    if (isRu) {
-      s = s.replace(/\*\*Insight\*\*\s*:/gi, "**Вывод**: ");
-      s = s.replace(/\*\*Tip\*\*\s*:/gi, "**Совет**: ");
-      s = s.replace(/\*\*Advice\*\*\s*:/gi, "**Совет**: ");
-    }
-
-    // Ensure bullet lists start on new lines
-    s = s.replace(/([^\n])\s+([\-\*•]\s+)/g, "$1\n$2");
-
-    // Strip stray bold markers and reapply only to keywords
-    s = s.replace(/\*\*/g, "");
-    const headings = [
-      "Spending Analysis",
-      "Weekly Summary",
-      "Monthly Comparison",
-      "This Week",
-      "Last Week",
-      "This Month",
-      "Last Month",
-    ];
-    const esc = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    for (const h of headings) {
-      const re = new RegExp(`(^|\\n)\\s*${esc(h)}(?!\\*\\*)`, "g");
-      s = s.replace(re, `$1**${h}**`);
-    }
-    // Ensure newline after section headings
-    s = s.replace(
-      /(\*\*Spending Analysis\*\*|\*\*Weekly Summary\*\*|\*\*Monthly Comparison\*\*)\s*(?!\n)/g,
-      "$1\n",
-    );
-    // Ensure labels start on new lines
-    s = s.replace(
-      /(\*\*This Week\*\*|\*\*Last Week\*\*|\*\*This Month\*\*|\*\*Last Month\*\*)(?!\n)/g,
-      "$1\n",
-    );
-    // Normalize label punctuation
-    s = s.replace(/Total spending\s*[:：]?\s*/gi, "Total spending: ");
-
-    return s;
-  };
-
-  const nodeText = (node: any): string => {
-    const arr = Children.toArray(node?.props?.children || []);
-    return arr
-      .map((c: any) =>
-        typeof c === "string"
-          ? c
-          : typeof c?.props?.children === "string"
-          ? c.props.children
-          : Array.isArray(c?.props?.children)
-          ? Children.toArray(c.props.children)
-              .map((x: any) => (typeof x === "string" ? x : ""))
-              .join("")
-          : "",
-      )
-      .join("")
-      .trim();
-  };
-
-  const markdownSchema = {
-    ...defaultSchema,
-    tagNames: [
-      ...(defaultSchema.tagNames || []),
-      "table",
-      "thead",
-      "tbody",
-      "tr",
-      "th",
-      "td",
-    ],
-    attributes: {
-      ...defaultSchema.attributes,
-      a: ["href", "title", "target", "rel"],
-      table: ["className"],
-      thead: ["className"],
-      tbody: ["className"],
-      tr: ["className"],
-      th: ["className"],
-      td: ["className"],
-      code: ["className"],
-      pre: ["className"],
-    },
-  };
-
-  // Универсальная нормализация Markdown для всех локалей
-  const normalizeMarkdown = (text: string) => {
-    let s = text;
-
-    // Перенос строки перед маркером списка, если он идёт после знака препинания
-    s = s.replace(/([:;,.!?—–])\s+([\-*•]\s)/g, "$1\n$2");
-
-    // Пустая строка перед списком для корректного распознавания Markdown
-    s = s.replace(/\n([\-*•]\s)/g, "\n\n$1");
-
-    // Даты в отдельные пункты списка (локале-агностично)
-    s = s.replace(/(\d{4}-\d{2}-\d{2})\s—\s/g, "\n- $1 — ");
-
-    return s;
-  };
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
 
   return (
-    <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-4">
-      {/* Date separators and bubbles */}
-      {messages.map((message, idx) => {
-        const showSeparator =
-          idx === 0 ||
-          !isSameDay(message.timestamp, messages[idx - 1].timestamp);
+    <div className="flex flex-col gap-4 p-4">
+      {messages.map((message, index) => {
+        const isUser = message.role === "user";
+        // Attempt to get content from message.content which might be string or parts
+        // Assuming string for now based on prompt context, but handling potential object if needed
+        const content = typeof message.content === 'string' ? message.content : '';
+
+        if (!content && !message.toolInvocations) return null;
+
         return (
-          <div key={message.id}>
-            {showSeparator && (
-              <div className="flex items-center my-2">
-                <div className="flex-1 h-px bg-border" />
-                <span className="mx-3 text-[11px] text-muted-foreground">
-                  {dayLabel(message.timestamp)}
-                </span>
-                <div className="flex-1 h-px bg-border" />
-              </div>
+          <div
+            key={index}
+            className={cn(
+              "flex flex-col max-w-[85%] md:max-w-xl",
+              isUser ? "self-end items-end" : "self-start items-start"
             )}
-            <div
-              className={`flex items-start space-x-3 ${message.role === "user" ? "justify-end" : "justify-start"}`}
-            >
-              {message.role === "assistant" && (
-                <div className="w-7 h-7 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
-                  <Bot className="w-4 h-4 text-secondary-black dark:text-white" />
-                </div>
-              )}
-              <div
-            className={`w-fit max-w-[85%] p-3 rounded-2xl shadow-sm text-[14px] sm:text-[15px] break-words whitespace-pre-wrap overflow-x-auto ${message.role === "user"
-              ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-md"
-              : "bg-gray-100 text-secondary-black rounded-bl-md border border-gray-200 dark:bg-gray-800 dark:text-white dark:border-gray-700"
-              }`}
           >
+            <div
+              className={cn(
+                "rounded-2xl px-4 py-3 shadow-sm w-full",
+                isUser
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted/50"
+              )}
+            >
+              <div className={cn(
+                "prose prose-sm dark:prose-invert max-w-none leading-relaxed",
+                // Customizing prose specifics
+                "prose-headings:mt-4 prose-headings:mb-2 prose-headings:font-bold",
+                "prose-p:my-2",
+                "prose-ul:my-2 prose-li:my-0",
+                "prose-table:my-2",
+                isUser && "prose-headings:text-primary-foreground prose-p:text-primary-foreground prose-li:text-primary-foreground prose-strong:text-primary-foreground"
+              )}>
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm, remarkBreaks]}
-                  rehypePlugins={[[rehypeSanitize, markdownSchema]]}
                   components={{
-                    // Text styling
-                    p: ({ node, ...props }) => (
-                      <p className="mb-3 whitespace-pre-wrap last:mb-0" {...props} />
-                    ),
-                    ul: ({ node, ...props }) => (
-                      <ul className="my-2 ml-6 list-disc [&>li]:mt-1" {...props} />
-                    ),
-                    ol: ({ node, ...props }) => (
-                      <ol className="my-2 ml-6 list-decimal [&>li]:mt-1" {...props} />
-                    ),
-                    li: ({ node, ...props }) => (
-                      <li className="leading-normal" {...props} />
-                    ),
-                    strong: ({ node, ...props }) => (
-                      <strong className="font-semibold" {...props} />
-                    ),
-                    a: ({ node, ...props }) => (
-                      <a className="font-medium underline underline-offset-4 text-primary" {...props} />
-                    ),
-                    // Table styling
-                    table: ({ node, ...props }) => {
-                      const kids = Children.toArray(props.children || []);
-                      const theadNode: any = kids.find(
-                        (k: any) => String(k?.type) === "thead",
-                      );
-                      const tbodyNode: any = kids.find(
-                        (k: any) => String(k?.type) === "tbody",
-                      );
-                      const headerRow: any = Children.toArray(
-                        theadNode?.props?.children || [],
-                      )[0];
-                      const headerCells: any[] = headerRow
-                        ? Children.toArray(headerRow.props.children || [])
-                        : [];
-                      const headers = headerCells.map((c) => nodeText(c));
-                      const rows: any[] = tbodyNode
-                        ? Children.toArray(tbodyNode.props.children || [])
-                        : [];
-                      return (
-                        <div className="my-4 w-full overflow-hidden rounded-md border border-border">
-                          <div className="overflow-x-auto hidden sm:block">
-                            <table className="w-full text-sm" {...props} />
-                          </div>
-                          <div className="sm:hidden space-y-2 p-2">
-                            {rows.map((r, ri) => {
-                              const cells = Children.toArray(r?.props?.children || []);
-                              return (
-                                <div key={ri} className="rounded-md border bg-background p-3">
-                                  {cells.map((cell: any, ci: number) => (
-                                    <div key={ci} className="flex justify-between py-0.5">
-                                      <span className="text-xs text-muted-foreground">
-                                        {headers[ci] || `Col ${ci + 1}`}
-                                      </span>
-                                      <span className="text-sm">
-                                        {nodeText(cell)}
-                                      </span>
-                                    </div>
-                                  ))}
-                                </div>
-                              );
-                            })}
-                          </div>
+                    table: ({ node, ...props }) => (
+                      <div className="my-4 w-full overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm border-collapse" {...props} />
                         </div>
-                      );
-                    },
-                    thead: ({ node, ...props }) => (
-                      <thead className="bg-muted/80 font-medium" {...props} />
+                      </div>
                     ),
-                    tbody: ({ node, ...props }) => (
-                      <tbody className="divide-y divide-border bg-background/50" {...props} />
-                    ),
-                    tr: ({ node, ...props }) => {
-                      const cells = Children.toArray(props.children || []);
-                      const firstCell = cells[0] as any;
-                      const txt = nodeText(firstCell);
-                      const isDiff = /^(Difference|Разница)$/i.test(txt) || /Difference|Разница/i.test(txt);
-                      const cls = isDiff
-                        ? "transition-colors bg-amber-50 dark:bg-amber-900/30"
-                        : "transition-colors hover:bg-muted/50";
-                      return <tr className={cls} {...props} />;
-                    },
-                    blockquote: ({ node, ...props }) => (
-                      <blockquote className="my-3 p-3 border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 rounded-r-md">
-                        <div className="flex items-start gap-2">
-                          <span aria-hidden>💡</span>
-                          <div>{props.children}</div>
-                        </div>
-                      </blockquote>
-                    ),
+                    // Add clear borders to cells to distinguish from plain text
                     th: ({ node, ...props }) => (
-                      <th className="px-4 py-2 align-middle font-medium text-muted-foreground text-right first:text-left [&:has([role=checkbox])]:pr-0" {...props} />
+                      <th className="px-4 py-2 text-left font-semibold bg-muted/50 border-b border-border" {...props} />
                     ),
                     td: ({ node, ...props }) => (
-                      <td className="px-4 py-2 align-middle text-right first:text-left [&:has([role=checkbox])]:pr-0" {...props} />
+                      <td className="px-4 py-2 align-top border-b border-border" {...props} />
                     ),
+                    // Adding key logic for links if needed, but prose handles most
+                    a: ({ node, ...props }) => (
+                      <a target="_blank" rel="noopener noreferrer" className="underline font-medium" {...props} />
+                    )
                   }}
                 >
-                  {preprocessContent(normalizeMarkdown(message.content))}
+                  {cleanContent(content)}
                 </ReactMarkdown>
-                <div
-                  className={`text-xs mt-2 ${message.role === "user" ? "text-blue-200 dark:text-blue-100" : "text-gray-500 dark:text-gray-400"}`}
-                >
-                  {message.timestamp.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </div>
               </div>
-              {message.role === "user" && (
-                <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm overflow-hidden">
-                  {userAvatar ? (
-                    <img
-                      src={userAvatar}
-                      alt="User avatar"
-                      className="w-full h-full object-cover rounded-full"
-                      referrerPolicy="no-referrer"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-indigo-600 dark:bg-indigo-400 flex items-center justify-center">
-                      <span className="text-white text-xs font-semibold">
-                        {userInitial}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
           </div>
         );
       })}
 
-      {/* Typing Indicator */}
       {isTyping && (
-        <div className="flex items-start space-x-3 animate-in fade-in-0 duration-300">
-          <div className="w-7 h-7 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
-            <Bot className="w-4 h-4 text-secondary-black dark:text-white" />
-          </div>
-          <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-2xl rounded-bl-md border border-gray-200 dark:border-gray-700 shadow-sm">
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce"></div>
-              <div
-                className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce"
-                style={{ animationDelay: "0.1s" }}
-              ></div>
-              <div
-                className="w-2 h-2 bg-gray-500 dark:bg-gray-400 rounded-full animate-bounce"
-                style={{ animationDelay: "0.2s" }}
-              ></div>
-            </div>
-          </div>
+        <div className="self-start flex items-center gap-2 p-4 bg-muted/50 rounded-2xl w-16">
+          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
         </div>
       )}
-
-      {/* Pending Action Card */}
-      {pendingAction && (
-        <div className="flex items-start space-x-3 animate-in fade-in-0 duration-300">
-          <div className="w-7 h-7 bg-gray-200 dark:bg-gray-800 rounded-full flex items-center justify-center flex-shrink-0 mt-1 shadow-sm">
-            <Bot className="w-4 h-4 text-secondary-black dark:text-white" />
-          </div>
-          <div className="max-w-[85%] w-full sm:w-[320px]">
-            <TransactionProposalCard
-              proposal={{
-                title: pendingAction.title,
-                amount: pendingAction.amount,
-                type: "expense", // Defaulting to expense as per typical flow, but could be inferred
-                category_name: pendingAction.budget_name,
-                date: new Date().toISOString().split("T")[0],
-              }}
-              budgets={budgets}
-              onSuccess={() => onConfirmAction?.(true)}
-              onError={() => { }} // Handle error if needed
-            />
-          </div>
-        </div>
-      )}
-
-      <div ref={messagesEndRef} />
+      <div ref={bottomRef} className="h-1" />
     </div>
   );
 };

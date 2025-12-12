@@ -583,6 +583,26 @@
         "amount": "Amount"
       }
     },
+    "headings": {
+      "spendingAnalysis": "Spending Analysis",
+      "weeklySummary": "Weekly Summary",
+      "monthlyComparison": "Monthly Comparison"
+    },
+    "labels": {
+      "thisWeek": "This Week",
+      "lastWeek": "Last Week",
+      "thisMonth": "This Month",
+      "lastMonth": "Last Month"
+    },
+    "table": {
+      "period": "Period",
+      "totalSpending": "Total Spending",
+      "difference": "Difference",
+      "category": "Category",
+      "item": "Item",
+      "topCategories": "Top Categories",
+      "topExpenses": "Top Expenses"
+    },
     "buttons": {
       "close": "Close AI assistant",
       "ask": "Ask AI",
@@ -924,6 +944,13 @@
       "createFailed": "Failed to create notification.",
       "updateFailed": "Failed to update notification.",
       "queueAdded": "Notification added to queue"
+    }
+  },
+  "chat": {
+    "empty_state": {
+      "quick_add_title": "⚡️ Quick Add",
+      "quick_add_desc": "Just type the details in this order:",
+      "pattern_example": "Example: Add Coffee 50 Food"
     }
   }
 }

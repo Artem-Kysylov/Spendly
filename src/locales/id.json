@@ -265,6 +265,26 @@
         "amount": "Jumlah"
       }
     },
+    "headings": {
+      "spendingAnalysis": "Analisis Pengeluaran",
+      "weeklySummary": "Ringkasan Mingguan",
+      "monthlyComparison": "Perbandingan Bulanan"
+    },
+    "labels": {
+      "thisWeek": "Minggu Ini",
+      "lastWeek": "Minggu Lalu",
+      "thisMonth": "Bulan Ini",
+      "lastMonth": "Bulan Lalu"
+    },
+    "table": {
+      "period": "Periode",
+      "totalSpending": "Total Pengeluaran",
+      "difference": "Selisih",
+      "category": "Kategori",
+      "item": "Item",
+      "topCategories": "Kategori Teratas",
+      "topExpenses": "Pengeluaran Teratas"
+    },
     "buttons": {
       "close": "Tutup AI Assistant",
       "ask": "Tanya AI",
@@ -422,7 +442,9 @@
     "budget": {
       "pickEmojiOptional": "Pilih emoji (opsional)",
       "pickColor": "Pilih warna",
-      "color": { "none": "Tidak ada/Default" },
+      "color": {
+        "none": "Tidak ada/Default"
+      },
       "placeholder": {
         "name": "Nama anggaran",
         "amountUSD": "Jumlah (USD)"
@@ -507,6 +529,13 @@
       "description": "Anda telah mencapai batas paket Gratis.",
       "budgets": "Hingga 3 anggaran di Gratis. Upgrade untuk tanpa batas.",
       "cta": "Upgrade ke Pro"
+    }
+  },
+  "chat": {
+    "empty_state": {
+      "quick_add_title": "⚡️ Tambah Cepat",
+      "quick_add_desc": "Cukup ketik detail dalam urutan ini:",
+      "pattern_example": "Contoh: Add Kopi 50 Makanan"
     }
   }
 }
