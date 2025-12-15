@@ -933,6 +933,7 @@
     "empty_state": {
       "quick_add_title": "⚡️ त्वरित जोड़ें",
       "quick_add_desc": "बस इस क्रम में विवरण लिखें:",
+      "quick_add_pattern": "Add [Item] [Amount] [Budget]",
       "pattern_example": "उदाहरण: Add कॉफ़ी 50 खाना"
     }
   }

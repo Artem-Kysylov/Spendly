@@ -715,6 +715,7 @@
     "empty_state": {
       "quick_add_title": "⚡️ 빠른 추가",
       "quick_add_desc": "이 순서대로 세부 정보를 입력하세요:",
+      "quick_add_pattern": "Add [Item] [Amount] [Budget]",
       "pattern_example": "예시: Add 커피 50 음식"
     }
   }

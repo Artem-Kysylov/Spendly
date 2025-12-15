@@ -951,6 +951,7 @@
     "empty_state": {
       "quick_add_title": "⚡️ Quick Add",
       "quick_add_desc": "Just type the details in this order:",
+      "quick_add_pattern": "Add [Item] [Amount] [Budget]",
       "pattern_example": "Example: Add Coffee 50 Food"
     }
   }

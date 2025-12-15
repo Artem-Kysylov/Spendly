@@ -5,10 +5,12 @@ import React, { useEffect } from "react";
 import useModal from "@/hooks/useModal";
 import TransactionModal from "@/components/modals/TransactionModal";
 import { useTranslations } from "next-intl";
+import { useToast } from "@/components/ui/use-toast";
 
 const AddTransactionProvider: React.FC = () => {
   const { isModalOpen, openModal, closeModal } = useModal();
   const t = useTranslations("transactions");
+  const { toast } = useToast();
 
   useEffect(() => {
     const handler = () => openModal();
@@ -21,9 +23,20 @@ const AddTransactionProvider: React.FC = () => {
       title={t("modal.addTitle")}
       onClose={closeModal}
       onSubmit={(message, type) => {
-        // Сообщить другим частям UI об обновлении (синхронизация графиков/счётчиков)
         if (type === "success") {
+          toast({
+            variant: "success",
+            description: message,
+            duration: 3000,
+          });
+
           window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
+        } else {
+          toast({
+            variant: "destructive",
+            description: message,
+            duration: 3000,
+          });
         }
       }}
     />

@@ -40,15 +40,17 @@ import MobileTransactionCard from "@/components/chunks/MobileTransactionCard";
 import TransactionsTable from "@/components/chunks/TransactionsTable";
 import TransactionModal from "@/components/modals/TransactionModal";
 import { ExpensesBarChart } from "@/components/charts/TransactionsBarChart";
-import ToastMessage from "@/components/ui-elements/ToastMessage";
+import { useToast } from "@/components/ui/use-toast";
 
 import type { Transaction, ToastMessageProps } from "@/types/types";
+import { ToastMessage } from "@/components/ui-elements";
 
 export default function TransactionsClient() {
   const { session } = UserAuth();
   const t = useTranslations("transactions");
   const tCommon = useTranslations("common");
   const { isMobile } = useDeviceType();
+  const { toast } = useToast();
 
   // Modal & Toast
   const { isModalOpen, openModal, closeModal } = useModal();
@@ -123,6 +125,11 @@ export default function TransactionsClient() {
     type: ToastMessageProps["type"],
   ) => {
     setToastMessage({ text, type });
+    toast({
+      variant: type === "success" ? "success" : "destructive",
+      description: text,
+      duration: 3000,
+    });
     setTimeout(() => setToastMessage(null), 3000);
   };
 
@@ -299,7 +306,7 @@ export default function TransactionsClient() {
               </SheetTrigger>
               <SheetContent
                 side="left"
-                className="w-[300px] sm:w-[400px] overflow-y-auto"
+                className="w-[300px] sm:w-[400px] overflow-y-auto bg-background border-r border-border"
               >
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
@@ -310,9 +317,9 @@ export default function TransactionsClient() {
                 <div className="mt-6 px-1">
                   {isInsightsLoading ? (
                     <div className="space-y-3">
-                      <Skeleton className="h-32 w-full rounded-lg" />
-                      <Skeleton className="h-20 w-full rounded-lg" />
-                      <Skeleton className="h-16 w-full rounded-lg" />
+                      <Skeleton className="h-32 w-full rounded-lg bg-muted/80 border border-border/80 shadow-sm" />
+                      <Skeleton className="h-20 w-full rounded-lg bg-muted/80 border border-border/80 shadow-sm" />
+                      <Skeleton className="h-16 w-full rounded-lg bg-muted/80 border border-border/80 shadow-sm" />
                     </div>
                   ) : insightsError ? (
                     <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
@@ -321,7 +328,7 @@ export default function TransactionsClient() {
                   ) : insightsData ? (
                     <div className="space-y-3">
                       {/* Trend Card */}
-                      <div className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg">
+                      <div className="p-4 bg-card border border-border rounded-lg shadow-sm">
                         <div className="flex items-start gap-3">
                           <div className="text-2xl">
                             {insightsData.trend.direction === "down"
@@ -342,7 +349,7 @@ export default function TransactionsClient() {
                       </div>
 
                       {/* Top Category Card */}
-                      <div className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg">
+                      <div className="p-4 bg-card border border-border rounded-lg shadow-sm">
                         <div className="flex items-start gap-3">
                           <div className="text-2xl">
                             {insightsData.topCategory.emoji}
@@ -369,7 +376,7 @@ export default function TransactionsClient() {
                       </div>
 
                       {/* Financial Tip Card */}
-                      <div className="p-4 bg-zinc-800/50 border border-zinc-700/50 rounded-lg">
+                      <div className="p-4 bg-card border border-border rounded-lg shadow-sm">
                         <div className="flex items-start gap-3">
                           <div className="text-2xl">💡</div>
                           <div className="flex-1">

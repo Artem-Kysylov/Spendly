@@ -535,6 +535,7 @@
     "empty_state": {
       "quick_add_title": "⚡️ Tambah Cepat",
       "quick_add_desc": "Cukup ketik detail dalam urutan ini:",
+      "quick_add_pattern": "Add [Item] [Amount] [Budget]",
       "pattern_example": "Contoh: Add Kopi 50 Makanan"
     }
   }

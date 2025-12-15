@@ -778,6 +778,7 @@
     "empty_state": {
       "quick_add_title": "⚡️ クイック追加",
       "quick_add_desc": "この順序で詳細を入力してください:",
+      "quick_add_pattern": "Add [Item] [Amount] [Budget]",
       "pattern_example": "例: Add コーヒー 50 食費"
     }
   }

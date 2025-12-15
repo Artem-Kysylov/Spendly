@@ -7,7 +7,7 @@ export function Toaster() {
   const { toasts, dismiss } = useToast();
 
   return (
-    <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+8px)] left-0 right-0 sm:right-4 sm:left-auto z-50 flex flex-col gap-2 w-full sm:w-auto px-4 sm:px-0 pointer-events-none [&>*]:pointer-events-auto">
+    <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+8px)] left-0 right-0 sm:right-4 sm:left-auto z-[10001] flex flex-col gap-2 w-full sm:w-auto px-4 sm:px-0 pointer-events-none [&>*]:pointer-events-auto">
       {toasts.map((t) => {
         const variant = t.variant ?? "default";
         const base =

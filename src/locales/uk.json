@@ -802,6 +802,7 @@
     "empty_state": {
       "quick_add_title": "⚡️ Швидке додавання",
       "quick_add_desc": "Просто напишіть дані в такому порядку:",
+      "quick_add_pattern": "Add [Item] [Amount] [Budget]",
       "pattern_example": "Приклад: Add Кава 50 Їжа"
     }
   }

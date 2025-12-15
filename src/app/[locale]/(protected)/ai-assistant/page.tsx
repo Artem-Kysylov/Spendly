@@ -1,20 +1,17 @@
 "use client";
 
-import { useChat } from "@/hooks/useChat";
-import { ChatMessages } from "@/components/ai-assistant/ChatMessages";
-import { ChatInput } from "@/components/ai-assistant/ChatInput";
-import { ChatPresets } from "@/components/ai-assistant/ChatPresets";
-import { PresetChipsRow } from "@/components/ai-assistant/PresetChipsRow";
+import { ChevronLeft, Pencil, Trash } from "lucide-react";
 import { useTranslations } from "next-intl";
-import useDeviceType from "@/hooks/useDeviceType";
-import { supabase } from "@/lib/supabaseClient";
-import { useEffect, useState, useCallback } from "react";
-import { UserAuth } from "@/context/AuthContext";
-import { Trash } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { ChatInput } from "@/components/ai-assistant/ChatInput";
+import { ChatMessages } from "@/components/ai-assistant/ChatMessages";
+import { ChatPresets } from "@/components/ai-assistant/ChatPresets";
 import { ToneSelect } from "@/components/ai-assistant/ToneSelect";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { ChevronLeft, Pencil } from "lucide-react";
-import { useBudgets } from "@/hooks/useBudgets";
+import { UserAuth } from "@/context/AuthContext";
+import { useChat } from "@/hooks/useChat";
+import useDeviceType from "@/hooks/useDeviceType";
+import { supabase } from "@/lib/supabaseClient";
 import { useUIStore } from "@/store/ui-store";
 
 export default function AIAssistantPage() {
@@ -30,17 +27,15 @@ export default function AIAssistantPage() {
     loadSessionMessages,
     newChat,
     deleteSession,
-    pendingActionPayload,
-    confirmAction,
   } = useChat();
   const tAI = useTranslations("assistant");
+  const tChat = useTranslations("chat");
   const { isDesktop } = useDeviceType();
   const { session } = UserAuth();
   const [sessions, setSessions] = useState<
     Array<{ id: string; title: string | null; created_at: string }>
   >([]);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const { budgets } = useBudgets();
   const { isTabBarVisible } = useUIStore();
 
   const refreshSessions = useCallback(async () => {
@@ -62,7 +57,7 @@ export default function AIAssistantPage() {
       const raw = window.localStorage.getItem("spendly:ai_sessions") || "[]";
       const arr = JSON.parse(raw) as any[];
       local = arr.filter((s) => s?.user_id === userId);
-    } catch { }
+    } catch {}
     const merged = [...local, ...remote]
       .map((s) => ({
         id: String(s.id),
@@ -102,6 +97,7 @@ export default function AIAssistantPage() {
           <h2 className="text-sm font-semibold">{tAI("history.title")}</h2>
           {isDesktop && (
             <button
+              type="button"
               className="inline-flex items-center gap-1 text-xs px-2 py-1 rounded bg-primary text-white"
               onClick={() => {
                 newChat();
@@ -132,8 +128,9 @@ export default function AIAssistantPage() {
               const isActive = currentSessionId === s.id;
               return (
                 <li key={s.id}>
-                  <div
-                    className={`relative w-full max-w-full overflow-hidden rounded-md border bg-card transition-colors ${isActive ? "border-primary/30" : "border-border hover:bg-muted/40"}`}
+                  <button
+                    type="button"
+                    className={`relative w-full max-w-full overflow-hidden rounded-md border bg-card transition-colors text-left ${isActive ? "border-primary/30" : "border-border hover:bg-muted/40"}`}
                     onClick={() => {
                       loadSessionMessages(s.id);
                       setHistoryOpen(false);
@@ -149,6 +146,7 @@ export default function AIAssistantPage() {
                         </div>
                       </div>
                       <button
+                        type="button"
                         className="inline-flex h-6 w-6 items-center justify-center rounded text-error hover:bg-red-50"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -160,7 +158,7 @@ export default function AIAssistantPage() {
                         <Trash size={16} />
                       </button>
                     </div>
-                  </div>
+                  </button>
                 </li>
               );
             })}
@@ -179,6 +177,7 @@ export default function AIAssistantPage() {
       {!isDesktop && (
         <div className="sticky top-0 z-20 px-0 pt-2 pb-2 border-b border-border bg-background flex items-center justify-between w-full">
           <button
+            type="button"
             className="flex items-center text-primary"
             aria-label={tAI("history.title")}
             onClick={() => setHistoryOpen(true)}
@@ -210,10 +209,21 @@ export default function AIAssistantPage() {
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {tAI("welcomeDesc")}
                 </p>
-                <div className="mt-4 px-4 py-3 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <p className="text-xs text-blue-700 dark:text-blue-300 leading-relaxed">
-                    💡 {tAI("tipAddTransaction")}
+                <div className="mt-4 border border-dashed border-white/10 bg-white/5 rounded-xl p-4 text-center">
+                  <div className="font-semibold mb-2">
+                    {tChat("empty_state.quick_add_title")}
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    {tChat("empty_state.quick_add_desc")}
                   </p>
+                  <div className="space-y-2">
+                    <div className="font-mono text-sm text-muted-foreground">
+                      {tChat("empty_state.quick_add_pattern")}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {tChat("empty_state.pattern_example")}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -222,20 +232,18 @@ export default function AIAssistantPage() {
         </div>
       ) : (
         <div className="flex-1 min-h-0 min-w-0 flex flex-col">
-          <ChatMessages
-            messages={messages}
-            isTyping={isTyping}
-          />
+          <ChatMessages messages={messages} isTyping={isTyping} />
         </div>
       )}
       {/* Инпут: обычный поток внизу контейнера, без sticky */}
       {/* Инпут: обычный поток внизу контейнера, sticky bottom-0, с минимальным отступом снизу */}
       {/* Инпут: обычный поток внизу контейнера, sticky bottom-0, с минимальным отступом снизу */}
       <div
-        className={`shrink-0 z-10 bg-background border-t border-border md:pb-0 transition-[padding] duration-200 ${isTabBarVisible && !isDesktop
-          ? "pb-[calc(env(safe-area-inset-bottom)+64px)]"
-          : "pb-[env(safe-area-inset-bottom)]"
-          }`}
+        className={`shrink-0 z-10 bg-background border-t border-border md:pb-0 transition-[padding] duration-200 ${
+          isTabBarVisible && !isDesktop
+            ? "pb-[calc(env(safe-area-inset-bottom)+64px)]"
+            : "pb-[env(safe-area-inset-bottom)]"
+        }`}
       >
         <div className="pt-2 px-2">
           <ChatInput
@@ -268,6 +276,7 @@ export default function AIAssistantPage() {
               <div className="h-full flex flex-col">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                   <button
+                    type="button"
                     className="flex items-center text-primary"
                     onClick={() => setHistoryOpen(false)}
                     aria-label={tAI("history.title")}
@@ -275,6 +284,7 @@ export default function AIAssistantPage() {
                     <ChevronLeft className="h-6 w-6 text-primary -scale-x-100" />
                   </button>
                   <button
+                    type="button"
                     className="flex items-center text-primary"
                     onClick={() => {
                       newChat();

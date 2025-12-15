@@ -237,9 +237,9 @@ export default function TransactionForm({
       //   variant: "default",
       // });
 
-      // Refresh data
-      router.refresh();
+      // Notify parent first to show toast, then refresh data
       onSuccess();
+      setTimeout(() => router.refresh(), 100);
     } catch (err) {
       console.error("Error submitting transaction:", err);
       toast({
