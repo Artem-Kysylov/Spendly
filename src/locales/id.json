@@ -274,7 +274,8 @@
       "thisWeek": "Minggu Ini",
       "lastWeek": "Minggu Lalu",
       "thisMonth": "Bulan Ini",
-      "lastMonth": "Bulan Lalu"
+      "lastMonth": "Bulan Lalu",
+      "insight": "Wawasan"
     },
     "table": {
       "period": "Periode",

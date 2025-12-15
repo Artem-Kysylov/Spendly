@@ -205,7 +205,8 @@
       "thisWeek": "이번 주",
       "lastWeek": "지난 주",
       "thisMonth": "이번 달",
-      "lastMonth": "지난 달"
+      "lastMonth": "지난 달",
+      "insight": "인사이트"
     },
     "table": {
       "period": "기간",

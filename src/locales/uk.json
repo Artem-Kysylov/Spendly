@@ -274,7 +274,8 @@
       "thisWeek": "Цей тиждень",
       "lastWeek": "Минулий тиждень",
       "thisMonth": "Цей місяць",
-      "lastMonth": "Минулий місяць"
+      "lastMonth": "Минулий місяць",
+      "insight": "Порада"
     },
     "table": {
       "period": "Період",
