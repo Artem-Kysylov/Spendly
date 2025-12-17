@@ -62,6 +62,11 @@ export async function generateSpendingInsights({
         return cached.data;
     }
 
+    let fallbackCurrentExpenses = 0;
+    let fallbackPreviousExpenses = 0;
+    let fallbackTrendPercentage = 0;
+    let fallbackTopCategory: { name: string; amount: number; emoji: string } | null = null;
+
     try {
         const supabase = getServerSupabaseClient();
 
@@ -116,6 +121,9 @@ export async function generateSpendingInsights({
             .filter((t) => t.type === "expense")
             .reduce((sum, t) => sum + t.amount, 0);
 
+        fallbackCurrentExpenses = currentExpenses;
+        fallbackPreviousExpenses = previousExpenses;
+
         // Group by budget category
         const categoryTotals: Record<
             string,
@@ -134,25 +142,39 @@ export async function generateSpendingInsights({
                 categoryTotals[category].total += t.amount;
             });
 
+        const sortedCategories = Object.values(categoryTotals).sort(
+            (a, b) => b.total - a.total,
+        );
+
+        if (sortedCategories.length > 0) {
+            const top = sortedCategories[0];
+            fallbackTopCategory = {
+                name: top.name,
+                emoji: top.emoji,
+                amount: top.total,
+            };
+        }
+
         // Prepare context for AI
         const transactionsList = (currentTransactions || [])
-            .slice(0, 50) // Limit to last 50 for AI context
+            .slice(0, 50)
             .map((t) => {
                 const budgetName = (t.budget_folders as any)?.name || "Uncategorized";
-                return `- ${t.title}: $${t.amount.toFixed(2)} (${budgetName}) - ${new Date(t.created_at).toLocaleDateString()}`;
+                return `- ${t.title}: ${t.amount.toFixed(2)} (${budgetName}) - ${new Date(t.created_at).toLocaleDateString()}`;
             })
             .join("\n");
 
-        const categorySummary = Object.entries(categoryTotals)
-            .sort((a, b) => b[1].total - a[1].total)
+        const categorySummary = sortedCategories
             .slice(0, 5)
-            .map(([_, data]) => `${data.emoji} ${data.name}: $${data.total.toFixed(2)}`)
+            .map((data) => `${data.emoji} ${data.name}: ${data.total.toFixed(2)}`)
             .join("\n");
 
         const trendPercentage =
             previousExpenses > 0
                 ? ((currentExpenses - previousExpenses) / previousExpenses) * 100
                 : 0;
+
+        fallbackTrendPercentage = trendPercentage;
 
         const systemPrompt = `You are a financial advisor analyzing spending patterns. Be specific, helpful, and slightly friendly in your advice.
 
@@ -206,20 +228,53 @@ Be conversational but concise. Use emojis sparingly. Make the advice actionable.
         console.error('[AI Insights] ERROR:', error);
         console.error('[AI Insights] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
 
-        // Return fallback data
+        const hasExpensesData = fallbackCurrentExpenses > 0 || fallbackPreviousExpenses > 0;
+        const hasTopCategory = !!fallbackTopCategory;
+
+        let direction: "up" | "down" | "neutral" = "neutral";
+        if (fallbackTrendPercentage > 1) {
+            direction = "up";
+        } else if (fallbackTrendPercentage < -1) {
+            direction = "down";
+        }
+
+        const absTrend = Math.abs(fallbackTrendPercentage);
+
+        const trendMessage = hasExpensesData
+            ? direction === "up"
+                ? `Your spending increased by ${absTrend.toFixed(1)}% compared to the previous period.`
+                : direction === "down"
+                    ? `Your spending decreased by ${absTrend.toFixed(1)}% compared to the previous period.`
+                    : "Your spending is roughly flat compared to the previous period."
+            : "Not enough data yet to calculate a spending trend.";
+
+        const topCategory = hasTopCategory
+            ? {
+                  name: fallbackTopCategory!.name,
+                  amount: fallbackTopCategory!.amount,
+                  emoji: fallbackTopCategory!.emoji,
+                  advice:
+                      "This is your top spending category for the selected period. Consider reviewing these expenses and setting a specific budget if needed.",
+              }
+            : {
+                  name: "General",
+                  amount: 0,
+                  emoji: "📊",
+                  advice: "Keep tracking your expenses to get better insights.",
+              };
+
+        const generalTip = hasExpensesData
+            ? "Focus on your top spending category and look for 1–2 concrete places where you can reduce or postpone expenses this period."
+            : "Start by adding a few transactions. Once you have some history, you'll get more detailed spending insights.";
+
         return {
             trend: {
-                direction: "neutral",
-                percentage: 0,
-                message: "Unable to calculate trend at this time",
+                direction,
+                percentage: hasExpensesData ? fallbackTrendPercentage : 0,
+                message: trendMessage,
             },
-            topCategory: {
-                name: "General",
-                amount: 0,
-                emoji: "📊",
-                advice: "Keep tracking your expenses to get better insights",
-            },
-            generalTip: "Start by reviewing your recent transactions to identify spending patterns",
+            topCategory,
+            generalTip,
         };
     }
 }
