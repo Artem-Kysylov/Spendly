@@ -179,6 +179,18 @@
         "title": "Sign out?",
         "text": "Are you sure you want to sign out?"
       }
+    },
+    "support_title": "Support & Feedback",
+    "btn_report_bug": "Report a bug",
+    "btn_contact_support": "Contact Support",
+    "btn_twitter": "Follow updates on X",
+    "bug_drawer": {
+      "title": "Help us fix it faster 🐛",
+      "desc": "A good bug report helps us solve the issue in minutes.",
+      "tip_1": "Take a screenshot of the error.",
+      "tip_2": "Describe what you were doing when it happened.",
+      "tip_3": "Mention your device model.",
+      "btn_continue": "Draft Email"
     }
   },
   "payment": {

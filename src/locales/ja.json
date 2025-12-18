@@ -216,6 +216,18 @@
         "deleteFailed": "ルールの削除に失敗しました。",
         "limitReached": "制限: 無料プランではルールは最大2件。Pro にアップグレードで無制限。"
       }
+    },
+    "support_title": "Support & Feedback",
+    "btn_report_bug": "Report a bug",
+    "btn_contact_support": "Contact Support",
+    "btn_twitter": "Follow updates on X",
+    "bug_drawer": {
+      "title": "Help us fix it faster 🐛",
+      "desc": "A good bug report helps us solve the issue in minutes.",
+      "tip_1": "Take a screenshot of the error.",
+      "tip_2": "Describe what you were doing when it happened.",
+      "tip_3": "Mention your device model.",
+      "btn_continue": "Draft Email"
     }
   },
   "auth": {
@@ -299,30 +311,6 @@
       "showBiggest": "支出が最も大きいカテゴリ",
       "compareMonths": "今月と先月を比較"
     },
-    "insights": {
-      "title": "AI インサイト",
-      "beta": "ベータ"
-    },
-    "tone": {
-      "label": "トーン",
-      "select_label": "AI アシスタントのトーンを選択",
-      "options": {
-        "neutral": "ニュートラル",
-        "friendly": "フレンドリー",
-        "formal": "フォーマル",
-        "playful": "遊び心のある"
-      }
-    },
-    "settings": {
-      "proOnlyHint": "カスタムアシスタントトーンはProで利用可能です。アップグレードしてロックを解除してください。",
-      "title": "Spendly Pal のトーン",
-      "description": "AI アシスタントの応答トーンを選択します。"
-    },
-    "errors": {
-      "parseFailed": "トランザクションを作成できませんでした。入力を確認し、予算が存在するか確認してください。フォーマット: Add \"タイトル\" 12.34 to <予算> budget.",
-      "budgetNotFound": "予算「{name}」が見つかりませんでした。名前を確認するか、新しく作成してください。"
-    },
-    "tipAddTransaction": "ヒント: Add \"タイトル\" 12.34 to \"Budget\" budget のようにトランザクションを追加します。例: Add \"ランチ\" 12.50 to food budget; Add \"タクシー\" 200 to transport budget。コンマと通貨記号がサポートされています。",
     "insights": {
       "title": "AI インサイト",
       "beta": "ベータ"

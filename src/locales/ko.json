@@ -620,6 +620,18 @@
         "deleteFailed": "규칙 삭제에 실패했습니다.",
         "limitReached": "무료 요금제에서는 반복 규칙을 최대 2개까지 추가할 수 있습니다. Pro로 업그레이드하면 무제한입니다."
       }
+    },
+    "support_title": "Support & Feedback",
+    "btn_report_bug": "Report a bug",
+    "btn_contact_support": "Contact Support",
+    "btn_twitter": "Follow updates on X",
+    "bug_drawer": {
+      "title": "Help us fix it faster 🐛",
+      "desc": "A good bug report helps us solve the issue in minutes.",
+      "tip_1": "Take a screenshot of the error.",
+      "tip_2": "Describe what you were doing when it happened.",
+      "tip_3": "Mention your device model.",
+      "btn_continue": "Draft Email"
     }
   },
   "notifications": {

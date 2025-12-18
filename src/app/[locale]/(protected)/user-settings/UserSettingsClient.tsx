@@ -18,6 +18,7 @@ import LanguageSelect from "@/components/ui-elements/locale/LanguageSelect";
 import { useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import ToneSettings from "@/components/ai-assistant/ToneSettings";
+import { SupportSection } from "@/components/user-settings/SupportSection";
 
 import TransactionTemplatesSettings from "@/components/user-settings/TransactionTemplatesSettings";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -187,11 +188,10 @@ export default function UserSettingsClient() {
                 </p>
               </div>
               <span
-                className={`text-xs px-2 py-1 rounded border ${
-                  subscriptionPlan === "pro"
+                className={`text-xs px-2 py-1 rounded border ${subscriptionPlan === "pro"
                     ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-900"
                     : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-900"
-                }`}
+                  }`}
               >
                 {tSettings("subscription.currentPlan")}:{" "}
                 {subscriptionPlan === "pro"
@@ -360,6 +360,11 @@ export default function UserSettingsClient() {
             </div>
           )}
 
+          {/* Support Section — mobile padding 12px */}
+          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
+            <SupportSection />
+          </div>
+
           {/* Account Section — мобильный паддинг 12px и без нижнего дивайдера */}
           <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
             <div className="space-y-6">
@@ -424,7 +429,7 @@ export default function UserSettingsClient() {
       <EditProfileModal
         isOpen={isEditProfileModalOpen}
         onClose={handleEditProfileClose}
-        onSuccess={() => {}}
+        onSuccess={() => { }}
       />
 
       {/* App Install Modal */}

@@ -1,14 +1,4 @@
 {
-  "layout": {
-    "sidebar": {
-      "dashboard": "Dasbor",
-      "transactions": "Transaksi",
-      "budgets": "Anggaran",
-      "userSettings": "Pengaturan Pengguna",
-      "addTransaction": "Tambah Transaksi",
-      "aiAssistant": "Asisten AI"
-    }
-  },
   "onboarding": {
     "title": "Onboarding",
     "autodetected": "Terdeteksi otomatis",
@@ -226,6 +216,18 @@
         "deleteFailed": "Gagal menghapus aturan.",
         "limitReached": "Batas: di paket Gratis, Anda dapat menambahkan hingga 2 aturan berkala. Upgrade ke Pro untuk tanpa batas."
       }
+    },
+    "support_title": "Support & Feedback",
+    "btn_report_bug": "Report a bug",
+    "btn_contact_support": "Contact Support",
+    "btn_twitter": "Follow updates on X",
+    "bug_drawer": {
+      "title": "Help us fix it faster 🐛",
+      "desc": "A good bug report helps us solve the issue in minutes.",
+      "tip_1": "Take a screenshot of the error.",
+      "tip_2": "Describe what you were doing when it happened.",
+      "tip_3": "Mention your device model.",
+      "btn_continue": "Draft Email"
     }
   },
   "auth": {
@@ -515,6 +517,14 @@
     }
   },
   "layout": {
+    "sidebar": {
+      "dashboard": "Dasbor",
+      "transactions": "Transaksi",
+      "budgets": "Anggaran",
+      "userSettings": "Pengaturan Pengguna",
+      "addTransaction": "Tambah Transaksi",
+      "aiAssistant": "Asisten AI"
+    },
     "upgradeBanner": {
       "title": "Dapatkan wawasan dengan Pro 🚀",
       "description": "Buka anggaran tak terbatas, asisten AI, dan lainnya.",
