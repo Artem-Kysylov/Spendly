@@ -120,6 +120,7 @@ export function TransactionChatWindow({
               budgets={budgets}
               onTransactionSuccess={handleTransactionSuccess}
               onTransactionError={handleTransactionError}
+              onSuggestionClick={(text) => setInput(text)}
             />
           )}
         </div>

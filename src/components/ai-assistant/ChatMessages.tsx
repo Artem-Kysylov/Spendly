@@ -9,6 +9,7 @@ interface ChatMessagesProps {
   messages: ChatMessage[];
   isTyping?: boolean;
   currency?: string;
+  onSuggestionClick?: (text: string) => void;
 }
 
 // Minimal cleaner to fix "AI laziness" with newlines
@@ -16,57 +17,64 @@ const cleanContent = (text: string) => {
   if (!text) return "";
   let cleaned = text;
 
-  // 1. CRITICAL: Aggressive fix for "AI laziness" where it puts double pipes instead of newline
-  // Matches "||" anywhere and forces it to be "|\n|"
   cleaned = cleaned.replace(/\|\|/g, "|\n|");
 
-  // 2. Ensure newline before Table Header starts
-  // OLD DESTRUCTIVE REGEX: cleaned = cleaned.replace(/([^\n])\|(?=.*\|)/g, '$1\n\n|');
-  // NEW SAFE REGEX: Only add newline if the line explicitly DOES NOT start with a pipe using multiline start anchor
-  // Look for: Start of line -> (optional whitespace) -> Content that is NOT a pipe -> Pipe
-  // We want to turn "Some text | Header |" into "Some text\n\n| Header |"
-  // But leave "| Cell | Cell |" alone.
-  cleaned = cleaned.replace(/^([^|\n]+)(\|.*\|)/gm, '$1\n\n$2');
+  cleaned = cleaned.replace(/^([^|\n]+)(\|.*\|)/gm, "$1\n\n$2");
 
-  // 2b. SEPARATE Header Row from Separator Row
-  // Match: "| Header | Header |\n|---|---|" or similar attached lines
-  // Fix: Find "|...|...|" followed immediately by "|...|" or "|---|"
-  cleaned = cleaned.replace(/(\|\s*[^\n]+\s*)\|(\s*\|[-:]+)/g, '$1\n$2');
+  cleaned = cleaned.replace(/(\|\s*[^\n]+\s*)\|(\s*\|[-:]+)/g, "$1\n$2");
 
-  // 3. Ensure double newline before Headers (###)
-  cleaned = cleaned.replace(/([^\n])(#{1,3})/g, '$1\n\n$2');
+  cleaned = cleaned.replace(/([^\n])(#{1,3})/g, "$1\n\n$2");
 
-  // 4. Ensure double newline before Lists
-  cleaned = cleaned.replace(/([^\n])(\s)([\*\-])(?=\s)/g, '$1\n\n$3');
+  const lines = cleaned.split("\n");
+  let inCode = false;
+  const out: string[] = [];
 
-  // 5. Specific fix for "Insight" label merging with previous text
-  // Step 1: Normalize all "Insight" variations to "💡 Insight"
-  // First, strip existing bold chars from Insight/Совет to clean slate
-  cleaned = cleaned.replace(/\*\*(Insight|Совет)\*\*/g, '$1');
+  const insightTerms = "Insight|Совет|Порада|सुझाव|Wawasan|インサイト|인사이트";
+  const insightPattern = new RegExp(
+    `^(\\s*(?:-\\s*)?)(?:\\*\\*\\s*)?(?:💡\\s*)?(${insightTerms})(?:\\s*\\*\\*)?\\s*[:\\-]?\\s*`,
+    "u",
+  );
 
-  // Now replace "Insight" keywords with bold version
-  cleaned = cleaned.replace(/(Insight[-:]|###\s*Insight|Совет[-:]|###\s*Совет)/g, '$1');
+  for (const line of lines) {
+    const trimmed = line.trim();
 
-  // Normalize simple "Insight" or "Совет" to not have punctuation if it was stripped above?
-  cleaned = cleaned.replace(/(Insight|Совет)[-:]/g, '$1');
-  cleaned = cleaned.replace(/###\s*(Insight|Совет)/g, '$1');
+    if (trimmed.startsWith("```") ){
+      inCode = !inCode;
+      out.push(line);
+      continue;
+    }
 
-  // Step 2: Ensure double newline BEFORE Insight
-  cleaned = cleaned.replace(/([^\n])(Insight|Совет)/g, '$1\n\n$2');
+    const isTableLine = !inCode && trimmed.startsWith("|") && trimmed.includes("|");
+    if (isTableLine) {
+      out.push(line);
+      continue;
+    }
 
-  // Step 3: Add emoji and BOLD to "Insight" or "Совет"
-  cleaned = cleaned.replace(/^(Insight|Совет)/gm, '**💡 $1**');
-  cleaned = cleaned.replace(/\n(Insight|Совет)/g, '\n**💡 $1**');
+    let l = line;
 
-  // Step 4: Ensure space AFTER Insight
-  cleaned = cleaned.replace(/(\*\*💡 (Insight|Совет)\*\*)(?=[^\s])/g, '$1 ');
+    l = l.replace(/: (?=\p{L})/gu, ":\n");
+    l = l.replace(/:(?=\p{L})/gu, ":\n");
 
-  // 6. Generic Fix: Ensure space after ANY bold text if followed by non-space/non-newline
-  // This addresses "Insight**Text" issues generally
-  cleaned = cleaned.replace(/(\*\*[^*]+\*\*)(?=[^\s\n.,:;!?])/g, '$1 ');
+    l = l.replace(/([^\n])-\s/g, "$1\n- ");
 
-  // 7. Fix "Period" or "This Week" merging
-  cleaned = cleaned.replace(/([^\n])((?:This|Last)\s(?:Week|Month)[-:])/g, '$1\n\n$2');
+    l = l.replace(
+      /([^\n])((?:This|Last)\s(?:Week|Month)[-:])/g,
+      "$1\n\n$2",
+    );
+
+    l = l.replace(/([.!?])\s+(?=\p{L})/gu, "$1\n");
+
+    l = l.replace(insightPattern, "$1**💡 $2** ");
+
+    l = l.replace(/(\*\*[^*]+\*\*)(?=[^\s\n.,:;!?])/g, "$1 ");
+
+    const stars = (l.match(/\*\*/g) || []).length;
+    if (stars % 2 === 1) l = `${l}**`;
+
+    out.push(l);
+  }
+
+  cleaned = out.join("\n");
 
   return cleaned;
 };
@@ -74,6 +82,7 @@ const cleanContent = (text: string) => {
 export const ChatMessages = ({
   messages,
   isTyping,
+  onSuggestionClick,
 }: ChatMessagesProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -86,11 +95,23 @@ export const ChatMessages = ({
     <div className="flex flex-col gap-4 p-4">
       {messages.map((message, index) => {
         const isUser = message.role === "user";
-        // Attempt to get content from message.content which might be string or parts
-        // Assuming string for now based on prompt context, but handling potential object if needed
-        const content = typeof message.content === 'string' ? message.content : '';
+        const rawContent = typeof message.content === "string" ? message.content : "";
+        let content = rawContent;
+        let suggestions: string[] = [];
 
-        if (!content && !message.toolInvocations) return null;
+        if (!isUser && rawContent) {
+          const [main, followUpsRaw] = rawContent.split("### 🔮 Next Steps");
+          content = main.trimEnd();
+          if (followUpsRaw) {
+            const text = followUpsRaw.replace(/\n+/g, ' ').trim();
+            const matches = Array.from(text.matchAll(/-\s+([^\-]+?)(?=\s*-\s+|$)/g)).map((m) => m[1].trim());
+            suggestions = matches
+              .map((q) => q.replace(/^\[(.*)\]$/, '$1').trim())
+              .filter((q) => q.length > 0);
+          }
+        }
+
+        if (!content && !message.toolInvocations && suggestions.length === 0) return null;
 
         return (
           <div
@@ -127,23 +148,36 @@ export const ChatMessages = ({
                         </div>
                       </div>
                     ),
-                    // Add clear borders to cells to distinguish from plain text
                     th: ({ node, ...props }) => (
                       <th className="px-4 py-2 text-left font-semibold bg-muted/50 border-b border-border" {...props} />
                     ),
                     td: ({ node, ...props }) => (
                       <td className="px-4 py-2 align-top border-b border-border" {...props} />
                     ),
-                    // Adding key logic for links if needed, but prose handles most
                     a: ({ node, ...props }) => (
                       <a target="_blank" rel="noopener noreferrer" className="underline font-medium" {...props} />
-                    )
+                    ),
                   }}
                 >
                   {cleanContent(content)}
                 </ReactMarkdown>
               </div>
             </div>
+
+            {!isUser && suggestions.length > 0 && onSuggestionClick && (
+              <div className="mt-2 flex flex-wrap gap-5 md:gap-2">
+                {suggestions.map((s, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="inline-flex items-center justify-start rounded-full border bg-background hover:bg-muted text-sm px-4 py-2.5 md:text-xs md:px-3 md:py-1.5 text-left cursor-pointer transition-colors"
+                    onClick={() => onSuggestionClick(s)}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         );
       })}

@@ -235,7 +235,11 @@ export default function AIAssistantPage() {
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto min-h-0 w-full scroll-smooth">
-          <ChatMessages messages={messages} isTyping={isTyping} />
+          <ChatMessages
+            messages={messages}
+            isTyping={isTyping}
+            onSuggestionClick={sendMessage}
+          />
         </div>
       )}
 

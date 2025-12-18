@@ -14,6 +14,7 @@ interface TransactionChatMessagesProps {
   budgets: any[];
   onTransactionSuccess: () => void;
   onTransactionError: (error: string) => void;
+  onSuggestionClick?: (text: string) => void;
 }
 
 // Minimal cleaner to fix "AI laziness" with newlines
@@ -81,6 +82,7 @@ export const TransactionChatMessages = ({
   budgets,
   onTransactionSuccess,
   onTransactionError,
+  onSuggestionClick,
 }: TransactionChatMessagesProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -94,8 +96,21 @@ export const TransactionChatMessages = ({
       {messages.map((message) => {
         const isUser = message.role === "user";
 
-        // Handle normal text content
-        const content = message.content;
+        const rawContent = message.content;
+        let content = rawContent;
+        let suggestions: string[] = [];
+
+        if (!isUser && rawContent) {
+          const [main, followUpsRaw] = rawContent.split("### 🔮 Next Steps");
+          content = main.trimEnd();
+          if (followUpsRaw) {
+            suggestions = followUpsRaw
+              .split("\n")
+              .filter((line) => line.trim().startsWith("-"))
+              .map((line) => line.replace(/^-\s*/, "").trim())
+              .filter((line) => line.length > 0);
+          }
+        }
 
         return (
           <div
@@ -148,6 +163,21 @@ export const TransactionChatMessages = ({
                     {cleanContent(content)}
                   </ReactMarkdown>
                 </div>
+              </div>
+            )}
+
+            {!isUser && suggestions.length > 0 && onSuggestionClick && (
+              <div className="mt-1 flex flex-wrap gap-5 md:gap-2">
+                {suggestions.map((s, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className="inline-flex items-center justify-start rounded-full border bg-background hover:bg-muted text-sm px-4 py-2.5 md:text-xs md:px-3 md:py-1.5 text-left cursor-pointer transition-colors"
+                    onClick={() => onSuggestionClick(s)}
+                  >
+                    {s}
+                  </button>
+                ))}
               </div>
             )}
 

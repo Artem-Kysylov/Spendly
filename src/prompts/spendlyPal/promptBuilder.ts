@@ -115,15 +115,19 @@ export function buildInstructions(opts: {
 
   const toneMapEn: Record<AssistantTone, string> = {
     neutral: "Use a neutral, straightforward tone.",
-    friendly: "Use a friendly, encouraging tone.",
+    friendly:
+      "Use a friendly, encouraging tone. Use emojis in most sentences to keep the response warm and human.",
     formal: "Use a formal, professional tone.",
-    playful: "Use a playful, upbeat tone.",
+    playful:
+      "Use a playful, upbeat tone. Use emojis in almost every sentence; be fun, light-hearted, and expressive.",
   };
   const toneMapRu: Record<AssistantTone, string> = {
     neutral: "Используй нейтральный, прямой тон.",
-    friendly: "Используй дружелюбный, поддерживающий тон.",
+    friendly:
+      "Используй дружелюбный, поддерживающий тон. Добавляй эмодзи в большинстве предложений, чтобы звучать теплее и живее.",
     formal: "Используй формальный, профессиональный тон.",
-    playful: "Используй игривый, позитивный тон.",
+    playful:
+      "Используй игривый, позитивный тон. Добавляй эмодзи почти в каждое предложение; будь лёгким и эмоциональным.",
   };
   const toneDirective = opts.tone
     ? isRu
@@ -145,10 +149,15 @@ export function buildInstructions(opts: {
     "When the request is weekly, summarize ThisWeek/LastWeek sections. When monthly, summarize ThisMonth/LastMonth.",
     `If the requested weekly period has "none", reply exactly: "${weeklyNone}" or "${weeklyNoneLast}".`,
     `If the requested monthly period has "none", reply exactly: "${monthlyNone}" or "${monthlyNoneLast}".`,
-    "Include key numbers: totals, budget totals, and top expenses. Add one short insight if helpful.",
+    "Include key numbers: totals, budget totals, and top expenses. At the very end, add one short, explicit insight as its own paragraph starting with \"**💡 Insight**\".",
     isRu
       ? "Если показываешь подписки — кратко отметь оптимизацию."
       : "If recurring charges are listed — add brief optimization tips.",
+    // Навигация и follow-up вопросы
+    "When it helps the user navigate the app, use Markdown links like [Settings](/settings), [Budgets](/budgets), [Dashboard](/dashboard), [Transactions](/transactions).",
+    isRu
+      ? "В самом конце ответа добавь раздел `### 🔮 Next Steps` с 2–3 короткими следующими вопросами по теме. Используй маркированный список `-` и формулируй вопросы на языке пользователя. Не нумеруй их."
+      : "At the very end of the response, add a section `### 🔮 Next Steps` with 2–3 short follow-up questions the user might ask next. Use a bulleted list `-` and write questions in the user’s language. Do NOT number them.",
     intentExtra,
     `Currency: ${currency}. PromptVersion: ${pv}.`,
   ].join(" ");

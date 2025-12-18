@@ -93,8 +93,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get current date for context
-    const currentDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const now = new Date();
+    const currentDate = now.toISOString().split("T")[0];
+    const dateContext = now.toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
 
     // Load translations for AI response terminology
     const t = await getTranslations({ locale, namespace: 'assistant' });
@@ -104,7 +110,6 @@ export async function POST(req: NextRequest) {
       .map((b) => `${b.emoji || "📁"} ${b.name} (${b.type})`)
       .join("\n");
 
-    // Construct localization context block
     const localizationContext = `**LOCALIZATION:** You are responding in ${locale.toUpperCase()} language.
 When formatting your response, you MUST use these exact localized terms:
 
@@ -130,16 +135,36 @@ When formatting your response, you MUST use these exact localized terms:
 
 Use these terms EXACTLY as shown when creating tables, lists, or structured output.`;
 
-    // Construct system prompt with override rule at the very top
     const overrideRule = `You are Spendly Pal. Today is ${currentDate}. !!! IMPORTANT RULE !!! If the user sends a message formatted as [Item] [Amount] (e.g., 'Taxi 200', 'Coffee 5', 'Lunch 150'), you MUST interpret this as a command to ADD a transaction. - DO NOT search for past data. - DO NOT say 'No data found'. - IMMEDIATELY call the \`propose_transaction\` tool. !!!`;
 
-    // Tone customization
+    const globalContextBlock = `- **GLOBAL CONTEXT:**
+- TODAY: ${dateContext}. Use this for relative dates ("yesterday", "last Friday").
+- LANGUAGE: Respond in the user's detected language (${locale}).
+
+- **FORMATTING RULES:**
+1. **MONEY:** Always use symbol & 2 decimals ($1,250.00).
+2. **LINKS:** Use Markdown for app navigation:
+   - [Settings](/settings)
+   - [Budgets](/budgets)
+   - [Dashboard](/dashboard)
+   - [Transactions](/transactions)
+3. **FOLLOW-UPS (CRITICAL):**
+   At the very end of your response, strictly follow this format:
+
+   ### 🔮 Next Steps
+
+   - [Short Question 1 in ${locale}?]
+   - [Short Question 2 in ${locale}?]
+
+   (Generate 2-3 short, relevant follow-up questions that the user might want to ask next. Do NOT number them. Use bullets.)`;
+
     let tonePrompt = "";
     if (body.tone === "playful") {
       tonePrompt = `
 - **TONE:** Playful, fun, and energetic! 🚀
 - **EMOJIS:** Use emojis LIBERALLY in every sentence! 🌟🎉
-- Make the user smile while being helpful.`;
+- Make the user smile while being helpful.
+- IF tone is 'playful' OR 'friendly': You MUST use emojis in almost every sentence. Be casual and fun.`;
     } else if (body.tone === "formal") {
       tonePrompt = `
 - **TONE:** Professional, concise, and objective.
@@ -150,12 +175,14 @@ Use these terms EXACTLY as shown when creating tables, lists, or structured outp
       tonePrompt = `
 - **TONE:** Friendly, enthusiastic, and helpful.
 - **EMOJIS:** Use emojis to be engaging (but don't overdo it). 😊
-`;
+- IF tone is 'playful' OR 'friendly': You MUST use emojis in almost every sentence. Be casual and fun.`;
     }
 
     const systemPrompt = `${overrideRule}
 
 ${localizationContext}
+
+${globalContextBlock}
 
 You are Spendly Pal, a financial assistant.
 
@@ -184,7 +211,7 @@ ${budgetList || "No budgets available"}
 - Default to "expense" type unless explicitly "income".
 - "Yesterday" = ${currentDate} - 1 day.
 
-**FORMATTING RULES:**
+**ADDITIONAL FORMATTING RULES:**
 1. **NO PARAGRAPHS.** Use bullet points (\`-\`) for almost everything.
 2. **TABLES:** CRITICAL: Use proper Markdown syntax.
    - Header row must be separated from data by \`|---|---| \`.

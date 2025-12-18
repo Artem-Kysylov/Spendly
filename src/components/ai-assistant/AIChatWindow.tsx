@@ -103,7 +103,12 @@ export const AIChatWindow = ({
             ) : (
               <div className="min-h-0 flex flex-col">
                 <div className="overflow-y-auto">
-                  <ChatMessages messages={messages} isTyping={isTyping} currency={currency} />
+                  <ChatMessages
+                    messages={messages}
+                    isTyping={isTyping}
+                    currency={currency}
+                    onSuggestionClick={onSendMessage}
+                  />
                 </div>
               </div>
             )}
