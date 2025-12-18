@@ -57,7 +57,7 @@ export default function AIAssistantPage() {
       const raw = window.localStorage.getItem("spendly:ai_sessions") || "[]";
       const arr = JSON.parse(raw) as any[];
       local = arr.filter((s) => s?.user_id === userId);
-    } catch {}
+    } catch { }
     const merged = [...local, ...remote]
       .map((s) => ({
         id: String(s.id),
@@ -171,11 +171,10 @@ export default function AIAssistantPage() {
   );
 
   const ChatPane = (
-    <div
-      className={`h-[100dvh] flex flex-col min-h-0 overflow-x-hidden min-w-0 md:h-full`}
-    >
+    <div className="flex flex-col h-full overflow-hidden relative">
+      {/* 2. Header (Tone Selector, etc.) - Fixed at top */}
       {!isDesktop && (
-        <div className="sticky top-0 z-20 px-0 pt-2 pb-2 border-b border-border bg-background flex items-center justify-between w-full">
+        <div className="flex-none px-4 py-2 border-b bg-background z-10 flex items-center justify-between">
           <button
             type="button"
             className="flex items-center text-primary"
@@ -193,14 +192,18 @@ export default function AIAssistantPage() {
           />
         </div>
       )}
-      {/* Контент */}
+
+      {/* Rate Limit Warning */}
       {isRateLimited && (
-        <div className="px-4 py-2 text-xs text-amber-700 bg-amber-50 border-t border-b border-amber-200 dark:text-amber-100 dark:bg-amber-900 dark:border-amber-800">
+        <div className="flex-none px-4 py-2 text-xs text-amber-700 bg-amber-50 border-t border-b border-amber-200 dark:text-amber-100 dark:bg-amber-900 dark:border-amber-800">
           {tAI("rateLimited")}
         </div>
       )}
+
+      {/* 3. Messages Area (The Scrollable Part) */}
+      {/* flex-1: Fills space. overflow-y-auto: Scrolls internally. min-h-0: Fixes flex nesting bugs. */}
       {messages.length === 0 ? (
-        <div className="flex-1 min-h-0 overflow-y-auto w-full">
+        <div className="flex-1 overflow-y-auto min-h-0 w-full scroll-smooth">
           <div className="flex flex-col items-center justify-center min-h-full px-4 py-8">
             <div className="w-full max-w-[560px]">
               <div className="text-center mb-4">
@@ -231,21 +234,19 @@ export default function AIAssistantPage() {
           </div>
         </div>
       ) : (
-        <div className="flex-1 min-h-0 min-w-0 flex flex-col">
+        <div className="flex-1 overflow-y-auto min-h-0 w-full scroll-smooth">
           <ChatMessages messages={messages} isTyping={isTyping} />
         </div>
       )}
-      {/* Инпут: обычный поток внизу контейнера, без sticky */}
-      {/* Инпут: обычный поток внизу контейнера, sticky bottom-0, с минимальным отступом снизу */}
-      {/* Инпут: обычный поток внизу контейнера, sticky bottom-0, с минимальным отступом снизу */}
+
+      {/* 4. Input Area (Pinned to Bottom) */}
       <div
-        className={`shrink-0 z-10 bg-background border-t border-border md:pb-0 transition-[padding] duration-200 ${
-          isTabBarVisible && !isDesktop
-            ? "pb-[calc(env(safe-area-inset-bottom)+64px)]"
-            : "pb-[env(safe-area-inset-bottom)]"
-        }`}
+        className={`flex-none z-20 bg-background border-t border-border transition-[padding] duration-200 ${isTabBarVisible && !isDesktop
+          ? "pb-[calc(env(safe-area-inset-bottom)+84px)]"
+          : "pb-[env(safe-area-inset-bottom)]"
+          }`}
       >
-        <div className="pt-2 px-2">
+        <div className="pt-2 px-2 pb-2">
           <ChatInput
             onSendMessage={sendMessage}
             isThinking={isTyping}
@@ -262,7 +263,7 @@ export default function AIAssistantPage() {
 
   // Основной рендер страницы: сетка на десктопе, мобильная история через Sheet
   return (
-    <div className="h-full w-full md:grid md:grid-cols-[320px_1fr] md:gap-3 p-3 overflow-x-hidden">
+    <div className="relative h-full w-full md:grid md:grid-cols-[320px_1fr] md:gap-3 md:p-3 overflow-hidden">
       {isDesktop ? (
         <>
           {HistoryPane}

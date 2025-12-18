@@ -34,7 +34,7 @@ const TopBar = () => {
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
-    <header className="sticky top-0 z-40 pt-safe bg-transparent lg:bg-card lg:border-b lg:border-border transition-colors duration-300">
+    <header className="sticky top-0 z-40 pt-[env(safe-area-inset-top)] bg-transparent lg:bg-card lg:border-b lg:border-border transition-colors duration-300">
       <div className="mx-auto px-5 h-16 flex items-center justify-between">
         {/* Left: Avatar (settings) + date on desktop */}
         <div className="flex items-center gap-3">

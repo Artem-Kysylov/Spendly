@@ -44,9 +44,9 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     <ProtectedRoute>
       {/* Удалён глобальный AIAssistantProvider */}
       <AddTransactionProvider />
-      <div className="flex h-[100dvh] min-h-[100dvh] transition-colors duration-300">
+      <div className="flex h-[100dvh] transition-colors duration-300 overflow-hidden">
         <Sidebar />
-        <div className="flex-1 flex flex-col lg:ml-64 transition-colors duration-300">
+        <div className="flex-1 flex flex-col h-full overflow-hidden lg:ml-64 transition-colors duration-300">
           <motion.div
             key={`topbar-${pathname}`}
             initial={prefersReduced ? false : { opacity: 0, y: -4 }}
@@ -61,7 +61,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           <AnimatePresence mode="wait">
             <motion.main
               key={pathname}
-              className={`${pathname?.includes("/ai-assistant") && isDesktop ? "flex-1 overflow-hidden min-w-0 min-h-0 transition-colors duration-300 overscroll-none" : "flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 pb-[calc(env(safe-area-inset-bottom)+96px)] lg:pb-0 transition-colors duration-300"}`}
+              className={`${pathname?.includes("/ai-assistant") ? "flex-1 flex flex-col overflow-hidden min-w-0 min-h-0 transition-colors duration-300 overscroll-none" : "flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 pb-[calc(env(safe-area-inset-bottom)+96px)] lg:pb-0 transition-colors duration-300"}`}
               initial={pageVariants ? "initial" : false}
               animate={pageVariants ? "animate" : { opacity: 1 }}
               exit={pageVariants ? "exit" : undefined}
@@ -70,7 +70,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
               style={{
                 willChange: "opacity, transform",
                 touchAction:
-                  pathname?.includes("/ai-assistant") && isDesktop
+                  pathname?.includes("/ai-assistant")
                     ? "pan-y"
                     : undefined,
               }}
