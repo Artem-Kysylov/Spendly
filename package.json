@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
-    "check:locales": "node scripts/check-locales.mjs"
+    "check:locales": "node scripts/check-locales.mjs",
+    "check:locales:strict": "STRICT_LOCALE_CHECK=1 node scripts/check-locales.mjs"
   },
   "dependencies": {
     "@ai-sdk/google": "^2.0.44",

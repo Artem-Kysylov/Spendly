@@ -41,6 +41,24 @@
     "downloadApp": "Download the app",
     "signOut": "Sign Out"
   },
+  "pwa": {
+    "guard": {
+      "title": "Open Spendly in your browser",
+      "description": "For security and AI features, open Spendly in Safari or Chrome using the menu in the top corner."
+    },
+    "ios": {
+      "title": "Install Spendly App",
+      "description": "Add Spendly to your Home Screen for instant access to your budgets and AI insights.",
+      "step1Title": "Step 1",
+      "step1Text": "Tap the Share button in the Safari toolbar.",
+      "step2Title": "Step 2",
+      "step2Text": "Select \"Add to Home Screen\" and confirm.",
+      "notNow": "Not now"
+    },
+    "button": {
+      "install": "Install app"
+    }
+  },
   "pricing": {
     "free": {
       "label": "Free",
@@ -797,6 +815,12 @@
       "meta": {
         "title": "Transactions",
         "description": "Browse and manage all your transactions."
+      }
+    },
+    "budgets": {
+      "meta": {
+        "title": "Budgets",
+        "description": "Create and manage your budgets."
       }
     },
     "budgetDetails": {

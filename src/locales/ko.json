@@ -136,6 +136,24 @@
     "downloadApp": "앱 다운로드",
     "signOut": "로그아웃"
   },
+  "pwa": {
+    "guard": {
+      "title": "브라우저에서 Spendly를 열어 주세요",
+      "description": "보안과 AI 기능을 위해 오른쪽 상단 메뉴에서 Safari 또는 Chrome으로 Spendly를 여세요."
+    },
+    "ios": {
+      "title": "Spendly 앱 설치",
+      "description": "예산과 AI 인사이트에 빠르게 접근할 수 있도록 홈 화면에 Spendly를 추가하세요.",
+      "step1Title": "1단계",
+      "step1Text": "Safari 도구 막대에서 공유 버튼을 탭하세요.",
+      "step2Title": "2단계",
+      "step2Text": "\"홈 화면에 추가\"를 선택하고 확인하세요.",
+      "notNow": "나중에"
+    },
+    "button": {
+      "install": "앱 설치"
+    }
+  },
   "pricing": {
     "free": {
       "label": "무료",
@@ -536,6 +554,26 @@
       "title": "알림",
       "description": "알림 기본 설정 관리"
     },
+  "pages": {
+    "dashboard": {
+      "meta": {
+        "title": "대시보드",
+        "description": "재정 상황을 종합적으로 살펴보세요."
+      }
+    },
+    "transactions": {
+      "meta": {
+        "title": "거래",
+        "description": "모든 거래를 보고 관리하세요."
+      }
+    },
+    "budgets": {
+      "meta": {
+        "title": "예산",
+        "description": "예산을 생성하고 관리합니다."
+      }
+    }
+  },
     "subscription": {
       "title": "구독",
       "description": "구독 플랜 및 청구 내역 보기",
@@ -621,17 +659,17 @@
         "limitReached": "무료 요금제에서는 반복 규칙을 최대 2개까지 추가할 수 있습니다. Pro로 업그레이드하면 무제한입니다."
       }
     },
-    "support_title": "Support & Feedback",
-    "btn_report_bug": "Report a bug",
-    "btn_contact_support": "Contact Support",
-    "btn_twitter": "Follow updates on X",
+    "support_title": "지원 및 피드백",
+    "btn_report_bug": "버그 신고",
+    "btn_contact_support": "지원팀에 문의",
+    "btn_twitter": "X에서 업데이트 팔로우",
     "bug_drawer": {
-      "title": "Help us fix it faster 🐛",
-      "desc": "A good bug report helps us solve the issue in minutes.",
-      "tip_1": "Take a screenshot of the error.",
-      "tip_2": "Describe what you were doing when it happened.",
-      "tip_3": "Mention your device model.",
-      "btn_continue": "Draft Email"
+      "title": "더 빠른 수정을 도와주세요 🐛",
+      "desc": "좋은 버그 보고서는 몇 분 안에 문제를 해결하는 데 도움이 됩니다.",
+      "tip_1": "오류 스크린샷을 찍으세요.",
+      "tip_2": "문제가 발생했을 때 무엇을 하고 있었는지 설명해주세요.",
+      "tip_3": "기기 모델을 알려주세요.",
+      "btn_continue": "이메일 초안 작성"
     }
   },
   "notifications": {

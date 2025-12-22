@@ -64,6 +64,24 @@
     "downloadApp": "アプリをダウンロード",
     "signOut": "サインアウト"
   },
+  "pwa": {
+    "guard": {
+      "title": "ブラウザで Spendly を開いてください",
+      "description": "セキュリティと AI 機能のため、右上のメニューから Safari または Chrome で Spendly を開いてください。"
+    },
+    "ios": {
+      "title": "Spendly アプリをインストール",
+      "description": "予算と AI インサイトへすぐにアクセスできるよう、ホーム画面に Spendly を追加します。",
+      "step1Title": "ステップ 1",
+      "step1Text": "Safari のツールバーで共有ボタンをタップします。",
+      "step2Title": "ステップ 2",
+      "step2Text": "「ホーム画面に追加」を選択して、確認します。",
+      "notNow": "あとで"
+    },
+    "button": {
+      "install": "アプリをインストール"
+    }
+  },
   "pricing": {
     "free": {
       "label": "無料",
@@ -217,17 +235,17 @@
         "limitReached": "制限: 無料プランではルールは最大2件。Pro にアップグレードで無制限。"
       }
     },
-    "support_title": "Support & Feedback",
-    "btn_report_bug": "Report a bug",
-    "btn_contact_support": "Contact Support",
-    "btn_twitter": "Follow updates on X",
+    "support_title": "サポートとフィードバック",
+    "btn_report_bug": "バグを報告",
+    "btn_contact_support": "サポートに連絡",
+    "btn_twitter": "Xで更新をフォロー",
     "bug_drawer": {
-      "title": "Help us fix it faster 🐛",
-      "desc": "A good bug report helps us solve the issue in minutes.",
-      "tip_1": "Take a screenshot of the error.",
-      "tip_2": "Describe what you were doing when it happened.",
-      "tip_3": "Mention your device model.",
-      "btn_continue": "Draft Email"
+      "title": "迅速な修正にご協力ください 🐛",
+      "desc": "良いバグレポートは、問題を数分で解決するのに役立ちます。",
+      "tip_1": "エラーのスクリーンショットを撮ってください。",
+      "tip_2": "問題が発生したときの操作を説明してください。",
+      "tip_3": "お使いのデバイスのモデルを記載してください。",
+      "btn_continue": "メールを作成"
     }
   },
   "auth": {
@@ -386,6 +404,12 @@
       "meta": {
         "title": "ダッシュボード",
         "description": "予算と活動の概要。"
+      }
+    },
+    "transactions": {
+      "meta": {
+        "title": "取引",
+        "description": "すべての取引を閲覧および管理します。"
       }
     },
     "payment": {

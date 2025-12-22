@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import UpgradeSidebarBanner from "@/components/free/UpgradeSidebarBanner";
+import InstallPWA from "@/components/pwa/InstallPWA";
 // удалено: import router from 'next/router'
 
 const Sidebar = () => {
@@ -135,13 +136,18 @@ const Sidebar = () => {
             </Link>
           </li>
         </ul>
+        <div className="mt-6">
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore */}
+          <UpgradeSidebarBanner />
+        </div>
       </nav>
 
-      {/* Upgrade banner */}
+
+
+      {/* Desktop PWA install button, above user settings */}
       <div className="px-4 pb-2">
-        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-        {/* @ts-ignore */}
-        <UpgradeSidebarBanner />
+        <InstallPWA buttonClassName="w-full px-4 py-3 rounded-lg bg-primary text-primary-foreground font-medium text-sm shadow hover:bg-primary/90 transition-colors flex items-center justify-center gap-2" forceShowButton={true} />
       </div>
 
       {/* User Section */}

@@ -1,50 +1,88 @@
 import { useEffect, useState } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
-    prompt: () => Promise<void>;
-    userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
 export default function usePWAInstall() {
-    const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-    const [isIOS, setIsIOS] = useState(false);
-    const [isStandalone, setIsStandalone] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] =
+    useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstallPromptAvailable, setIsInstallPromptAvailable] =
+    useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone, setIsStandalone] = useState(false);
+  const [isInAppBrowser, setIsInAppBrowser] = useState(false);
 
-    useEffect(() => {
-        // 1. Check if app is already installed
-        setIsStandalone(window.matchMedia('(display-mode: standalone)').matches);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
 
-        // 2. Detect iOS
-        const userAgent = window.navigator.userAgent.toLowerCase();
-        const isIosDevice = /iphone|ipad|ipod/.test(userAgent);
-        setIsIOS(isIosDevice);
+    const userAgent = window.navigator.userAgent || "";
+    const isStandaloneMode =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone === true;
+    const isIosDevice = /iPhone|iPad|iPod/i.test(userAgent);
+    const inApp =
+      /TikTok|Instagram|FBAN|FBAV|FB_IAB/i.test(userAgent) || false;
 
-        // 3. Capture event for Android/Desktop
-        const handler = (e: Event) => {
-            e.preventDefault();
-            setDeferredPrompt(e as BeforeInstallPromptEvent);
-        };
+    setIsIOS(isIosDevice);
+    setIsInAppBrowser(inApp);
+    setIsStandalone(isStandaloneMode);
 
-        window.addEventListener("beforeinstallprompt", handler);
-        return () => window.removeEventListener("beforeinstallprompt", handler);
-    }, []);
+    if (isStandaloneMode) {
+      setDeferredPrompt(null);
+      setIsInstallPromptAvailable(false);
+      return;
+    }
 
-    const promptInstall = async () => {
-        if (deferredPrompt) {
-            // Android Logic
-            await deferredPrompt.prompt();
-            const { outcome } = await deferredPrompt.userChoice;
-            if (outcome === 'accepted') {
-                setDeferredPrompt(null);
-            }
-        } else if (isIOS) {
-            // iOS Logic: Signal to open instruction drawer
-            return "OPEN_IOS_INSTRUCTIONS";
-        }
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      const e = event as BeforeInstallPromptEvent;
+      setDeferredPrompt(e);
+      setIsInstallPromptAvailable(true);
     };
 
-    // Show button if: (Android Prompt is ready OR It is iOS) AND (App is not installed)
-    const showInstallButton = !isStandalone && (!!deferredPrompt || isIOS);
+    const handleAppInstalled = () => {
+      setIsStandalone(true);
+      setDeferredPrompt(null);
+      setIsInstallPromptAvailable(false);
+    };
 
-    return { showInstallButton, promptInstall, isIOS };
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  const promptInstall = async () => {
+    if (deferredPrompt) {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") {
+        setDeferredPrompt(null);
+        setIsInstallPromptAvailable(false);
+      }
+      return outcome;
+    }
+
+    if (isIOS && !isStandalone) {
+      return "ios";
+    }
+
+    return null;
+  };
+
+  return {
+    isInstallPromptAvailable,
+    isIOS,
+    isStandalone,
+    isInAppBrowser,
+    promptInstall,
+  };
 }

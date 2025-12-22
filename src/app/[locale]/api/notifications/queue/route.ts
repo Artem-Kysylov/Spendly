@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthenticatedClient } from "@/lib/serverSupabase";
+import {
+  getAuthenticatedClient,
+  getServerSupabaseClient,
+} from "@/lib/serverSupabase";
 import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
 import { getTranslations } from "next-intl/server";
+import { processNotificationQueue } from "@/lib/notificationProcessor";
 
 // POST /api/notifications/queue - добавление уведомления в очередь
 export async function POST(req: NextRequest) {
@@ -128,19 +132,10 @@ export async function POST(req: NextRequest) {
     // Если уведомление не запланировано на будущее — дергаем внутренний processor
     if (!scheduled_for || new Date(scheduledISO) <= new Date()) {
       try {
-        const processorUrl = `${req.nextUrl.origin}/${locale}/api/notifications/processor`;
-        const response = await fetch(processorUrl, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY || ""}`,
-            "Content-Type": "application/json",
-          },
-        });
-        if (!response.ok) {
-          console.warn("Processor call failed:", await response.text());
-        }
+        const adminSupabase = getServerSupabaseClient();
+        await processNotificationQueue(adminSupabase);
       } catch (edgeError) {
-        console.warn("Failed to trigger internal processor:", edgeError);
+        console.error("Failed to trigger internal processor:", edgeError);
       }
     }
 

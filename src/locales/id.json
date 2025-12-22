@@ -37,6 +37,24 @@
     "downloadApp": "Unduh Aplikasi",
     "signOut": "Keluar"
   },
+  "pwa": {
+    "guard": {
+      "title": "Buka Spendly di browser",
+      "description": "Untuk keamanan dan fitur AI, buka Spendly di Safari atau Chrome melalui menu di pojok kanan atas."
+    },
+    "ios": {
+      "title": "Instal Aplikasi Spendly",
+      "description": "Tambahkan Spendly ke Layar Utama untuk akses cepat ke anggaran dan insight AI.",
+      "step1Title": "Langkah 1",
+      "step1Text": "Ketuk tombol Bagikan di toolbar Safari.",
+      "step2Title": "Langkah 2",
+      "step2Text": "Pilih \"Tambahkan ke Layar Utama\" dan konfirmasi.",
+      "notNow": "Nanti saja"
+    },
+    "button": {
+      "install": "Instal aplikasi"
+    }
+  },
   "bell": {
     "aria": "Notifikasi",
     "title": "Notifikasi",
@@ -217,17 +235,17 @@
         "limitReached": "Batas: di paket Gratis, Anda dapat menambahkan hingga 2 aturan berkala. Upgrade ke Pro untuk tanpa batas."
       }
     },
-    "support_title": "Support & Feedback",
-    "btn_report_bug": "Report a bug",
-    "btn_contact_support": "Contact Support",
-    "btn_twitter": "Follow updates on X",
+    "support_title": "Dukungan & Umpan Balik",
+    "btn_report_bug": "Laporkan bug",
+    "btn_contact_support": "Hubungi Dukungan",
+    "btn_twitter": "Ikuti pembaruan di X",
     "bug_drawer": {
-      "title": "Help us fix it faster 🐛",
-      "desc": "A good bug report helps us solve the issue in minutes.",
-      "tip_1": "Take a screenshot of the error.",
-      "tip_2": "Describe what you were doing when it happened.",
-      "tip_3": "Mention your device model.",
-      "btn_continue": "Draft Email"
+      "title": "Bantu kami memperbaikinya lebih cepat 🐛",
+      "desc": "Laporan bug yang baik membantu kami menyelesaikan masalah dalam hitungan menit.",
+      "tip_1": "Ambil tangkapan layar dari kesalahan tersebut.",
+      "tip_2": "Jelaskan apa yang Anda lakukan saat itu terjadi.",
+      "tip_3": "Sebutkan model perangkat Anda.",
+      "btn_continue": "Buat Draf Email"
     }
   },
   "auth": {
@@ -376,6 +394,12 @@
         }
       }
     },
+    "dashboard": {
+      "meta": {
+        "title": "Dasbor",
+        "description": "Gambaran lengkap keuangan Anda."
+      }
+    },
     "budgetDetails": {
       "meta": {
         "title": "Detail Anggaran",
@@ -386,6 +410,44 @@
       "meta": {
         "title": "Ringkasan Anggaran",
         "description": "Ringkasan total pengeluaran dan sisa anggaran."
+      }
+    },
+    "transactions": {
+      "meta": {
+        "title": "Transaksi",
+        "description": "Lihat dan kelola semua transaksi Anda."
+      }
+    },
+    "budgets": {
+      "meta": {
+        "title": "Anggaran",
+        "description": "Buat dan kelola anggaran Anda."
+      }
+    },
+    "payment": {
+      "meta": {
+        "title": "Pembayaran",
+        "description": "Tingkatkan ke Pro dan buka fitur-fitur canggih."
+      }
+    },
+    "onboarding": {
+      "meta": {
+        "title": "Selamat Datang di Spendly",
+        "description": "Siapkan akun Anda dan mulailah mengelola keuangan Anda."
+      }
+    },
+    "setup": {
+      "budget": {
+        "meta": {
+          "title": "Siapkan Anggaran Anda",
+          "description": "Konfigurasikan anggaran utama Anda untuk memulai."
+        }
+      }
+    },
+    "notFound": {
+      "meta": {
+        "title": "Halaman Tidak Ditemukan",
+        "description": "Halaman yang Anda cari tidak ada."
       }
     },
     "expenseList": {

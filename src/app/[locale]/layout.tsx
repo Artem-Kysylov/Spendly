@@ -7,6 +7,7 @@ import { QueryProvider } from "@/context/QueryProvider";
 import { ToastProvider } from "@/components/ui/use-toast";
 import { Toaster } from "@/components/ui/toaster";
 import ServiceWorkerRegistration from "@/components/notifications/ServiceWorkerRegistration";
+import InstallPWA from "@/components/pwa/InstallPWA";
 import { LazyMotion, domAnimation } from "framer-motion";
 import { NextIntlClientProvider } from "next-intl";
 import { cookies } from "next/headers";
@@ -126,6 +127,9 @@ export default async function RootLayout({
               >
                 <ThemeProvider>
                   {children}
+                  <div className="lg:hidden">
+                    <InstallPWA floating />
+                  </div>
                   <ServiceWorkerRegistration />
                 </ThemeProvider>
               </NextIntlClientProvider>

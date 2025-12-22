@@ -11,14 +11,14 @@ import NotificationSettings from "@/components/notifications/NotificationSetting
 import ProfileCard from "@/components/user-settings/ProfileCard";
 import ThemeSwitcher from "@/components/ui-elements/ThemeSwitcher";
 import useIsPWAInstalled from "@/hooks/useIsPWAInstalled";
-import AppInstallModal from "@/components/modals/AppInstallModal";
-import { Link, useRouter, usePathname } from "@/i18n/routing";
+import { useRouter, usePathname } from "@/i18n/routing";
 import { supabase } from "@/lib/supabaseClient";
 import LanguageSelect from "@/components/ui-elements/locale/LanguageSelect";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useParams } from "next/navigation";
 import ToneSettings from "@/components/ai-assistant/ToneSettings";
 import { SupportSection } from "@/components/user-settings/SupportSection";
+import InstallPWA from "@/components/pwa/InstallPWA";
 
 import TransactionTemplatesSettings from "@/components/user-settings/TransactionTemplatesSettings";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -51,11 +51,13 @@ export default function UserSettingsClient() {
   const tCTA = useTranslations("cta");
   const tCommon = useTranslations("common");
   const tAI = useTranslations("assistant");
+  const locale = useLocale();
   const { subscriptionPlan } = useSubscription();
+  const CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL;
 
   // Appearance & App Controls
-  const [isAppInstallModalOpen, setIsAppInstallModalOpen] = useState(false);
   const isPWAInstalled = useIsPWAInstalled();
+  const [isUpgradeLoading, setIsUpgradeLoading] = useState(false);
 
   // Language state
   const [language, setLanguage] = useState<
@@ -123,6 +125,44 @@ export default function UserSettingsClient() {
     }
   }
 
+  async function handleUpgradeClick() {
+    if (isUpgradeLoading) return;
+    setIsUpgradeLoading(true);
+    try {
+      if (CHECKOUT_URL) {
+        if (CHECKOUT_URL.includes("/checkout/buy/")) {
+          console.warn(
+            "[Settings] Env contains legacy buy URL; skipping to avoid 404.",
+          );
+          return;
+        }
+        window.location.href = CHECKOUT_URL;
+        return;
+      }
+
+      const res = await fetch("/api/checkout-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ locale }),
+      });
+      if (!res.ok) throw new Error("Failed to create checkout");
+
+      const { url } = await res.json();
+      if (typeof url !== "string" || url.includes("/checkout/buy/")) {
+        console.warn(
+          "[Settings] API returned legacy buy link or invalid URL; skipping to avoid 404.",
+        );
+        return;
+      }
+
+      window.location.href = url;
+    } catch (e) {
+      console.warn("[Settings] No checkout URL available:", e);
+    } finally {
+      setIsUpgradeLoading(false);
+    }
+  }
+
   async function handleConfirmUnsubscribe() {
     setIsUnsubscribing(true);
     try {
@@ -145,7 +185,7 @@ export default function UserSettingsClient() {
 
   return (
     <>
-      <div className="flex flex-col gap-6 px-4 md:px-5 pb-8 max-w-4xl mx-auto w-full">
+      <div className="flex flex-col gap-6 px-4 md:px-6 pb-8 w-full">
         {/* Page Header */}
         <motion.div
           className="mt-[30px] mb-8"
@@ -242,20 +282,16 @@ export default function UserSettingsClient() {
                   <li>• {tPricing("pro.features.aiUnlimited")}</li>
                   <li>• {tPricing("pro.features.advancedCharts")}</li>
                   <li>• {tPricing("pro.features.prioritySupport")}</li>
-                  <li>• {tPricing("pro.features.customGoals")}</li>
-                  <li>• {tPricing("pro.features.earlyAccess")}</li>
                 </ul>
                 <div className="mt-5">
-                  <Link
-                    href={{ pathname: "/payment" }}
-                    className="inline-flex w-full"
-                  >
-                    <Button
-                      text={tCTA("upgradeToPro")}
-                      variant="primary"
-                      className="w-full"
-                    />
-                  </Link>
+                  <Button
+                    text={tCTA("upgradeToPro")}
+                    variant="primary"
+                    className="w-full"
+                    onClick={handleUpgradeClick}
+                    isLoading={isUpgradeLoading}
+                    disabled={isUpgradeLoading}
+                  />
                 </div>
               </div>
             </div>
@@ -339,11 +375,10 @@ export default function UserSettingsClient() {
             <ToneSettings />
           </div>
 
-          {/* App Controls Section — мобильный паддинг 12px */}
           {!isPWAInstalled && (
             <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex items-center justify-between gap-4">
+                <div className="min-w-0">
                   <h2 className="text-lg font-semibold text-secondary-black dark:text-white mb-2">
                     {tSettings("appControls.title")}
                   </h2>
@@ -351,11 +386,9 @@ export default function UserSettingsClient() {
                     {tSettings("appControls.description")}
                   </p>
                 </div>
-                <Button
-                  text={tCTA("downloadApp")}
-                  variant="default"
-                  onClick={() => setIsAppInstallModalOpen(true)}
-                />
+                <div className="flex-shrink-0">
+                  <InstallPWA />
+                </div>
               </div>
             </div>
           )}
@@ -432,14 +465,6 @@ export default function UserSettingsClient() {
         onSuccess={() => { }}
       />
 
-      {/* App Install Modal */}
-      {isAppInstallModalOpen && (
-        <AppInstallModal
-          isOpen={isAppInstallModalOpen}
-          onClose={() => setIsAppInstallModalOpen(false)}
-        />
-      )}
-
       {/* Unsubscribe Modal */}
       {isUnsubscribeOpen && (
         <UnsubscribeModal
@@ -454,14 +479,17 @@ export default function UserSettingsClient() {
       <Sheet open={isNotificationsOpen} onOpenChange={setIsNotificationsOpen}>
         <SheetContent
           side="bottom"
-          className="bg-background text-foreground h-[75vh]"
+          className="bg-background text-foreground h-[75vh] flex flex-col overflow-hidden p-0"
         >
           <SheetHeader className="px-4 py-4 border-b border-border justify-center">
             <SheetTitle className="text-[18px] sm:text-[20px] font-semibold text-center">
               {tSettings("notifications.title")}
             </SheetTitle>
           </SheetHeader>
-          <div className="p-4">
+          <div
+            className="p-4 flex-1 overflow-y-auto overscroll-y-contain"
+            style={{ WebkitOverflowScrolling: "touch", touchAction: "pan-y" }}
+          >
             <NotificationSettings />
           </div>
           <SheetFooter className="px-4 py-3 border-t border-border">
