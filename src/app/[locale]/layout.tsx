@@ -128,7 +128,7 @@ export default async function RootLayout({
                 <ThemeProvider>
                   {children}
                   <div className="lg:hidden">
-                    <InstallPWA floating />
+                    <InstallPWA floating forceShowButton />
                   </div>
                   <ServiceWorkerRegistration />
                 </ThemeProvider>

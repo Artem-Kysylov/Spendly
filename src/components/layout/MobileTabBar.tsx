@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import router from "next/router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useUIStore } from "@/store/ui-store";
 
 function MobileTabBar() {
@@ -17,10 +17,35 @@ function MobileTabBar() {
   const tLayout = useTranslations("layout");
   const router = useRouter();
 
-  // Скрывать таббар при открытой клавиатуре (mobile) - controlled by global store
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const checkStandalone = () => {
+      const mq = window.matchMedia
+        ? window.matchMedia("(display-mode: standalone)")
+        : null;
+      const isStandaloneMatch = mq?.matches ?? false;
+      const isNavigatorStandalone =
+        (window.navigator as any).standalone === true;
+      setIsStandalone(isStandaloneMatch || isNavigatorStandalone);
+    };
+
+    checkStandalone();
+
+    const mq = window.matchMedia
+      ? window.matchMedia("(display-mode: standalone)")
+      : null;
+    mq?.addEventListener("change", checkStandalone);
+
+    return () => {
+      mq?.removeEventListener("change", checkStandalone);
+    };
+  }, []);
+
   const { isTabBarVisible } = useUIStore();
 
-  // Премиум анимация с ease-out
   const navTransition = { duration: 0.5, ease: "easeOut" } as const;
 
   // заметный fade+slide; variants передаём только если не reduced
@@ -49,12 +74,10 @@ function MobileTabBar() {
         exit={prefersReduced ? undefined : { opacity: 0, y: 20 }}
         transition={navTransition}
         style={{ willChange: "opacity, transform" }}
-        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 lg:hidden z-50 border-t border-border bg-background dark:bg-card h-[calc(84px+env(safe-area-inset-bottom))]`}
+        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 lg:hidden z-50 border-t border-border bg-background dark:bg-card ${isStandalone ? "h-[calc(84px+env(safe-area-inset-bottom))]" : "h-[84px]"}`}
         aria-label="Bottom navigation"
       >
-        {/* Внутренний враппер с Safe Area для iOS */}
-        <div className="h-full pb-[env(safe-area-inset-bottom)]">
-          {/* 5-элементная сетка: [Дашборд] [Транзакции] [FAB +] [Бюджеты] [AI] */}
+        <div className={`h-full ${isStandalone ? "pb-[env(safe-area-inset-bottom)]" : "pb-0"}`}>
           <ul className="h-full grid grid-cols-5 pt-1 pb-2">
           {/* Дашборд */}
           <li className="flex items-center justify-center">

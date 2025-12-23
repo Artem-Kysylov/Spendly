@@ -191,6 +191,14 @@ export default function InstallPWA({
   const { session } = UserAuth();
   const [iosDrawerOpen, setIosDrawerOpen] = useState(false);
   const [iosDrawerAutoShown, setIosDrawerAutoShown] = useState(false);
+  const [isPrimaryInstance] = useState(() => {
+    if (typeof window === "undefined") return true;
+    if ((window as any).__spendlyPwaPrimaryInstance) {
+      return false;
+    }
+    (window as any).__spendlyPwaPrimaryInstance = true;
+    return true;
+  });
 
   const isBlockedInApp = isInAppBrowser && !isStandalone;
   const showInstallButton =
@@ -203,8 +211,10 @@ export default function InstallPWA({
     pathname?.includes("/forgot-password") ||
     pathname?.includes("/reset-password");
   const canShowInstallUi = !!session && !isAuthRoute;
+  const canShowButtonUi = forceShowButton || canShowInstallUi;
 
   useEffect(() => {
+    if (!isPrimaryInstance) return;
     if (!canShowInstallUi) return;
     if (!shouldAttachIosDrawer) return;
     if (iosDrawerAutoShown) return;
@@ -212,12 +222,13 @@ export default function InstallPWA({
     const timeoutId = window.setTimeout(() => {
       setIosDrawerOpen(true);
       setIosDrawerAutoShown(true);
+      (window as any).__spendlyIosDrawerShown = true;
     }, 5000);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [canShowInstallUi, shouldAttachIosDrawer, iosDrawerAutoShown]);
+  }, [isPrimaryInstance, canShowInstallUi, shouldAttachIosDrawer, iosDrawerAutoShown]);
 
   const handleInstallClick = async () => {
     const result = await promptInstall();
@@ -229,8 +240,8 @@ export default function InstallPWA({
 
   return (
     <>
-      <InAppBrowserGuard open={isBlockedInApp} />
-      {canShowInstallUi && showButton && effectiveShowButton && (
+      {isPrimaryInstance && <InAppBrowserGuard open={isBlockedInApp} />}
+      {canShowButtonUi && showButton && effectiveShowButton && (
         <div
           className={
             floating
@@ -241,7 +252,7 @@ export default function InstallPWA({
           <InstallButton onClick={handleInstallClick} className={buttonClassName} />
         </div>
       )}
-      {canShowInstallUi && shouldAttachIosDrawer && (
+      {isPrimaryInstance && canShowInstallUi && shouldAttachIosDrawer && (
         <IOSInstallDrawer
           open={iosDrawerOpen}
           onOpenChange={(open) => {

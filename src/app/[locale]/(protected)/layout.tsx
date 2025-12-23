@@ -1,7 +1,7 @@
 // ProtectedLayout component
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import TopBar from "@/components/layout/TopBar";
 import Sidebar from "@/components/layout/Sidebar";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
@@ -26,6 +26,23 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
   const prefersReduced = useReducedMotion();
   const { subscriptionPlan } = useSubscription();
   const { isReady } = UserAuth();
+
+  const [isStandalone, setIsStandalone] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const checkStandalone = () => {
+      const mq = window.matchMedia ? window.matchMedia("(display-mode: standalone)") : null;
+      const isStandaloneMatch = mq?.matches ?? false;
+      const isNavigatorStandalone = (window.navigator as any).standalone === true;
+      setIsStandalone(isStandaloneMatch || isNavigatorStandalone);
+    };
+    checkStandalone();
+    const mq = window.matchMedia ? window.matchMedia("(display-mode: standalone)") : null;
+    mq?.addEventListener("change", checkStandalone);
+    return () => {
+      mq?.removeEventListener("change", checkStandalone);
+    };
+  }, []);
 
   // Типобезопасный transition (ease — кубическая кривая)
   const transition = { duration: 0.2, ease: [0.22, 1, 0.36, 1] } as const;
@@ -61,7 +78,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           <AnimatePresence mode="wait">
             <motion.main
               key={pathname}
-              className={`${pathname?.includes("/ai-assistant") ? "flex-1 flex flex-col overflow-hidden min-w-0 min-h-0 transition-colors duration-300 overscroll-none" : "flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 pb-[calc(env(safe-area-inset-bottom)+96px)] lg:pb-0 transition-colors duration-300"}`}
+              className={`${pathname?.includes("/ai-assistant") ? "flex-1 flex flex-col overflow-hidden min-w-0 min-h-0 transition-colors duration-300 overscroll-none" : `flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 ${isStandalone ? "pb-[calc(env(safe-area-inset-bottom)+96px)]" : "pb-[96px]"} lg:pb-0 transition-colors duration-300`}`}
               initial={pageVariants ? "initial" : false}
               animate={pageVariants ? "animate" : { opacity: 1 }}
               exit={pageVariants ? "exit" : undefined}
