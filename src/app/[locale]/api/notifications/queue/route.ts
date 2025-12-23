@@ -129,6 +129,41 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Дублируем в in‑app notifications для центра уведомлений (анти‑дубли в пределах 1 часа)
+    try {
+      const notifTypeMap = (t: string) =>
+        t === "budget_warning" ? "budget_alert" :
+        t === "weekly_reminder" ? "weekly_reminder" :
+        "general";
+
+      const candidateType = notifTypeMap(notification_type);
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { data: existing } = await supabase
+        .from("notifications")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("title", title)
+        .eq("message", message)
+        .eq("type", candidateType)
+        .gte("created_at", oneHourAgo)
+        .limit(1);
+
+      if (!existing || existing.length === 0) {
+        await supabase
+          .from("notifications")
+          .insert({
+            user_id: user.id,
+            title,
+            message,
+            type: candidateType,
+            metadata: { ...(data || {}), queue_id: queuedNotification.id },
+            is_read: false,
+          });
+      }
+    } catch (dupErr) {
+      console.warn("Queue duplication to in‑app notifications failed:", dupErr);
+    }
+
     // Если уведомление не запланировано на будущее — дергаем внутренний processor
     if (!scheduled_for || new Date(scheduledISO) <= new Date()) {
       try {
