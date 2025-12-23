@@ -71,7 +71,7 @@ export function IOSInstallDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="border-border bg-card">
+      <DrawerContent className="z-[130] border-border bg-card">
         <div className="mx-auto flex w-full max-w-md flex-col gap-4 pb-4">
           <DrawerHeader className="items-center text-center gap-3">
             <div className="flex items-center justify-center">
