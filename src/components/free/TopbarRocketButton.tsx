@@ -8,7 +8,7 @@ export function TopbarRocketButton() {
   const t = useTranslations("layout.upgradeBanner");
 
   return (
-    <Link href="/payment" aria-label={t("cta")} title={t("cta")}>
+    <Link href="/paywall" aria-label={t("cta")} title={t("cta")}>
       <Button
         variant="ghost"
         size="icon"

@@ -16,6 +16,7 @@ export default function PeriodicUpgradeBanner() {
 
     const STORAGE_KEY = "spendly:periodic_banner:last_shown_at";
     const DAY_MS = 24 * 60 * 60 * 1000;
+    const SHOW_INTERVAL_MS = 7 * DAY_MS; // 7 days
 
     try {
       const lastShown = parseInt(
@@ -24,7 +25,7 @@ export default function PeriodicUpgradeBanner() {
       );
       const now = Date.now();
       const shouldShow =
-        !Number.isFinite(lastShown) || now - lastShown >= DAY_MS;
+        !Number.isFinite(lastShown) || now - lastShown >= SHOW_INTERVAL_MS;
 
       if (shouldShow) {
         setVisible(true);
@@ -69,10 +70,11 @@ export default function PeriodicUpgradeBanner() {
         <Button variant="ghost" size="sm" onClick={handleDismiss}>
           {t("periodicBanner.dismiss")}
         </Button>
-        <Link href="/payment" onClick={handleUpgradeClick}>
+        <Link href="/paywall" onClick={handleUpgradeClick}>
           <Button size="sm">{t("upgradeBanner.cta")}</Button>
         </Link>
       </div>
     </div>
   );
 }
+

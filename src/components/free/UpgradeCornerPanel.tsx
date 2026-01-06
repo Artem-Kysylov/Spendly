@@ -1,11 +1,24 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function UpgradeCornerPanel() {
   const t = useTranslations("layout");
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const dismissed = localStorage.getItem("upgrade_corner_dismissed");
+    setVisible(!dismissed);
+  }, []);
+
+  const handleDismiss = () => {
+    setVisible(false);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("upgrade_corner_dismissed", "true");
+    }
+  };
 
   if (!visible) return null;
 
@@ -23,7 +36,7 @@ export default function UpgradeCornerPanel() {
             <li>• {t("limitWarning.budgets")}</li>
             <li>• {t("limitWarning.assistant")}</li>
           </ul>
-          <Link href="/payment">
+          <Link href="/paywall">
             <Button size="sm" className="mt-3 w-full">
               {t("upgradeBanner.cta")}
             </Button>
@@ -31,7 +44,7 @@ export default function UpgradeCornerPanel() {
         </div>
         <button
           className="ml-2 text-muted-foreground hover:text-foreground"
-          onClick={() => setVisible(false)}
+          onClick={handleDismiss}
           aria-label="Close"
           title="Close"
         >

@@ -20,7 +20,7 @@ export default function UpgradeSidebarBanner() {
       <p className="mt-1 text-xs text-muted-foreground">
         {t("upgradeBanner.description")}
       </p>
-      <Link href="/payment" onClick={handleUpgradeClick}>
+      <Link href="/paywall" onClick={handleUpgradeClick}>
         <Button size="sm" className="mt-2 w-full">
           {t("upgradeBanner.cta")}
         </Button>

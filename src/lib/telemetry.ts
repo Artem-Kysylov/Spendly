@@ -8,7 +8,9 @@ type TelemetryEvent =
   | "ai_session_created"
   | "ai_message_sent"
   | "ai_title_generated"
-  | "ai_session_synced";
+  | "ai_session_synced"
+  | "paywall_cta_clicked"
+  | "limit_reached_upgrade_clicked";
 
 export async function trackEvent(
   name: TelemetryEvent,

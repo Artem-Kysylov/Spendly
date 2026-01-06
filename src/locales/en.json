@@ -57,6 +57,10 @@
     },
     "button": {
       "install": "Install app"
+    },
+    "settings": {
+      "title": "Install App",
+      "description": "Install Spendly for quick access and offline support"
     }
   },
   "pricing": {
@@ -219,6 +223,53 @@
     "successTitle": "Payment Successful",
     "successMessage": "Thank you for supporting Spendly Pro!",
     "goToDashboard": "Go to Dashboard"
+  },
+  "paywall": {
+    "hero": {
+      "badge": "Upgrade to Pro",
+      "title": "Unlock the full potential of Spendly",
+      "subtitle": "Take control of your finances with powerful Pro features"
+    },
+    "comparison": {
+      "title": "Choose the plan that's right for you",
+      "popular": "Most Popular",
+      "free1": "Up to 3 budgets",
+      "free2": "Basic charts and insights",
+      "free3": "10 AI messages per day",
+      "free4": "Local device notifications",
+      "pro1": "Unlimited budgets",
+      "pro2": "Advanced charts and analytics",
+      "pro3": "Unlimited AI assistant usage",
+      "pro4": "Priority support",
+      "pro5": "Custom goals and alerts",
+      "pro6": "Early access to new features"
+    },
+    "social": {
+      "trusted": "Trusted by thousands of users worldwide"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "What happens to my data when I upgrade?",
+      "a1": "All your data is preserved and instantly available. You'll simply unlock additional features and remove all limits.",
+      "q2": "Can I cancel anytime?",
+      "a2": "Yes, you can cancel your Pro subscription at any time. You'll continue to have Pro access until the end of your billing period.",
+      "q3": "What payment methods do you accept?",
+      "a3": "We accept all major credit cards, debit cards, and PayPal through our secure payment processor Lemon Squeezy.",
+      "q4": "Is there a free trial?",
+      "a4": "The Free plan is available forever with no credit card required. You can upgrade to Pro anytime to unlock all features."
+    },
+    "cta": {
+      "monthly": "Upgrade to Pro",
+      "yearly": "Upgrade to Pro (Yearly)"
+    }
+  },
+  "limitReached": {
+    "title": "Limit Reached",
+    "budgets": "You have reached the limit of 3 budgets on the Free plan.",
+    "wallets": "You have reached the limit of 5 wallets on the Free plan.",
+    "description": "Upgrade to Pro to unlock unlimited budgets, AI assistant, and more powerful features.",
+    "upgrade": "Upgrade to Pro",
+    "cancel": "Not now"
   },
   "transactions": {
     "title": "Transactions📉",
@@ -847,6 +898,12 @@
       "meta": {
         "title": "Payment",
         "description": "Upgrade to Spendly Pro."
+      }
+    },
+    "paywall": {
+      "meta": {
+        "title": "Upgrade to Pro - Spendly",
+        "description": "Unlock unlimited budgets, AI assistant, and powerful features. Take control of your finances with Spendly Pro."
       }
     },
     "onboarding": {

@@ -12,6 +12,7 @@ export const routing = defineRouting({
     "/forgot-password": "/forgot-password",
     "/reset-password": "/reset-password",
     "/payment": "/payment",
+    "/paywall": "/paywall",
     "/dashboard": "/dashboard",
     "/onboarding": "/onboarding",
     "/transactions": "/transactions",

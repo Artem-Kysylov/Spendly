@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, X } from "lucide-react";
 import usePWAInstall from "@/hooks/usePWAInstall";
 import {
   Drawer,
@@ -152,23 +152,41 @@ export function IOSInstallDrawer({
 type InstallButtonProps = {
   onClick: () => void | Promise<void>;
   className?: string;
+  showDismiss?: boolean;
+  onDismiss?: () => void;
 };
 
-export function InstallButton({ onClick, className }: InstallButtonProps) {
+export function InstallButton({
+  onClick,
+  className,
+  showDismiss = false,
+  onDismiss,
+}: InstallButtonProps) {
   const tPwa = useTranslations("pwa");
 
   const defaultClass =
     "inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-primary to-primary/80 px-4 py-2 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/40 hover:from-primary/90 hover:to-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2";
 
   return (
-    <Button
-      type="button"
-      onClick={onClick}
-      className={className ?? defaultClass}
-    >
-      <Download className="h-4 w-4 text-white" />
-      {tPwa("button.install")}
-    </Button>
+    <div className="relative inline-flex items-center gap-2">
+      <Button
+        type="button"
+        onClick={onClick}
+        className={className ?? defaultClass}
+      >
+        <Download className="h-4 w-4 text-white" />
+        {tPwa("button.install")}
+      </Button>
+      {showDismiss && onDismiss && (
+        <button
+          onClick={onDismiss}
+          className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-muted border border-border shadow-sm flex items-center justify-center hover:bg-muted/80 transition-colors"
+          aria-label="Dismiss"
+        >
+          <X className="h-3 w-3" />
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -190,7 +208,7 @@ export default function InstallPWA({
   const pathname = usePathname();
   const { session } = UserAuth();
   const [iosDrawerOpen, setIosDrawerOpen] = useState(false);
-  const [iosDrawerAutoShown, setIosDrawerAutoShown] = useState(false);
+  const [fabDismissed, setFabDismissed] = useState(false);
   const [isPrimaryInstance] = useState(() => {
     if (typeof window === "undefined") return true;
     if ((window as any).__spendlyPwaPrimaryInstance) {
@@ -213,35 +231,57 @@ export default function InstallPWA({
   const canShowInstallUi = !!session && !isAuthRoute;
   const canShowButtonUi = forceShowButton || canShowInstallUi;
 
+  // Check if FAB was dismissed
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const dismissed = localStorage.getItem("pwa_fab_dismissed");
+    setFabDismissed(!!dismissed);
+  }, []);
+
+  // Listen for external trigger event (from transaction success)
   useEffect(() => {
     if (!isPrimaryInstance) return;
     if (!canShowInstallUi) return;
-    if (!shouldAttachIosDrawer) return;
-    if (iosDrawerAutoShown) return;
 
-    const timeoutId = window.setTimeout(() => {
-      setIosDrawerOpen(true);
-      setIosDrawerAutoShown(true);
-      (window as any).__spendlyIosDrawerShown = true;
-    }, 5000);
+    const handleTrigger = async () => {
+      // Check if prompt was already seen
+      const promptSeen = localStorage.getItem("pwa_prompt_seen");
+      if (promptSeen) return;
 
-    return () => {
-      window.clearTimeout(timeoutId);
+      // Trigger install prompt
+      const result = await promptInstall();
+      if (result === "ios") {
+        setIosDrawerOpen(true);
+      }
+
+      // Mark as seen
+      localStorage.setItem("pwa_prompt_seen", "true");
     };
-  }, [isPrimaryInstance, canShowInstallUi, shouldAttachIosDrawer, iosDrawerAutoShown]);
+
+    window.addEventListener("pwa:trigger-install" as any, handleTrigger);
+    return () => {
+      window.removeEventListener("pwa:trigger-install" as any, handleTrigger);
+    };
+  }, [isPrimaryInstance, canShowInstallUi, promptInstall]);
 
   const handleInstallClick = async () => {
     const result = await promptInstall();
     if (result === "ios") {
       setIosDrawerOpen(true);
-      setIosDrawerAutoShown(true);
+    }
+  };
+
+  const handleFabDismiss = () => {
+    setFabDismissed(true);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("pwa_fab_dismissed", "true");
     }
   };
 
   return (
     <>
       {isPrimaryInstance && <InAppBrowserGuard open={isBlockedInApp} />}
-      {canShowButtonUi && showButton && effectiveShowButton && (
+      {canShowButtonUi && showButton && effectiveShowButton && !fabDismissed && (
         <div
           className={
             floating
@@ -249,7 +289,12 @@ export default function InstallPWA({
               : ""
           }
         >
-          <InstallButton onClick={handleInstallClick} className={buttonClassName} />
+          <InstallButton
+            onClick={handleInstallClick}
+            className={buttonClassName}
+            showDismiss={floating}
+            onDismiss={handleFabDismiss}
+          />
         </div>
       )}
       {isPrimaryInstance && canShowInstallUi && shouldAttachIosDrawer && (
@@ -257,9 +302,6 @@ export default function InstallPWA({
           open={iosDrawerOpen}
           onOpenChange={(open) => {
             setIosDrawerOpen(open);
-            if (!open) {
-              setIosDrawerAutoShown(true);
-            }
           }}
         />
       )}
