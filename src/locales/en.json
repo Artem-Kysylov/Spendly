@@ -51,6 +51,7 @@
       "description": "Add Spendly to your Home Screen for instant access to your budgets and AI insights.",
       "step1Title": "Step 1",
       "step1Text": "Tap the Share button in the Safari toolbar.",
+      "step1TextChrome": "Tap the Share button in the top right corner.",
       "step2Title": "Step 2",
       "step2Text": "Select \"Add to Home Screen\" and confirm.",
       "notNow": "Not now"
@@ -233,16 +234,49 @@
     "comparison": {
       "title": "Choose the plan that's right for you",
       "popular": "Most Popular",
-      "free1": "Up to 3 budgets",
-      "free2": "Basic charts and insights",
-      "free3": "10 AI messages per day",
-      "free4": "Local device notifications",
-      "pro1": "Unlimited budgets",
-      "pro2": "Advanced charts and analytics",
-      "pro3": "Unlimited AI assistant usage",
-      "pro4": "Priority support",
-      "pro5": "Custom goals and alerts",
-      "pro6": "Early access to new features"
+      "bestValue": "Best Value",
+      "foundersEdition": "Founder's Edition",
+      "free": {
+        "label": "Free",
+        "period": "/forever",
+        "feature1": "3 budgets",
+        "feature2": "5 wallets",
+        "feature3": "10 AI messages/day",
+        "feature4": "Basic charts",
+        "cta": "Current Plan"
+      },
+      "monthly": {
+        "label": "Monthly",
+        "price": "$7",
+        "period": "/month",
+        "feature1": "Unlimited budgets",
+        "feature2": "Unlimited wallets",
+        "feature3": "Basic AI support",
+        "feature4": "All free features",
+        "cta": "Upgrade to Monthly"
+      },
+      "yearly": {
+        "label": "Yearly",
+        "price": "$49",
+        "period": "/year",
+        "priceNote": "~$4.08/month",
+        "feature1": "Everything in Monthly",
+        "feature2": "Priority support",
+        "feature3": "Early access to features",
+        "feature4": "Best value",
+        "cta": "Upgrade to Yearly"
+      },
+      "lifetime": {
+        "label": "Lifetime",
+        "price": "$99",
+        "period": "one-time",
+        "feature1": "Everything in Yearly",
+        "feature2": "Early Adopter Badge",
+        "feature3": "Lifetime updates",
+        "feature4": "Founder's Edition",
+        "fairUsage": "Fair Usage Policy applies to AI limits",
+        "cta": "Get Lifetime Access"
+      }
     },
     "social": {
       "trusted": "Trusted by thousands of users worldwide"

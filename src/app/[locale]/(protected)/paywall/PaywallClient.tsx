@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { useTranslations, useLocale } from "next-intl";
-import { Check, Sparkles, Rocket, Shield } from "lucide-react";
+import { Check, Sparkles, Rocket, Shield, Crown, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     Accordion,
@@ -26,14 +26,22 @@ export default function PaywallClient() {
     const [toast, setToast] = useState<ToastMessageProps | null>(null);
     const CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL;
 
-    const handleUpgradeClick = async (plan: "monthly" | "yearly") => {
+    const handleUpgradeClick = async (plan: "monthly" | "yearly" | "lifetime") => {
         trackEvent("paywall_cta_clicked", { plan, from: "paywall" });
 
         try {
-            // Use existing payment logic from PaymentClient
-            if (CHECKOUT_URL) {
-                console.log("[Paywall] Using env checkout URL ->", CHECKOUT_URL);
-                if (CHECKOUT_URL.includes("/checkout/buy/")) {
+            // Use plan-specific checkout URLs if available
+            const CHECKOUT_URLS = {
+                monthly: process.env.NEXT_PUBLIC_LS_MONTHLY_URL || CHECKOUT_URL,
+                yearly: process.env.NEXT_PUBLIC_LS_YEARLY_URL || CHECKOUT_URL,
+                lifetime: process.env.NEXT_PUBLIC_LS_LIFETIME_URL || CHECKOUT_URL,
+            };
+
+            const checkoutUrl = CHECKOUT_URLS[plan];
+
+            if (checkoutUrl) {
+                console.log(`[Paywall] Using ${plan} checkout URL ->`, checkoutUrl);
+                if (checkoutUrl.includes("/checkout/buy/")) {
                     console.warn(
                         "[Paywall] Env contains legacy buy URL; skipping to avoid 404.",
                     );
@@ -41,7 +49,7 @@ export default function PaywallClient() {
                     setTimeout(() => setToast(null), 3000);
                     return;
                 }
-                window.location.href = CHECKOUT_URL;
+                window.location.href = checkoutUrl;
                 return;
             }
 
@@ -49,7 +57,7 @@ export default function PaywallClient() {
             const res = await fetch("/api/checkout-url", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ locale }),
+                body: JSON.stringify({ locale, plan }),
             });
             if (!res.ok) throw new Error("Failed to create checkout");
 
@@ -79,24 +87,10 @@ export default function PaywallClient() {
         return null;
     }
 
-    const freeFeatures = [
-        tPaywall("comparison.free1"),
-        tPaywall("comparison.free2"),
-        tPaywall("comparison.free3"),
-        tPaywall("comparison.free4"),
-    ];
-
-    const proFeatures = [
-        tPaywall("comparison.pro1"),
-        tPaywall("comparison.pro2"),
-        tPaywall("comparison.pro3"),
-        tPaywall("comparison.pro4"),
-        tPaywall("comparison.pro5"),
-        tPaywall("comparison.pro6"),
-    ];
+    const isFree = subscriptionPlan === "free";
 
     return (
-        <div className="container mx-auto px-4 py-10 max-w-6xl">
+        <div className="container mx-auto px-4 py-10 max-w-[1280px]">
             {toast && <ToastMessage text={toast.text} type={toast.type} />}
 
             {/* Hero Section */}
@@ -120,7 +114,7 @@ export default function PaywallClient() {
                 </p>
             </motion.div>
 
-            {/* Comparison Table */}
+            {/* 4-Tier Pricing Grid */}
             <motion.div
                 className="mb-16"
                 initial={{ opacity: 0, y: 20 }}
@@ -130,70 +124,222 @@ export default function PaywallClient() {
                 <h2 className="text-2xl font-semibold text-center mb-8 text-secondary-black dark:text-white">
                     {tPaywall("comparison.title")}
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* Free Plan Card */}
-                    <div className="rounded-2xl border-2 border-gray-200 dark:border-border p-6 bg-white dark:bg-card">
+                    <div className={`rounded-2xl border-2 p-6 bg-white dark:bg-card ${isFree ? "border-gray-400 dark:border-gray-500 ring-2 ring-gray-300" : "border-gray-300 dark:border-gray-600"}`}>
                         <div className="text-center mb-6">
                             <h3 className="text-xl font-semibold text-secondary-black dark:text-white mb-2">
-                                {tPricing("free.label")}
+                                {tPaywall("comparison.free.label")}
                             </h3>
                             <div className="flex items-baseline justify-center gap-1">
                                 <span className="text-4xl font-bold text-secondary-black dark:text-white">
                                     $0
                                 </span>
-                                <span className="text-gray-500 dark:text-gray-400">
-                                    {tPricing("perMonth")}
+                                <span className="text-gray-500 dark:text-gray-400 text-sm">
+                                    {tPaywall("comparison.free.period")}
                                 </span>
                             </div>
                         </div>
-                        <ul className="space-y-3">
-                            {freeFeatures.map((feature, idx) => (
-                                <li key={idx} className="flex items-start gap-3">
-                                    <Check className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
-                                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                                        {feature}
-                                    </span>
-                                </li>
-                            ))}
+                        <ul className="space-y-3 mb-6 min-h-[200px]">
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-700 dark:text-gray-300">
+                                    {tPaywall("comparison.free.feature1")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-700 dark:text-gray-300">
+                                    {tPaywall("comparison.free.feature2")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-700 dark:text-gray-300">
+                                    {tPaywall("comparison.free.feature3")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-700 dark:text-gray-300">
+                                    {tPaywall("comparison.free.feature4")}
+                                </span>
+                            </li>
                         </ul>
+                        <Button
+                            disabled={isFree}
+                            className="w-full h-11 text-sm font-semibold"
+                            variant="outline"
+                        >
+                            {tPaywall("comparison.free.cta")}
+                        </Button>
                     </div>
 
-                    {/* Pro Plan Card */}
+                    {/* Monthly Plan Card */}
+                    <div className="rounded-2xl border-2 border-gray-200 dark:border-border p-6 bg-white dark:bg-card">
+                        <div className="text-center mb-6">
+                            <h3 className="text-xl font-semibold text-secondary-black dark:text-white mb-2">
+                                {tPaywall("comparison.monthly.label")}
+                            </h3>
+                            <div className="flex items-baseline justify-center gap-1">
+                                <span className="text-4xl font-bold text-secondary-black dark:text-white">
+                                    {tPaywall("comparison.monthly.price")}
+                                </span>
+                                <span className="text-gray-500 dark:text-gray-400 text-sm">
+                                    {tPaywall("comparison.monthly.period")}
+                                </span>
+                            </div>
+                        </div>
+                        <ul className="space-y-3 mb-6 min-h-[200px]">
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white">
+                                    {tPaywall("comparison.monthly.feature1")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white">
+                                    {tPaywall("comparison.monthly.feature2")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white">
+                                    {tPaywall("comparison.monthly.feature3")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white">
+                                    {tPaywall("comparison.monthly.feature4")}
+                                </span>
+                            </li>
+                        </ul>
+                        <Button
+                            onClick={() => handleUpgradeClick("monthly")}
+                            className="w-full h-11 text-sm font-semibold"
+                        >
+                            <Rocket className="h-4 w-4 mr-2" />
+                            {tPaywall("comparison.monthly.cta")}
+                        </Button>
+                    </div>
+
+                    {/* Yearly Plan Card (Best Value) */}
                     <div className="rounded-2xl border-2 border-primary dark:border-primary p-6 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 relative overflow-hidden">
                         <div className="absolute top-4 right-4">
                             <div className="px-3 py-1 rounded-full bg-primary text-white text-xs font-semibold">
-                                {tPaywall("comparison.popular")}
+                                {tPaywall("comparison.bestValue")}
                             </div>
                         </div>
                         <div className="text-center mb-6">
                             <h3 className="text-xl font-semibold text-secondary-black dark:text-white mb-2">
-                                {tPricing("pro.label")}
+                                {tPaywall("comparison.yearly.label")}
                             </h3>
-                            <div className="flex items-baseline justify-center gap-1">
-                                <span className="text-4xl font-bold text-secondary-black dark:text-white">
-                                    $7
-                                </span>
-                                <span className="text-gray-500 dark:text-gray-400">
-                                    {tPricing("perMonth")}
+                            <div className="flex flex-col items-center">
+                                <div className="flex items-baseline justify-center gap-1">
+                                    <span className="text-4xl font-bold text-secondary-black dark:text-white">
+                                        {tPaywall("comparison.yearly.price")}
+                                    </span>
+                                    <span className="text-gray-500 dark:text-gray-400 text-sm">
+                                        {tPaywall("comparison.yearly.period")}
+                                    </span>
+                                </div>
+                                <span className="text-xs text-primary mt-1">
+                                    {tPaywall("comparison.yearly.priceNote")}
                                 </span>
                             </div>
                         </div>
-                        <ul className="space-y-3 mb-6">
-                            {proFeatures.map((feature, idx) => (
-                                <li key={idx} className="flex items-start gap-3">
-                                    <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-                                    <span className="text-sm text-gray-800 dark:text-white font-medium">
-                                        {feature}
-                                    </span>
-                                </li>
-                            ))}
+                        <ul className="space-y-3 mb-6 min-h-[200px]">
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white font-medium">
+                                    {tPaywall("comparison.yearly.feature1")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white font-medium">
+                                    {tPaywall("comparison.yearly.feature2")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white font-medium">
+                                    {tPaywall("comparison.yearly.feature3")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white font-medium">
+                                    {tPaywall("comparison.yearly.feature4")}
+                                </span>
+                            </li>
                         </ul>
                         <Button
-                            onClick={() => handleUpgradeClick("monthly")}
-                            className="w-full h-12 text-base font-semibold"
+                            onClick={() => handleUpgradeClick("yearly")}
+                            className="w-full h-11 text-sm font-semibold"
                         >
-                            <Rocket className="h-4 w-4 mr-2" />
-                            {tPaywall("cta.monthly")}
+                            <Zap className="h-4 w-4 mr-2" />
+                            {tPaywall("comparison.yearly.cta")}
+                        </Button>
+                    </div>
+
+                    {/* Lifetime Plan Card (Founder's Edition) */}
+                    <div className="rounded-2xl border-2 border-amber-500 dark:border-amber-400 p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 relative overflow-hidden">
+                        <div className="absolute top-4 right-4">
+                            <div className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-semibold">
+                                {tPaywall("comparison.foundersEdition")}
+                            </div>
+                        </div>
+                        <div className="text-center mb-6">
+                            <h3 className="text-xl font-semibold text-secondary-black dark:text-white mb-2">
+                                {tPaywall("comparison.lifetime.label")}
+                            </h3>
+                            <div className="flex items-baseline justify-center gap-1">
+                                <span className="text-4xl font-bold text-amber-600 dark:text-amber-400">
+                                    {tPaywall("comparison.lifetime.price")}
+                                </span>
+                                <span className="text-gray-600 dark:text-gray-300 text-sm">
+                                    {tPaywall("comparison.lifetime.period")}
+                                </span>
+                            </div>
+                        </div>
+                        <ul className="space-y-3 mb-4 min-h-[200px]">
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white font-medium">
+                                    {tPaywall("comparison.lifetime.feature1")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white font-medium">
+                                    {tPaywall("comparison.lifetime.feature2")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white font-medium">
+                                    {tPaywall("comparison.lifetime.feature3")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white font-medium">
+                                    {tPaywall("comparison.lifetime.feature4")}
+                                </span>
+                            </li>
+                        </ul>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-4 text-center">
+                            {tPaywall("comparison.lifetime.fairUsage")}
+                        </p>
+                        <Button
+                            onClick={() => handleUpgradeClick("lifetime")}
+                            className="w-full h-11 text-sm font-semibold bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0"
+                        >
+                            <Crown className="h-4 w-4 mr-2" />
+                            {tPaywall("comparison.lifetime.cta")}
                         </Button>
                     </div>
                 </div>

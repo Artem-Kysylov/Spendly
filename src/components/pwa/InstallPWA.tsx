@@ -63,15 +63,33 @@ type IOSInstallDrawerProps = {
   onOpenChange: (open: boolean) => void;
 };
 
+
 export function IOSInstallDrawer({
   open,
   onOpenChange,
 }: IOSInstallDrawerProps) {
   const tPwa = useTranslations("pwa");
 
+  // Detect Chrome on iOS
+  const isChrome = typeof window !== "undefined" &&
+    /CriOS/i.test(window.navigator.userAgent);
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="z-[130] border-border bg-card">
+      <DrawerContent className="z-[130] border-border bg-card relative">
+        {/* Arrow for Chrome - positioned absolutely at top-right */}
+        {isChrome && (
+          <div className="absolute top-4 right-4 pointer-events-none">
+            <Image
+              src="/assets/install/arrow-guide.png"
+              alt="Arrow pointing to share button"
+              width={80}
+              height={80}
+              className="rotate-180 drop-shadow-[0_10px_25px_rgba(0,0,0,0.45)]"
+            />
+          </div>
+        )}
+
         <div className="mx-auto flex w-full max-w-md flex-col gap-4 pb-4">
           <DrawerHeader className="items-center text-center gap-3">
             <div className="flex items-center justify-center">
@@ -108,7 +126,10 @@ export function IOSInstallDrawer({
                   {tPwa("ios.step1Title")}
                 </span>
                 <span className="text-sm text-foreground">
-                  {tPwa("ios.step1Text")}
+                  {isChrome
+                    ? tPwa("ios.step1TextChrome")
+                    : tPwa("ios.step1Text")
+                  }
                 </span>
               </div>
             </div>
@@ -132,6 +153,19 @@ export function IOSInstallDrawer({
               </div>
             </div>
           </div>
+
+          {/* Arrow for Safari - positioned below instructions */}
+          {!isChrome && (
+            <div className="flex flex-col items-end px-4">
+              <Image
+                src="/assets/install/arrow-guide.png"
+                alt="Arrow pointing down"
+                width={120}
+                height={120}
+                className="h-24 w-24 animate-bounce drop-shadow-[0_10px_25px_rgba(0,0,0,0.45)]"
+              />
+            </div>
+          )}
 
           <DrawerFooter className="pt-0">
             <Button
