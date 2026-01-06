@@ -248,6 +248,77 @@
       "btn_continue": "Buat Draf Email"
     }
   },
+  "paywall": {
+    "hero": {
+      "badge": "Upgrade ke Pro",
+      "title": "Buka Potensi Penuh Spendly",
+      "subtitle": "Kendalikan keuangan Anda dengan fitur Pro yang canggih"
+    },
+    "comparison": {
+      "title": "Pilih paket yang tepat untuk Anda",
+      "popular": "Populer",
+      "bestValue": "Nilai Terbaik",
+      "foundersEdition": "Edisi Pendiri",
+      "free": {
+        "label": "Gratis",
+        "period": "/selamanya",
+        "feature1": "3 anggaran",
+        "feature3": "10 pesan AI/hari",
+        "feature4": "Grafik dasar",
+        "cta": "Paket Saat Ini"
+      },
+      "monthly": {
+        "label": "Bulanan",
+        "price": "$7",
+        "period": "/bulan",
+        "feature1": "Anggaran tak terbatas",
+        "feature2": "Dompet tak terbatas",
+        "feature3": "Dukungan AI dasar",
+        "feature4": "Semua fitur gratis",
+        "cta": "Upgrade ke Bulanan"
+      },
+      "yearly": {
+        "label": "Tahunan",
+        "price": "$49",
+        "period": "/tahun",
+        "priceNote": "~$4.08/bulan",
+        "feature1": "Semua di Bulanan",
+        "feature2": "Dukungan prioritas",
+        "feature3": "Akses awal ke fitur",
+        "feature4": "Nilai terbaik",
+        "cta": "Upgrade ke Tahunan"
+      },
+      "lifetime": {
+        "label": "Seumur Hidup",
+        "price": "$99",
+        "period": "sekali bayar",
+        "feature1": "Semua di Tahunan",
+        "feature2": "Badge Early Adopter",
+        "feature3": "Pembaruan seumur hidup",
+        "feature4": "Edisi Pendiri",
+        "fairUsage": "Kebijakan Penggunaan Wajar berlaku untuk batas AI",
+        "cta": "Dapatkan Akses Seumur Hidup"
+      }
+    },
+    "social": {
+      "trusted": "Dipercaya oleh ribuan pengguna di seluruh dunia"
+    },
+    "faq": {
+      "title": "Pertanyaan yang Sering Diajukan",
+      "q1": "Apa yang terjadi dengan data saya saat saya upgrade?",
+      "a1": "Semua data Anda dipertahankan dan langsung tersedia. Anda hanya akan membuka fitur tambahan dan menghapus semua batasan.",
+      "q2": "Dapatkah saya membatalkan kapan saja?",
+      "a2": "Ya, Anda dapat membatalkan langganan Pro Anda kapan saja. Anda akan terus memiliki akses Pro hingga akhir periode penagihan Anda.",
+      "q3": "Metode pembayaran apa yang Anda terima?",
+      "a3": "Kami menerima semua kartu kredit utama, kartu debit, dan PayPal melalui pemroses pembayaran aman kami, Lemon Squeezy.",
+      "q4": "Apakah ada uji coba gratis?",
+      "a4": "Paket Gratis tersedia selamanya tanpa memerlukan kartu kredit. Anda dapat upgrade ke Pro kapan saja."
+    },
+    "cta": {
+      "monthly": "Upgrade ke Pro",
+      "yearly": "Upgrade ke Pro (Tahunan)"
+    }
+  },
   "auth": {
     "tabs": {
       "signin": "Masuk",

@@ -218,7 +218,7 @@ export default function UserSettingsClient() {
 
           {/* Subscription Section — мобильный паддинг 12px */}
           <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-6">
               <div>
                 <h2 className="text-lg font-semibold text-secondary-black dark:text-white">
                   {tSettings("subscription.title")}
@@ -229,8 +229,8 @@ export default function UserSettingsClient() {
               </div>
               <span
                 className={`text-xs px-2 py-1 rounded border ${subscriptionPlan === "pro"
-                    ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-900"
-                    : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-900"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-900"
+                  : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-900"
                   }`}
               >
                 {tSettings("subscription.currentPlan")}:{" "}
@@ -239,60 +239,136 @@ export default function UserSettingsClient() {
                   : tPricing("free.label")}
               </span>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Free */}
-              <div className="rounded-lg border border-gray-200 dark:border-border p-3 md:p-5">
-                <h3 className="font-medium text-secondary-black dark:text-white">
+
+            {/* 4-Tier Pricing Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* Free Plan */}
+              <div className={`rounded-lg border-2 p-4 flex flex-col ${subscriptionPlan === "free" ? "border-gray-400 dark:border-gray-500 ring-2 ring-gray-300" : "border-gray-300 dark:border-gray-600"} bg-white dark:bg-card`}>
+                <h3 className="font-semibold text-secondary-black dark:text-white mb-1">
                   {tPricing("free.label")}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-white mt-1">
-                  {tPricing("free.short")}
-                </p>
-                <div className="mt-4">
-                  <div className="text-2xl font-semibold text-secondary-black dark:text-white">
+                <div className="mb-3">
+                  <div className="text-2xl font-bold text-secondary-black dark:text-white">
                     $0
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {tPricing("perMonth")}
+                    /forever
                   </div>
                 </div>
-                <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-white">
-                  <li>• {tPricing("free.features.track")}</li>
-                  <li>• {tPricing("free.features.charts")}</li>
-                  <li>• {tPricing("free.features.notifications")}</li>
+                <ul className="space-y-1.5 text-xs text-gray-700 dark:text-gray-300 mb-4 flex-1">
+                  <li>• 3 budgets</li>
+                  <li>• 10 AI messages/day</li>
+                  <li>• Basic charts</li>
                 </ul>
+                <Button
+                  text="Current Plan"
+                  variant="outline"
+                  className="w-full text-xs h-9"
+                  disabled={subscriptionPlan === "free"}
+                />
               </div>
-              {/* Pro */}
-              <div className="rounded-lg border border-primary dark:border-primary p-3 md:p-5 bg-primary/5 dark:bg-primary/10">
-                <h3 className="font-medium text-secondary-black dark:text-white">
-                  {tPricing("pro.label")}
+
+              {/* Monthly Plan */}
+              <div className="rounded-lg border-2 border-gray-200 dark:border-border p-4 bg-white dark:bg-card flex flex-col">
+                <h3 className="font-semibold text-secondary-black dark:text-white mb-1">
+                  Monthly
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-white mt-1">
-                  {tPricing("pro.short")}
-                </p>
-                <div className="mt-4">
-                  <div className="text-2xl font-semibold text-secondary-black dark:text-white">
+                <div className="mb-3">
+                  <div className="text-2xl font-bold text-secondary-black dark:text-white">
                     $7
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {tPricing("perMonth")}
+                    /month
                   </div>
                 </div>
-                <ul className="mt-4 space-y-2 text-sm text-gray-800 dark:text-white">
-                  <li>• {tPricing("pro.features.aiUnlimited")}</li>
-                  <li>• {tPricing("pro.features.advancedCharts")}</li>
-                  <li>• {tPricing("pro.features.prioritySupport")}</li>
+                <ul className="space-y-1.5 text-xs text-gray-800 dark:text-white mb-4 flex-1">
+                  <li>• Unlimited budgets</li>
+                  <li>• Unlimited wallets</li>
+                  <li>• Basic AI support</li>
+                  <li>• All free features</li>
                 </ul>
-                <div className="mt-5">
-                  <Button
-                    text={tCTA("upgradeToPro")}
-                    variant="primary"
-                    className="w-full"
-                    onClick={handleUpgradeClick}
-                    isLoading={isUpgradeLoading}
-                    disabled={isUpgradeLoading}
-                  />
+                <Button
+                  text="Upgrade"
+                  variant="primary"
+                  className="w-full text-xs h-9"
+                  onClick={handleUpgradeClick}
+                  isLoading={isUpgradeLoading}
+                  disabled={isUpgradeLoading}
+                />
+              </div>
+
+              {/* Yearly Plan */}
+              <div className="rounded-lg border-2 border-primary dark:border-primary p-4 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 relative">
+                <div className="absolute top-2 right-2">
+                  <div className="px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-semibold">
+                    Best Value
+                  </div>
                 </div>
+                <h3 className="font-semibold text-secondary-black dark:text-white mb-1 pt-6">
+                  Yearly
+                </h3>
+                <div className="mb-3">
+                  <div className="text-2xl font-bold text-secondary-black dark:text-white">
+                    $49
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    /year
+                  </div>
+                  <div className="text-[10px] text-primary">
+                    ~$4.08/month
+                  </div>
+                </div>
+                <ul className="space-y-1.5 text-xs text-gray-800 dark:text-white mb-4">
+                  <li>• Everything in Monthly</li>
+                  <li>• Priority support</li>
+                  <li>• Early access</li>
+                  <li>• Best value</li>
+                </ul>
+                <Button
+                  text="Upgrade"
+                  variant="primary"
+                  className="w-full text-xs h-9"
+                  onClick={handleUpgradeClick}
+                  isLoading={isUpgradeLoading}
+                  disabled={isUpgradeLoading}
+                />
+              </div>
+
+              {/* Lifetime Plan */}
+              <div className="rounded-lg border-2 border-amber-500 dark:border-amber-400 p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 relative">
+                <div className="absolute top-2 right-2">
+                  <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-[10px] font-semibold">
+                    Founder's Edition
+                  </div>
+                </div>
+                <h3 className="font-semibold text-secondary-black dark:text-white mb-1 pt-6">
+                  Lifetime
+                </h3>
+                <div className="mb-3">
+                  <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                    $99
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-300">
+                    one-time
+                  </div>
+                </div>
+                <ul className="space-y-1.5 text-xs text-gray-800 dark:text-white mb-3">
+                  <li>• Everything in Yearly</li>
+                  <li>• Early Adopter Badge</li>
+                  <li>• Lifetime updates</li>
+                  <li>• Founder's Edition</li>
+                </ul>
+                <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-3 text-center">
+                  Fair Usage Policy applies
+                </p>
+                <Button
+                  text="Get Lifetime"
+                  variant="primary"
+                  className="w-full text-xs h-9 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0"
+                  onClick={handleUpgradeClick}
+                  isLoading={isUpgradeLoading}
+                  disabled={isUpgradeLoading}
+                />
               </div>
             </div>
           </div>

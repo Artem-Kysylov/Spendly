@@ -82,10 +82,11 @@ export default function PaywallClient() {
     };
 
     // If already pro, redirect to dashboard
-    if (subscriptionPlan === "pro") {
-        router.push("/dashboard");
-        return null;
-    }
+    // Commented out to allow Pro users to view the page
+    // if (subscriptionPlan === "pro") {
+    //     router.push("/dashboard");
+    //     return null;
+    // }
 
     const isFree = subscriptionPlan === "free";
 
@@ -126,7 +127,7 @@ export default function PaywallClient() {
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {/* Free Plan Card */}
-                    <div className={`rounded-2xl border-2 p-6 bg-white dark:bg-card ${isFree ? "border-gray-400 dark:border-gray-500 ring-2 ring-gray-300" : "border-gray-300 dark:border-gray-600"}`}>
+                    <div className={`rounded-2xl border-2 p-6 bg-white dark:bg-card flex flex-col ${isFree ? "border-gray-400 dark:border-gray-500 ring-2 ring-gray-300" : "border-gray-300 dark:border-gray-600"}`}>
                         <div className="text-center mb-6">
                             <h3 className="text-xl font-semibold text-secondary-black dark:text-white mb-2">
                                 {tPaywall("comparison.free.label")}
@@ -140,17 +141,11 @@ export default function PaywallClient() {
                                 </span>
                             </div>
                         </div>
-                        <ul className="space-y-3 mb-6 min-h-[200px]">
+                        <ul className="space-y-3 mb-6 min-h-[200px] flex-1">
                             <li className="flex items-start gap-3">
                                 <Check className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
                                 <span className="text-sm text-gray-700 dark:text-gray-300">
                                     {tPaywall("comparison.free.feature1")}
-                                </span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <Check className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
-                                <span className="text-sm text-gray-700 dark:text-gray-300">
-                                    {tPaywall("comparison.free.feature2")}
                                 </span>
                             </li>
                             <li className="flex items-start gap-3">
@@ -176,7 +171,7 @@ export default function PaywallClient() {
                     </div>
 
                     {/* Monthly Plan Card */}
-                    <div className="rounded-2xl border-2 border-gray-200 dark:border-border p-6 bg-white dark:bg-card">
+                    <div className="rounded-2xl border-2 border-gray-200 dark:border-border p-6 bg-white dark:bg-card flex flex-col">
                         <div className="text-center mb-6">
                             <h3 className="text-xl font-semibold text-secondary-black dark:text-white mb-2">
                                 {tPaywall("comparison.monthly.label")}
@@ -190,7 +185,7 @@ export default function PaywallClient() {
                                 </span>
                             </div>
                         </div>
-                        <ul className="space-y-3 mb-6 min-h-[200px]">
+                        <ul className="space-y-3 mb-6 min-h-[200px] flex-1">
                             <li className="flex items-start gap-3">
                                 <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                                 <span className="text-sm text-gray-800 dark:text-white">
@@ -227,12 +222,12 @@ export default function PaywallClient() {
 
                     {/* Yearly Plan Card (Best Value) */}
                     <div className="rounded-2xl border-2 border-primary dark:border-primary p-6 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 relative overflow-hidden">
-                        <div className="absolute top-4 right-4">
+                        <div className="absolute top-2 right-2">
                             <div className="px-3 py-1 rounded-full bg-primary text-white text-xs font-semibold">
                                 {tPaywall("comparison.bestValue")}
                             </div>
                         </div>
-                        <div className="text-center mb-6">
+                        <div className="text-center mb-6 pt-8">
                             <h3 className="text-xl font-semibold text-secondary-black dark:text-white mb-2">
                                 {tPaywall("comparison.yearly.label")}
                             </h3>
@@ -287,12 +282,12 @@ export default function PaywallClient() {
 
                     {/* Lifetime Plan Card (Founder's Edition) */}
                     <div className="rounded-2xl border-2 border-amber-500 dark:border-amber-400 p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 relative overflow-hidden">
-                        <div className="absolute top-4 right-4">
+                        <div className="absolute top-2 right-2">
                             <div className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-semibold">
                                 {tPaywall("comparison.foundersEdition")}
                             </div>
                         </div>
-                        <div className="text-center mb-6">
+                        <div className="text-center mb-6 pt-8">
                             <h3 className="text-xl font-semibold text-secondary-black dark:text-white mb-2">
                                 {tPaywall("comparison.lifetime.label")}
                             </h3>

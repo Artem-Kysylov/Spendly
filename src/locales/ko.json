@@ -177,6 +177,77 @@
     },
     "perMonth": "월"
   },
+  "paywall": {
+    "hero": {
+      "badge": "Pro로 업그레이드",
+      "title": "Spendly의 모든 잠재력을 깨우세요",
+      "subtitle": "강력한 Pro 기능으로 자산을 스마트하게 관리하세요"
+    },
+    "comparison": {
+      "title": "귀하에게 딱 맞는 플랜을 선택하세요",
+      "popular": "인기",
+      "bestValue": "가장 합리적인 선택",
+      "foundersEdition": "파운더스 에디션",
+      "free": {
+        "label": "무료",
+        "period": "/평생 무료",
+        "feature1": "예산 3개",
+        "feature3": "일일 AI 메시지 10개",
+        "feature4": "기본 차트",
+        "cta": "현재 플랜"
+      },
+      "monthly": {
+        "label": "월간",
+        "price": "$7",
+        "period": "/월",
+        "feature1": "무제한 예산",
+        "feature2": "무제한 지갑",
+        "feature3": "기본 AI 지원",
+        "feature4": "모든 무료 기능 포함",
+        "cta": "월간 플랜으로 업그레이드"
+      },
+      "yearly": {
+        "label": "연간",
+        "price": "$49",
+        "period": "/년",
+        "priceNote": "약 $4.08/월",
+        "feature1": "월간 플랜의 모든 기능",
+        "feature2": "우선 지원 서비스",
+        "feature3": "신기능 우선 체험",
+        "feature4": "가장 합리적인 선택",
+        "cta": "연간 플랜으로 업그레이드"
+      },
+      "lifetime": {
+        "label": "평생 소장",
+        "price": "$99",
+        "period": "1회 결제",
+        "feature1": "연간 플랜의 모든 기능",
+        "feature2": "초기 사용자 배지",
+        "feature3": "평생 업데이트",
+        "feature4": "파운더스 에디션",
+        "fairUsage": "AI 사용량에는 공정 사용 정책이 적용됩니다",
+        "cta": "평생 액세스 권한 획득"
+      }
+    },
+    "social": {
+      "trusted": "전 세계 수천 명의 사용자가 신뢰합니다"
+    },
+    "faq": {
+      "title": "자주 묻는 질문",
+      "q1": "업그레이드하면 내 데이터는 어떻게 되나요?",
+      "a1": "모든 데이터는 보존되며 즉시 사용할 수 있습니다. 추가 기능이 활성화되고 모든 제한이 해제됩니다.",
+      "q2": "언제든지 취소할 수 있나요?",
+      "a2": "네, 언제든지 Pro 구독을 취소할 수 있습니다. 결제 기간이 끝날 때까지 Pro 기능을 계속 사용할 수 있습니다.",
+      "q3": "어떤 결제 수단을 사용할 수 있나요?",
+      "a3": "보안 결제 프로세서인 Lemon Squeezy를 통해 모든 주요 신용카드, 체크카드 및 PayPal을 지원합니다.",
+      "q4": "무료 체험판이 있나요?",
+      "a4": "무료 플랜은 신용카드 없이 평생 이용 가능합니다. 언제든지 Pro로 업그레이드할 수 있습니다."
+    },
+    "cta": {
+      "monthly": "Pro로 업그레이드",
+      "yearly": "Pro (연간)로 업그레이드"
+    }
+  },
   "auth": {
     "tabs": {
       "signin": "로그인",
@@ -554,26 +625,26 @@
       "title": "알림",
       "description": "알림 기본 설정 관리"
     },
-  "pages": {
-    "dashboard": {
-      "meta": {
-        "title": "대시보드",
-        "description": "재정 상황을 종합적으로 살펴보세요."
+    "pages": {
+      "dashboard": {
+        "meta": {
+          "title": "대시보드",
+          "description": "재정 상황을 종합적으로 살펴보세요."
+        }
+      },
+      "transactions": {
+        "meta": {
+          "title": "거래",
+          "description": "모든 거래를 보고 관리하세요."
+        }
+      },
+      "budgets": {
+        "meta": {
+          "title": "예산",
+          "description": "예산을 생성하고 관리합니다."
+        }
       }
     },
-    "transactions": {
-      "meta": {
-        "title": "거래",
-        "description": "모든 거래를 보고 관리하세요."
-      }
-    },
-    "budgets": {
-      "meta": {
-        "title": "예산",
-        "description": "예산을 생성하고 관리합니다."
-      }
-    }
-  },
     "subscription": {
       "title": "구독",
       "description": "구독 플랜 및 청구 내역 보기",
