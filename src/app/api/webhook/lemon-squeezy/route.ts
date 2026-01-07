@@ -84,15 +84,15 @@ function getPlanFromVariantId(variantId: number | null) {
   return "unknown";
 }
 
-type UpdateProfilesResult =
+type UpdateUsersResult =
   | { updated: true; matchedBy: "id" | "user_id" }
   | { updated: false; matchedBy: null; error: any };
 
-async function updateProfilesByUserId(opts: {
+async function updateUsersByUserId(opts: {
   userId: string;
   isPro: boolean;
   customerId?: string | null;
-}): Promise<UpdateProfilesResult> {
+}): Promise<UpdateUsersResult> {
   const { userId, isPro, customerId } = opts;
   const supabase = getServerSupabaseClient();
 
@@ -105,21 +105,33 @@ async function updateProfilesByUserId(opts: {
     updatePayload.lemon_squeezy_customer_id = customerId;
   }
 
-  // Primary guess: profiles.id == auth.users.id
-  const { data: updatedById, error: errById } = await supabase
-    .from("profiles")
+  // Primary guess: public.users.id == auth.users.id
+  const updateByIdRes = await supabase
+    .from("users")
     .update(updatePayload)
     .eq("id", userId)
-    .select("id")
-    .maybeSingle();
+    .select("id");
 
-  if (!errById && updatedById?.id) {
+  if (!updateByIdRes.error && Array.isArray(updateByIdRes.data) && updateByIdRes.data.length > 0) {
     return { updated: true, matchedBy: "id" };
   }
 
-  // Fallback: some schemas use profiles.user_id
+  // Fallback: row missing -> create via upsert
+  if (!updateByIdRes.error && Array.isArray(updateByIdRes.data) && updateByIdRes.data.length === 0) {
+    const upsertRes = await supabase
+      .from("users")
+      .upsert([{ id: userId, ...updatePayload }], { onConflict: "id" })
+      .select("id");
+
+    if (!upsertRes.error && Array.isArray(upsertRes.data) && upsertRes.data.length > 0) {
+      return { updated: true, matchedBy: "id" };
+    }
+    return { updated: false, matchedBy: null, error: upsertRes.error || null };
+  }
+
+  // Fallback: some schemas use public.users.user_id
   const { data: updatedByUserId, error: errByUserId } = await supabase
-    .from("profiles")
+    .from("users")
     .update(updatePayload)
     .eq("user_id", userId)
     .select("user_id")
@@ -132,7 +144,7 @@ async function updateProfilesByUserId(opts: {
   return {
     updated: false,
     matchedBy: null,
-    error: errById || errByUserId || null,
+    error: updateByIdRes.error || errByUserId || null,
   };
 }
 
@@ -189,14 +201,14 @@ export async function POST(request: NextRequest) {
 
     const isPro = eventName === "order_created" || eventName === "subscription_created";
 
-    const result = await updateProfilesByUserId({
+    const result = await updateUsersByUserId({
       userId,
       isPro,
       customerId,
     });
 
     if (!result.updated) {
-      console.error("[LS webhook] Failed to update profiles", {
+      console.error("[LS webhook] Failed to update users", {
         eventName,
         userId,
         plan,
@@ -206,7 +218,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "DB update failed" }, { status: 500 });
     }
 
-    console.log("[LS webhook] profiles updated", {
+    console.log("[LS webhook] users updated", {
       eventName,
       userId,
       isPro,

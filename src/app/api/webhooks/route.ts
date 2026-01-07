@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { getServerSupabaseClient } from "@/lib/serverSupabase";
 
 export async function POST(request: NextRequest) {
   const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET;
@@ -38,34 +38,49 @@ export async function POST(request: NextRequest) {
   // subscription_payment_success -> активировать
   // subscription_cancelled/expired -> деактивировать
 
-  // Add: update Supabase user_metadata.subscription_status based on event
-  const customerEmail = payload?.data?.attributes?.customer_email;
-  if (customerEmail) {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    );
-    const { data: users } = await supabase
-      .from("auth.users") // Supabase REST exposes users via admin; alternatively use supabase.auth.admin
-      .select("id, email")
-      .ilike("email", customerEmail)
-      .limit(1);
+  const userId =
+    typeof payload?.meta?.custom_data?.user_id === "string"
+      ? payload.meta.custom_data.user_id
+      : null;
 
-    const userId = users?.[0]?.id;
-    if (userId) {
-      const status =
-        eventName === "subscription_payment_success"
-          ? "pro"
-          : eventName === "subscription_cancelled" ||
-              eventName === "subscription_expired"
-            ? "free"
-            : undefined;
+  const customerId = (() => {
+    const id =
+      payload?.data?.attributes?.customer_id ??
+      payload?.data?.relationships?.customer?.data?.id;
+    if (typeof id === "string" && id.length > 0) return id;
+    if (typeof id === "number" && Number.isFinite(id)) return String(id);
+    return null;
+  })();
 
-      if (status) {
-        await supabase.auth.admin.updateUserById(userId, {
-          user_metadata: { subscription_status: status },
-        });
-      }
+  const isPro =
+    eventName === "subscription_payment_success" ||
+    eventName === "subscription_created" ||
+    eventName === "order_created";
+
+  const shouldSetFree =
+    eventName === "subscription_cancelled" ||
+    eventName === "subscription_expired" ||
+    eventName === "order_refunded";
+
+  const shouldUpdate = isPro || shouldSetFree;
+  if (shouldUpdate && userId) {
+    const supabase = getServerSupabaseClient();
+    const updatePayload: Record<string, any> = {
+      is_pro: isPro,
+      subscription_status: isPro ? "pro" : "free",
+    };
+    if (customerId) updatePayload.lemon_squeezy_customer_id = customerId;
+
+    const updateRes = await supabase
+      .from("users")
+      .update(updatePayload)
+      .eq("id", userId)
+      .select("id");
+
+    if (!updateRes.error && Array.isArray(updateRes.data) && updateRes.data.length === 0) {
+      await supabase
+        .from("users")
+        .upsert([{ id: userId, ...updatePayload }], { onConflict: "id" });
     }
   }
 

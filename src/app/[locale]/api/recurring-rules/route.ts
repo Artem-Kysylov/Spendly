@@ -6,8 +6,19 @@ export async function POST(req: NextRequest) {
     const { supabase, user } = await getAuthenticatedClient(req);
     const body = await req.json();
 
-    const isPro =
-      ((user.user_metadata || {}) as any)?.subscription_status === "pro";
+    const isPro = await (async () => {
+      const { data, error } = await supabase
+        .from("users")
+        .select("is_pro, subscription_status")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!error && data) {
+        return (data as any)?.is_pro === true || (data as any)?.subscription_status === "pro";
+      }
+
+      return ((user.user_metadata || {}) as any)?.subscription_status === "pro";
+    })();
     if (!isPro) {
       const { count, error: countErr } = await supabase
         .from("recurring_rules")

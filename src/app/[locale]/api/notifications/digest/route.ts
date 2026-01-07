@@ -156,9 +156,14 @@ export async function POST(req: NextRequest) {
       .slice(0, 3);
 
     // Получаем план пользователя (free/pro)
-    const { data: userRes } = await supabase.auth.admin.getUserById(userId);
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("is_pro, subscription_status")
+      .eq("id", userId)
+      .maybeSingle();
     const isPro =
-      (userRes?.user?.user_metadata as any)?.subscription_status === "pro";
+      (userRow as any)?.is_pro === true ||
+      (userRow as any)?.subscription_status === "pro";
 
     // Сводка по прошлой неделе (базовая, для Free и Pro)
     const title = t("weekly.title");

@@ -191,6 +191,17 @@ export default function UserSettingsClient() {
           assistant_tone: "neutral",
         },
       });
+
+      const userId = session?.user?.id;
+      if (userId) {
+        const { error } = await supabase
+          .from("users")
+          .update({ subscription_status: "free", is_pro: false })
+          .eq("id", userId);
+        if (error) {
+          console.warn("Error updating users subscription status:", error);
+        }
+      }
       await signOut();
       router.replace({ pathname: "/auth", query: { tab: "signup" } });
     } catch (e) {

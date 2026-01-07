@@ -117,9 +117,16 @@ export const upsertRecurringRule = async (
 
   // Enforce Free-tier rule limit (max 2)
   try {
-    const { data: userRes } = await supabase.auth.admin.getUserById(userId);
+    const { data, error } = await supabase
+      .from("users")
+      .select("is_pro, subscription_status")
+      .eq("id", userId)
+      .maybeSingle();
+
     const isPro =
-      (userRes?.user?.user_metadata as any)?.subscription_status === "pro";
+      !error && data
+        ? (data as any)?.is_pro === true || (data as any)?.subscription_status === "pro"
+        : false;
 
     if (!isPro) {
       const { count, error: countErr } = await supabase
