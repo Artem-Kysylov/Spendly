@@ -47,7 +47,39 @@ export default function AuthPageClient() {
   }, [searchParams]);
 
   useEffect(() => {
+    try {
+      const plan = searchParams?.get("plan");
+      if (plan) localStorage.setItem("auth:pendingPlan", plan);
+    } catch {}
+  }, [searchParams]);
+
+  useEffect(() => {
     if (isReady && session && session.user && router) {
+      let storedPlan: string | null = null;
+      try {
+        storedPlan = localStorage.getItem("auth:pendingPlan");
+      } catch {}
+
+      if (storedPlan) {
+        try {
+          localStorage.removeItem("auth:pendingPlan");
+        } catch {}
+
+        if (safeRedirectTo?.startsWith("/paywall")) {
+          const url = new URL(safeRedirectTo, window.location.origin);
+          const query: Record<string, string> = {};
+          url.searchParams.forEach((value, key) => {
+            query[key] = value;
+          });
+          if (!query.plan) query.plan = storedPlan;
+          router.replace({ pathname: "/paywall", query });
+          return;
+        }
+
+        router.replace({ pathname: "/paywall", query: { plan: storedPlan } });
+        return;
+      }
+
       if (safeRedirectTo) {
         nextRouter.replace(safeRedirectTo);
         return;

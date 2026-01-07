@@ -104,6 +104,11 @@ export const AuthContextProvider = ({
 
   // Sign in with Google
   const signInWithGoogle = async () => {
+    try {
+      const plan = new URLSearchParams(window.location.search).get("plan");
+      if (plan) window.localStorage.setItem("auth:pendingPlan", plan);
+    } catch {}
+
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
