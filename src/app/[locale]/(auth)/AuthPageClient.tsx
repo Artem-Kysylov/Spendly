@@ -18,7 +18,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { AvatarUpload } from "@/components/ui-elements";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter as useNextRouter } from "next/navigation";
 
 export default function AuthPageClient() {
   const {
@@ -31,17 +31,31 @@ export default function AuthPageClient() {
     isSigningUp,
   } = UserAuth();
   const router = useRouter();
+  const nextRouter = useNextRouter();
   const tAuth = useTranslations("auth");
   const searchParams = useSearchParams();
   const initialTab =
     searchParams?.get("tab") === "signup" ? "signup" : "signin";
 
+  const safeRedirectTo = useMemo(() => {
+    const raw = searchParams?.get("redirectTo");
+    if (!raw) return null;
+    if (!raw.startsWith("/") || raw.startsWith("//")) return null;
+    const authPathPattern = /^\/([a-z]{2})?\/?auth(\/|\?|$)/i;
+    if (authPathPattern.test(raw)) return null;
+    return raw;
+  }, [searchParams]);
+
   useEffect(() => {
     if (isReady && session && session.user && router) {
+      if (safeRedirectTo) {
+        nextRouter.replace(safeRedirectTo);
+        return;
+      }
       const completed = !!session.user?.user_metadata?.onboarding_completed;
       router.replace(completed ? "/dashboard" : "/onboarding");
     }
-  }, [isReady, session, router]);
+  }, [isReady, nextRouter, router, safeRedirectTo, session]);
 
   const [activeTab, setActiveTab] = useState<"signin" | "signup">(initialTab);
   const [email, setEmail] = useState("");
@@ -139,6 +153,12 @@ export default function AuthPageClient() {
       localStorage.removeItem("auth:rememberMe");
       localStorage.removeItem("auth:rememberedEmail");
     }
+
+    if (safeRedirectTo) {
+      nextRouter.replace(safeRedirectTo);
+      return;
+    }
+
     let completed = !!data?.user?.user_metadata?.onboarding_completed;
     if (completed === false && !data?.user) {
       const { data: userData } = await supabase.auth.getUser();
@@ -210,6 +230,12 @@ export default function AuthPageClient() {
       localStorage.setItem("auth:rememberMe", "1");
       localStorage.setItem("auth:rememberedEmail", email);
     }
+
+    if (safeRedirectTo) {
+      nextRouter.replace(safeRedirectTo);
+      return;
+    }
+
     router.replace("/onboarding");
   };
 

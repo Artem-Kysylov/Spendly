@@ -136,13 +136,31 @@ export default function UserSettingsClient() {
           );
           return;
         }
-        window.location.href = CHECKOUT_URL;
+        const urlWithCustomData = (() => {
+          try {
+            const userId = session?.user?.id;
+            if (!userId) return CHECKOUT_URL;
+            const u = new URL(CHECKOUT_URL);
+            u.searchParams.set("checkout[custom][user_id]", userId);
+            return u.toString();
+          } catch {
+            return CHECKOUT_URL;
+          }
+        })();
+
+        window.location.href = urlWithCustomData;
         return;
       }
 
+      const token = session?.access_token;
+      if (!token) throw new Error("No auth token");
+
       const res = await fetch("/api/checkout-url", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ locale }),
       });
       if (!res.ok) throw new Error("Failed to create checkout");

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useTranslations, useLocale } from "next-intl";
 import { Check, Sparkles, Rocket, Shield, Crown, Zap } from "lucide-react";
@@ -13,50 +13,60 @@ import {
 } from "@/components/ui/accordion";
 import { useSubscription } from "@/hooks/useSubscription";
 import { trackEvent } from "@/lib/telemetry";
-import { useRouter } from "@/i18n/routing";
 import type { ToastMessageProps } from "@/types/types";
 import ToastMessage from "@/components/ui-elements/ToastMessage";
+import { UserAuth } from "@/context/AuthContext";
+import { useSearchParams } from "next/navigation";
 
 export default function PaywallClient() {
     const tPaywall = useTranslations("paywall");
     const tPricing = useTranslations("pricing");
     const locale = useLocale();
-    const router = useRouter();
+    const searchParams = useSearchParams();
+    const { session } = UserAuth();
     const { subscriptionPlan } = useSubscription();
     const [toast, setToast] = useState<ToastMessageProps | null>(null);
-    const CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL;
 
-    const handleUpgradeClick = async (plan: "monthly" | "yearly" | "lifetime") => {
+    type Plan = "monthly" | "yearly" | "lifetime";
+
+    const requestedPlan = useMemo<Plan | null>(() => {
+        const p = (searchParams?.get("plan") || "").toLowerCase();
+        if (p === "monthly" || p === "yearly" || p === "lifetime") return p;
+        return null;
+    }, [searchParams]);
+
+    const monthlyRef = useRef<HTMLDivElement | null>(null);
+    const yearlyRef = useRef<HTMLDivElement | null>(null);
+    const lifetimeRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        if (!requestedPlan) return;
+        const target =
+            requestedPlan === "monthly"
+                ? monthlyRef
+                : requestedPlan === "yearly"
+                    ? yearlyRef
+                    : lifetimeRef;
+        target.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, [requestedPlan]);
+
+    const handleUpgradeClick = async (plan: Plan) => {
         trackEvent("paywall_cta_clicked", { plan, from: "paywall" });
 
         try {
-            // Use plan-specific checkout URLs if available
-            const CHECKOUT_URLS = {
-                monthly: process.env.NEXT_PUBLIC_LS_MONTHLY_URL || CHECKOUT_URL,
-                yearly: process.env.NEXT_PUBLIC_LS_YEARLY_URL || CHECKOUT_URL,
-                lifetime: process.env.NEXT_PUBLIC_LS_LIFETIME_URL || CHECKOUT_URL,
-            };
-
-            const checkoutUrl = CHECKOUT_URLS[plan];
-
-            if (checkoutUrl) {
-                console.log(`[Paywall] Using ${plan} checkout URL ->`, checkoutUrl);
-                if (checkoutUrl.includes("/checkout/buy/")) {
-                    console.warn(
-                        "[Paywall] Env contains legacy buy URL; skipping to avoid 404.",
-                    );
-                    setToast({ text: "Coming soon!", type: "success" });
-                    setTimeout(() => setToast(null), 3000);
-                    return;
-                }
-                window.location.href = checkoutUrl;
+            const token = session?.access_token;
+            if (!token) {
+                setToast({ text: "Please sign in to continue", type: "error" });
+                setTimeout(() => setToast(null), 3000);
                 return;
             }
 
-            // Fallback to API
             const res = await fetch("/api/checkout-url", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
                 body: JSON.stringify({ locale, plan }),
             });
             if (!res.ok) throw new Error("Failed to create checkout");
@@ -89,6 +99,9 @@ export default function PaywallClient() {
     // }
 
     const isFree = subscriptionPlan === "free";
+    const isMonthlySelected = requestedPlan === "monthly";
+    const isYearlySelected = requestedPlan === "yearly";
+    const isLifetimeSelected = requestedPlan === "lifetime";
 
     return (
         <div className="container mx-auto px-4 py-10 max-w-[1280px]">
@@ -171,7 +184,10 @@ export default function PaywallClient() {
                     </div>
 
                     {/* Monthly Plan Card */}
-                    <div className="rounded-2xl border-2 border-gray-200 dark:border-border p-6 bg-white dark:bg-card flex flex-col">
+                    <div
+                        ref={monthlyRef}
+                        className={`scroll-mt-24 rounded-2xl border-2 p-6 bg-white dark:bg-card flex flex-col ${isMonthlySelected ? "border-primary ring-2 ring-primary/30" : "border-gray-200 dark:border-border"}`}
+                    >
                         <div className="text-center mb-6">
                             <h3 className="text-xl font-semibold text-secondary-black dark:text-white mb-2">
                                 {tPaywall("comparison.monthly.label")}
@@ -221,7 +237,10 @@ export default function PaywallClient() {
                     </div>
 
                     {/* Yearly Plan Card (Best Value) */}
-                    <div className="rounded-2xl border-2 border-primary dark:border-primary p-6 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 relative overflow-hidden">
+                    <div
+                        ref={yearlyRef}
+                        className={`scroll-mt-24 rounded-2xl border-2 p-6 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 relative overflow-hidden ${isYearlySelected ? "ring-2 ring-primary/30" : ""} border-primary dark:border-primary`}
+                    >
                         <div className="absolute top-2 right-2">
                             <div className="px-3 py-1 rounded-full bg-primary text-white text-xs font-semibold">
                                 {tPaywall("comparison.bestValue")}
@@ -281,7 +300,10 @@ export default function PaywallClient() {
                     </div>
 
                     {/* Lifetime Plan Card (Founder's Edition) */}
-                    <div className="rounded-2xl border-2 border-amber-500 dark:border-amber-400 p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 relative overflow-hidden">
+                    <div
+                        ref={lifetimeRef}
+                        className={`scroll-mt-24 rounded-2xl border-2 p-6 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 relative overflow-hidden ${isLifetimeSelected ? "ring-2 ring-amber-500/30" : ""} border-amber-500 dark:border-amber-400`}
+                    >
                         <div className="absolute top-2 right-2">
                             <div className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-semibold">
                                 {tPaywall("comparison.foundersEdition")}

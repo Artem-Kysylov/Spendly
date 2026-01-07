@@ -6,6 +6,7 @@ import Button from "@/components/ui-elements/Button";
 import ToastMessage from "@/components/ui-elements/ToastMessage";
 import type { ToastMessageProps } from "@/types/types";
 import { useTranslations, useLocale } from "next-intl";
+import { UserAuth } from "@/context/AuthContext";
 
 export default function PaymentClient() {
   const [toast, setToast] = useState<ToastMessageProps | null>(null);
@@ -13,6 +14,7 @@ export default function PaymentClient() {
   const tPricing = useTranslations("pricing");
   const tCTA = useTranslations("cta");
   const locale = useLocale();
+  const { session } = UserAuth();
   const CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL;
 
   const handleUpgradeClick = async () => {
@@ -28,14 +30,32 @@ export default function PaymentClient() {
           setTimeout(() => setToast(null), 3000);
           return;
         }
-        window.location.href = CHECKOUT_URL;
+        const urlWithCustomData = (() => {
+          try {
+            const userId = session?.user?.id;
+            if (!userId) return CHECKOUT_URL;
+            const u = new URL(CHECKOUT_URL);
+            u.searchParams.set("checkout[custom][user_id]", userId);
+            return u.toString();
+          } catch {
+            return CHECKOUT_URL;
+          }
+        })();
+
+        window.location.href = urlWithCustomData;
         return;
       }
 
       // 2) Если ENV нет — пробуем серверный API
+      const token = session?.access_token;
+      if (!token) throw new Error("No auth token");
+
       const res = await fetch("/api/checkout-url", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ locale }),
       });
       if (!res.ok) throw new Error("Failed to create checkout");
