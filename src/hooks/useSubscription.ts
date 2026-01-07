@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { UserAuth } from "../context/AuthContext";
-import { supabase } from "../lib/supabaseClient";
 
 export type SubscriptionPlan = "free" | "pro";
 
@@ -8,51 +7,46 @@ export const useSubscription = () => {
   const { session } = UserAuth();
   const [dbIsPro, setDbIsPro] = useState<boolean | null>(null);
 
-  const email = (session?.user?.email || "").toLowerCase();
-  const allowlist = (process.env.NEXT_PUBLIC_PREMIUM_EMAILS || "")
-    .toLowerCase()
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-
   useEffect(() => {
     const userId = session?.user?.id;
+    const token = session?.access_token;
     if (!userId) {
       setDbIsPro(null);
+      return;
+    }
+    if (!token) {
+      setDbIsPro(false);
       return;
     }
 
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
-        .from("users")
-        .select("is_pro, subscription_status")
-        .eq("id", userId)
-        .maybeSingle();
+      const res = await fetch("/api/subscription-status", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (cancelled) return;
-      if (error) {
-        setDbIsPro(null);
+      if (!res.ok) {
+        setDbIsPro(false);
         return;
       }
-      const isPro =
-        (data as any)?.is_pro === true || (data as any)?.subscription_status === "pro";
-      setDbIsPro(isPro);
+
+      const json = (await res.json().catch(() => null)) as
+        | { is_pro?: boolean; subscription_status?: string }
+        | null;
+      setDbIsPro(json?.is_pro === true);
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [session?.user?.id]);
-
-  const isProMetadata =
-    session?.user?.user_metadata?.subscription_status === "pro" ||
-    session?.user?.user_metadata?.isPro === true;
-
-  const isProOverride = email && allowlist.includes(email);
+  }, [session?.access_token, session?.user?.id]);
 
   const subscriptionPlan: SubscriptionPlan =
-    dbIsPro === true || isProMetadata || isProOverride ? "pro" : "free";
+    dbIsPro === true ? "pro" : "free";
 
   return { subscriptionPlan };
 };

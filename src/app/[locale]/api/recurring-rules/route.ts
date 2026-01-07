@@ -6,19 +6,13 @@ export async function POST(req: NextRequest) {
     const { supabase, user } = await getAuthenticatedClient(req);
     const body = await req.json();
 
-    const isPro = await (async () => {
-      const { data, error } = await supabase
-        .from("users")
-        .select("is_pro, subscription_status")
-        .eq("id", user.id)
-        .maybeSingle();
-
-      if (!error && data) {
-        return (data as any)?.is_pro === true || (data as any)?.subscription_status === "pro";
-      }
-
-      return ((user.user_metadata || {}) as any)?.subscription_status === "pro";
-    })();
+    const { data: userRow } = await supabase
+      .from("users")
+      .select("is_pro")
+      .eq("id", user.id)
+      .maybeSingle();
+    const isPro =
+      (userRow as any)?.is_pro === true;
     if (!isPro) {
       const { count, error: countErr } = await supabase
         .from("recurring_rules")
@@ -42,7 +36,7 @@ export async function POST(req: NextRequest) {
       updated_at: new Date().toISOString(),
     };
 
-    const { data, error } = await supabase
+    const { data: ruleData, error } = await supabase
       .from("recurring_rules")
       .upsert(payload, { onConflict: "user_id,title_pattern" })
       .select();
@@ -50,7 +44,10 @@ export async function POST(req: NextRequest) {
     if (error) {
       return NextResponse.json({ error: "saveFailed" }, { status: 400 });
     }
-    return NextResponse.json({ rule: (data || [])[0] }, { status: 200 });
+    return NextResponse.json(
+      { rule: ((ruleData || []) as any[])[0] },
+      { status: 200 },
+    );
   } catch {
     return NextResponse.json({ error: "saveFailed" }, { status: 500 });
   }
@@ -77,7 +74,7 @@ export async function PATCH(req: NextRequest) {
       patch.budget_folder_id = body.budget_folder_id;
     patch.updated_at = new Date().toISOString();
 
-    const { data, error } = await supabase
+    const { data: ruleData, error } = await supabase
       .from("recurring_rules")
       .update(patch)
       .eq("id", id)
@@ -87,7 +84,10 @@ export async function PATCH(req: NextRequest) {
     if (error) {
       return NextResponse.json({ error: "updateFailed" }, { status: 400 });
     }
-    return NextResponse.json({ rule: (data || [])[0] }, { status: 200 });
+    return NextResponse.json(
+      { rule: ((ruleData || []) as any[])[0] },
+      { status: 200 },
+    );
   } catch {
     return NextResponse.json({ error: "updateFailed" }, { status: 500 });
   }

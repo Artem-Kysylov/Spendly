@@ -119,13 +119,13 @@ export const upsertRecurringRule = async (
   try {
     const { data, error } = await supabase
       .from("users")
-      .select("is_pro, subscription_status")
+      .select("is_pro")
       .eq("id", userId)
       .maybeSingle();
 
     const isPro =
       !error && data
-        ? (data as any)?.is_pro === true || (data as any)?.subscription_status === "pro"
+        ? (data as any)?.is_pro === true
         : false;
 
     if (!isPro) {
