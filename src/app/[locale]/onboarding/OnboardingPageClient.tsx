@@ -16,13 +16,8 @@ export default function OnboardingPageClient() {
   }, [isReady, session, router]);
 
   return (
-    <div
-      className="auth-light min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: "url('/Sign up screen-bg.png')" }}
-    >
-      <div className="container mx-auto min-h-screen p-0">
-        <ChatOnboarding />
-      </div>
+    <div className="min-h-screen">
+      <ChatOnboarding />
     </div>
   );
 }

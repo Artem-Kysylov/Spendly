@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { UserAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
@@ -57,6 +57,7 @@ const LANGUAGE_CURRENCY_MAP: Record<string, string> = {
 
 export default function ChatOnboarding() {
   const t = useTranslations("onboarding");
+  const currentLocale = useLocale() as Language;
   const router = useRouter();
   const { session } = UserAuth();
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -67,7 +68,7 @@ export default function ChatOnboarding() {
   const [toast, setToast] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   // Locale state
-  const [language, setLanguage] = useState<Language>("en");
+  const [language, setLanguage] = useState<Language>(currentLocale);
   const [currency, setCurrency] = useState<string>("USD");
   const [autodetected, setAutodetected] = useState<boolean>(false);
 
@@ -83,19 +84,23 @@ export default function ChatOnboarding() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Detect locale on mount
+  // Detect locale on mount and sync with URL
   useEffect(() => {
     let active = true;
     detectInitialLocale().then((s) => {
       if (!active) return;
-      setLanguage(s.locale);
+      // If detected locale differs from URL, redirect
+      if (s.locale !== currentLocale && s.autodetected) {
+        router.replace("/onboarding", { locale: s.locale });
+      }
+      setLanguage(currentLocale);
       setCurrency(s.currency);
       setAutodetected(!!s.autodetected);
     });
     return () => {
       active = false;
     };
-  }, []);
+  }, [currentLocale, router]);
 
   // Add initial greeting when component mounts
   const greetingRef = useRef(false);
@@ -186,49 +191,65 @@ export default function ChatOnboarding() {
   const handleBudgetStyleSelect = useCallback(async (style: BudgetStyle, label: string) => {
     setSelectedBudgetStyle(style);
     addUserMessage(label);
-    
-    setTimeout(() => {
-      setStep(3);
-      addBotMessage(t("step4.processing"));
-    }, 300);
 
     // Save everything
-    if (session?.user?.id) {
-      try {
-        // Save locale settings
-        await saveUserLocaleSettings({
-          userId: session.user.id,
-          country: "US",
-          currency,
-          locale: language,
-        });
-
-        // Calculate budget amount
-        const budgetAmount = BUDGET_AMOUNTS[currency]?.[style] || BUDGET_AMOUNTS.USD[style];
-
-        // Save main budget
-        await supabase
-          .from("main_budget")
-          .upsert(
-            { user_id: session.user.id, amount: budgetAmount },
-            { onConflict: "user_id" },
-          );
-
-        // Save first transaction if we have one
-        if (selectedCategory && transactionAmount) {
-          await supabase.from("transactions").insert({
-            user_id: session.user.id,
-            title: selectedCategory,
-            amount: Number(transactionAmount),
-            type: "expense",
-            date: new Date().toISOString(),
-          });
-        }
-      } catch (e) {
-        console.warn("Failed to save onboarding data", e);
-      }
+    if (!session?.user?.id) {
+      showToast(t("errors.authRequired"), "error");
+      return;
     }
-  }, [session?.user?.id, currency, language, selectedCategory, transactionAmount, addBotMessage, addUserMessage, t]);
+
+    try {
+      // Save locale settings
+      await saveUserLocaleSettings({
+        userId: session.user.id,
+        country: "US",
+        currency,
+        locale: language,
+      });
+
+      // Calculate budget amount
+      const budgetAmount = BUDGET_AMOUNTS[currency]?.[style] || BUDGET_AMOUNTS.USD[style];
+
+      // Save main budget
+      const { error } = await supabase
+        .from("main_budget")
+        .upsert(
+          { user_id: session.user.id, amount: budgetAmount },
+          { onConflict: "user_id" },
+        );
+
+      if (error) {
+        console.error("Budget save error:", error);
+        showToast(t("errors.budgetSaveFailed"), "error");
+        return;
+      }
+
+      // Save first transaction if we have one
+      if (selectedCategory && transactionAmount) {
+        const { error: txError } = await supabase.from("transactions").insert({
+          user_id: session.user.id,
+          title: selectedCategory,
+          amount: Number(transactionAmount),
+          type: "expense",
+          date: new Date().toISOString(),
+        });
+        
+        if (txError) {
+          console.warn("Transaction save failed:", txError);
+          // Don't block onboarding if transaction fails
+        }
+      }
+
+      // Success - move to next step
+      setTimeout(() => {
+        setStep(3);
+        addBotMessage(t("step4.processing"));
+      }, 300);
+    } catch (e) {
+      console.error("Failed to save onboarding data", e);
+      showToast(t("errors.unexpected"), "error");
+    }
+  }, [session?.user?.id, currency, language, addBotMessage, addUserMessage, t, showToast]);
 
   // Handle finish
   const handleFinish = useCallback(async () => {
@@ -256,12 +277,12 @@ export default function ChatOnboarding() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col relative">
       {/* Floating Language Switcher */}
-      <div className="absolute top-4 right-4 z-10">
+      <div className="fixed top-4 right-4 z-50 flex flex-col items-end">
         <LanguageSelect value={language} onChange={handleLanguageChange} />
         {autodetected && (
-          <span className="block text-xs text-muted-foreground mt-1 text-right">
+          <span className="block text-xs text-muted-foreground mt-1">
             {t("autodetected")}
           </span>
         )}
