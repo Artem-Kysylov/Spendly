@@ -77,18 +77,32 @@ export async function POST(req: NextRequest) {
     };
     console.log("[Checkout API] request payload:", payload);
 
-    const res = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
-      method: "POST",
-      headers: {
-        Accept: "application/vnd.api+json",
-        "Content-Type": "application/vnd.api+json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify(payload),
-    });
+    let res: Response;
+    try {
+      res = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
+        method: "POST",
+        headers: {
+          Accept: "application/vnd.api+json",
+          "Content-Type": "application/vnd.api+json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch (error: any) {
+      console.error("[Checkout Error Details]:", error.response?.data || error.message || error);
+      return NextResponse.json(
+        { error: "Checkout API request failed", details: error.message },
+        { status: 500 },
+      );
+    }
 
     if (!res.ok) {
       const text = await res.text();
+      console.error("[Checkout API Error Response]:", {
+        status: res.status,
+        statusText: res.statusText,
+        body: text,
+      });
       return NextResponse.json(
         { error: "Checkout API failed", details: text },
         { status: 500 },

@@ -1,4 +1,10 @@
 {
+  "seo": {
+    "paywall": {
+      "title": "Upgrade to Pro - Spendly",
+      "description": "Unlock unlimited budgets, AI assistant, and powerful features to take control of your finances with Spendly Pro."
+    }
+  },
   "BudgetSetup": {
     "title": "Set your monthly budget",
     "selectCountry": "Select your country",

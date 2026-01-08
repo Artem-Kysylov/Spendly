@@ -21,15 +21,19 @@ export async function trackEvent(
     return;
   }
 
-  try {
-    const { error } = await supabase
-      .from("telemetry")
-      .insert([{ event_name: name, payload }]);
+  // Telemetry disabled: table does not exist in production
+  // Uncomment below when telemetry table is created
+  return;
 
-    if (error) {
-      console.error("Error tracking event:", error);
-    }
-  } catch (error) {
-    console.error("Error inserting telemetry event:", error);
-  }
+  // try {
+  //   const { error } = await supabase
+  //     .from("telemetry")
+  //     .insert([{ event_name: name, payload }]);
+
+  //   if (error) {
+  //     // Silently fail - telemetry should not break user experience
+  //   }
+  // } catch (error) {
+  //   // Silently fail - telemetry should not break user experience
+  // }
 }
