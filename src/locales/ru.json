@@ -76,25 +76,34 @@
   "onboarding": {
     "title": "Онбординг",
     "autodetected": "Автоопределено",
-    "intro": {
-      "welcome": "Привет! Я проведу тебя через короткую настройку.",
-      "firstTransactionPrompt": "Давай добавим первую транзакцию, чтобы начать."
+    "step1": {
+      "greeting": "Привет! Я Spendly Pal. Давай настроим всё. Ты тратил деньги сегодня?",
+      "action_coffee": "Кофе",
+      "action_food": "Еда",
+      "action_taxi": "Такси",
+      "action_groceries": "Продукты",
+      "amount_placeholder": "Сколько это стоило?"
+    },
+    "step2": {
+      "currency_question": "Понял! Какую валюту ты используешь?"
+    },
+    "step3": {
+      "budget_question": "И последнее — какова твоя месячная цель? Выбери стиль:",
+      "style_monk": "Режим монаха",
+      "style_monk_desc": "Строгий бюджет",
+      "style_balanced": "Баланс",
+      "style_balanced_desc": "Обычные траты",
+      "style_rich": "Широкая душа",
+      "style_rich_desc": "Гибкие лимиты"
+    },
+    "step4": {
+      "processing": "Настраиваю твоё пространство...",
+      "finish_button": "Завершить настройку"
     },
     "actions": {
-      "addFirstTransaction": "Добавить первую транзакцию",
       "back": "Назад",
       "next": "Далее",
       "finish": "Готово"
-    },
-    "currency": {
-      "choosePrompt": "Выбери страну и валюту для корректного форматирования."
-    },
-    "budget": {
-      "createPrompt": "Установи свой основной месячный бюджет.",
-      "saved": "Бюджет успешно сохранён!"
-    },
-    "finish": {
-      "summary": "Всё готово! Можно переходить к дашборду."
     },
     "transaction": {
       "modalTitle": "Добавить транзакцию",

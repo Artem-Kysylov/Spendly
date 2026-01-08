@@ -32,25 +32,34 @@
   "onboarding": {
     "title": "ऑनबोर्डिंग",
     "autodetected": "स्वतः पहचाना",
-    "intro": {
-      "welcome": "स्वागत है! मैं आपको एक तेज़ सेटअप कराऊँगा।",
-      "firstTransactionPrompt": "शुरू करने के लिए पहली ट्रांज़ैक्शन जोड़ते हैं।"
+    "step1": {
+      "greeting": "नमस्ते! मैं Spendly Pal हूँ। चलो सेटअप करते हैं। क्या आपने आज पैसे खर्च किए?",
+      "action_coffee": "कॉफ़ी",
+      "action_food": "खाना",
+      "action_taxi": "टैक्सी",
+      "action_groceries": "किराना",
+      "amount_placeholder": "कितना खर्च हुआ?"
+    },
+    "step2": {
+      "currency_question": "समझ गया! आप कौन सी मुद्रा इस्तेमाल करते हैं?"
+    },
+    "step3": {
+      "budget_question": "अंत में, आपका मासिक लक्ष्य क्या है? एक शैली चुनें:",
+      "style_monk": "मोंक मोड",
+      "style_monk_desc": "सख्त बजट",
+      "style_balanced": "संतुलित",
+      "style_balanced_desc": "सामान्य खर्च",
+      "style_rich": "हाई रोलर",
+      "style_rich_desc": "लचीली सीमाएं"
+    },
+    "step4": {
+      "processing": "आपका वर्कस्पेस सेट कर रहा हूँ...",
+      "finish_button": "सेटअप पूरा करें"
     },
     "actions": {
-      "addFirstTransaction": "पहली ट्रांज़ैक्शन जोड़ें",
       "back": "वापस",
       "next": "आगे",
       "finish": "समाप्त"
-    },
-    "currency": {
-      "choosePrompt": "सही फ़ॉर्मेटिंग के लिए देश और मुद्रा चुनें।"
-    },
-    "budget": {
-      "createPrompt": "अपना मुख्य मासिक बजट सेट करें।",
-      "saved": "बजट सफलतापूर्वक सहेजा गया!"
-    },
-    "finish": {
-      "summary": "सब तैयार! अब आप डैशबोर्ड देख सकते हैं।"
     },
     "transaction": {
       "modalTitle": "ट्रांज़ैक्शन जोड़ें",

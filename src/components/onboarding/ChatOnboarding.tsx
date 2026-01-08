@@ -1,46 +1,94 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { UserAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import { detectInitialLocale } from "@/i18n/detect";
-import type { Language, UserLocaleSettings } from "@/types/locale";
+import type { Language } from "@/types/locale";
 import LanguageSelect from "@/components/ui-elements/locale/LanguageSelect";
-import CountryCombobox from "@/components/ui-elements/locale/CountryCombobox";
-import CurrencyCombobox from "@/components/ui-elements/locale/CurrencyCombobox";
-import TransactionModal from "@/components/modals/TransactionModal";
-import CreateMainBudget from "@/components/budgets/CreateMainBudget";
 import ToastMessage from "@/components/ui-elements/ToastMessage";
 import { Button } from "@/components/ui/button";
 import { saveUserLocaleSettings } from "@/app/[locale]/actions/saveUserLocaleSettings";
+import { cn } from "@/lib/utils";
+import { Coffee, UtensilsCrossed, Car, ShoppingCart, Wallet, Scale, Sparkles } from "lucide-react";
 
 type Step = 0 | 1 | 2 | 3;
+type BudgetStyle = "monk" | "balanced" | "rich";
+
+interface ChatMessage {
+  id: string;
+  role: "assistant" | "user";
+  content: string;
+  isTyping?: boolean;
+}
+
+const CURRENCY_OPTIONS = [
+  { code: "USD", symbol: "$", flag: "🇺🇸" },
+  { code: "EUR", symbol: "€", flag: "🇪🇺" },
+  { code: "UAH", symbol: "₴", flag: "🇺🇦" },
+  { code: "IDR", symbol: "Rp", flag: "🇮🇩" },
+  { code: "JPY", symbol: "¥", flag: "🇯🇵" },
+  { code: "KRW", symbol: "₩", flag: "🇰🇷" },
+  { code: "INR", symbol: "₹", flag: "🇮🇳" },
+  { code: "RUB", symbol: "₽", flag: "🇷🇺" },
+];
+
+const BUDGET_AMOUNTS: Record<string, Record<BudgetStyle, number>> = {
+  USD: { monk: 500, balanced: 1500, rich: 5000 },
+  EUR: { monk: 450, balanced: 1400, rich: 4500 },
+  UAH: { monk: 15000, balanced: 45000, rich: 150000 },
+  IDR: { monk: 7500000, balanced: 22500000, rich: 75000000 },
+  JPY: { monk: 75000, balanced: 225000, rich: 750000 },
+  KRW: { monk: 650000, balanced: 2000000, rich: 6500000 },
+  INR: { monk: 40000, balanced: 120000, rich: 400000 },
+  RUB: { monk: 45000, balanced: 135000, rich: 450000 },
+};
+
+const LANGUAGE_CURRENCY_MAP: Record<string, string> = {
+  uk: "UAH",
+  ru: "RUB",
+  ja: "JPY",
+  ko: "KRW",
+  id: "IDR",
+  hi: "INR",
+};
 
 export default function ChatOnboarding() {
   const t = useTranslations("onboarding");
   const router = useRouter();
   const { session } = UserAuth();
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   const [step, setStep] = useState<Step>(0);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
   const [toast, setToast] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   // Locale state
   const [language, setLanguage] = useState<Language>("en");
-  const [country, setCountry] = useState<string>("US");
   const [currency, setCurrency] = useState<string>("USD");
   const [autodetected, setAutodetected] = useState<boolean>(false);
 
-  // Transaction modal state
-  const [isTxOpen, setTxOpen] = useState<boolean>(false);
+  // Transaction state
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [transactionAmount, setTransactionAmount] = useState<string>("");
 
+  // Budget style state
+  const [selectedBudgetStyle, setSelectedBudgetStyle] = useState<BudgetStyle | null>(null);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
+
+  // Detect locale on mount
   useEffect(() => {
     let active = true;
     detectInitialLocale().then((s) => {
       if (!active) return;
       setLanguage(s.locale);
-      setCountry(s.country);
       setCurrency(s.currency);
       setAutodetected(!!s.autodetected);
     });
@@ -49,52 +97,141 @@ export default function ChatOnboarding() {
     };
   }, []);
 
+  // Add initial greeting when component mounts
+  const greetingRef = useRef(false);
+  useEffect(() => {
+    if (greetingRef.current) return;
+    greetingRef.current = true;
+    
+    const timer = setTimeout(() => {
+      setIsTyping(true);
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages([{ id: "greeting", role: "assistant", content: t("step1.greeting") }]);
+      }, 800 + Math.random() * 400);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [t]);
+
   const showToast = (text: string, type: "success" | "error") => {
     setToast({ text, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  // Ensure step updates always return a valid union type
-  const clampStep = (n: number): Step => (n <= 0 ? 0 : n >= 3 ? 3 : (n as Step));
+  const addBotMessage = useCallback((content: string) => {
+    setIsTyping(true);
+    
+    setTimeout(() => {
+      setIsTyping(false);
+      setMessages((prev) => [
+        ...prev,
+        { id: `bot-${Date.now()}`, role: "assistant", content },
+      ]);
+    }, 800 + Math.random() * 400);
+  }, []);
 
-  // Handle language change (updates locale path)
+  const addUserMessage = useCallback((content: string) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: `user-${Date.now()}`, role: "user", content },
+    ]);
+  }, []);
+
+  // Handle language change
   const handleLanguageChange = useCallback(
     (lang: Language) => {
       setLanguage(lang);
+      // Auto-select currency based on language
+      const suggestedCurrency = LANGUAGE_CURRENCY_MAP[lang] || "USD";
+      setCurrency(suggestedCurrency);
       try {
         router.replace("/onboarding", { locale: lang });
       } catch (e) {
-        // ignore routing errors in dev
+        // ignore routing errors
       }
     },
     [router],
   );
 
-  const handleNext = useCallback(async () => {
-    // Step-specific side effects
-    if (step === 1) {
-      // Persist locale settings after Step 2
-      if (session?.user?.id) {
-        try {
-          await saveUserLocaleSettings({
-            userId: session.user.id,
-            country,
-            currency,
-            locale: language,
+  // Handle category selection (Step 1)
+  const handleCategorySelect = useCallback((category: string, label: string) => {
+    setSelectedCategory(category);
+    addUserMessage(label);
+  }, [addUserMessage]);
+
+  // Handle amount submit (Step 1 -> Step 2)
+  const handleAmountSubmit = useCallback(() => {
+    if (!transactionAmount || !selectedCategory) return;
+    
+    addUserMessage(`${currency} ${transactionAmount}`);
+    
+    setTimeout(() => {
+      setStep(1);
+      addBotMessage(t("step2.currency_question"));
+    }, 300);
+  }, [transactionAmount, selectedCategory, currency, addBotMessage, addUserMessage, t]);
+
+  // Handle currency selection (Step 2 -> Step 3)
+  const handleCurrencySelect = useCallback((currencyCode: string, flag: string) => {
+    setCurrency(currencyCode);
+    addUserMessage(`${flag} ${currencyCode}`);
+    
+    setTimeout(() => {
+      setStep(2);
+      addBotMessage(t("step3.budget_question"));
+    }, 300);
+  }, [addBotMessage, addUserMessage, t]);
+
+  // Handle budget style selection (Step 3 -> Step 4)
+  const handleBudgetStyleSelect = useCallback(async (style: BudgetStyle, label: string) => {
+    setSelectedBudgetStyle(style);
+    addUserMessage(label);
+    
+    setTimeout(() => {
+      setStep(3);
+      addBotMessage(t("step4.processing"));
+    }, 300);
+
+    // Save everything
+    if (session?.user?.id) {
+      try {
+        // Save locale settings
+        await saveUserLocaleSettings({
+          userId: session.user.id,
+          country: "US",
+          currency,
+          locale: language,
+        });
+
+        // Calculate budget amount
+        const budgetAmount = BUDGET_AMOUNTS[currency]?.[style] || BUDGET_AMOUNTS.USD[style];
+
+        // Save main budget
+        await supabase
+          .from("main_budget")
+          .upsert(
+            { user_id: session.user.id, amount: budgetAmount },
+            { onConflict: "user_id" },
+          );
+
+        // Save first transaction if we have one
+        if (selectedCategory && transactionAmount) {
+          await supabase.from("transactions").insert({
+            user_id: session.user.id,
+            title: selectedCategory,
+            amount: Number(transactionAmount),
+            type: "expense",
+            date: new Date().toISOString(),
           });
-        } catch (e) {
-          console.warn("Failed to save locale settings during onboarding", e);
         }
+      } catch (e) {
+        console.warn("Failed to save onboarding data", e);
       }
     }
-    setStep((s) => clampStep(s + 1));
-  }, [step, session?.user?.id, country, currency, language]);
+  }, [session?.user?.id, currency, language, selectedCategory, transactionAmount, addBotMessage, addUserMessage, t]);
 
-  const handleBack = useCallback(() => {
-    setStep((s) => clampStep(s - 1));
-  }, []);
-
-  const markCompleted = useCallback(async () => {
+  // Handle finish
+  const handleFinish = useCallback(async () => {
     try {
       if (session?.user) {
         await supabase.auth.updateUser({
@@ -102,170 +239,176 @@ export default function ChatOnboarding() {
         });
       }
     } catch {}
-  }, [session?.user]);
-
-  const handleFinish = useCallback(async () => {
-    await markCompleted();
     router.push("/dashboard");
-  }, [markCompleted, router]);
+  }, [session?.user, router]);
 
-  const headerTitle = useMemo(() => t("title"), [t]);
+  const categories = [
+    { id: "coffee", label: t("step1.action_coffee"), icon: Coffee, emoji: "☕" },
+    { id: "food", label: t("step1.action_food"), icon: UtensilsCrossed, emoji: "🍔" },
+    { id: "taxi", label: t("step1.action_taxi"), icon: Car, emoji: "🚕" },
+    { id: "groceries", label: t("step1.action_groceries"), icon: ShoppingCart, emoji: "🛒" },
+  ];
+
+  const budgetStyles = [
+    { id: "monk" as BudgetStyle, label: t("step3.style_monk"), desc: t("step3.style_monk_desc"), icon: Wallet, emoji: "🧘" },
+    { id: "balanced" as BudgetStyle, label: t("step3.style_balanced"), desc: t("step3.style_balanced_desc"), icon: Scale, emoji: "⚖️" },
+    { id: "rich" as BudgetStyle, label: t("step3.style_rich"), desc: t("step3.style_rich_desc"), icon: Sparkles, emoji: "💎" },
+  ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground grid grid-rows-[auto_1fr_auto]">
-      {/* Header with language switch */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold">{headerTitle}</span>
-          {autodetected ? (
-            <span className="ml-2 text-xs text-muted-foreground">{t("autodetected")}</span>
-          ) : null}
-        </div>
-        <div className="flex items-center gap-2">
-          <LanguageSelect value={language} onChange={handleLanguageChange} />
-        </div>
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
+      {/* Floating Language Switcher */}
+      <div className="absolute top-4 right-4 z-10">
+        <LanguageSelect value={language} onChange={handleLanguageChange} />
+        {autodetected && (
+          <span className="block text-xs text-muted-foreground mt-1 text-right">
+            {t("autodetected")}
+          </span>
+        )}
       </div>
 
-      {/* Chat Body */}
-      <div className="overflow-y-auto">
-        <div className="max-w-3xl mx-auto p-4 space-y-6">
-          {/* Step Intro */}
-          {step === 0 && (
-            <div className="space-y-4">
-              <div className="rounded-xl bg-muted p-4">
-                <p className="text-sm leading-relaxed">{t("intro.welcome")}</p>
+      {/* Chat Container */}
+      <div className="flex-1 overflow-y-auto pb-4">
+        <div className="max-w-2xl mx-auto p-4 pt-16 space-y-4">
+          {/* Chat Messages */}
+          {messages.map((message) => (
+            <div
+              key={message.id}
+              className={cn(
+                "flex flex-col max-w-[85%]",
+                message.role === "user" ? "self-end items-end ml-auto" : "self-start items-start"
+              )}
+            >
+              <div
+                className={cn(
+                  "rounded-2xl px-4 py-3 shadow-sm",
+                  message.role === "user"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted/50"
+                )}
+              >
+                <p className="text-sm leading-relaxed">{message.content}</p>
               </div>
-              <div className="rounded-xl bg-muted p-4">
-                <p className="text-sm leading-relaxed">{t("intro.firstTransactionPrompt")}</p>
-                <div className="mt-3">
-                  <Button onClick={() => setTxOpen(true)}>{t("actions.addFirstTransaction")}</Button>
-                </div>
-              </div>
+            </div>
+          ))}
+
+          {/* Typing Indicator */}
+          {isTyping && (
+            <div className="self-start flex items-center gap-2 p-4 bg-muted/50 rounded-2xl w-16">
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
             </div>
           )}
 
-          {/* Step 2: Currency */}
-          {step === 1 && (
-            <div className="space-y-4">
-              <div className="rounded-xl bg-muted p-4">
-                <p className="text-sm leading-relaxed">{t("currency.choosePrompt")}</p>
-                <div className="mt-3 flex gap-3">
-                  <CountryCombobox value={country} onChange={setCountry} />
-                  <CurrencyCombobox value={currency} countryCode={country} onChange={setCurrency} />
-                </div>
-              </div>
+          {/* Step 1: Category Selection */}
+          {step === 0 && !isTyping && messages.length > 0 && !selectedCategory && (
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => handleCategorySelect(cat.id, cat.label)}
+                  className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:bg-muted/50 transition-colors text-left"
+                >
+                  <span className="text-2xl">{cat.emoji}</span>
+                  <span className="text-sm font-medium">{cat.label}</span>
+                </button>
+              ))}
             </div>
           )}
 
-          {/* Step 3: Budget */}
-          {step === 2 && (
-            <div className="space-y-4">
-              <div className="rounded-xl bg-muted p-4">
-                <p className="text-sm leading-relaxed">{t("budget.createPrompt")}</p>
-                <div className="mt-4">
-                  <CreateMainBudget
-                    onSubmit={async (amount: string, localeSettings?: UserLocaleSettings) => {
-                      if (!session?.user?.id) {
-                        showToast(t("errors.authRequired"), "error");
-                        return;
-                      }
-                      try {
-                        const { data, error } = await supabase
-                          .from("main_budget")
-                          .upsert(
-                            {
-                              user_id: session.user.id,
-                              amount: Number(amount),
-                            },
-                            { onConflict: "user_id" },
-                          )
-                          .select();
-
-                        if (error) {
-                          showToast(t("errors.budgetSaveFailed"), "error");
-                          return;
-                        }
-
-                        // Persist locale settings too
-                        if (localeSettings) {
-                          try {
-                            await saveUserLocaleSettings({
-                              userId: session.user.id,
-                              country: localeSettings.country,
-                              currency: localeSettings.currency,
-                              locale: localeSettings.locale,
-                            });
-                          } catch {}
-                        }
-
-                        showToast(t("budget.saved"), "success");
-                        setStep((s) => clampStep(s + 1));
-                      } catch (e) {
-                        showToast(t("errors.unexpected"), "error");
-                      }
-                    }}
-                  />
-                </div>
+          {/* Step 1: Amount Input */}
+          {step === 0 && selectedCategory && !isTyping && (
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground">{currency}</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder={t("step1.amount_placeholder")}
+                  value={transactionAmount}
+                  onChange={(e) => setTransactionAmount(e.target.value)}
+                  className="flex-1 px-4 py-3 rounded-2xl border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary"
+                  autoFocus
+                />
               </div>
+              <Button
+                onClick={handleAmountSubmit}
+                disabled={!transactionAmount}
+                className="w-full"
+              >
+                {t("actions.next")}
+              </Button>
+            </div>
+          )}
+
+          {/* Step 2: Currency Selection */}
+          {step === 1 && !isTyping && (
+            <div className="flex flex-wrap gap-2 mt-4">
+              {CURRENCY_OPTIONS.map((curr) => (
+                <button
+                  key={curr.code}
+                  type="button"
+                  onClick={() => handleCurrencySelect(curr.code, curr.flag)}
+                  className={cn(
+                    "px-4 py-2 rounded-full border transition-colors",
+                    currency === curr.code
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card hover:bg-muted/50"
+                  )}
+                >
+                  <span className="mr-1">{curr.flag}</span>
+                  <span className="text-sm font-medium">{curr.code}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Step 3: Budget Style Selection */}
+          {step === 2 && !isTyping && (
+            <div className="space-y-3 mt-4">
+              {budgetStyles.map((style) => (
+                <button
+                  key={style.id}
+                  type="button"
+                  onClick={() => handleBudgetStyleSelect(style.id, style.label)}
+                  className={cn(
+                    "w-full flex items-center gap-4 p-4 rounded-2xl border transition-colors text-left",
+                    selectedBudgetStyle === style.id
+                      ? "border-primary bg-primary/10"
+                      : "border-border bg-card hover:bg-muted/50"
+                  )}
+                >
+                  <span className="text-3xl">{style.emoji}</span>
+                  <div className="flex-1">
+                    <div className="font-semibold">{style.label}</div>
+                    <div className="text-sm text-muted-foreground">{style.desc}</div>
+                  </div>
+                </button>
+              ))}
             </div>
           )}
 
           {/* Step 4: Finish */}
-          {step === 3 && (
-            <div className="space-y-4">
-              <div className="rounded-xl bg-muted p-4">
-                <p className="text-sm leading-relaxed">{t("finish.summary")}</p>
-                <div className="mt-3">
-                  <Button onClick={handleFinish}>{t("actions.finish")}</Button>
-                </div>
-              </div>
+          {step === 3 && !isTyping && (
+            <div className="mt-4">
+              <Button onClick={handleFinish} className="w-full" size="lg">
+                {t("step4.finish_button")}
+              </Button>
             </div>
           )}
 
-          {/* Transaction Modal */}
-          {isTxOpen && (
-            <TransactionModal
-              title={t("transaction.modalTitle")}
-              onClose={() => setTxOpen(false)}
-              onSubmit={(text, type) => {
-                if (type === "success") {
-                  showToast(t("transaction.added"), "success");
-                  setTxOpen(false);
-                  setStep(1);
-                } else {
-                  showToast(text, "error");
-                }
-              }}
-              initialBudgetId={undefined}
-              initialData={undefined}
-              allowTypeChange
-            />
-          )}
-        </div>
-      </div>
-
-      {/* Footer controls */}
-      <div className="flex items-center justify-between p-4 border-t border-border">
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleBack} disabled={step === 0}>
-            {t("actions.back")}
-          </Button>
-        </div>
-        <div className="flex items-center gap-2">
-          {step < 3 ? (
-            <Button onClick={handleNext}>{t("actions.next")}</Button>
-          ) : (
-            <Button onClick={handleFinish}>{t("actions.finish")}</Button>
-          )}
+          <div ref={chatEndRef} className="h-1" />
         </div>
       </div>
 
       {/* Toast */}
-      {toast ? (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-md">
+      {toast && (
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full max-w-md z-50">
           <ToastMessage text={toast.text} type={toast.type} />
         </div>
-      ) : null}
+      )}
     </div>
   );
 }

@@ -29,25 +29,34 @@
   "onboarding": {
     "title": "オンボーディング",
     "autodetected": "自動検出",
-    "intro": {
-      "welcome": "ようこそ！短いセットアップをご案内します。",
-      "firstTransactionPrompt": "まずは最初の取引を追加しましょう。"
+    "step1": {
+      "greeting": "こんにちは！Spendly Palです。セットアップしましょう。今日お金を使いましたか？",
+      "action_coffee": "コーヒー",
+      "action_food": "食事",
+      "action_taxi": "タクシー",
+      "action_groceries": "買い物",
+      "amount_placeholder": "いくらでしたか？"
+    },
+    "step2": {
+      "currency_question": "了解！どの通貨を使いますか？"
+    },
+    "step3": {
+      "budget_question": "最後に、月間目標は？スタイルを選んでください：",
+      "style_monk": "修行モード",
+      "style_monk_desc": "厳格な予算",
+      "style_balanced": "バランス",
+      "style_balanced_desc": "普通の支出",
+      "style_rich": "リッチ",
+      "style_rich_desc": "柔軟な制限"
+    },
+    "step4": {
+      "processing": "ワークスペースを設定中...",
+      "finish_button": "セットアップ完了"
     },
     "actions": {
-      "addFirstTransaction": "最初の取引を追加",
       "back": "戻る",
       "next": "次へ",
       "finish": "完了"
-    },
-    "currency": {
-      "choosePrompt": "国と通貨を選択して正しく表示します。"
-    },
-    "budget": {
-      "createPrompt": "メインの月次予算を設定してください。",
-      "saved": "予算が保存されました！"
-    },
-    "finish": {
-      "summary": "準備完了！ダッシュボードへ進めます。"
     },
     "transaction": {
       "modalTitle": "取引を追加",

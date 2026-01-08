@@ -255,15 +255,16 @@ export default function InstallPWA({
   const isBlockedInApp = isInAppBrowser && !isStandalone;
   const showInstallButton =
     !isStandalone && isInstallPromptAvailable && !isBlockedInApp;
-  const effectiveShowButton =
-    (forceShowButton && !isStandalone && !isBlockedInApp) || showInstallButton;
   const shouldAttachIosDrawer = isIOS && !isStandalone && !isBlockedInApp;
   const isAuthRoute =
     pathname?.includes("/auth") ||
     pathname?.includes("/forgot-password") ||
-    pathname?.includes("/reset-password");
+    pathname?.includes("/reset-password") ||
+    pathname?.includes("/onboarding");
   const canShowInstallUi = !!session && !isAuthRoute;
-  const canShowButtonUi = forceShowButton || canShowInstallUi;
+  const effectiveShowButton =
+    (forceShowButton && canShowInstallUi) || showInstallButton;
+  const canShowButtonUi = canShowInstallUi;
 
   // Check if FAB was dismissed
   useEffect(() => {

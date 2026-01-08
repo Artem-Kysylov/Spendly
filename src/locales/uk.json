@@ -70,25 +70,34 @@
   "onboarding": {
     "title": "Онбординг",
     "autodetected": "Автовизначено",
-    "intro": {
-      "welcome": "Вітаємо! Проведу вас короткою настройкою.",
-      "firstTransactionPrompt": "Додаймо першу транзакцію, щоб розпочати."
+    "step1": {
+      "greeting": "Привіт! Я Spendly Pal. Давай налаштуємо все. Ти витрачав гроші сьогодні?",
+      "action_coffee": "Кава",
+      "action_food": "Їжа",
+      "action_taxi": "Таксі",
+      "action_groceries": "Продукти",
+      "amount_placeholder": "Скільки це коштувало?"
+    },
+    "step2": {
+      "currency_question": "Зрозумів! Яку валюту ти використовуєш?"
+    },
+    "step3": {
+      "budget_question": "І останнє — яка твоя місячна ціль? Обери стиль:",
+      "style_monk": "Режим монаха",
+      "style_monk_desc": "Суворий бюджет",
+      "style_balanced": "Баланс",
+      "style_balanced_desc": "Звичайні витрати",
+      "style_rich": "Широка душа",
+      "style_rich_desc": "Гнучкі ліміти"
+    },
+    "step4": {
+      "processing": "Налаштовую твій простір...",
+      "finish_button": "Завершити налаштування"
     },
     "actions": {
-      "addFirstTransaction": "Додати першу транзакцію",
       "back": "Назад",
       "next": "Далі",
       "finish": "Готово"
-    },
-    "currency": {
-      "choosePrompt": "Виберіть країну та валюту для коректного форматування."
-    },
-    "budget": {
-      "createPrompt": "Встановіть основний місячний бюджет.",
-      "saved": "Бюджет успішно збережено!"
-    },
-    "finish": {
-      "summary": "Усе готово! Перейдіть до панелі керування."
     },
     "transaction": {
       "modalTitle": "Додати транзакцію",

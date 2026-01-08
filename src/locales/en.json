@@ -569,25 +569,34 @@
   "onboarding": {
     "title": "Onboarding",
     "autodetected": "Auto-detected",
-    "intro": {
-      "welcome": "Welcome! I’ll walk you through a quick setup.",
-      "firstTransactionPrompt": "Let’s add your first transaction to get started."
+    "step1": {
+      "greeting": "Hi! I'm Spendly Pal. Let's get set up. Did you spend money today?",
+      "action_coffee": "Coffee",
+      "action_food": "Food",
+      "action_taxi": "Taxi",
+      "action_groceries": "Groceries",
+      "amount_placeholder": "How much was it?"
+    },
+    "step2": {
+      "currency_question": "Got it! Which currency do you use?"
+    },
+    "step3": {
+      "budget_question": "Finally, what's your monthly goal? Pick a style:",
+      "style_monk": "Monk Mode",
+      "style_monk_desc": "Strict budget",
+      "style_balanced": "Balanced",
+      "style_balanced_desc": "Normal spending",
+      "style_rich": "High Roller",
+      "style_rich_desc": "Flexible limits"
+    },
+    "step4": {
+      "processing": "Setting up your workspace...",
+      "finish_button": "Finish Setup"
     },
     "actions": {
-      "addFirstTransaction": "Add first transaction",
       "back": "Back",
       "next": "Next",
       "finish": "Finish"
-    },
-    "currency": {
-      "choosePrompt": "Choose your country and currency for correct formatting."
-    },
-    "budget": {
-      "createPrompt": "Set your main monthly budget.",
-      "saved": "Budget saved successfully!"
-    },
-    "finish": {
-      "summary": "All set! You can now explore your dashboard."
     },
     "transaction": {
       "modalTitle": "Add Transaction",

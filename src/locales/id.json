@@ -2,25 +2,34 @@
   "onboarding": {
     "title": "Onboarding",
     "autodetected": "Terdeteksi otomatis",
-    "intro": {
-      "welcome": "Selamat datang! Saya akan memandu setup singkat.",
-      "firstTransactionPrompt": "Mari tambahkan transaksi pertama untuk memulai."
+    "step1": {
+      "greeting": "Hai! Saya Spendly Pal. Mari setup. Apakah kamu mengeluarkan uang hari ini?",
+      "action_coffee": "Kopi",
+      "action_food": "Makanan",
+      "action_taxi": "Taksi",
+      "action_groceries": "Belanja",
+      "amount_placeholder": "Berapa harganya?"
+    },
+    "step2": {
+      "currency_question": "Oke! Mata uang apa yang kamu gunakan?"
+    },
+    "step3": {
+      "budget_question": "Terakhir, apa target bulananmu? Pilih gaya:",
+      "style_monk": "Mode Biksu",
+      "style_monk_desc": "Anggaran ketat",
+      "style_balanced": "Seimbang",
+      "style_balanced_desc": "Pengeluaran normal",
+      "style_rich": "Sultan",
+      "style_rich_desc": "Batas fleksibel"
+    },
+    "step4": {
+      "processing": "Menyiapkan workspace-mu...",
+      "finish_button": "Selesaikan Setup"
     },
     "actions": {
-      "addFirstTransaction": "Tambah transaksi pertama",
       "back": "Kembali",
       "next": "Berikutnya",
       "finish": "Selesai"
-    },
-    "currency": {
-      "choosePrompt": "Pilih negara dan mata uang untuk format yang benar."
-    },
-    "budget": {
-      "createPrompt": "Tetapkan anggaran bulanan utama Anda.",
-      "saved": "Anggaran berhasil disimpan!"
-    },
-    "finish": {
-      "summary": "Semua siap! Anda dapat membuka dasbor."
     },
     "transaction": {
       "modalTitle": "Tambah Transaksi",
