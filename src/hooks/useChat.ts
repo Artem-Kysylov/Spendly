@@ -11,7 +11,7 @@ import {
   localizeEmptyGeneric,
   periodLabel as canonicalPeriodLabel,
 } from "@/prompts/spendlyPal/canonicalPhrases";
-import { trackEvent } from "@/lib/telemetry";
+// import { trackEvent } from "@/lib/telemetry";
 import { supabase } from "@/lib/supabaseClient";
 import type { AIResponse, AssistantTone, Period } from "@/types/ai";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -226,7 +226,7 @@ export const useChat = (): UseChatReturn => {
         console.warn("Failed to insert ai_chat_message", error);
         persistLocalMessage(role, content, sid);
       } else {
-        trackEvent("ai_message_sent", { role, sessionId: sid });
+        // trackEvent("ai_message_sent", { role, sessionId: sid });
         window.dispatchEvent(
           new CustomEvent("ai:sessionUpdated", { detail: { id: sid } }),
         );
@@ -341,7 +341,7 @@ export const useChat = (): UseChatReturn => {
                 .from("ai_chat_sessions")
                 .update({ title: finalTitle })
                 .eq("id", sid);
-              trackEvent("ai_title_generated", { sessionId: sid });
+              // trackEvent("ai_title_generated", { sessionId: sid });
               window.dispatchEvent(
                 new CustomEvent("ai:sessionUpdated", { detail: { id: sid } }),
               );
@@ -376,7 +376,7 @@ export const useChat = (): UseChatReturn => {
         );
       } catch { }
       void generateAutoTitle(firstMessage, sid);
-      trackEvent("ai_session_created", { sessionId: sid });
+      // trackEvent("ai_session_created", { sessionId: sid });
       return sid;
     },
     [session?.user?.id, generateAutoTitle, deriveTitle, tAssistant],
@@ -401,7 +401,7 @@ export const useChat = (): UseChatReturn => {
       skipNextLoadRef.current = true;
       setCurrentSessionId(sessionId);
       void generateAutoTitle(firstMessage, sessionId);
-      trackEvent("ai_session_created", { sessionId });
+      // trackEvent("ai_session_created", { sessionId });
       window.dispatchEvent(
         new CustomEvent("ai:sessionCreated", { detail: { id: sessionId } }),
       );
@@ -419,7 +419,7 @@ export const useChat = (): UseChatReturn => {
 
   const sendMessage = useCallback(
     async (content: string) => {
-      trackEvent("ai_request_used");
+      // trackEvent("ai_request_used");
 
       const userMessage: ChatMessage = {
         id: Date.now().toString(),
@@ -497,7 +497,7 @@ export const useChat = (): UseChatReturn => {
         }
 
         if (response.status === 429) {
-          trackEvent("ai_limit_hit");
+          // trackEvent("ai_limit_hit");
           const retryAfter = Number(response.headers.get("Retry-After") ?? "0");
           const cooldownMs =
             Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 3000;
@@ -1005,11 +1005,11 @@ export const useChat = (): UseChatReturn => {
 
         // 4) Обновляем текущую сессию и UI
         setCurrentSessionId(newSid);
-        trackEvent("ai_session_created", {
-          from: ls.id,
-          to: newSid,
-          synced: true,
-        });
+        // trackEvent("ai_session_created", {
+        //   from: ls.id,
+        //   to: newSid,
+        //   synced: true,
+        // });
         window.dispatchEvent(
           new CustomEvent("ai:sessionUpdated", { detail: { id: newSid } }),
         );
@@ -1051,7 +1051,7 @@ export const useChat = (): UseChatReturn => {
         window.dispatchEvent(
           new CustomEvent("ai:sessionUpdated", { detail: { id: sid } }),
         );
-        trackEvent("ai_session_created", { sessionId: sid, deleted: true });
+        // trackEvent("ai_session_created", { sessionId: sid, deleted: true });
       } catch (e) {
         console.warn("Failed to delete session", e);
       }

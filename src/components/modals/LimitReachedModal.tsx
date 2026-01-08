@@ -20,7 +20,7 @@ import {
 import useDeviceType from "@/hooks/useDeviceType";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { Rocket, X } from "lucide-react";
-import { trackEvent } from "@/lib/telemetry";
+// import { trackEvent } from "@/lib/telemetry";
 
 type LimitReachedModalProps = {
     isOpen: boolean;
@@ -42,7 +42,7 @@ export default function LimitReachedModal({
     const { mobileSheetsEnabled } = useFeatureFlags();
 
     const handleUpgrade = () => {
-        trackEvent("limit_reached_upgrade_clicked", { limitType });
+        // trackEvent("limit_reached_upgrade_clicked", { limitType });
         router.push("/paywall");
     };
 

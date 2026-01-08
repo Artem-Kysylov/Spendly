@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
 import { useState, useEffect } from "react";
 import { useSubscription } from "@/hooks/useSubscription";
-import { trackEvent } from "@/lib/telemetry";
+// import { trackEvent } from "@/lib/telemetry";
 
 export default function PeriodicUpgradeBanner() {
   const t = useTranslations("layout");
@@ -40,7 +40,7 @@ export default function PeriodicUpgradeBanner() {
   if (!visible || subscriptionPlan === "pro") return null;
 
   const handleUpgradeClick = () => {
-    trackEvent("upgrade_cta_clicked", { from: "periodic_banner" });
+    // trackEvent("upgrade_cta_clicked", { from: "periodic_banner" });
   };
 
   const handleDismiss = () => {

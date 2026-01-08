@@ -55,9 +55,9 @@ export async function POST(req: NextRequest) {
             custom: {
               user_id: user.id,
             },
+            redirect_url: redirectUrl,
           },
           preview,
-          redirect_url: redirectUrl,
         },
         relationships: {
           store: {

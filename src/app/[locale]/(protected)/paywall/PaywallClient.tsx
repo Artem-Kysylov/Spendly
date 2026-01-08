@@ -12,7 +12,7 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion";
 import { useSubscription } from "@/hooks/useSubscription";
-import { trackEvent } from "@/lib/telemetry";
+// import { trackEvent } from "@/lib/telemetry";
 import type { ToastMessageProps } from "@/types/types";
 import ToastMessage from "@/components/ui-elements/ToastMessage";
 import { UserAuth } from "@/context/AuthContext";
@@ -51,7 +51,7 @@ export default function PaywallClient() {
     }, [requestedPlan]);
 
     const handleUpgradeClick = async (plan: Plan) => {
-        trackEvent("paywall_cta_clicked", { plan, from: "paywall" });
+        // trackEvent("paywall_cta_clicked", { plan, from: "paywall" });
 
         try {
             const token = session?.access_token;

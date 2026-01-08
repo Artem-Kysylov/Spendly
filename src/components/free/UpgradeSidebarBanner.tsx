@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
 import { useSubscription } from "@/hooks/useSubscription";
-import { trackEvent } from "@/lib/telemetry";
+// import { trackEvent } from "@/lib/telemetry";
 
 export default function UpgradeSidebarBanner() {
   const t = useTranslations("layout");
@@ -11,7 +11,7 @@ export default function UpgradeSidebarBanner() {
   if (subscriptionPlan === "pro") return null;
 
   const handleUpgradeClick = () => {
-    trackEvent("upgrade_cta_clicked", { from: "sidebar_banner" });
+    // trackEvent("upgrade_cta_clicked", { from: "sidebar_banner" });
   };
 
   return (
