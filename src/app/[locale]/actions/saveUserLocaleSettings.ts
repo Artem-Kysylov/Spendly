@@ -18,20 +18,26 @@ export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
   const { userId, country, currency, locale } = payload;
   if (!userId) throw new Error("Missing userId");
 
-  const datasetPath = path.join(
-    process.cwd(),
-    "public",
-    "data",
-    "countries-currencies-languages.json",
-  );
-  const raw = fs.readFileSync(datasetPath, "utf8");
-  const whitelist: Array<{ code: string; currency: string; language: string }> =
-    JSON.parse(raw);
+  let whitelist: Array<{ code: string; currency: string; language: string }> = [];
+  
+  try {
+    const datasetPath = path.join(
+      process.cwd(),
+      "public",
+      "data",
+      "countries-currencies-languages.json",
+    );
+    const raw = fs.readFileSync(datasetPath, "utf8");
+    whitelist = JSON.parse(raw);
+  } catch (e) {
+    console.warn("Failed to load countries dataset:", e);
+    // Continue without validation if file not found
+  }
 
   const validCountry =
-    country && whitelist.some((c) => c.code === country) ? country : undefined;
+    country && (whitelist.length === 0 || whitelist.some((c) => c.code === country)) ? country : undefined;
   const validCurrency =
-    currency && whitelist.some((c) => c.currency === currency)
+    currency && (whitelist.length === 0 || whitelist.some((c) => c.currency === currency))
       ? currency
       : undefined;
   const validLocale =

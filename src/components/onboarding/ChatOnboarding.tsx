@@ -91,6 +91,22 @@ export default function ChatOnboarding() {
     
     localeInitRef.current = true;
     let active = true;
+    
+    // Check if user manually selected a language before
+    const manuallySelected = typeof window !== 'undefined' 
+      ? localStorage.getItem('spendly_manual_locale')
+      : null;
+    
+    if (manuallySelected) {
+      // User manually selected language - use it and don't auto-detect
+      setLanguage(manuallySelected as Language);
+      setAutodetected(false);
+      const suggestedCurrency = LANGUAGE_CURRENCY_MAP[manuallySelected as Language] || "USD";
+      setCurrency(suggestedCurrency);
+      return;
+    }
+    
+    // No manual selection - proceed with auto-detection
     detectInitialLocale().then((s) => {
       if (!active) return;
       setLanguage(s.locale);
@@ -151,6 +167,10 @@ export default function ChatOnboarding() {
     (lang: Language) => {
       setLanguage(lang);
       setAutodetected(false); // Mark as manually selected
+      // Save manual selection to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('spendly_manual_locale', lang);
+      }
       // Auto-select currency based on language
       const suggestedCurrency = LANGUAGE_CURRENCY_MAP[lang] || "USD";
       setCurrency(suggestedCurrency);
