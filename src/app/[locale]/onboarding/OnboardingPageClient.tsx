@@ -16,7 +16,15 @@ export default function OnboardingPageClient() {
   }, [isReady, session, router]);
 
   return (
-    <div className="light min-h-screen bg-white">
+    <div 
+      className="min-h-screen"
+      data-theme="light"
+      style={{
+        colorScheme: 'light',
+        backgroundColor: '#ffffff',
+        color: '#000000'
+      }}
+    >
       <ChatOnboarding />
     </div>
   );

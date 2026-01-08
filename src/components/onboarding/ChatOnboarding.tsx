@@ -154,6 +154,7 @@ export default function ChatOnboarding() {
   const handleLanguageChange = useCallback(
     (lang: Language) => {
       setLanguage(lang);
+      setAutodetected(false); // Mark as manually selected
       // Auto-select currency based on language
       const suggestedCurrency = LANGUAGE_CURRENCY_MAP[lang] || "USD";
       setCurrency(suggestedCurrency);
@@ -285,12 +286,12 @@ export default function ChatOnboarding() {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col relative">
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col relative">
       {/* Floating Language Switcher */}
-      <div className="fixed top-4 right-4 z-50 flex flex-col items-end">
+      <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-1">
         <LanguageSelect value={language} onChange={handleLanguageChange} />
         {autodetected && (
-          <span className="block text-xs text-muted-foreground mt-1">
+          <span className="block text-xs text-gray-500 bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded">
             {t("autodetected")}
           </span>
         )}
@@ -312,8 +313,8 @@ export default function ChatOnboarding() {
                 className={cn(
                   "rounded-2xl px-4 py-3 shadow-sm",
                   message.role === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted/50"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-900"
                 )}
               >
                 <p className="text-sm leading-relaxed">{message.content}</p>
@@ -323,7 +324,7 @@ export default function ChatOnboarding() {
 
           {/* Typing Indicator */}
           {isTyping && (
-            <div className="self-start flex items-center gap-2 p-4 bg-muted/50 rounded-2xl w-16">
+            <div className="self-start flex items-center gap-2 p-4 bg-gray-100 rounded-2xl w-16">
               <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]" />
               <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]" />
               <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
