@@ -85,11 +85,19 @@ export default function ChatOnboarding() {
   }, [messages, isTyping]);
 
   // Detect locale on mount and sync with URL
+  const localeInitRef = useRef(false);
   useEffect(() => {
+    if (localeInitRef.current) {
+      // Already initialized, just sync state with current URL locale
+      setLanguage(currentLocale);
+      return;
+    }
+    
+    localeInitRef.current = true;
     let active = true;
     detectInitialLocale().then((s) => {
       if (!active) return;
-      // If detected locale differs from URL, redirect
+      // Only redirect on first mount if detected locale differs from URL
       if (s.locale !== currentLocale && s.autodetected) {
         router.replace("/onboarding", { locale: s.locale });
       }

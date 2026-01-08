@@ -16,7 +16,7 @@ export default function OnboardingPageClient() {
   }, [isReady, session, router]);
 
   return (
-    <div className="min-h-screen">
+    <div className="light min-h-screen bg-white">
       <ChatOnboarding />
     </div>
   );

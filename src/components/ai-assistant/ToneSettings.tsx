@@ -91,7 +91,7 @@ const ToneSettings = () => {
 
       {isFree && (
         <div className="rounded-md border border-blue-200 dark:border-blue-900 bg-blue-50 dark:bg-blue-950 p-3 text-sm text-blue-700 dark:text-blue-200">
-          {tAI("tone.proOnlyHint")}{" "}
+          {tAI("settings.proOnlyHint")}{" "}
           <Link href={{ pathname: "/payment" }} className="underline">
             {tCTA("upgradeToPro")}
           </Link>
