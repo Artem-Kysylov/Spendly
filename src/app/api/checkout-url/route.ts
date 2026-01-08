@@ -42,11 +42,9 @@ export async function POST(req: NextRequest) {
     const successUrl = `${origin}/${redirectLocale}/dashboard?success=true`;
     const dashboardUrl = `${origin}/${redirectLocale}/dashboard`;
 
-    const previewEnv = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_PREVIEW_MODE;
-    const preview =
-      typeof previewEnv === "undefined"
-        ? true
-        : previewEnv === "true" || previewEnv === "1";
+    // Only use preview mode in development, not in production
+    const isDev = process.env.NODE_ENV === "development";
+    const preview = isDev;
 
     const payload = {
       data: {
