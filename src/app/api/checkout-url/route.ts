@@ -13,12 +13,12 @@ export async function POST(req: NextRequest) {
     const { user, locale } = await getAuthenticatedClient(req);
 
     const apiKey = process.env.LEMON_SQUEEZY_API_KEY;
-    const storeId = Number(process.env.LEMON_SQUEEZY_STORE_ID);
+    const storeId = parseInt(process.env.LEMON_SQUEEZY_STORE_ID || "0", 10);
 
-    const fallbackVariantId = Number(process.env.LEMON_SQUEEZY_PRO_VARIANT_ID);
-    const monthlyVariantId = Number(process.env.LEMON_SQUEEZY_MONTHLY_VARIANT_ID);
-    const yearlyVariantId = Number(process.env.LEMON_SQUEEZY_YEARLY_VARIANT_ID);
-    const lifetimeVariantId = Number(process.env.LEMON_SQUEEZY_LIFETIME_VARIANT_ID);
+    const fallbackVariantId = parseInt(process.env.LEMON_SQUEEZY_PRO_VARIANT_ID || "0", 10);
+    const monthlyVariantId = parseInt(process.env.LEMON_SQUEEZY_MONTHLY_VARIANT_ID || "0", 10);
+    const yearlyVariantId = parseInt(process.env.LEMON_SQUEEZY_YEARLY_VARIANT_ID || "0", 10);
+    const lifetimeVariantId = parseInt(process.env.LEMON_SQUEEZY_LIFETIME_VARIANT_ID || "0", 10);
 
     const resolvedVariantId =
       plan === "monthly" && Number.isFinite(monthlyVariantId) && monthlyVariantId > 0
@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
     // Строим redirect на страницу успеха с учётом origin и locale
     const origin = new URL(req.url).origin;
     const redirectLocale = localeFromBody || locale;
-    const redirectUrl = `${origin}/${redirectLocale}/checkout/success`;
+    const successUrl = `${origin}/${redirectLocale}/dashboard?success=true`;
+    const dashboardUrl = `${origin}/${redirectLocale}/dashboard`;
 
     const previewEnv = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_PREVIEW_MODE;
     const preview =
@@ -53,9 +54,13 @@ export async function POST(req: NextRequest) {
         attributes: {
           checkout_data: {
             custom: {
-              user_id: user.id,
+              user_id: user.id.toString(),
             },
-            redirect_url: redirectUrl,
+          },
+          product_options: {
+            redirect_url: successUrl,
+            receipt_button_text: "Return to Spendly",
+            receipt_link_url: dashboardUrl,
           },
           preview,
         },
