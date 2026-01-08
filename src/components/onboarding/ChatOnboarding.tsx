@@ -84,31 +84,27 @@ export default function ChatOnboarding() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // Detect locale on mount and sync with URL
+  // Detect locale on mount ONLY - no auto-redirect on language change
   const localeInitRef = useRef(false);
   useEffect(() => {
-    if (localeInitRef.current) {
-      // Already initialized, just sync state with current URL locale
-      setLanguage(currentLocale);
-      return;
-    }
+    if (localeInitRef.current) return; // Already initialized, do nothing
     
     localeInitRef.current = true;
     let active = true;
     detectInitialLocale().then((s) => {
       if (!active) return;
-      // Only redirect on first mount if detected locale differs from URL
+      setLanguage(s.locale);
+      setCurrency(s.currency);
+      setAutodetected(!!s.autodetected);
+      // Only redirect if detected locale differs from URL on first mount
       if (s.locale !== currentLocale && s.autodetected) {
         router.replace("/onboarding", { locale: s.locale });
       }
-      setLanguage(currentLocale);
-      setCurrency(s.currency);
-      setAutodetected(!!s.autodetected);
     });
     return () => {
       active = false;
     };
-  }, [currentLocale, router]);
+  }, []); // Empty deps - run only once on mount
 
   // Add initial greeting when component mounts
   const greetingRef = useRef(false);
@@ -339,7 +335,7 @@ export default function ChatOnboarding() {
                   key={cat.id}
                   type="button"
                   onClick={() => handleCategorySelect(cat.id, cat.label)}
-                  className="flex items-center gap-3 p-4 rounded-2xl border border-border bg-card hover:bg-muted/50 transition-colors text-left"
+                  className="flex items-center gap-3 p-4 rounded-2xl border border-gray-300 bg-white hover:bg-gray-50 transition-colors text-left text-gray-900"
                 >
                   <span className="text-2xl">{cat.emoji}</span>
                   <span className="text-sm font-medium">{cat.label}</span>
@@ -352,14 +348,14 @@ export default function ChatOnboarding() {
           {step === 0 && selectedCategory && !isTyping && (
             <div className="mt-4 space-y-3">
               <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">{currency}</span>
+                <span className="text-gray-600 font-medium">{currency}</span>
                 <input
                   type="number"
                   inputMode="decimal"
                   placeholder={t("step1.amount_placeholder")}
                   value={transactionAmount}
                   onChange={(e) => setTransactionAmount(e.target.value)}
-                  className="flex-1 px-4 py-3 rounded-2xl border border-border bg-card focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="flex-1 px-4 py-3 rounded-2xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   autoFocus
                 />
               </div>
@@ -384,8 +380,8 @@ export default function ChatOnboarding() {
                   className={cn(
                     "px-4 py-2 rounded-full border transition-colors",
                     currency === curr.code
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border bg-card hover:bg-muted/50"
+                      ? "border-blue-500 bg-blue-50 text-blue-700"
+                      : "border-gray-300 bg-white hover:bg-gray-50 text-gray-900"
                   )}
                 >
                   <span className="mr-1">{curr.flag}</span>
@@ -406,14 +402,14 @@ export default function ChatOnboarding() {
                   className={cn(
                     "w-full flex items-center gap-4 p-4 rounded-2xl border transition-colors text-left",
                     selectedBudgetStyle === style.id
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-card hover:bg-muted/50"
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-300 bg-white hover:bg-gray-50"
                   )}
                 >
                   <span className="text-3xl">{style.emoji}</span>
                   <div className="flex-1">
-                    <div className="font-semibold">{style.label}</div>
-                    <div className="text-sm text-muted-foreground">{style.desc}</div>
+                    <div className="font-semibold text-gray-900">{style.label}</div>
+                    <div className="text-sm text-gray-600">{style.desc}</div>
                   </div>
                 </button>
               ))}
