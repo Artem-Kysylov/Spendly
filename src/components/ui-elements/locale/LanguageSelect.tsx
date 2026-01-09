@@ -35,11 +35,11 @@ export default function LanguageSelect({
   return (
     <Select value={value} onValueChange={(v) => onChange?.(v as Language)}>
       <SelectTrigger
-        className={`bg-background text-foreground border-input ${className ?? ""}`}
+        className={`${className ?? ""}`}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="bg-popover text-popover-foreground border-border">
+      <SelectContent>
         {LANGUAGES.map((l) => (
           <SelectItem key={l.code} value={l.code}>
             {l.emoji} {l.label}

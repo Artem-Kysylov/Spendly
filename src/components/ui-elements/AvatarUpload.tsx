@@ -45,7 +45,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   } = useAvatarProcessing();
 
   const tErrors = useTranslations("errors");
-  const tProfile = useTranslations("profile");
+  const tProfile = useTranslations("userSettings.profile");
 
   // Размеры в зависимости от пропа size
   const sizeClasses = {
