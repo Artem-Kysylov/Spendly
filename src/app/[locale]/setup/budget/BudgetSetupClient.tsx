@@ -48,6 +48,18 @@ export default function BudgetSetupClient() {
             currency: settings.currency,
             locale: settings.locale,
           });
+
+          if (typeof window !== "undefined" && settings.currency) {
+            localStorage.setItem("user-currency", settings.currency);
+          }
+
+          if (settings.currency) {
+            try {
+              await supabase.auth.updateUser({
+                data: { currency_preference: settings.currency },
+              });
+            } catch {}
+          }
         }
       } catch (e) {
         // If locale save fails (e.g., missing users table), continue with budget save

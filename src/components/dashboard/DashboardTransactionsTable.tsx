@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Trash, Pencil } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
@@ -25,12 +24,14 @@ interface DashboardTransactionsTableProps {
   transactions: Transaction[];
   onEdit: (transaction: Transaction) => void;
   onDelete: (id: string) => void;
+  currency?: string;
 }
 
 export default function DashboardTransactionsTable({
   transactions,
   onEdit,
   onDelete,
+  currency,
 }: DashboardTransactionsTableProps) {
   const router = useRouter();
   const tDashboard = useTranslations("dashboard");
@@ -74,6 +75,7 @@ export default function DashboardTransactionsTable({
             onEdit={onEdit}
             onDelete={onDelete}
             showDate={true}
+            currency={currency}
           />
         ))}
       </div>
@@ -128,7 +130,7 @@ export default function DashboardTransactionsTable({
                   )}
                 </TableCell>
                 <TableCell className="text-foreground font-semibold whitespace-nowrap">
-                  {formatCurrency(transaction.amount)}
+                  {formatCurrency(transaction.amount, currency)}
                 </TableCell>
                 <TableCell>
                   <span

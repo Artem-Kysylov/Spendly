@@ -6,7 +6,7 @@ import { UserAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import { useRouter } from "@/i18n/routing";
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import EmptyState from "@/components/chunks/EmptyState";
 import CompactKPICard from "@/components/dashboard/CompactKPICard";
@@ -34,9 +34,16 @@ import {
 function DashboardClient() {
   const { session } = UserAuth();
   const router = useRouter();
+  const locale = useLocale();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [budget, setBudget] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [currency, setCurrency] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("user-currency") || "USD";
+    }
+    return "USD";
+  });
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(
     null,
   );
@@ -59,10 +66,66 @@ function DashboardClient() {
 
   const { isLoading: isBudgetChecking } = useCheckBudget(session?.user?.id);
 
+  const prettifyName = (raw: string) => {
+    const cleaned = raw.trim();
+    if (!cleaned) return "User";
+    const parts = cleaned.split(/[._-]+/g).filter(Boolean);
+    if (parts.length <= 1) return cleaned;
+    return parts
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join(" ");
+  };
+
+  const guessCurrencyFromLocale = (l: string) => {
+    const base = l.split("-")[0];
+    const map: Record<string, string> = {
+      uk: "UAH",
+      ru: "RUB",
+      ja: "JPY",
+      ko: "KRW",
+      id: "IDR",
+      hi: "INR",
+    };
+    return map[base] || "USD";
+  };
+
   const fetchTransactions = async () => {
     if (!session?.user?.id) return;
 
     setIsLoading(true);
+    // Resolve currency deterministically
+    try {
+      const metaCurrency =
+        (session.user.user_metadata as any)?.currency_preference as string | undefined;
+      const localCurrency =
+        typeof window !== "undefined" ? localStorage.getItem("user-currency") : null;
+      let resolved = metaCurrency || localCurrency || guessCurrencyFromLocale(locale) || "USD";
+
+      // Try to read currency from public.users (if exists) as the most authoritative
+      try {
+        const { data: userSettings } = await supabase
+          .from("users")
+          .select("currency")
+          .eq("id", session.user.id)
+          .single();
+        if (userSettings?.currency) {
+          resolved = userSettings.currency;
+        }
+      } catch {}
+
+      setCurrency(resolved);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("user-currency", resolved);
+      }
+      if (metaCurrency !== resolved) {
+        try {
+          await supabase.auth.updateUser({
+            data: { currency_preference: resolved },
+          });
+        } catch {}
+      }
+    } catch {}
+
     const { data, error } = await supabase
       .from("transactions")
       .select(`
@@ -212,10 +275,10 @@ function DashboardClient() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
             >
               {tGreeting(greetingKey)},{" "}
-              {session?.user?.user_metadata?.full_name || 
-               session?.user?.user_metadata?.name || 
-               session?.user?.email?.split('@')[0] || 
-               'User'} 👋
+              {session?.user?.user_metadata?.full_name ||
+                session?.user?.user_metadata?.name ||
+                prettifyName(session?.user?.email?.split("@")[0] || "") ||
+                "User"} 👋
             </motion.h1>
           </motion.div>
 
@@ -231,6 +294,7 @@ function DashboardClient() {
               totalExpenses={totalExpenses}
               expensesTrend={expensesTrend}
               onBudgetClick={handleIconClick}
+              currency={currency}
             />
 
             <AiInsightTeaser
@@ -270,6 +334,7 @@ function DashboardClient() {
                   transactions={transactions}
                   onEdit={(tx) => openEditModal(tx)}
                   onDelete={handleDeleteTransaction}
+                  currency={currency}
                 />
               </motion.div>
             )}

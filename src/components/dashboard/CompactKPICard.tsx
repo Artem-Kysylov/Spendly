@@ -10,6 +10,7 @@ interface CompactKPICardProps {
   totalExpenses: number;
   expensesTrend: number;
   onBudgetClick: () => void;
+  currency?: string;
 }
 
 export default function CompactKPICard({
@@ -17,6 +18,7 @@ export default function CompactKPICard({
   totalExpenses,
   expensesTrend,
   onBudgetClick,
+  currency,
 }: CompactKPICardProps) {
   const tDashboard = useTranslations("dashboard");
   const tBudgets = useTranslations("budgets");
@@ -51,7 +53,7 @@ export default function CompactKPICard({
           </h3>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-xl md:text-2xl font-bold text-foreground">
-              {formatCurrency(budget)}
+              {formatCurrency(budget, currency)}
             </span>
           </div>
         </div>
@@ -61,15 +63,16 @@ export default function CompactKPICard({
             spentAmount={totalExpenses}
             totalAmount={budget}
             type="expense"
+            currency={currency}
             className="h-2"
             showLabels={false}
           />
           <div className="flex justify-between text-[11px] md:text-xs text-muted-foreground">
             <span>
-              {formatCurrency(totalExpenses)} {tBudgets("labels.spent")}
+              {formatCurrency(totalExpenses, currency)} {tBudgets("labels.spent")}
             </span>
             <span>
-              {formatCurrency(remainingBudget)} {tBudgets("labels.left")}
+              {formatCurrency(remainingBudget, currency)} {tBudgets("labels.left")}
             </span>
           </div>
         </div>
@@ -83,7 +86,7 @@ export default function CompactKPICard({
           </h3>
           <div className="mt-2">
             <span className="text-xl md:text-2xl font-bold text-foreground">
-              {formatCurrency(totalExpenses)}
+              {formatCurrency(totalExpenses, currency)}
             </span>
           </div>
         </div>
@@ -102,12 +105,12 @@ export default function CompactKPICard({
             <span
               className={`text-xl md:text-2xl font-bold ${safeToSpend < 0 ? "text-red-500" : "text-foreground"}`}
             >
-              {formatCurrency(safeToSpend)}
+              {formatCurrency(safeToSpend, currency)}
             </span>
           </div>
         </div>
         <div className="text-[11px] md:text-xs text-muted-foreground">
-          {daysLeft} days left in month
+          {tDashboard("counters.daysLeftInMonth", { days: daysLeft })}
         </div>
       </div>
     </div>

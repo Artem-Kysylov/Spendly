@@ -5,12 +5,14 @@ import { Pencil, Trash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Transaction } from "@/types/types";
 import { useLocale } from "next-intl";
+import { formatCurrency } from "@/lib/chartUtils";
 
 type Props = {
   transaction: Transaction;
   onEdit: (t: Transaction) => void;
   onDelete: (id: string) => void;
   showDate?: boolean;
+  currency?: string;
 };
 
 export default function MobileTransactionCard({
@@ -18,6 +20,7 @@ export default function MobileTransactionCard({
   onEdit,
   onDelete,
   showDate = false,
+  currency,
 }: Props) {
   const amountClass =
     transaction.type === "expense" ? "text-error" : "text-success";
@@ -54,7 +57,7 @@ export default function MobileTransactionCard({
         </div>
         <div className="flex items-center gap-2">
           <div className={`font-bold ${amountClass}`}>
-            ${transaction.amount}
+            {formatCurrency(transaction.amount, currency)}
           </div>
           <Button
             size="icon"

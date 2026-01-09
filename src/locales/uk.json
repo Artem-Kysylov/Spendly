@@ -808,6 +808,7 @@
       "remaining": "Залишилось",
       "usedPercent": "використано",
       "overBudget": "Перевищено",
+      "daysLeftInMonth": "Залишилось {days} днів у місяці",
       "status": {
         "exceeded": "Перевищено",
         "warning": "Попередження",

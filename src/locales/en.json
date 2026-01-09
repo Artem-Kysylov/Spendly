@@ -373,6 +373,7 @@
       "remaining": "remaining",
       "usedPercent": "used",
       "overBudget": "Over budget",
+      "daysLeftInMonth": "{days} days left in month",
       "status": {
         "exceeded": "Exceeded",
         "warning": "Warning",

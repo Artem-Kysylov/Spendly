@@ -242,6 +242,15 @@ export default function ChatOnboarding() {
         localStorage.setItem('user-currency', currency);
       }
 
+      // Persist currency into auth user_metadata for reliable usage across devices/SSR
+      try {
+        await supabase.auth.updateUser({
+          data: { currency_preference: currency },
+        });
+      } catch (e) {
+        console.warn("Failed to persist currency_preference", e);
+      }
+
       // Calculate budget amount
       const budgetAmount = BUDGET_AMOUNTS[currency]?.[style] || BUDGET_AMOUNTS.USD[style];
 

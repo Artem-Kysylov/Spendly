@@ -804,12 +804,14 @@
       "editTitle": "Редактировать основной бюджет"
     },
     "counters": {
-      "totalBudget": "Всего бюджет",
-      "totalExpenses": "Всего расходы",
-      "totalIncome": "Всего доходы",
-      "remaining": "Осталось",
+      "totalBudget": "Общий бюджет",
+      "totalExpenses": "Общие траты",
+      "dailySafeToSpend": "Безопасно тратить в день",
+      "totalIncome": "Общий доход",
+      "remaining": "осталось",
       "usedPercent": "использовано",
       "overBudget": "Превышен",
+      "daysLeftInMonth": "Осталось {days} дней в месяце",
       "status": {
         "exceeded": "Превышен",
         "warning": "Предупреждение",
