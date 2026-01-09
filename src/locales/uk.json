@@ -787,6 +787,7 @@
     "counters": {
       "totalBudget": "Загальний бюджет",
       "totalExpenses": "Загальні витрати",
+      "dailySafeToSpend": "Безпечно витрачати щодня",
       "totalIncome": "Загальний дохід",
       "remaining": "Залишилось",
       "usedPercent": "використано",

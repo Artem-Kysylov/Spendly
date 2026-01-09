@@ -18,19 +18,37 @@ export const defaultChartColors: ChartColorPalette = {
 // Форматирование валюты
 export const formatCurrency = (
   amount: number,
-  currency: string = "USD",
+  currency?: string,
   abbreviated: boolean = false,
 ): string => {
+  // Get currency from localStorage or default to USD
+  const userCurrency = currency || (typeof window !== 'undefined' ? localStorage.getItem('user-currency') : null) || 'USD';
+  
   if (abbreviated && amount >= 1000) {
     if (amount >= 1000000) {
-      return `${(amount / 1000000).toFixed(1)}M ${currency}`;
+      return `${(amount / 1000000).toFixed(1)}M ${userCurrency}`;
     }
-    return `${(amount / 1000).toFixed(1)}K ${currency}`;
+    return `${(amount / 1000).toFixed(1)}K ${userCurrency}`;
   }
 
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currency,
+  // Map locale based on currency for better formatting
+  const localeMap: Record<string, string> = {
+    USD: 'en-US',
+    EUR: 'de-DE',
+    GBP: 'en-GB',
+    UAH: 'uk-UA',
+    RUB: 'ru-RU',
+    JPY: 'ja-JP',
+    KRW: 'ko-KR',
+    INR: 'hi-IN',
+    IDR: 'id-ID',
+  };
+  
+  const locale = localeMap[userCurrency] || 'en-US';
+
+  return new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency: userCurrency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(amount);

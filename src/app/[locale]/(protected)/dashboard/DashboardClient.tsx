@@ -212,7 +212,10 @@ function DashboardClient() {
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
             >
               {tGreeting(greetingKey)},{" "}
-              {session?.user?.user_metadata?.name ?? ""} 👋
+              {session?.user?.user_metadata?.full_name || 
+               session?.user?.user_metadata?.name || 
+               session?.user?.email?.split('@')[0] || 
+               'User'} 👋
             </motion.h1>
           </motion.div>
 
