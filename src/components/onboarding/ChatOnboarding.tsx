@@ -312,7 +312,7 @@ export default function ChatOnboarding() {
     <div className="min-h-screen bg-white text-gray-900 flex flex-col relative">
       {/* Floating Language Switcher */}
       <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-1">
-        <LanguageSelect value={language} onChange={handleLanguageChange} />
+        <LanguageSelect value={language} onChange={handleLanguageChange} forceLight />
         {autodetected && (
           <span className="block text-xs text-gray-500 bg-white/80 backdrop-blur-sm px-2 py-0.5 rounded">
             {t("autodetected")}

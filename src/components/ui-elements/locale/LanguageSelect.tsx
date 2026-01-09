@@ -14,6 +14,8 @@ type Props = {
   onChange?: (lang: Language) => void;
   placeholder?: string;
   className?: string;
+  /** Force light theme styling (for onboarding) */
+  forceLight?: boolean;
 };
 
 const LANGUAGES: Array<{ code: Language; label: string; emoji: string }> = [
@@ -31,17 +33,28 @@ export default function LanguageSelect({
   onChange,
   placeholder = "Select language",
   className,
+  forceLight = false,
 }: Props) {
+  const lightTriggerStyles = forceLight
+    ? "bg-white text-gray-900 border-gray-300 hover:bg-gray-50"
+    : "";
+  const lightContentStyles = forceLight
+    ? "bg-white text-gray-900 border-gray-200"
+    : "";
+  const lightItemStyles = forceLight
+    ? "text-gray-900 focus:bg-gray-100 focus:text-gray-900"
+    : "";
+
   return (
     <Select value={value} onValueChange={(v) => onChange?.(v as Language)}>
       <SelectTrigger
-        className={`${className ?? ""}`}
+        className={`${lightTriggerStyles} ${className ?? ""}`}
       >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className={lightContentStyles}>
         {LANGUAGES.map((l) => (
-          <SelectItem key={l.code} value={l.code}>
+          <SelectItem key={l.code} value={l.code} className={lightItemStyles}>
             {l.emoji} {l.label}
           </SelectItem>
         ))}

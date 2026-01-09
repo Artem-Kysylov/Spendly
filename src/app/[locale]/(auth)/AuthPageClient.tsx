@@ -147,6 +147,11 @@ export default function AuthPageClient() {
     setTimeout(() => setToast(null), 3000);
   };
 
+  const showSuccess = (text: string) => {
+    setToast({ text, type: "success" });
+    setTimeout(() => setToast(null), 4000);
+  };
+
   const pwdCheck = useMemo(() => {
     const len = password.length >= 6;
     const lower = /[a-z]/.test(password);
@@ -218,18 +223,30 @@ export default function AuthPageClient() {
       return;
     }
 
-    try {
-      let avatarBlob: Blob | null = signupAvatarBlob;
-      if (!avatarBlob) {
-        avatarBlob = await generateInitialAvatar(email);
-      }
-      if (avatarBlob) {
-        let userId = data?.user?.id ?? null;
-        if (!userId) {
-          const { data: userData } = await supabase.auth.getUser();
-          userId = userData?.user?.id ?? null;
+    if (rememberMe) {
+      localStorage.setItem("auth:rememberMe", "1");
+      localStorage.setItem("auth:rememberedEmail", email);
+    }
+
+    if (!data?.session) {
+      showSuccess(
+        "Check your email to confirm your account, then come back and sign in.",
+      );
+      return;
+    }
+
+    // Check if we have a valid session (email confirmation might be required)
+    const hasSession = !!data?.session;
+    const userId = data?.user?.id ?? null;
+
+    // Only attempt avatar upload if we have a valid session
+    if (hasSession && userId) {
+      try {
+        let avatarBlob: Blob | null = signupAvatarBlob;
+        if (!avatarBlob) {
+          avatarBlob = await generateInitialAvatar(email);
         }
-        if (userId) {
+        if (avatarBlob) {
           const ext = avatarBlob.type === "image/webp" ? "webp" : "jpg";
           const fileName = `${userId}-${Date.now()}.${ext}`;
           const filePath = `avatars/${fileName}`;
@@ -243,7 +260,7 @@ export default function AuthPageClient() {
             });
 
           if (uploadError) {
-            showError(uploadError.message || "Failed to upload avatar");
+            console.error("Avatar upload error:", uploadError);
           } else {
             const { data: urlData } = supabase.storage
               .from("user-avatars")
@@ -256,20 +273,13 @@ export default function AuthPageClient() {
               data: { avatar_url: publicUrl },
             });
             if (updateError) {
-              showError(
-                updateError.message || "Failed to save avatar to profile",
-              );
+              console.error("Avatar metadata update error:", updateError);
             }
           }
         }
+      } catch (err: any) {
+        console.error("Avatar processing error:", err);
       }
-    } catch (err: any) {
-      showError(err?.message || "Failed to process avatar upload");
-    }
-
-    if (rememberMe) {
-      localStorage.setItem("auth:rememberMe", "1");
-      localStorage.setItem("auth:rememberedEmail", email);
     }
 
     if (safeRedirectTo) {
