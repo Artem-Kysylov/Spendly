@@ -215,7 +215,12 @@ export default function AuthPageClient() {
 
   const onEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!pwdCheck.all) return;
+    if (!pwdCheck.all) {
+      showError(
+        "Password is too weak. Please include 6+ chars, uppercase, number and special character.",
+      );
+      return;
+    }
 
     const { data, error } = await signUpWithPassword(email, password);
     if (error) {
@@ -308,6 +313,7 @@ export default function AuthPageClient() {
       className="auth-light min-h-screen bg-cover bg-center"
       style={{ backgroundImage: "url('/Sign up screen-bg.png')" }}
     >
+      {toast && <ToastMessage text={toast.text} type={toast.type} />}
       <motion.div
         className="container mx-auto flex min-h-screen items-center justify-center p-4"
         initial={{ opacity: 0 }}
