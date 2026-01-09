@@ -14,7 +14,7 @@ import { saveUserLocaleSettings } from "@/app/[locale]/actions/saveUserLocaleSet
 import { cn } from "@/lib/utils";
 import { Coffee, UtensilsCrossed, Car, ShoppingCart, Wallet, Scale, Sparkles } from "lucide-react";
 
-type Step = 0 | 1 | 2 | 3;
+type Step = 0 | 1 | 2 | 3 | 4;
 type BudgetStyle = "monk" | "balanced" | "rich";
 
 interface ChatMessage {
@@ -132,7 +132,7 @@ export default function ChatOnboarding() {
       setIsTyping(true);
       setTimeout(() => {
         setIsTyping(false);
-        setMessages([{ id: "greeting", role: "assistant", content: t("step1.greeting") }]);
+        setMessages([{ id: "greeting", role: "assistant", content: t("step0.currency_greeting") }]);
       }, 800 + Math.random() * 400);
     }, 500);
     return () => clearTimeout(timer);
@@ -182,34 +182,40 @@ export default function ChatOnboarding() {
     [],
   );
 
-  // Handle category selection (Step 1)
+  // Handle currency selection (Step 0 -> Step 1)
+  const handleCurrencySelect = useCallback((currencyCode: string, flag: string) => {
+    setCurrency(currencyCode);
+    addUserMessage(`${flag} ${currencyCode}`);
+    
+    setTimeout(() => {
+      setStep(1);
+      addBotMessage(t("step1.category_question"));
+    }, 300);
+  }, [addBotMessage, addUserMessage, t]);
+
+  // Handle category selection (Step 1 -> Step 2)
   const handleCategorySelect = useCallback((category: string, label: string) => {
     setSelectedCategory(category);
     addUserMessage(label);
-  }, [addUserMessage]);
+    
+    setTimeout(() => {
+      setStep(2);
+      addBotMessage(t("step2.amount_question"));
+    }, 300);
+  }, [addBotMessage, addUserMessage, t]);
 
-  // Handle amount submit (Step 1 -> Step 2)
+  // Handle amount submit (Step 2 -> Step 3)
   const handleAmountSubmit = useCallback(() => {
     if (!transactionAmount || !selectedCategory) return;
     
     addUserMessage(`${currency} ${transactionAmount}`);
     
     setTimeout(() => {
-      setStep(1);
-      addBotMessage(t("step2.currency_question"));
+      setStep(3);
+      addBotMessage(t("step3.budget_question"));
     }, 300);
   }, [transactionAmount, selectedCategory, currency, addBotMessage, addUserMessage, t]);
 
-  // Handle currency selection (Step 2 -> Step 3)
-  const handleCurrencySelect = useCallback((currencyCode: string, flag: string) => {
-    setCurrency(currencyCode);
-    addUserMessage(`${flag} ${currencyCode}`);
-    
-    setTimeout(() => {
-      setStep(2);
-      addBotMessage(t("step3.budget_question"));
-    }, 300);
-  }, [addBotMessage, addUserMessage, t]);
 
   // Handle budget style selection (Step 3 -> Step 4)
   const handleBudgetStyleSelect = useCallback(async (style: BudgetStyle, label: string) => {
@@ -259,21 +265,22 @@ export default function ChatOnboarding() {
         });
         
         if (txError) {
-          console.warn("Transaction save failed:", txError);
+          console.error("Transaction save failed:", txError);
+          showToast(t("errors.transactionSaveFailed"), "error");
           // Don't block onboarding if transaction fails
         }
       }
 
       // Success - move to next step
       setTimeout(() => {
-        setStep(3);
+        setStep(4);
         addBotMessage(t("step4.processing"));
       }, 300);
     } catch (e) {
       console.error("Failed to save onboarding data", e);
       showToast(t("errors.unexpected"), "error");
     }
-  }, [session?.user?.id, currency, language, addBotMessage, addUserMessage, t, showToast]);
+  }, [session?.user?.id, currency, language, selectedCategory, transactionAmount, addBotMessage, addUserMessage, t, showToast]);
 
   // Handle finish
   const handleFinish = useCallback(async () => {
@@ -346,50 +353,8 @@ export default function ChatOnboarding() {
             </div>
           )}
 
-          {/* Step 1: Category Selection */}
-          {step === 0 && !isTyping && messages.length > 0 && !selectedCategory && (
-            <div className="grid grid-cols-2 gap-3 mt-4">
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => handleCategorySelect(cat.id, cat.label)}
-                  className="flex items-center gap-3 p-4 rounded-2xl border border-gray-300 bg-white hover:bg-gray-50 transition-colors text-left text-gray-900"
-                >
-                  <span className="text-2xl">{cat.emoji}</span>
-                  <span className="text-sm font-medium">{cat.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Step 1: Amount Input */}
-          {step === 0 && selectedCategory && !isTyping && (
-            <div className="mt-4 space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-600 font-medium">{currency}</span>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  placeholder={t("step1.amount_placeholder")}
-                  value={transactionAmount}
-                  onChange={(e) => setTransactionAmount(e.target.value)}
-                  className="flex-1 px-4 py-3 rounded-2xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  autoFocus
-                />
-              </div>
-              <Button
-                onClick={handleAmountSubmit}
-                disabled={!transactionAmount}
-                className="w-full"
-              >
-                {t("actions.next")}
-              </Button>
-            </div>
-          )}
-
-          {/* Step 2: Currency Selection */}
-          {step === 1 && !isTyping && (
+          {/* Step 0: Currency Selection */}
+          {step === 0 && !isTyping && messages.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-4">
               {CURRENCY_OPTIONS.map((curr) => (
                 <button
@@ -410,8 +375,50 @@ export default function ChatOnboarding() {
             </div>
           )}
 
-          {/* Step 3: Budget Style Selection */}
+          {/* Step 1: Category Selection */}
+          {step === 1 && !isTyping && (
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => handleCategorySelect(cat.id, cat.label)}
+                  className="flex items-center gap-3 p-4 rounded-2xl border border-gray-300 bg-white hover:bg-gray-50 transition-colors text-left text-gray-900"
+                >
+                  <span className="text-2xl">{cat.emoji}</span>
+                  <span className="text-sm font-medium">{cat.label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Step 2: Amount Input */}
           {step === 2 && !isTyping && (
+            <div className="mt-4 space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-600 font-medium">{currency}</span>
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder={t("step2.amount_placeholder")}
+                  value={transactionAmount}
+                  onChange={(e) => setTransactionAmount(e.target.value)}
+                  className="flex-1 px-4 py-3 rounded-2xl border border-gray-300 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  autoFocus
+                />
+              </div>
+              <Button
+                onClick={handleAmountSubmit}
+                disabled={!transactionAmount}
+                className="w-full"
+              >
+                {t("actions.next")}
+              </Button>
+            </div>
+          )}
+
+          {/* Step 3: Budget Style Selection */}
+          {step === 3 && !isTyping && (
             <div className="space-y-3 mt-4">
               {budgetStyles.map((style) => (
                 <button
@@ -436,7 +443,7 @@ export default function ChatOnboarding() {
           )}
 
           {/* Step 4: Finish */}
-          {step === 3 && !isTyping && (
+          {step === 4 && !isTyping && (
             <div className="mt-4">
               <Button onClick={handleFinish} className="w-full" size="lg">
                 {t("step4.finish_button")}

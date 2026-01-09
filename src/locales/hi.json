@@ -33,15 +33,15 @@
     "title": "ऑनबोर्डिंग",
     "autodetected": "स्वतः पहचाना",
     "step1": {
-      "greeting": "नमस्ते! मैं Spendly Pal हूँ। चलो सेटअप करते हैं। क्या आपने आज पैसे खर्च किए?",
       "action_coffee": "कॉफ़ी",
       "action_food": "खाना",
       "action_taxi": "टैक्सी",
       "action_groceries": "किराना",
-      "amount_placeholder": "कितना खर्च हुआ?"
+      "category_question": "समझ गया! क्या आपने आज पैसे खर्च किए?"
     },
     "step2": {
-      "currency_question": "समझ गया! आप कौन सी मुद्रा इस्तेमाल करते हैं?"
+      "amount_question": "कितना था?",
+      "amount_placeholder": "राशि दर्ज करें"
     },
     "step3": {
       "budget_question": "अंत में, आपका मासिक लक्ष्य क्या है? एक शैली चुनें:",
@@ -68,7 +68,11 @@
     "errors": {
       "authRequired": "जारी रखने के लिए साइन इन करें।",
       "budgetSaveFailed": "बजट सहेजने में विफल। कृपया पुनः प्रयास करें।",
-      "unexpected": "एक अप्रत्याशित त्रुटि हुई।"
+      "unexpected": "एक अप्रत्याशित त्रुटि हुई।",
+      "transactionSaveFailed": "लेनदेन सहेजने में विफल। कृपया पुनः प्रयास करें।"
+    },
+    "step0": {
+      "currency_greeting": "नमस्ते! मैं Spendly Pal हूं। चलिए सेटअप करते हैं। आप कौन सी मुद्रा का उपयोग करते हैं?"
     }
   },
   "cta": {
@@ -544,14 +548,14 @@
     "onboarding": {
       "meta": {
         "title": "ऑनबोर्डिंग",
-        "description": "अपनी प्राथमिकताएँ सेट करें और आरंभ करें।"
+        "description": "प्राथमिकताएँ सेट करें और शुरुआत करें।"
       }
     },
     "setup": {
       "budget": {
         "meta": {
           "title": "बजट सेटअप",
-          "description": "अपना देश और मुद्रा चुनें।"
+          "description": "देश और मुद्रा चुनें।"
         }
       }
     },
@@ -600,20 +604,6 @@
         "toast": {
           "failedDetermineType": "बजट का प्रकार निर्धारित करने में विफल",
           "typeMissing": "बजट का प्रकार निर्धारित नहीं है"
-        }
-      }
-    },
-    "onboarding": {
-      "meta": {
-        "title": "ऑनबोर्डिंग",
-        "description": "प्राथमिकताएँ सेट करें और शुरुआत करें।"
-      }
-    },
-    "setup": {
-      "budget": {
-        "meta": {
-          "title": "बजट सेटअप",
-          "description": "देश और मुद्रा चुनें।"
         }
       }
     },
@@ -892,67 +882,12 @@
     }
   },
   "errors": {
-    "uploadAvatarFailed": "अवतार अपलोड करने में विफल।",
-    "removeAvatarFailed": "अवतार हटाने में विफल।",
-    "generic": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।",
-    "network": "नेटवर्क त्रुटि। कृपया कनेक्शन जांचें।",
-    "notFound": "पेज नहीं मिला",
-    "unauthorized": "अनधिकृत पहुंच"
-  },
-  "modals": {
     "common": {
-      "title": "पुष्टि करें",
-      "confirm": "पुष्टि करें",
-      "cancel": "रद्द करें"
-    }
-  },
-  "subscription": {
-    "title": "सदस्यता",
-    "description": "अपनी सदस्यता प्रबंधित करें",
-    "status": {
-      "active": "सक्रिय",
-      "inactive": "निष्क्रिय",
-      "cancelled": "रद्द की गई",
-      "expired": "समाप्त हो गई"
+      "internalServerError": "आंतरिक सर्वर त्रुटि"
     },
-    "actions": {
-      "upgrade": "अपग्रेड करें",
-      "cancel": "रद्द करें",
-      "renew": "नवीनीकृत करें"
-    }
-  },
-  "freeTier": {
-    "title": "मुफ्त संस्करण",
-    "description": "मूल सुविधाएँ",
-    "limits": {
-      "budgets": "बजट: अधिकतम 3",
-      "aiRequests": "AI अनुरोध: दैनिक 5",
-      "recurringRules": "आवर्ती नियम: अधिकतम 2"
-    },
-    "upgradePrompt": "असीमित सुविधाओं के लिए Pro में अपग्रेड करें"
-  },
-  "common": {
-    "save": "सहेजें",
-    "cancel": "रद्द करें",
-    "loading": "लोड हो रहा है…",
-    "delete": "हटाएं",
-    "edit": "संपादित करें",
-    "create": "बनाएं",
-    "update": "अपडेट करें",
-    "close": "बंद करें",
-    "confirm": "पुष्टि करें",
-    "yes": "हाँ",
-    "no": "नहीं",
-    "ok": "ठीक है",
-    "error": "त्रुटि",
-    "success": "सफल",
-    "warning": "चेतावनी",
-    "info": "जानकारी"
-  },
-  "filters": {
-    "options": {
-      "week": "सप्ताह",
-      "month": "महीना"
+    "notifications": {
+      "fetchFailed": "सूचनाएँ प्राप्त करने में विफल",
+      "subscriptionInvalid": "सूचना सदस्यता अमान्य है"
     }
   },
   "modals": {
@@ -1011,13 +946,53 @@
       "text": "क्या आप वाकई साइन आउट करना चाहते हैं?"
     }
   },
-  "errors": {
-    "common": {
-      "internalServerError": "आंतरिक सर्वर त्रुटि"
+  "subscription": {
+    "title": "सदस्यता",
+    "description": "अपनी सदस्यता प्रबंधित करें",
+    "status": {
+      "active": "सक्रिय",
+      "inactive": "निष्क्रिय",
+      "cancelled": "रद्द की गई",
+      "expired": "समाप्त हो गई"
     },
-    "notifications": {
-      "fetchFailed": "सूचनाएँ प्राप्त करने में विफल",
-      "subscriptionInvalid": "सूचना सदस्यता अमान्य है"
+    "actions": {
+      "upgrade": "अपग्रेड करें",
+      "cancel": "रद्द करें",
+      "renew": "नवीनीकृत करें"
+    }
+  },
+  "freeTier": {
+    "title": "मुफ्त संस्करण",
+    "description": "मूल सुविधाएँ",
+    "limits": {
+      "budgets": "बजट: अधिकतम 3",
+      "aiRequests": "AI अनुरोध: दैनिक 5",
+      "recurringRules": "आवर्ती नियम: अधिकतम 2"
+    },
+    "upgradePrompt": "असीमित सुविधाओं के लिए Pro में अपग्रेड करें"
+  },
+  "common": {
+    "save": "सहेजें",
+    "cancel": "रद्द करें",
+    "loading": "लोड हो रहा है…",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "create": "बनाएं",
+    "update": "अपडेट करें",
+    "close": "बंद करें",
+    "confirm": "पुष्टि करें",
+    "yes": "हाँ",
+    "no": "नहीं",
+    "ok": "ठीक है",
+    "error": "त्रुटि",
+    "success": "सफल",
+    "warning": "चेतावनी",
+    "info": "जानकारी"
+  },
+  "filters": {
+    "options": {
+      "week": "सप्ताह",
+      "month": "महीना"
     }
   },
   "chat": {

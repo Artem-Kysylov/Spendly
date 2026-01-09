@@ -30,15 +30,15 @@
     "title": "オンボーディング",
     "autodetected": "自動検出",
     "step1": {
-      "greeting": "こんにちは！Spendly Palです。セットアップしましょう。今日お金を使いましたか？",
       "action_coffee": "コーヒー",
       "action_food": "食事",
       "action_taxi": "タクシー",
       "action_groceries": "買い物",
-      "amount_placeholder": "いくらでしたか？"
+      "category_question": "わかりました！今日お金を使いましたか？"
     },
     "step2": {
-      "currency_question": "了解！どの通貨を使いますか？"
+      "amount_question": "いくらでしたか？",
+      "amount_placeholder": "金額を入力"
     },
     "step3": {
       "budget_question": "最後に、月間目標は？スタイルを選んでください：",
@@ -65,7 +65,11 @@
     "errors": {
       "authRequired": "続行するにはサインインしてください。",
       "budgetSaveFailed": "予算の保存に失敗しました。もう一度お試しください。",
-      "unexpected": "予期しないエラーが発生しました。"
+      "unexpected": "予期しないエラーが発生しました。",
+      "transactionSaveFailed": "トランザクションの保存に失敗しました。もう一度お試しください。"
+    },
+    "step0": {
+      "currency_greeting": "こんにちは！私はSpendly Palです。設定しましょう。どの通貨を使用しますか？"
     }
   },
   "cta": {

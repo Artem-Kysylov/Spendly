@@ -44,15 +44,15 @@
     "title": "온보딩",
     "autodetected": "자동 감지",
     "step1": {
-      "greeting": "안녕하세요! Spendly Pal입니다. 설정을 시작해요. 오늘 돈을 쓰셨나요?",
       "action_coffee": "커피",
       "action_food": "음식",
       "action_taxi": "택시",
       "action_groceries": "장보기",
-      "amount_placeholder": "얼마였나요?"
+      "category_question": "알겠습니다! 오늘 돈을 쓰셨나요?"
     },
     "step2": {
-      "currency_question": "알겠어요! 어떤 통화를 사용하시나요?"
+      "amount_question": "얼마였나요?",
+      "amount_placeholder": "금액 입력"
     },
     "step3": {
       "budget_question": "마지막으로, 월간 목표는요? 스타일을 선택하세요:",
@@ -79,7 +79,11 @@
     "errors": {
       "authRequired": "계속하려면 로그인하세요.",
       "budgetSaveFailed": "예산 저장에 실패했습니다. 다시 시도하세요.",
-      "unexpected": "예기치 않은 오류가 발생했습니다."
+      "unexpected": "예기치 않은 오류가 발생했습니다.",
+      "transactionSaveFailed": "거래 저장에 실패했습니다. 다시 시도해주세요."
+    },
+    "step0": {
+      "currency_greeting": "안녕하세요! 저는 Spendly Pal입니다. 설정해 봅시다. 어떤 통화를 사용하시나요?"
     }
   },
   "budgets": {

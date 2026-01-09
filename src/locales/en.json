@@ -569,16 +569,19 @@
   "onboarding": {
     "title": "Onboarding",
     "autodetected": "Auto-detected",
+    "step0": {
+      "currency_greeting": "Hi! I'm Spendly Pal. Let's get set up. Which currency do you use?"
+    },
     "step1": {
-      "greeting": "Hi! I'm Spendly Pal. Let's get set up. Did you spend money today?",
+      "category_question": "Got it! Did you spend money today?",
       "action_coffee": "Coffee",
       "action_food": "Food",
       "action_taxi": "Taxi",
-      "action_groceries": "Groceries",
-      "amount_placeholder": "How much was it?"
+      "action_groceries": "Groceries"
     },
     "step2": {
-      "currency_question": "Got it! Which currency do you use?"
+      "amount_question": "How much was it?",
+      "amount_placeholder": "Enter amount"
     },
     "step3": {
       "budget_question": "Finally, what's your monthly goal? Pick a style:",
@@ -605,6 +608,7 @@
     "errors": {
       "authRequired": "Please sign in to continue.",
       "budgetSaveFailed": "Failed to save budget. Please try again.",
+      "transactionSaveFailed": "Failed to save transaction. Please try again.",
       "unexpected": "An unexpected error occurred."
     }
   },

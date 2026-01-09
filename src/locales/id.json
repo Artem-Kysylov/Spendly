@@ -3,15 +3,15 @@
     "title": "Onboarding",
     "autodetected": "Terdeteksi otomatis",
     "step1": {
-      "greeting": "Hai! Saya Spendly Pal. Mari setup. Apakah kamu mengeluarkan uang hari ini?",
       "action_coffee": "Kopi",
       "action_food": "Makanan",
       "action_taxi": "Taksi",
       "action_groceries": "Belanja",
-      "amount_placeholder": "Berapa harganya?"
+      "category_question": "Mengerti! Apakah Anda menghabiskan uang hari ini?"
     },
     "step2": {
-      "currency_question": "Oke! Mata uang apa yang kamu gunakan?"
+      "amount_question": "Berapa banyak?",
+      "amount_placeholder": "Masukkan jumlah"
     },
     "step3": {
       "budget_question": "Terakhir, apa target bulananmu? Pilih gaya:",
@@ -38,7 +38,11 @@
     "errors": {
       "authRequired": "Silakan masuk untuk melanjutkan.",
       "budgetSaveFailed": "Gagal menyimpan anggaran. Coba lagi.",
-      "unexpected": "Terjadi kesalahan tak terduga."
+      "unexpected": "Terjadi kesalahan tak terduga.",
+      "transactionSaveFailed": "Gagal menyimpan transaksi. Silakan coba lagi."
+    },
+    "step0": {
+      "currency_greeting": "Hai! Saya Spendly Pal. Mari kita atur. Mata uang apa yang Anda gunakan?"
     }
   },
   "cta": {
