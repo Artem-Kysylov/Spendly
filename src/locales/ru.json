@@ -94,7 +94,8 @@
       "style_balanced": "Баланс",
       "style_balanced_desc": "Обычные траты",
       "style_rich": "Широкая душа",
-      "style_rich_desc": "Гибкие лимиты"
+      "style_rich_desc": "Гибкие лимиты",
+      "budget_hint": "Вы можете изменить эту сумму позже в приложении"
     },
     "step4": {
       "processing": "Настраиваю твоё пространство...",

@@ -20,7 +20,8 @@
       "style_balanced": "Seimbang",
       "style_balanced_desc": "Pengeluaran normal",
       "style_rich": "Sultan",
-      "style_rich_desc": "Batas fleksibel"
+      "style_rich_desc": "Batas fleksibel",
+      "budget_hint": "Anda dapat mengubah jumlah ini nanti di aplikasi"
     },
     "step4": {
       "processing": "Menyiapkan workspace-mu...",

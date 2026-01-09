@@ -585,6 +585,7 @@
     },
     "step3": {
       "budget_question": "Finally, what's your monthly goal? Pick a style:",
+      "budget_hint": "You can change this amount later in the app",
       "style_monk": "Monk Mode",
       "style_monk_desc": "Strict budget",
       "style_balanced": "Balanced",

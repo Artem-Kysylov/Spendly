@@ -88,7 +88,8 @@
       "style_balanced": "Баланс",
       "style_balanced_desc": "Звичайні витрати",
       "style_rich": "Широка душа",
-      "style_rich_desc": "Гнучкі ліміти"
+      "style_rich_desc": "Гнучкі ліміти",
+      "budget_hint": "Ви можете змінити цю суму пізніше в додатку"
     },
     "step4": {
       "processing": "Налаштовую твій простір...",

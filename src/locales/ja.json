@@ -47,7 +47,8 @@
       "style_balanced": "バランス",
       "style_balanced_desc": "普通の支出",
       "style_rich": "リッチ",
-      "style_rich_desc": "柔軟な制限"
+      "style_rich_desc": "柔軟な制限",
+      "budget_hint": "この金額は後でアプリで変更できます"
     },
     "step4": {
       "processing": "ワークスペースを設定中...",

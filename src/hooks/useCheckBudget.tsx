@@ -33,9 +33,9 @@ const useCheckBudget = (userId: string | undefined) => {
 
         if (!data) {
           console.log(
-            "No main budget found, redirecting to create budget page",
+            "No main budget found - user should complete onboarding first",
           );
-          router.push("/add-new-budget");
+          // Don't redirect - budget is now created during onboarding
         }
       } catch (error) {
         console.error("Error checking main budget:", error);

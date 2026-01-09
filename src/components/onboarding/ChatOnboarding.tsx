@@ -261,7 +261,8 @@ export default function ChatOnboarding() {
           title: selectedCategory,
           amount: Number(transactionAmount),
           type: "expense",
-          date: new Date().toISOString(),
+          budget_folder_id: null,
+          created_at: new Date().toISOString(),
         });
         
         if (txError) {
@@ -302,9 +303,9 @@ export default function ChatOnboarding() {
   ];
 
   const budgetStyles = [
-    { id: "monk" as BudgetStyle, label: t("step3.style_monk"), desc: t("step3.style_monk_desc"), icon: Wallet, emoji: "🧘" },
-    { id: "balanced" as BudgetStyle, label: t("step3.style_balanced"), desc: t("step3.style_balanced_desc"), icon: Scale, emoji: "⚖️" },
-    { id: "rich" as BudgetStyle, label: t("step3.style_rich"), desc: t("step3.style_rich_desc"), icon: Sparkles, emoji: "💎" },
+    { id: "monk" as BudgetStyle, label: t("step3.style_monk"), desc: t("step3.style_monk_desc"), icon: Wallet, emoji: "🧘", amount: BUDGET_AMOUNTS[currency]?.monk || BUDGET_AMOUNTS.USD.monk },
+    { id: "balanced" as BudgetStyle, label: t("step3.style_balanced"), desc: t("step3.style_balanced_desc"), icon: Scale, emoji: "⚖️", amount: BUDGET_AMOUNTS[currency]?.balanced || BUDGET_AMOUNTS.USD.balanced },
+    { id: "rich" as BudgetStyle, label: t("step3.style_rich"), desc: t("step3.style_rich_desc"), icon: Sparkles, emoji: "💎", amount: BUDGET_AMOUNTS[currency]?.rich || BUDGET_AMOUNTS.USD.rich },
   ];
 
   return (
@@ -419,26 +420,34 @@ export default function ChatOnboarding() {
 
           {/* Step 3: Budget Style Selection */}
           {step === 3 && !isTyping && (
-            <div className="space-y-3 mt-4">
-              {budgetStyles.map((style) => (
-                <button
-                  key={style.id}
-                  type="button"
-                  onClick={() => handleBudgetStyleSelect(style.id, style.label)}
-                  className={cn(
-                    "w-full flex items-center gap-4 p-4 rounded-2xl border transition-colors text-left",
-                    selectedBudgetStyle === style.id
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-300 bg-white hover:bg-gray-50"
-                  )}
-                >
-                  <span className="text-3xl">{style.emoji}</span>
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-900">{style.label}</div>
-                    <div className="text-sm text-gray-600">{style.desc}</div>
-                  </div>
-                </button>
-              ))}
+            <div className="space-y-4 mt-4">
+              <p className="text-xs text-gray-500 text-center">
+                {t("step3.budget_hint")}
+              </p>
+              <div className="space-y-3">
+                {budgetStyles.map((style) => (
+                  <button
+                    key={style.id}
+                    type="button"
+                    onClick={() => handleBudgetStyleSelect(style.id, style.label)}
+                    className={cn(
+                      "w-full flex items-center gap-4 p-4 rounded-2xl border transition-colors text-left",
+                      selectedBudgetStyle === style.id
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-300 bg-white hover:bg-gray-50"
+                    )}
+                  >
+                    <span className="text-3xl">{style.emoji}</span>
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">{style.label}</div>
+                      <div className="text-sm text-gray-600">{style.desc}</div>
+                      <div className="text-sm font-medium text-blue-600 mt-1">
+                        {currency} {style.amount.toLocaleString()}
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

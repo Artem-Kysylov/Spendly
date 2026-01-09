@@ -50,7 +50,8 @@
       "style_balanced": "संतुलित",
       "style_balanced_desc": "सामान्य खर्च",
       "style_rich": "हाई रोलर",
-      "style_rich_desc": "लचीली सीमाएं"
+      "style_rich_desc": "लचीली सीमाएं",
+      "budget_hint": "आप इस राशि को बाद में ऐप में बदल सकते हैं"
     },
     "step4": {
       "processing": "आपका वर्कस्पेस सेट कर रहा हूँ...",

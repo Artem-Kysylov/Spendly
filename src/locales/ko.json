@@ -61,7 +61,8 @@
       "style_balanced": "균형",
       "style_balanced_desc": "일반 지출",
       "style_rich": "플렉스",
-      "style_rich_desc": "유연한 한도"
+      "style_rich_desc": "유연한 한도",
+      "budget_hint": "이 금액은 나중에 앱에서 변경할 수 있습니다"
     },
     "step4": {
       "processing": "워크스페이스 설정 중...",
