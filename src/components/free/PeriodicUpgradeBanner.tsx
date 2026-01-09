@@ -54,24 +54,24 @@ export default function PeriodicUpgradeBanner() {
   };
 
   return (
-    <div className="bg-primary/10 border-b border-primary/20 px-5 py-3 flex items-center justify-between">
-      <div className="flex items-center gap-3">
-        <span className="text-xl">🚀</span>
-        <div>
-          <div className="text-sm font-semibold">
+    <div className="bg-primary/10 border-b border-primary/20 px-3 sm:px-5 py-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+        <span className="text-lg sm:text-xl flex-shrink-0">🚀</span>
+        <div className="min-w-0 flex-1">
+          <div className="text-xs sm:text-sm font-semibold truncate">
             {t("periodicBanner.title")}
           </div>
-          <div className="text-xs text-muted-foreground">
+          <div className="text-xs text-muted-foreground line-clamp-2 sm:line-clamp-1">
             {t("periodicBanner.description")}
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="sm" onClick={handleDismiss}>
+      <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto flex-shrink-0">
+        <Button variant="ghost" size="sm" onClick={handleDismiss} className="flex-1 sm:flex-initial text-xs sm:text-sm">
           {t("periodicBanner.dismiss")}
         </Button>
-        <Link href="/paywall" onClick={handleUpgradeClick}>
-          <Button size="sm">{t("upgradeBanner.cta")}</Button>
+        <Link href="/paywall" onClick={handleUpgradeClick} className="flex-1 sm:flex-initial">
+          <Button size="sm" className="w-full text-xs sm:text-sm">{t("upgradeBanner.cta")}</Button>
         </Link>
       </div>
     </div>

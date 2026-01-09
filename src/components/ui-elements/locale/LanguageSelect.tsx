@@ -34,12 +34,14 @@ export default function LanguageSelect({
 }: Props) {
   return (
     <Select value={value} onValueChange={(v) => onChange?.(v as Language)}>
-      <SelectTrigger className={`bg-white text-gray-900 border-gray-300 hover:bg-gray-50 ${className}`}>
+      <SelectTrigger
+        className={`bg-background text-foreground border-input ${className ?? ""}`}
+      >
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="bg-white border-gray-200">
+      <SelectContent className="bg-popover text-popover-foreground border-border">
         {LANGUAGES.map((l) => (
-          <SelectItem key={l.code} value={l.code} className="text-gray-900 hover:bg-gray-100 focus:bg-gray-100">
+          <SelectItem key={l.code} value={l.code}>
             {l.emoji} {l.label}
           </SelectItem>
         ))}

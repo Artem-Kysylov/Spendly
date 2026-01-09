@@ -261,10 +261,10 @@ export default function InstallPWA({
     pathname?.includes("/forgot-password") ||
     pathname?.includes("/reset-password") ||
     pathname?.includes("/onboarding");
-  const canShowInstallUi = !!session && !isAuthRoute;
+  const canShowInstallUi = !!session && !isAuthRoute && !isStandalone;
   const effectiveShowButton =
-    (forceShowButton && canShowInstallUi) || showInstallButton;
-  const canShowButtonUi = canShowInstallUi;
+    (forceShowButton && canShowInstallUi && !isStandalone) || showInstallButton;
+  const canShowButtonUi = canShowInstallUi && !isStandalone;
 
   // Check if FAB was dismissed
   useEffect(() => {
