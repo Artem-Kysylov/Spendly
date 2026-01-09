@@ -50,7 +50,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
           <div className="flex-shrink-0 flex justify-center md:justify-start">
             {isGoogleUser ? (
               // Google пользователи - только отображение аватара
-              <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+              <div className="w-24 h-24 aspect-square rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700">
                 {avatarUrl ? (
                   <img
                     src={avatarUrl}
@@ -68,12 +68,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
               </div>
             ) : (
               // Email пользователи - возможность загрузки
-              <div className="w-24 h-24">
+              <div className="w-24 h-24 aspect-square">
                 <AvatarUpload
                   currentAvatarUrl={avatarUrl}
                   onAvatarUpdate={handleAvatarUpdate}
                   size="md"
-                  className="w-24 h-24 rounded-full"
+                  className="w-full h-full rounded-full"
                 />
               </div>
             )}
@@ -123,13 +123,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
 
         {/* Edit Button - только для email пользователей */}
         {!isGoogleUser && (
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-start">
             <Button
               text={tProfile("edit")}
               variant="outline"
               onClick={onEditProfile}
               icon={<Edit2 size={16} />}
-              className="w-full md:w-auto"
+              className="w-full md:w-auto max-w-full"
             />
           </div>
         )}

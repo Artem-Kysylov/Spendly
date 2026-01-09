@@ -237,6 +237,11 @@ export default function ChatOnboarding() {
         locale: language,
       });
 
+      // Save currency to localStorage for formatCurrency
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('user-currency', currency);
+      }
+
       // Calculate budget amount
       const budgetAmount = BUDGET_AMOUNTS[currency]?.[style] || BUDGET_AMOUNTS.USD[style];
 

@@ -227,12 +227,12 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                 >
                   {showCurrentPassword ? (
-                    <EyeOff size={16} />
+                    <EyeOff size={18} />
                   ) : (
-                    <Eye size={16} />
+                    <Eye size={18} />
                   )}
                 </button>
               </div>
@@ -250,9 +250,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                 >
-                  {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
 
@@ -271,12 +271,12 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
                 >
                   {showConfirmPassword ? (
-                    <EyeOff size={16} />
+                    <EyeOff size={18} />
                   ) : (
-                    <Eye size={16} />
+                    <Eye size={18} />
                   )}
                 </button>
               </div>
