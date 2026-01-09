@@ -180,7 +180,13 @@
       "memberSince": "З нами з {monthYear}",
       "googleAccount": "Обліковий запис Google",
       "emailAccount": "Обліковий запис Email",
-      "edit": "Редагувати профіль"
+      "edit": "Редагувати профіль",
+      "avatar": {
+        "alt": "Аватар користувача",
+        "upload": "Завантажити аватар",
+        "change": "Змінити аватар",
+        "cancel": "Скасувати"
+      }
     },
     "appearance": {
       "title": "Вигляд",

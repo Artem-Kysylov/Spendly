@@ -129,7 +129,13 @@
       "memberSince": "{monthYear}から利用",
       "googleAccount": "Google アカウント",
       "emailAccount": "メールアカウント",
-      "edit": "プロフィールを編集"
+      "edit": "プロフィールを編集",
+      "avatar": {
+        "alt": "ユーザーアバター",
+        "upload": "アバターをアップロード",
+        "change": "アバターを変更",
+        "cancel": "キャンセル"
+      }
     },
     "appearance": {
       "title": "外観",

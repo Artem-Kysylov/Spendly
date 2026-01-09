@@ -132,7 +132,13 @@
       "memberSince": "{monthYear} से हमारे साथ",
       "googleAccount": "Google अकाउंट",
       "emailAccount": "ईमेल अकाउंट",
-      "edit": "प्रोफ़ाइल संपादित करें"
+      "edit": "प्रोफ़ाइल संपादित करें",
+      "avatar": {
+        "alt": "उपयोगकर्ता अवतार",
+        "upload": "अवतार अपलोड करें",
+        "change": "अवतार बदलें",
+        "cancel": "रद्द करें"
+      }
     },
     "appearance": {
       "title": "रूप-रंग",

@@ -176,7 +176,13 @@
       "memberSince": "С нами с {monthYear}",
       "googleAccount": "Аккаунт Google",
       "emailAccount": "Аккаунт Email",
-      "edit": "Редактировать профиль"
+      "edit": "Редактировать профиль",
+      "avatar": {
+        "alt": "Аватар пользователя",
+        "upload": "Загрузить аватар",
+        "change": "Изменить аватар",
+        "cancel": "Отменить"
+      }
     },
     "appearance": {
       "title": "Внешний вид",

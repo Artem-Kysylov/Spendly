@@ -629,7 +629,13 @@
       "memberSince": "{monthYear}부터 회원",
       "googleAccount": "Google 계정",
       "emailAccount": "이메일 계정",
-      "edit": "프로필 편집"
+      "edit": "프로필 편집",
+      "avatar": {
+        "alt": "사용자 아바타",
+        "upload": "아바타 업로드",
+        "change": "아바타 변경",
+        "cancel": "취소"
+      }
     },
     "appearance": {
       "title": "모양",

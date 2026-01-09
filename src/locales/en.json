@@ -114,7 +114,13 @@
       "memberSince": "Member since {monthYear}",
       "googleAccount": "Google Account",
       "emailAccount": "Email Account",
-      "edit": "Edit Profile"
+      "edit": "Edit Profile",
+      "avatar": {
+        "alt": "User avatar",
+        "upload": "Upload avatar",
+        "change": "Change avatar",
+        "cancel": "Cancel"
+      }
     },
     "appearance": {
       "title": "Appearance",

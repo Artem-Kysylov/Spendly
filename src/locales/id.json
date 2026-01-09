@@ -137,7 +137,13 @@
       "memberSince": "Anggota sejak {monthYear}",
       "googleAccount": "Akun Google",
       "emailAccount": "Akun Email",
-      "edit": "Edit profil"
+      "edit": "Edit profil",
+      "avatar": {
+        "alt": "Avatar pengguna",
+        "upload": "Unggah avatar",
+        "change": "Ubah avatar",
+        "cancel": "Batal"
+      }
     },
     "appearance": {
       "title": "Tampilan",

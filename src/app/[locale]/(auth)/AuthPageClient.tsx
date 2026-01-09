@@ -153,13 +153,22 @@ export default function AuthPageClient() {
     const upper = /[A-Z]/.test(password);
     const digit = /\d/.test(password);
     const symbol = /[^A-Za-z0-9]/.test(password);
+    const all = len && lower && upper && digit && symbol;
+    
+    let strength: 'weak' | 'medium' | 'strong' = 'weak';
+    const checks = [len, lower, upper, digit, symbol].filter(Boolean).length;
+    if (checks >= 5) strength = 'strong';
+    else if (checks >= 3) strength = 'medium';
+    
     return {
       len,
       lower,
       upper,
       digit,
       symbol,
-      all: len && lower && upper && digit && symbol,
+      all,
+      strength,
+      percentage: (checks / 5) * 100,
     };
   }, [password]);
 
@@ -462,6 +471,74 @@ export default function AuthPageClient() {
                       </button>
                     </div>
 
+                    {password && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-300 ${
+                                pwdCheck.strength === 'strong'
+                                  ? 'bg-green-500'
+                                  : pwdCheck.strength === 'medium'
+                                  ? 'bg-yellow-500'
+                                  : 'bg-red-500'
+                              }`}
+                              style={{ width: `${pwdCheck.percentage}%` }}
+                            />
+                          </div>
+                          <span
+                            className={`text-xs font-medium ${
+                              pwdCheck.strength === 'strong'
+                                ? 'text-green-600'
+                                : pwdCheck.strength === 'medium'
+                                ? 'text-yellow-600'
+                                : 'text-red-600'
+                            }`}
+                          >
+                            {pwdCheck.strength === 'strong'
+                              ? 'Strong'
+                              : pwdCheck.strength === 'medium'
+                              ? 'Medium'
+                              : 'Weak'}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1 text-xs">
+                          <div
+                            className={`flex items-center gap-1 ${
+                              pwdCheck.len ? 'text-green-600' : 'text-gray-400'
+                            }`}
+                          >
+                            <span>{pwdCheck.len ? '✓' : '○'}</span>
+                            <span>6+ characters</span>
+                          </div>
+                          <div
+                            className={`flex items-center gap-1 ${
+                              pwdCheck.upper ? 'text-green-600' : 'text-gray-400'
+                            }`}
+                          >
+                            <span>{pwdCheck.upper ? '✓' : '○'}</span>
+                            <span>Uppercase letter</span>
+                          </div>
+                          <div
+                            className={`flex items-center gap-1 ${
+                              pwdCheck.digit ? 'text-green-600' : 'text-gray-400'
+                            }`}
+                          >
+                            <span>{pwdCheck.digit ? '✓' : '○'}</span>
+                            <span>Number</span>
+                          </div>
+                          <div
+                            className={`flex items-center gap-1 ${
+                              pwdCheck.symbol ? 'text-green-600' : 'text-gray-400'
+                            }`}
+                          >
+                            <span>{pwdCheck.symbol ? '✓' : '○'}</span>
+                            <span>Special character</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex justify-center py-2">
                       <AvatarUpload
                         mode="pre-signup"
@@ -477,8 +554,7 @@ export default function AuthPageClient() {
                       />
                     </div>
                     <p className="text-xs text-gray-500 text-center">
-                      Accepted: image files up to 5MB. Square crop to 256×256.
-                      WebP/JPEG.
+                      Optional: Upload avatar (max 5MB, auto-cropped to 256×256)
                     </p>
 
                     <Button
