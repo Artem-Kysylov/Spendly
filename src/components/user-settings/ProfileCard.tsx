@@ -47,7 +47,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
       <CardContent className="p-3 md:p-6 pt-0 space-y-6">
         {/* Avatar Section */}
         <div className="flex flex-col md:flex-row md:items-start gap-6">
-          <div className="flex-shrink-0 flex justify-center md:justify-start">
+          <div className="flex-shrink-0 flex justify-start">
             {isGoogleUser ? (
               // Google пользователи - только отображение аватара
               <div className="w-24 h-24 aspect-square rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700">
@@ -68,14 +68,12 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
               </div>
             ) : (
               // Email пользователи - возможность загрузки
-              <div className="w-24">
-                <AvatarUpload
-                  currentAvatarUrl={avatarUrl}
-                  onAvatarUpdate={handleAvatarUpdate}
-                  size="md"
-                  className="items-start gap-3"
-                />
-              </div>
+              <AvatarUpload
+                currentAvatarUrl={avatarUrl}
+                onAvatarUpdate={handleAvatarUpdate}
+                size="md"
+                className="items-start gap-3 max-w-full"
+              />
             )}
           </div>
 
