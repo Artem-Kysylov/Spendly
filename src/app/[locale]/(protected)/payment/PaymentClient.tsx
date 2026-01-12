@@ -81,7 +81,7 @@ export default function PaymentClient() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-10">
+    <div key={locale} className="container mx-auto px-4 py-10">
       {toast && <ToastMessage text={toast.text} type={toast.type} />}
 
       <motion.div
