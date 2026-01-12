@@ -164,7 +164,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   };
 
   return (
-    <div className={`flex flex-col items-start gap-3 ${className}`}>
+    <div className={`flex flex-col items-center gap-4 ${className}`}>
       <div
         className={`relative ${sizeClasses[size]} rounded-full overflow-hidden border-2 border-border shadow-sm`}
       >
@@ -198,7 +198,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         )}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <Button
           text={
             (mode === "pre-signup" ? previewUrl : currentAvatarUrl)
