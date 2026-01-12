@@ -9,7 +9,7 @@ import { Link } from "@/i18n/routing";
 import { supabase } from "@/lib/supabaseClient";
 import { motion } from "framer-motion";
 import { CheckCircle2, ChevronLeft } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Button from "@/components/ui-elements/Button";
 
 export default function ForgotPasswordClient() {
@@ -17,6 +17,7 @@ export default function ForgotPasswordClient() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stage, setStage] = useState<"form" | "success">("form");
+  const locale = useLocale();
   const tForgot = useTranslations("forgotPassword");
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -31,7 +32,7 @@ export default function ForgotPasswordClient() {
     try {
       setIsSubmitting(true);
       await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/${locale}/reset-password`,
       });
       setStage("success");
     } catch (err: any) {

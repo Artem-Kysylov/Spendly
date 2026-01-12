@@ -354,6 +354,10 @@
         "deletePrompt": "Are you sure you want to delete this transaction?",
         "editTitle": "Edit transaction"
       }
+    },
+    "types": {
+      "expense": "Expense",
+      "income": "Income"
     }
   },
   "dashboard": {

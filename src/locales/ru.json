@@ -792,6 +792,10 @@
       "amount": "Сумма",
       "budget": "Бюджет",
       "actions": "Действия"
+    },
+    "types": {
+      "expense": "Расход",
+      "income": "Доход"
     }
   },
   "dashboard": {

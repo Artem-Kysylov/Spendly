@@ -293,7 +293,9 @@ function TransactionsTable({
                         : "border-green-200 text-green-700 bg-green-50 dark:border-green-900/30 dark:text-green-400 dark:bg-green-900/10"
                     }`}
                   >
-                    {transaction.type === "expense" ? "Expense" : "Income"}
+                    {transaction.type === "expense"
+                      ? tTransactions("types.expense")
+                      : tTransactions("types.income")}
                   </span>
                 </TableCell>
                 <TableCell className="text-muted-foreground whitespace-nowrap text-sm">

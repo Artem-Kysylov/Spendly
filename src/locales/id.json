@@ -117,6 +117,12 @@
     "successMessage": "Terima kasih telah mendukung Spendly Pro!",
     "goToDashboard": "Pergi ke Dasbor"
   },
+  "transactions": {
+    "types": {
+      "expense": "Pengeluaran",
+      "income": "Pemasukan"
+    }
+  },
   "userSettings": {
     "header": {
       "title": "Pengaturan Pengguna⚙️",

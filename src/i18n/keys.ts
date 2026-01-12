@@ -151,7 +151,9 @@ export type NamespaceKeys = {
     | "table.empty.default"
     | "table.modal.deleteTitle"
     | "table.modal.deletePrompt"
-    | "table.modal.editTitle";
+    | "table.modal.editTitle"
+    | "types.expense"
+    | "types.income";
   dashboard:
     | "welcome"
     | "deleteModal.title"

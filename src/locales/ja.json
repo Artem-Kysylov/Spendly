@@ -633,6 +633,10 @@
         "deletePrompt": "この取引を削除しますか？",
         "editTitle": "取引を編集"
       }
+    },
+    "types": {
+      "expense": "支出",
+      "income": "収入"
     }
   },
   "dashboard": {

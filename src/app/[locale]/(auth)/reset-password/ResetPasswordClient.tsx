@@ -18,6 +18,7 @@ export default function ResetPasswordClient() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isInitializingSession, setIsInitializingSession] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stage, setStage] = useState<"form" | "success">("form");
 
@@ -26,14 +27,66 @@ export default function ResetPasswordClient() {
   const tReset = useTranslations("resetPassword");
 
   useEffect(() => {
-    const accessToken = searchParams.get("access_token");
-    const refreshToken = searchParams.get("refresh_token");
-    if (accessToken && refreshToken) {
-      supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      });
-    }
+    let cancelled = false;
+
+    const initSessionFromUrl = async () => {
+      try {
+        const code = searchParams.get("code");
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (!cancelled && error) setError(error.message);
+          if (!cancelled) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete("code");
+            window.history.replaceState(null, "", url.pathname + url.search);
+          }
+          return;
+        }
+
+        const queryAccessToken = searchParams.get("access_token");
+        const queryRefreshToken = searchParams.get("refresh_token");
+
+        const hashParams = new URLSearchParams(
+          window.location.hash.replace(/^#/, ""),
+        );
+        const hashAccessToken = hashParams.get("access_token");
+        const hashRefreshToken = hashParams.get("refresh_token");
+
+        const accessToken = queryAccessToken ?? hashAccessToken;
+        const refreshToken = queryRefreshToken ?? hashRefreshToken;
+
+        if (!accessToken || !refreshToken) {
+          if (!cancelled) setError("Invalid or expired reset link");
+          return;
+        }
+
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (!cancelled && error) setError(error.message);
+
+        if (!cancelled) {
+          const url = new URL(window.location.href);
+          url.hash = "";
+          url.searchParams.delete("access_token");
+          url.searchParams.delete("refresh_token");
+          url.searchParams.delete("expires_in");
+          url.searchParams.delete("token_type");
+          url.searchParams.delete("type");
+          window.history.replaceState(null, "", url.pathname + url.search);
+        }
+      } finally {
+        if (!cancelled) setIsInitializingSession(false);
+      }
+    };
+
+    setIsInitializingSession(true);
+    void initSessionFromUrl();
+
+    return () => {
+      cancelled = true;
+    };
   }, [searchParams]);
 
   const validatePassword = (pwd: string) => ({
@@ -50,6 +103,10 @@ export default function ResetPasswordClient() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (isInitializingSession) {
+      setError("Please wait a moment and try again");
+      return;
+    }
     if (!isPasswordValid) {
       setError("Password does not meet requirements");
       return;
