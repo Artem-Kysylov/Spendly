@@ -48,6 +48,7 @@ export default function UserSettingsClient() {
   // Переводы
   const tSettings = useTranslations("userSettings");
   const tPricing = useTranslations("pricing");
+  const tPaywall = useTranslations("paywall.comparison");
   const tCTA = useTranslations("cta");
   const tCommon = useTranslations("common");
   const tAI = useTranslations("assistant");
@@ -274,23 +275,23 @@ export default function UserSettingsClient() {
               {/* Free Plan */}
               <div className={`rounded-lg border-2 p-4 flex flex-col ${subscriptionPlan === "free" ? "border-gray-400 dark:border-gray-500 ring-2 ring-gray-300" : "border-gray-300 dark:border-gray-600"} bg-white dark:bg-card`}>
                 <h3 className="font-semibold text-secondary-black dark:text-white mb-1">
-                  {tPricing("free.label")}
+                  {tPaywall("free.label")}
                 </h3>
                 <div className="mb-3">
                   <div className="text-2xl font-bold text-secondary-black dark:text-white">
                     $0
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    /forever
+                    {tPaywall("free.period")}
                   </div>
                 </div>
                 <ul className="space-y-1.5 text-xs text-gray-700 dark:text-gray-300 mb-4 flex-1">
-                  <li>• 3 budgets</li>
-                  <li>• 10 AI messages/day</li>
-                  <li>• Basic charts</li>
+                  <li>• {tPaywall("free.feature1")}</li>
+                  <li>• {tPaywall("free.feature3")}</li>
+                  <li>• {tPaywall("free.feature4")}</li>
                 </ul>
                 <Button
-                  text="Current Plan"
+                  text={tPaywall("free.cta")}
                   variant="outline"
                   className="w-full text-xs h-9"
                   disabled={subscriptionPlan === "free"}
@@ -300,24 +301,24 @@ export default function UserSettingsClient() {
               {/* Monthly Plan */}
               <div className="rounded-lg border-2 border-gray-200 dark:border-border p-4 bg-white dark:bg-card flex flex-col">
                 <h3 className="font-semibold text-secondary-black dark:text-white mb-1">
-                  Monthly
+                  {tPaywall("monthly.label")}
                 </h3>
                 <div className="mb-3">
                   <div className="text-2xl font-bold text-secondary-black dark:text-white">
-                    $7
+                    {tPaywall("monthly.price")}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    /month
+                    {tPaywall("monthly.period")}
                   </div>
                 </div>
                 <ul className="space-y-1.5 text-xs text-gray-800 dark:text-white mb-4 flex-1">
-                  <li>• Unlimited budgets</li>
-                  <li>• Unlimited wallets</li>
-                  <li>• Basic AI support</li>
-                  <li>• All free features</li>
+                  <li>• {tPaywall("monthly.feature1")}</li>
+                  <li>• {tPaywall("monthly.feature2")}</li>
+                  <li>• {tPaywall("monthly.feature3")}</li>
+                  <li>• {tPaywall("monthly.feature4")}</li>
                 </ul>
                 <Button
-                  text="Upgrade"
+                  text={tPaywall("monthly.cta")}
                   variant="primary"
                   className="w-full text-xs h-9"
                   onClick={handleUpgradeClick}
@@ -330,31 +331,31 @@ export default function UserSettingsClient() {
               <div className="rounded-lg border-2 border-primary dark:border-primary p-4 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 relative">
                 <div className="absolute top-2 right-2">
                   <div className="px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-semibold">
-                    Best Value
+                    {tPaywall("bestValue")}
                   </div>
                 </div>
                 <h3 className="font-semibold text-secondary-black dark:text-white mb-1 pt-6">
-                  Yearly
+                  {tPaywall("yearly.label")}
                 </h3>
                 <div className="mb-3">
                   <div className="text-2xl font-bold text-secondary-black dark:text-white">
-                    $49
+                    {tPaywall("yearly.price")}
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400">
-                    /year
+                    {tPaywall("yearly.period")}
                   </div>
                   <div className="text-[10px] text-primary">
-                    ~$4.08/month
+                    {tPaywall("yearly.priceNote")}
                   </div>
                 </div>
                 <ul className="space-y-1.5 text-xs text-gray-800 dark:text-white mb-4">
-                  <li>• Everything in Monthly</li>
-                  <li>• Priority support</li>
-                  <li>• Early access</li>
-                  <li>• Best value</li>
+                  <li>• {tPaywall("yearly.feature1")}</li>
+                  <li>• {tPaywall("yearly.feature2")}</li>
+                  <li>• {tPaywall("yearly.feature3")}</li>
+                  <li>• {tPaywall("yearly.feature4")}</li>
                 </ul>
                 <Button
-                  text="Upgrade"
+                  text={tPaywall("yearly.cta")}
                   variant="primary"
                   className="w-full text-xs h-9"
                   onClick={handleUpgradeClick}
@@ -367,31 +368,31 @@ export default function UserSettingsClient() {
               <div className="rounded-lg border-2 border-amber-500 dark:border-amber-400 p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 relative">
                 <div className="absolute top-2 right-2">
                   <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-[10px] font-semibold">
-                    Founder's Edition
+                    {tPaywall("foundersEdition")}
                   </div>
                 </div>
                 <h3 className="font-semibold text-secondary-black dark:text-white mb-1 pt-6">
-                  Lifetime
+                  {tPaywall("lifetime.label")}
                 </h3>
                 <div className="mb-3">
                   <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-                    $99
+                    {tPaywall("lifetime.price")}
                   </div>
                   <div className="text-xs text-gray-600 dark:text-gray-300">
-                    one-time
+                    {tPaywall("lifetime.period")}
                   </div>
                 </div>
                 <ul className="space-y-1.5 text-xs text-gray-800 dark:text-white mb-3">
-                  <li>• Everything in Yearly</li>
-                  <li>• Early Adopter Badge</li>
-                  <li>• Lifetime updates</li>
-                  <li>• Founder's Edition</li>
+                  <li>• {tPaywall("lifetime.feature1")}</li>
+                  <li>• {tPaywall("lifetime.feature2")}</li>
+                  <li>• {tPaywall("lifetime.feature3")}</li>
+                  <li>• {tPaywall("lifetime.feature4")}</li>
                 </ul>
                 <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-3 text-center">
-                  Fair Usage Policy applies
+                  {tPaywall("lifetime.fairUsage")}
                 </p>
                 <Button
-                  text="Get Lifetime"
+                  text={tPaywall("lifetime.cta")}
                   variant="primary"
                   className="w-full text-xs h-9 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0"
                   onClick={handleUpgradeClick}
