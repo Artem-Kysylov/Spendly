@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "@/i18n/routing";
-import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { supabase } from "@/lib/supabaseClient";
@@ -23,7 +22,6 @@ export default function ResetPasswordClient() {
   const [stage, setStage] = useState<"form" | "success">("form");
 
   const router = useRouter();
-  const searchParams = useSearchParams();
   const tReset = useTranslations("resetPassword");
 
   useEffect(() => {
@@ -41,23 +39,53 @@ export default function ResetPasswordClient() {
 
     const initSessionFromUrl = async () => {
       try {
-        const code = searchParams.get("code");
-        if (code) {
-          const { error } = await supabase.auth.exchangeCodeForSession(code);
-          if (!cancelled && error) setError(error.message);
+        const currentUrl = new URL(window.location.href);
+
+        // If Supabase redirected back with an error in hash, show it.
+        const hashParamsForError = new URLSearchParams(
+          currentUrl.hash.replace(/^#/, ""),
+        );
+        const supaErrorDesc = hashParamsForError.get("error_description");
+        const supaErrorCode = hashParamsForError.get("error_code");
+        if (supaErrorDesc || supaErrorCode) {
           if (!cancelled) {
-            const url = new URL(window.location.href);
-            url.searchParams.delete("code");
-            window.history.replaceState(null, "", url.pathname + url.search);
+            setError(
+              supaErrorDesc
+                ? decodeURIComponent(supaErrorDesc.replace(/\+/g, " "))
+                : "Invalid or expired reset link",
+            );
           }
           return;
         }
 
-        const queryAccessToken = searchParams.get("access_token");
-        const queryRefreshToken = searchParams.get("refresh_token");
+        // If session is already present (e.g. from previous init), don't show any link errors.
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData.session) {
+          if (!cancelled) setError(null);
+          return;
+        }
+
+        const code = currentUrl.searchParams.get("code");
+        if (code) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (!cancelled && error) setError(error.message);
+          if (!cancelled) {
+            currentUrl.searchParams.delete("code");
+            currentUrl.hash = "";
+            window.history.replaceState(
+              null,
+              "",
+              currentUrl.pathname + currentUrl.search,
+            );
+          }
+          return;
+        }
+
+        const queryAccessToken = currentUrl.searchParams.get("access_token");
+        const queryRefreshToken = currentUrl.searchParams.get("refresh_token");
 
         const hashParams = new URLSearchParams(
-          window.location.hash.replace(/^#/, ""),
+          currentUrl.hash.replace(/^#/, ""),
         );
         const hashAccessToken = hashParams.get("access_token");
         const hashRefreshToken = hashParams.get("refresh_token");
@@ -65,10 +93,7 @@ export default function ResetPasswordClient() {
         const accessToken = queryAccessToken ?? hashAccessToken;
         const refreshToken = queryRefreshToken ?? hashRefreshToken;
 
-        if (!accessToken || !refreshToken) {
-          if (!cancelled) setError("Invalid or expired reset link");
-          return;
-        }
+        if (!accessToken || !refreshToken) return;
 
         const { error } = await supabase.auth.setSession({
           access_token: accessToken,
@@ -77,14 +102,20 @@ export default function ResetPasswordClient() {
         if (!cancelled && error) setError(error.message);
 
         if (!cancelled) {
-          const url = new URL(window.location.href);
-          url.hash = "";
-          url.searchParams.delete("access_token");
-          url.searchParams.delete("refresh_token");
-          url.searchParams.delete("expires_in");
-          url.searchParams.delete("token_type");
-          url.searchParams.delete("type");
-          window.history.replaceState(null, "", url.pathname + url.search);
+          currentUrl.hash = "";
+          currentUrl.searchParams.delete("access_token");
+          currentUrl.searchParams.delete("refresh_token");
+          currentUrl.searchParams.delete("expires_in");
+          currentUrl.searchParams.delete("token_type");
+          currentUrl.searchParams.delete("type");
+          window.history.replaceState(
+            null,
+            "",
+            currentUrl.pathname + currentUrl.search,
+          );
+
+          // Clear any previous errors once session is established.
+          setError(null);
         }
       } finally {
         if (!cancelled) setIsInitializingSession(false);
@@ -97,7 +128,7 @@ export default function ResetPasswordClient() {
     return () => {
       cancelled = true;
     };
-  }, [searchParams]);
+  }, []);
 
   const validatePassword = (pwd: string) => ({
     len: pwd.length >= 6,
@@ -133,7 +164,14 @@ export default function ResetPasswordClient() {
         return;
       }
       setStage("success");
-      setTimeout(() => router.push("/"), 3000);
+      // Security/UX: after password reset, return user to sign-in screen.
+      try {
+        await supabase.auth.signOut();
+      } catch {}
+      setTimeout(
+        () => router.replace({ pathname: "/auth", query: { tab: "signin" } }),
+        1200,
+      );
     } catch (err: any) {
       setError(err?.message ?? "Something went wrong, please try again");
     } finally {
