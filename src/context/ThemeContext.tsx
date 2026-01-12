@@ -20,6 +20,7 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 const STORAGE_KEY = "app-theme";
+const FORCE_THEME_ATTR = "data-force-theme";
 
 function getSystemIsDark() {
   if (typeof window === "undefined") return false;
@@ -32,6 +33,13 @@ function getSystemIsDark() {
 function resolveTheme(theme: Theme): "light" | "dark" {
   if (theme === "system") return getSystemIsDark() ? "dark" : "light";
   return theme;
+}
+
+function getForcedTheme(): "light" | "dark" | null {
+  if (typeof document === "undefined") return null;
+  const raw = document.documentElement.getAttribute(FORCE_THEME_ATTR);
+  if (raw === "light" || raw === "dark") return raw;
+  return null;
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -50,20 +58,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    const r = resolveTheme(theme);
+    const forced = getForcedTheme();
+    const r = forced ?? resolveTheme(theme);
     setResolvedTheme(r);
     if (typeof document !== "undefined") {
       document.documentElement.classList.toggle("dark", r === "dark");
     }
-    try {
-      window.localStorage.setItem(STORAGE_KEY, theme);
-    } catch {}
+    if (!forced) {
+      try {
+        window.localStorage.setItem(STORAGE_KEY, theme);
+      } catch {}
+    }
   }, [theme]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const handler = () => {
+      if (getForcedTheme()) return;
       if (theme === "system") {
         const r = media.matches ? "dark" : "light";
         setResolvedTheme(r);
@@ -72,6 +84,26 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     };
     media.addEventListener?.("change", handler);
     return () => media.removeEventListener?.("change", handler);
+  }, [theme]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const el = document.documentElement;
+    const apply = () => {
+      const forced = getForcedTheme();
+      const r = forced ?? resolveTheme(theme);
+      setResolvedTheme(r);
+      el.classList.toggle("dark", r === "dark");
+    };
+
+    const observer = new MutationObserver((mutations) => {
+      if (!mutations.some((m) => m.attributeName === FORCE_THEME_ATTR)) return;
+      apply();
+    });
+    observer.observe(el, { attributes: true });
+    apply();
+
+    return () => observer.disconnect();
   }, [theme]);
 
   // Слушаем «внешние» обновления темы (например, из AuthContext) через custom event

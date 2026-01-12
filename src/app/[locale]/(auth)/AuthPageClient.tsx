@@ -37,6 +37,16 @@ export default function AuthPageClient() {
   const initialTab =
     searchParams?.get("tab") === "signup" ? "signup" : "signin";
 
+  useEffect(() => {
+    const el = document.documentElement;
+    const prev = el.getAttribute("data-force-theme");
+    el.setAttribute("data-force-theme", "light");
+    return () => {
+      if (prev === null) el.removeAttribute("data-force-theme");
+      else el.setAttribute("data-force-theme", prev);
+    };
+  }, []);
+
   const safeRedirectTo = useMemo(() => {
     const raw = searchParams?.get("redirectTo");
     if (!raw) return null;

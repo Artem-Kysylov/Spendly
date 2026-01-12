@@ -27,6 +27,16 @@ export default function ResetPasswordClient() {
   const tReset = useTranslations("resetPassword");
 
   useEffect(() => {
+    const el = document.documentElement;
+    const prev = el.getAttribute("data-force-theme");
+    el.setAttribute("data-force-theme", "light");
+    return () => {
+      if (prev === null) el.removeAttribute("data-force-theme");
+      else el.setAttribute("data-force-theme", prev);
+    };
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
 
     const initSessionFromUrl = async () => {

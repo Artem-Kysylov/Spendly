@@ -10,21 +10,23 @@ export default function OnboardingPageClient() {
   const router = useRouter();
 
   useEffect(() => {
+    const el = document.documentElement;
+    const prev = el.getAttribute("data-force-theme");
+    el.setAttribute("data-force-theme", "light");
+    return () => {
+      if (prev === null) el.removeAttribute("data-force-theme");
+      else el.setAttribute("data-force-theme", prev);
+    };
+  }, []);
+
+  useEffect(() => {
     if (isReady && session?.user?.user_metadata?.onboarding_completed) {
       router.replace("/dashboard");
     }
   }, [isReady, session, router]);
 
   return (
-    <div 
-      className="min-h-screen"
-      data-theme="light"
-      style={{
-        colorScheme: 'light',
-        backgroundColor: '#ffffff',
-        color: '#000000'
-      }}
-    >
+    <div className="min-h-screen">
       <ChatOnboarding />
     </div>
   );

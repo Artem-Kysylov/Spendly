@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,16 @@ export default function ForgotPasswordClient() {
   const [stage, setStage] = useState<"form" | "success">("form");
   const locale = useLocale();
   const tForgot = useTranslations("forgotPassword");
+
+  useEffect(() => {
+    const el = document.documentElement;
+    const prev = el.getAttribute("data-force-theme");
+    el.setAttribute("data-force-theme", "light");
+    return () => {
+      if (prev === null) el.removeAttribute("data-force-theme");
+      else el.setAttribute("data-force-theme", prev);
+    };
+  }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,7 +64,7 @@ export default function ForgotPasswordClient() {
         transition={{ duration: 0.5, ease: "easeOut" }}
       >
         <motion.div
-          className="w-full max-w-md rounded-[10px] border border-gray-200 bg-white text-gray-900 shadow-sm dark:bg白 dark:text-gray-900"
+          className="w-full max-w-md rounded-[10px] border border-gray-200 bg-white text-gray-900 shadow-sm dark:bg-white dark:text-gray-900"
           initial={{ opacity: 0, y: 30, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
