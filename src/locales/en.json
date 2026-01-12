@@ -70,29 +70,6 @@
       "description": "Install Spendly for quick access and offline support"
     }
   },
-  "pricing": {
-    "free": {
-      "label": "Free",
-      "short": "Great to get started",
-      "features": {
-        "track": "Track expenses and budgets",
-        "charts": "Basic charts and insights",
-        "notifications": "Local device notifications"
-      }
-    },
-    "pro": {
-      "label": "Pro",
-      "short": "Power features for growth",
-      "features": {
-        "aiUnlimited": "Unlimited AI assistant usage",
-        "advancedCharts": "Advanced charts and comparisons",
-        "prioritySupport": "Priority support",
-        "customGoals": "Custom goals and alerts",
-        "earlyAccess": "Early access to new features"
-      }
-    },
-    "perMonth": "per month"
-  },
   "Sidenav": {},
   "userSettings": {
     "dangerZone": {
@@ -226,6 +203,29 @@
       "tip_2": "Describe what you were doing when it happened.",
       "tip_3": "Mention your device model.",
       "btn_continue": "Draft Email"
+    }
+  },
+  "pricing": {
+    "perMonth": "per month",
+    "free": {
+      "label": "Free",
+      "short": "Perfect for getting started",
+      "features": {
+        "trackExpenses": "Track expenses and budgets",
+        "basicCharts": "Basic charts and insights",
+        "localNotifications": "Local device notifications"
+      }
+    },
+    "pro": {
+      "label": "Pro",
+      "short": "For power users who want more",
+      "features": {
+        "aiUnlimited": "Unlimited AI assistant",
+        "advancedCharts": "Advanced charts and analytics",
+        "prioritySupport": "Priority support",
+        "customGoals": "Custom savings goals",
+        "earlyAccess": "Early access to new features"
+      }
     }
   },
   "payment": {

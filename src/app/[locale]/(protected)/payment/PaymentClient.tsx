@@ -121,9 +121,9 @@ export default function PaymentClient() {
             </div>
           </div>
           <ul className="mt-4 space-y-2 text-sm text-gray-700 dark:text-white">
-            <li>• Track expenses and budgets</li>
-            <li>• Basic charts and insights</li>
-            <li>• Local device notifications</li>
+            <li>• {tPricing("free.features.trackExpenses")}</li>
+            <li>• {tPricing("free.features.basicCharts")}</li>
+            <li>• {tPricing("free.features.localNotifications")}</li>
           </ul>
         </motion.div>
 

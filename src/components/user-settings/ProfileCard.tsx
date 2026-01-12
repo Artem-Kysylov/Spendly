@@ -46,8 +46,8 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
       </CardHeader>
       <CardContent className="p-3 md:p-6 pt-0 space-y-6">
         {/* Avatar Section */}
-        <div className="flex flex-col md:flex-row md:items-start gap-6">
-          <div className="flex-shrink-0 flex justify-center md:justify-start">
+        <div className="flex flex-col items-center gap-6">
+          <div className="flex-shrink-0">
             {isGoogleUser ? (
               // Google пользователи - только отображение аватара
               <div className="w-24 h-24 aspect-square rounded-full overflow-hidden border-2 border-gray-200 dark:border-gray-700">
@@ -80,17 +80,17 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
           </div>
 
           {/* User Info */}
-          <div className="flex-1 space-y-3">
+          <div className="text-center space-y-3">
             <div>
               <h3 className="text-xl font-semibold text-secondary-black dark:text-white">
                 {userName}
               </h3>
-              <div className="flex items-center gap-2 text-gray-600 dark:text-white mt-1">
+              <div className="flex items-center justify-center gap-2 text-gray-600 dark:text-white mt-1">
                 <Mail size={16} />
                 <span className="text-sm">{userEmail}</span>
               </div>
               {createdAt && (
-                <div className="flex items-center gap-2 text-gray-600 dark:text-white mt-1">
+                <div className="flex items-center justify-center gap-2 text-gray-600 dark:text-white mt-1">
                   <Calendar size={16} />
                   <span className="text-sm">
                     {tProfile("memberSince", {
@@ -105,7 +105,7 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
             </div>
 
             {/* Provider Badge */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center gap-2">
               <span
                 className={`px-2 py-1 rounded-full text-xs font-medium ${
                   isGoogleUser
@@ -123,13 +123,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ onEditProfile }) => {
 
         {/* Edit Button - только для email пользователей */}
         {!isGoogleUser && (
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-start">
+          <div className="pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-center">
             <Button
               text={tProfile("edit")}
               variant="outline"
               onClick={onEditProfile}
               icon={<Edit2 size={16} />}
-              className="w-full md:w-auto max-w-full"
+              className="w-full max-w-xs"
             />
           </div>
         )}
