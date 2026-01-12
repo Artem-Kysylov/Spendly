@@ -14,8 +14,10 @@ import { supabase } from "@/lib/supabaseClient";
 import Button from "@/components/ui-elements/Button";
 import FormInput from "@/components/ui-elements/FormInput";
 import ToastMessage from "@/components/ui-elements/ToastMessage";
+import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -213,72 +215,99 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               />
 
               {/* Current Password */}
-              <div className="relative">
-                <FormInput
-                  label="Current Password"
-                  type={showCurrentPassword ? "text" : "password"}
-                  value={formData.currentPassword}
-                  onChange={(value) =>
-                    handleInputChange("currentPassword", value)
-                  }
-                  error={errors.currentPassword}
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                >
-                  {showCurrentPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={formData.currentPassword}
+                    onChange={(e) =>
+                      handleInputChange("currentPassword", e.target.value)
+                    }
+                    disabled={isLoading}
+                    className={cn(
+                      "h-[50px] px-[20px] pr-12",
+                      errors.currentPassword && "border-red-500 focus:border-red-500",
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowCurrentPassword(!showCurrentPassword)
+                    }
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                  >
+                    {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.currentPassword && (
+                  <p className="text-sm text-red-500">{errors.currentPassword}</p>
+                )}
               </div>
 
               {/* New Password */}
-              <div className="relative">
-                <FormInput
-                  label="New Password"
-                  type={showNewPassword ? "text" : "password"}
-                  value={formData.newPassword}
-                  onChange={(value) => handleInputChange("newPassword", value)}
-                  error={errors.newPassword}
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                >
-                  {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  New Password
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showNewPassword ? "text" : "password"}
+                    value={formData.newPassword}
+                    onChange={(e) => handleInputChange("newPassword", e.target.value)}
+                    disabled={isLoading}
+                    className={cn(
+                      "h-[50px] px-[20px] pr-12",
+                      errors.newPassword && "border-red-500 focus:border-red-500",
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                  >
+                    {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.newPassword && (
+                  <p className="text-sm text-red-500">{errors.newPassword}</p>
+                )}
               </div>
 
               {/* Confirm Password */}
-              <div className="relative">
-                <FormInput
-                  label="Confirm New Password"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={formData.confirmPassword}
-                  onChange={(value) =>
-                    handleInputChange("confirmPassword", value)
-                  }
-                  error={errors.confirmPassword}
-                  disabled={isLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-[38px] text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                </button>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Confirm New Password
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={formData.confirmPassword}
+                    onChange={(e) =>
+                      handleInputChange("confirmPassword", e.target.value)
+                    }
+                    disabled={isLoading}
+                    className={cn(
+                      "h-[50px] px-[20px] pr-12",
+                      errors.confirmPassword &&
+                        "border-red-500 focus:border-red-500",
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowConfirmPassword(!showConfirmPassword)
+                    }
+                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                  >
+                    {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-500">{errors.confirmPassword}</p>
+                )}
               </div>
             </div>
 
