@@ -901,6 +901,31 @@
     "appInstall": {
       "title": "ऐप इंस्टॉल करें"
     },
+    "editProfile": {
+      "title": "प्रोफ़ाइल संपादित करें",
+      "toast": {
+        "updateSuccess": "प्रोफ़ाइल सफलतापूर्वक अपडेट हो गई!",
+        "updateFailed": "प्रोफ़ाइल अपडेट करने में विफल"
+      },
+      "fields": {
+        "email": "ईमेल",
+        "currentPassword": "वर्तमान पासवर्ड",
+        "newPassword": "नया पासवर्ड",
+        "confirmNewPassword": "नए पासवर्ड की पुष्टि करें"
+      },
+      "actions": {
+        "update": "प्रोफ़ाइल अपडेट करें",
+        "updating": "अपडेट हो रहा है..."
+      },
+      "validation": {
+        "emailRequired": "ईमेल आवश्यक है",
+        "invalidEmail": "कृपया मान्य ईमेल दर्ज करें",
+        "currentPasswordRequired": "पासवर्ड बदलने के लिए वर्तमान पासवर्ड आवश्यक है",
+        "newPasswordRequired": "नया पासवर्ड आवश्यक है",
+        "passwordMinLength": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए",
+        "passwordsDoNotMatch": "पासवर्ड मेल नहीं खाते"
+      }
+    },
     "budget": {
       "pickEmojiOptional": "इमोजी चुनें (वैकल्पिक)",
       "placeholder": {

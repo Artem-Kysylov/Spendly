@@ -192,7 +192,19 @@ export type NamespaceKeys = {
     | "transaction.type.income"
     | "editProfile.title"
     | "editProfile.toast.updateSuccess"
-    | "editProfile.toast.updateFailed";
+    | "editProfile.toast.updateFailed"
+    | "editProfile.fields.email"
+    | "editProfile.fields.currentPassword"
+    | "editProfile.fields.newPassword"
+    | "editProfile.fields.confirmNewPassword"
+    | "editProfile.actions.update"
+    | "editProfile.actions.updating"
+    | "editProfile.validation.emailRequired"
+    | "editProfile.validation.invalidEmail"
+    | "editProfile.validation.currentPasswordRequired"
+    | "editProfile.validation.newPasswordRequired"
+    | "editProfile.validation.passwordMinLength"
+    | "editProfile.validation.passwordsDoNotMatch";
   notifications:
     | "bell.aria"
     | "bell.title"

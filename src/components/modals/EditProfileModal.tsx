@@ -83,9 +83,9 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
 
     // Email validation
     if (!formData.email) {
-      newErrors.email = "Email is required";
+      newErrors.email = tModals("editProfile.validation.emailRequired");
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Please enter a valid email";
+      newErrors.email = tModals("editProfile.validation.invalidEmail");
     }
 
     // Password validation (only if user wants to change password)
@@ -96,17 +96,17 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
     ) {
       if (!formData.currentPassword) {
         newErrors.currentPassword =
-          "Current password is required to change password";
+          tModals("editProfile.validation.currentPasswordRequired");
       }
 
       if (!formData.newPassword) {
-        newErrors.newPassword = "New password is required";
+        newErrors.newPassword = tModals("editProfile.validation.newPasswordRequired");
       } else if (formData.newPassword.length < 6) {
-        newErrors.newPassword = "Password must be at least 6 characters";
+        newErrors.newPassword = tModals("editProfile.validation.passwordMinLength");
       }
 
       if (formData.newPassword !== formData.confirmPassword) {
-        newErrors.confirmPassword = "Passwords do not match";
+        newErrors.confirmPassword = tModals("editProfile.validation.passwordsDoNotMatch");
       }
     }
 
@@ -206,7 +206,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <div className="space-y-4">
               {/* Email */}
               <FormInput
-                label="Email"
+                label={tModals("editProfile.fields.email")}
                 type="email"
                 value={formData.email}
                 onChange={(value) => handleInputChange("email", value)}
@@ -217,7 +217,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               {/* Current Password */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Current Password
+                  {tModals("editProfile.fields.currentPassword")}
                 </label>
                 <div className="relative">
                   <Input
@@ -250,7 +250,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               {/* New Password */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  New Password
+                  {tModals("editProfile.fields.newPassword")}
                 </label>
                 <div className="relative">
                   <Input
@@ -279,7 +279,7 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
               {/* Confirm Password */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Confirm New Password
+                  {tModals("editProfile.fields.confirmNewPassword")}
                 </label>
                 <div className="relative">
                   <Input
@@ -319,7 +319,11 @@ const EditProfileModal: React.FC<EditProfileModalProps> = ({
                 disabled={isLoading}
               />
               <Button
-                text={isLoading ? "Updating..." : "Update Profile"}
+                text={
+                  isLoading
+                    ? tModals("editProfile.actions.updating")
+                    : tModals("editProfile.actions.update")
+                }
                 type="submit"
                 variant="primary"
                 disabled={isLoading}

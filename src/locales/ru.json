@@ -317,29 +317,6 @@
       "btn_continue": "Создать письмо"
     }
   },
-  "pricing": {
-    "perMonth": "в месяц",
-    "free": {
-      "label": "Бесплатно",
-      "short": "Идеально для начала",
-      "features": {
-        "trackExpenses": "Отслеживание расходов и бюджетов",
-        "basicCharts": "Базовые графики и аналитика",
-        "localNotifications": "Уведомления на устройстве"
-      }
-    },
-    "pro": {
-      "label": "Pro",
-      "short": "Для опытных пользователей",
-      "features": {
-        "aiUnlimited": "Безлимитный AI-ассистент",
-        "advancedCharts": "Расширенные графики и аналитика",
-        "prioritySupport": "Приоритетная поддержка",
-        "customGoals": "Пользовательские цели сбережений",
-        "earlyAccess": "Ранний доступ к новым функциям"
-      }
-    }
-  },
   "payment": {
     "title": "Обновить до Pro",
     "subtitle": "Выберите план, который вам подходит.",
@@ -999,7 +976,29 @@
       "nameLabel": "Имя",
       "namePlaceholder": "Ваше имя",
       "save": "Сохранить изменения",
-      "cancel": "Отмена"
+      "cancel": "Отмена",
+      "toast": {
+        "updateSuccess": "Профиль успешно обновлён!",
+        "updateFailed": "Не удалось обновить профиль"
+      },
+      "fields": {
+        "email": "Email",
+        "currentPassword": "Текущий пароль",
+        "newPassword": "Новый пароль",
+        "confirmNewPassword": "Подтвердите новый пароль"
+      },
+      "actions": {
+        "update": "Обновить профиль",
+        "updating": "Обновление..."
+      },
+      "validation": {
+        "emailRequired": "Email обязателен",
+        "invalidEmail": "Введите корректный email",
+        "currentPasswordRequired": "Текущий пароль обязателен для смены пароля",
+        "newPasswordRequired": "Новый пароль обязателен",
+        "passwordMinLength": "Пароль должен содержать минимум 6 символов",
+        "passwordsDoNotMatch": "Пароли не совпадают"
+      }
     },
     "transaction": {
       "autoTypeInfo": "Тип определяется бюджетом",

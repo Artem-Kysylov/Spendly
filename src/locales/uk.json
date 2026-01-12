@@ -1009,7 +1009,29 @@
       "nameLabel": "Ім'я",
       "namePlaceholder": "Ваше ім'я",
       "save": "Зберегти зміни",
-      "cancel": "Скасувати"
+      "cancel": "Скасувати",
+      "toast": {
+        "updateSuccess": "Профіль успішно оновлено!",
+        "updateFailed": "Не вдалося оновити профіль"
+      },
+      "fields": {
+        "email": "Email",
+        "currentPassword": "Поточний пароль",
+        "newPassword": "Новий пароль",
+        "confirmNewPassword": "Підтвердьте новий пароль"
+      },
+      "actions": {
+        "update": "Оновити профіль",
+        "updating": "Оновлення..."
+      },
+      "validation": {
+        "emailRequired": "Email є обов'язковим",
+        "invalidEmail": "Введіть коректний email",
+        "currentPasswordRequired": "Поточний пароль потрібен для зміни пароля",
+        "newPasswordRequired": "Новий пароль є обов'язковим",
+        "passwordMinLength": "Пароль має містити щонайменше 6 символів",
+        "passwordsDoNotMatch": "Паролі не співпадають"
+      }
     },
     "transaction": {
       "autoTypeInfo": "Тип визначається бюджетом",

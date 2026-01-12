@@ -802,6 +802,31 @@
     "appInstall": {
       "title": "アプリをインストール"
     },
+    "editProfile": {
+      "title": "プロフィールを編集",
+      "toast": {
+        "updateSuccess": "プロフィールを更新しました！",
+        "updateFailed": "プロフィールの更新に失敗しました"
+      },
+      "fields": {
+        "email": "メール",
+        "currentPassword": "現在のパスワード",
+        "newPassword": "新しいパスワード",
+        "confirmNewPassword": "新しいパスワード（確認）"
+      },
+      "actions": {
+        "update": "プロフィールを更新",
+        "updating": "更新中..."
+      },
+      "validation": {
+        "emailRequired": "メールは必須です",
+        "invalidEmail": "有効なメールアドレスを入力してください",
+        "currentPasswordRequired": "パスワードを変更するには現在のパスワードが必要です",
+        "newPasswordRequired": "新しいパスワードは必須です",
+        "passwordMinLength": "パスワードは6文字以上である必要があります",
+        "passwordsDoNotMatch": "パスワードが一致しません"
+      }
+    },
     "budget": {
       "pickEmojiOptional": "絵文字を選択（任意）",
       "placeholder": {

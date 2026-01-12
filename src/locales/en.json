@@ -686,6 +686,24 @@
       "toast": {
         "updateSuccess": "Profile updated successfully!",
         "updateFailed": "Failed to update profile"
+      },
+      "fields": {
+        "email": "Email",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmNewPassword": "Confirm New Password"
+      },
+      "actions": {
+        "update": "Update Profile",
+        "updating": "Updating..."
+      },
+      "validation": {
+        "emailRequired": "Email is required",
+        "invalidEmail": "Please enter a valid email",
+        "currentPasswordRequired": "Current password is required to change password",
+        "newPasswordRequired": "New password is required",
+        "passwordMinLength": "Password must be at least 6 characters",
+        "passwordsDoNotMatch": "Passwords do not match"
       }
     }
   },

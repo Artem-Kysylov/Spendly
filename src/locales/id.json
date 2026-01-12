@@ -562,6 +562,31 @@
     }
   },
   "modals": {
+    "editProfile": {
+      "title": "Edit Profil",
+      "toast": {
+        "updateSuccess": "Profil berhasil diperbarui!",
+        "updateFailed": "Gagal memperbarui profil"
+      },
+      "fields": {
+        "email": "Email",
+        "currentPassword": "Kata sandi saat ini",
+        "newPassword": "Kata sandi baru",
+        "confirmNewPassword": "Konfirmasi kata sandi baru"
+      },
+      "actions": {
+        "update": "Perbarui Profil",
+        "updating": "Memperbarui..."
+      },
+      "validation": {
+        "emailRequired": "Email wajib diisi",
+        "invalidEmail": "Masukkan email yang valid",
+        "currentPasswordRequired": "Kata sandi saat ini diperlukan untuk mengganti kata sandi",
+        "newPasswordRequired": "Kata sandi baru wajib diisi",
+        "passwordMinLength": "Kata sandi minimal 6 karakter",
+        "passwordsDoNotMatch": "Kata sandi tidak cocok"
+      }
+    },
     "transaction": {
       "placeholder": {
         "title": "Nama transaksi",
