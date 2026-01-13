@@ -83,6 +83,37 @@ export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
     console.warn("users table missing, skipping DB save; using cookies only");
   }
 
+  try {
+    const { error } = await supabase
+      .from("user_settings")
+      .upsert(
+        [
+          {
+            user_id: userId,
+            locale: normalized.locale,
+          },
+        ],
+        { onConflict: "user_id" },
+      );
+
+    if (error) {
+      const code = (error as any).code || "";
+      const message = (error as any).message || "";
+      const relationMissing =
+        code === "42P01" || message.includes('relation "user_settings" does not exist');
+      if (!relationMissing) {
+        throw new Error(error.message);
+      }
+      console.warn(
+        "user_settings table missing, skipping DB save; using cookies only",
+      );
+    }
+  } catch (e: any) {
+    const msg = e?.message || String(e);
+    if (!msg.includes('relation "user_settings" does not exist')) throw e;
+    console.warn("user_settings table missing, skipping DB save; using cookies only");
+  }
+
   // Set cookies for client/provider sync
   const cookieStore = cookies();
   cookieStore.set("spendly_locale", normalized.locale, {

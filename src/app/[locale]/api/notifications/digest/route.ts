@@ -2,11 +2,108 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
 import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
 import { getWeekRange, getLastWeekRange } from "@/lib/ai/stats";
-import { getTranslations } from "next-intl/server";
 import { selectModel } from "@/lib/ai/routing";
 import { buildCountersPrompt } from "@/lib/ai/promptBuilders";
 import { streamOpenAIText } from "@/lib/llm/openai";
 import { streamGeminiText } from "@/lib/llm/google";
+
+type DigestLanguage = "en" | "ru";
+
+type DigestStrings = {
+  weeklyTitle: string;
+  lastWeekLabel: string;
+  expensesLabel: string;
+  incomeLabel: string;
+  topLabel: string;
+  expensesDifferenceText: (percent: string) => string;
+  incomeDifferenceText: (percent: string) => string;
+  aiSystem: string;
+};
+
+const DIGEST_STRINGS: Record<DigestLanguage, DigestStrings> = {
+  en: {
+    weeklyTitle: "Weekly Digest",
+    lastWeekLabel: "Last week",
+    expensesLabel: "Expenses",
+    incomeLabel: "Income",
+    topLabel: "Top",
+    expensesDifferenceText: (percent) =>
+      `Expenses changed by ${percent}% compared to the previous week.`,
+    incomeDifferenceText: (percent) =>
+      `Income changed by ${percent}% compared to the previous week.`,
+    aiSystem:
+      "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
+  },
+  ru: {
+    weeklyTitle: "Еженедельный отчёт",
+    lastWeekLabel: "Прошлая неделя",
+    expensesLabel: "Расходы",
+    incomeLabel: "Доходы",
+    topLabel: "Топ",
+    expensesDifferenceText: (percent) =>
+      `Расходы изменились на ${percent}% по сравнению с прошлой неделей.`,
+    incomeDifferenceText: (percent) =>
+      `Доходы изменились на ${percent}% по сравнению с прошлой неделей.`,
+    aiSystem:
+      "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
+  },
+};
+
+function toDigestLanguage(raw: unknown): DigestLanguage {
+  return raw === "ru" ? "ru" : "en";
+}
+
+function toIntlLocale(lang: DigestLanguage): string {
+  return lang === "ru" ? "ru-RU" : "en-US";
+}
+
+async function getUserPreferredLanguage(
+  supabase: any,
+  userId: string,
+): Promise<DigestLanguage> {
+  const normalize = (l: unknown): DigestLanguage => {
+    if (typeof l !== "string") return DEFAULT_LOCALE === "ru" ? "ru" : "en";
+    if (!isSupportedLanguage(l)) return DEFAULT_LOCALE === "ru" ? "ru" : "en";
+    return toDigestLanguage(l);
+  };
+
+  try {
+    const { data, error } = await supabase
+      .from("user_settings")
+      .select("locale")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (!error && data?.locale) {
+      return normalize(data.locale);
+    }
+
+    const code = (error as any)?.code;
+    const msg = String((error as any)?.message || "");
+    const relationMissing = code === "42P01" || msg.includes("does not exist");
+    if (error && !relationMissing) {
+      console.warn("digest: user_settings locale read failed", error);
+    }
+  } catch {
+    // ignore
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("users")
+      .select("locale")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (!error && data?.locale) {
+      return normalize(data.locale);
+    }
+  } catch {
+    // ignore
+  }
+
+  return DEFAULT_LOCALE === "ru" ? "ru" : "en";
+}
 
 function isAuthorized(req: NextRequest): boolean {
   const bearer = req.headers.get("authorization") || "";
@@ -39,14 +136,6 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getServerSupabaseClient();
-  const localeCookie =
-    req.cookies.get("NEXT_LOCALE")?.value ||
-    req.cookies.get("spendly_locale")?.value ||
-    DEFAULT_LOCALE;
-  const locale = isSupportedLanguage(localeCookie || "")
-    ? (localeCookie as any)
-    : DEFAULT_LOCALE;
-  const t = await getTranslations({ locale, namespace: "Notifications" });
   const currency = "USD"; // Можно расширить и брать из профиля
 
   // Точки недели: текущая неделя (старт в понедельник) и прошлые периоды
@@ -82,6 +171,10 @@ export async function POST(req: NextRequest) {
 
   for (const p of targets) {
     const userId = p.user_id;
+
+    const lang = await getUserPreferredLanguage(supabase, userId);
+    const strings = DIGEST_STRINGS[lang];
+    const intlLocale = toIntlLocale(lang);
 
     // Идемпотентность: проверяем, не создавали ли дайджест за эту прошлую неделю
     const idemKey = `weekly:${userId}:${lastWeekStart.toISOString().slice(0, 10)}`;
@@ -164,14 +257,16 @@ export async function POST(req: NextRequest) {
     const isPro = (userRow as any)?.is_pro === true;
 
     // Сводка по прошлой неделе (базовая, для Free и Pro)
-    const title = t("weekly.title");
+    const title = strings.weeklyTitle;
     const topBudgetsText = topBudgets.length
-      ? `${t("weekly.top")}: ${topBudgets.map(([n, v]) => `${n} ${formatCurrency(v, locale, currency)}`).join(", ")}.`
+      ? `${strings.topLabel}: ${topBudgets
+          .map(([n, v]) => `${n} ${formatCurrency(v, intlLocale, currency)}`)
+          .join(", ")}.`
       : "";
     const bodyBasic =
-      `${t("weekly.lastWeek")} — ` +
-      `${t("weekly.expenses")} ${formatCurrency(totalExpensesLast, locale, currency)}, ` +
-      `${t("weekly.income")} ${formatCurrency(totalIncomeLast, locale, currency)}. ` +
+      `${strings.lastWeekLabel} — ` +
+      `${strings.expensesLabel} ${formatCurrency(totalExpensesLast, intlLocale, currency)}, ` +
+      `${strings.incomeLabel} ${formatCurrency(totalIncomeLast, intlLocale, currency)}. ` +
       topBudgetsText;
 
     let body = bodyBasic;
@@ -213,13 +308,13 @@ export async function POST(req: NextRequest) {
               ? "warning"
               : "good";
 
-      const expensesDifferenceText = t("weekly.expensesDifference", {
-        percent: Math.abs(expensesTrendPercent).toFixed(1),
-      });
+      const expensesDifferenceText = strings.expensesDifferenceText(
+        Math.abs(expensesTrendPercent).toFixed(1),
+      );
 
-      const incomeDifferenceText = t("weekly.incomeDifference", {
-        percent: Math.abs(incomeTrendPercent).toFixed(1),
-      });
+      const incomeDifferenceText = strings.incomeDifferenceText(
+        Math.abs(incomeTrendPercent).toFixed(1),
+      );
 
       const prompt = buildCountersPrompt({
         budget,
@@ -236,7 +331,7 @@ export async function POST(req: NextRequest) {
         expensesDifferenceText,
         incomeDifferenceText,
         currency,
-        locale: locale as any,
+        locale: lang,
       });
 
       const hasOpenAI = !!process.env.OPENAI_API_KEY;
@@ -250,8 +345,7 @@ export async function POST(req: NextRequest) {
           const stream = streamOpenAIText({
             model: process.env.OPENAI_MODEL ?? "gpt-4-turbo",
             prompt,
-            system:
-              "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
+            system: strings.aiSystem,
             requestId,
           });
           const reader = stream.getReader();
@@ -266,8 +360,7 @@ export async function POST(req: NextRequest) {
           const stream = streamGeminiText({
             model: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
             prompt,
-            system:
-              "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
+            system: strings.aiSystem,
             requestId,
           });
           const reader = stream.getReader();
