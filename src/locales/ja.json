@@ -1,77 +1,46 @@
 {
-  "layout": {
-    "sidebar": {
-      "dashboard": "ダッシュボード",
-      "transactions": "取引",
-      "budgets": "予算",
-      "userSettings": "ユーザー設定",
-      "addTransaction": "取引を追加",
-      "aiAssistant": "AI アシスタント"
-    },
-    "upgradeBanner": {
-      "title": "Proでインサイトを得る 🚀",
-      "description": "無制限の予算、AI アシスタントなどが利用可能に。",
-      "cta": "Pro にアップグレード"
-    },
-    "periodicBanner": {
-      "title": "Proでインサイトをアンロック 🚀",
-      "description": "推測はやめましょう！キャッシュフロー、取引、予算に関するインサイトを取得します。",
-      "dismiss": "今はしない"
-    },
-    "limitWarning": {
-      "title": "無料プランの上限に達しました",
-      "description": "無料プランの制限に達しました。",
-      "budgets": "無料では最大3つの予算。無制限にはアップグレードしてください。",
-      "assistant": "無料では AI メッセージは最大10件。無制限にはアップグレードしてください。",
-      "cta": "Pro にアップグレード"
+  "seo": {
+    "paywall": {
+      "title": "Upgrade to Pro - Spendly",
+      "description": "Unlock unlimited budgets, AI assistant, and powerful features to take control of your finances with Spendly Pro."
     }
   },
-  "onboarding": {
-    "title": "オンボーディング",
-    "autodetected": "自動検出",
-    "step1": {
-      "action_coffee": "コーヒー",
-      "action_food": "食事",
-      "action_taxi": "タクシー",
-      "action_groceries": "買い物",
-      "category_question": "わかりました！今日お金を使いましたか？"
+  "BudgetSetup": {
+    "title": "Set your monthly budget",
+    "selectCountry": "Select your country",
+    "selectCurrency": "Select your currency",
+    "customAmount": "Custom amount",
+    "save": "Save",
+    "autodetected": "Autodetected",
+    "searchCountry": "Search country...",
+    "searchCurrency": "Search currency...",
+    "clearSelection": "Clear"
+  },
+  "greeting": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening"
+  },
+  "Settings": {
+    "language": "Language",
+    "selectLanguage": "Select language",
+    "saveLanguage": "Save language"
+  },
+  "common": {
+    "saving": "Saving…",
+    "unexpectedError": "An unexpected error occurred",
+    "errorLabel": "Error",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "save": "保存",
+    "submit": "Submit",
+    "close": "Close",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next"
     },
-    "step2": {
-      "amount_question": "いくらでしたか？",
-      "amount_placeholder": "金額を入力"
-    },
-    "step3": {
-      "budget_question": "最後に、月間目標は？スタイルを選んでください：",
-      "style_monk": "修行モード",
-      "style_monk_desc": "厳格な予算",
-      "style_balanced": "バランス",
-      "style_balanced_desc": "普通の支出",
-      "style_rich": "リッチ",
-      "style_rich_desc": "柔軟な制限",
-      "budget_hint": "この金額は後でアプリで変更できます"
-    },
-    "step4": {
-      "processing": "ワークスペースを設定中...",
-      "finish_button": "セットアップ完了"
-    },
-    "actions": {
-      "back": "戻る",
-      "next": "次へ",
-      "finish": "完了"
-    },
-    "transaction": {
-      "modalTitle": "取引を追加",
-      "added": "取引が正常に追加されました！"
-    },
-    "errors": {
-      "authRequired": "続行するにはサインインしてください。",
-      "budgetSaveFailed": "予算の保存に失敗しました。もう一度お試しください。",
-      "unexpected": "予期しないエラーが発生しました。",
-      "transactionSaveFailed": "トランザクションの保存に失敗しました。もう一度お試しください。"
-    },
-    "step0": {
-      "currency_greeting": "こんにちは！私はSpendly Palです。設定しましょう。どの通貨を使用しますか？"
-    }
+    "today": "Today",
+    "yesterday": "Yesterday"
   },
   "cta": {
     "upgradeToPro": "Pro にアップグレード",
@@ -88,38 +57,31 @@
       "description": "予算と AI インサイトへすぐにアクセスできるよう、ホーム画面に Spendly を追加します。",
       "step1Title": "ステップ 1",
       "step1Text": "Safari のツールバーで共有ボタンをタップします。",
+      "step1TextChrome": "Tap the Share button in the top right corner.",
       "step2Title": "ステップ 2",
       "step2Text": "「ホーム画面に追加」を選択して、確認します。",
       "notNow": "あとで"
     },
     "button": {
       "install": "アプリをインストール"
+    },
+    "settings": {
+      "title": "Install App",
+      "description": "Install Spendly for quick access and offline support"
     }
   },
-  "pricing": {
-    "free": {
-      "label": "無料",
-      "short": "はじめるための基本機能",
-      "features": {
-        "track": "支出と予算を追跡",
-        "charts": "基本的なグラフとインサイト",
-        "notifications": "基本的な通知"
-      }
-    },
-    "pro": {
-      "label": "Pro",
-      "short": "成長のための強力な機能",
-      "features": {
-        "aiUnlimited": "AI アシスタント無制限",
-        "advancedCharts": "高度なグラフと比較",
-        "prioritySupport": "優先サポート",
-        "customGoals": "カスタム目標とアラート",
-        "earlyAccess": "新機能への先行アクセス"
-      }
-    },
-    "perMonth": "月額"
-  },
+  "Sidenav": {},
   "userSettings": {
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "This action will cancel your Pro subscription and downgrade to Free.",
+      "unsubscribe": "Unsubscribe",
+      "modal": {
+        "title": "Are you sure you want to unsubscribe?",
+        "confirm": "Confirm",
+        "cancel": "Cancel"
+      }
+    },
     "header": {
       "title": "ユーザー設定⚙️",
       "subtitle": "アカウント設定と好みを管理します"
@@ -143,22 +105,7 @@
     },
     "notifications": {
       "title": "通知",
-      "description": "通知の受け取り方法とタイミングを管理",
-      "weekly": {
-        "title": "週間サマリー",
-        "body": "週間レポートの準備ができました。"
-      },
-      "push_subscribed": "プッシュが有効",
-      "push_failed": "プッシュ登録に失敗しました",
-      "permission_denied": "通知の権限が拒否されました",
-      "budget_80": "予算の80%に到達",
-      "budget_100": "予算超過"
-    },
-    "details": {
-      "inlineWarning": {
-        "reduceExpenses": "支出を削減",
-        "openReport": "レポートを開く"
-      }
+      "description": "通知の受け取り方法とタイミングを管理"
     },
     "subscription": {
       "title": "購読",
@@ -178,30 +125,7 @@
       "signOut": {
         "title": "サインアウト",
         "description": "アカウントからサインアウト"
-      },
-      "dangerZone": {
-        "title": "危険地帯",
-        "description": "この操作を行うと、Proサブスクリプションがキャンセルされ、無料版にダウングレードされます。",
-        "unsubscribe": "退会する",
-        "modal": {
-          "title": "本当に退会しますか？",
-          "confirm": "確認",
-          "cancel": "キャンセル"
-        }
       }
-    },
-    "modals": {
-      "signOut": {
-        "title": "サインアウトしますか？",
-        "text": "本当にサインアウトしますか？"
-      }
-    },
-    "templates": {
-      "title": "取引テンプレート",
-      "description": "入力を高速化：よく使うタイトル・金額・種類・予算を保存します。テンプレートに日付は使用しません。",
-      "loading": "テンプレートを読み込み中…",
-      "empty": "テンプレートはありません",
-      "delete": "削除"
     },
     "recurringRules": {
       "title": "定期ルール",
@@ -231,8 +155,8 @@
           "unbudgeted": "予算なし"
         },
         "btn": {
-          "saving": "保存中…",
-          "add": "ルールを追加"
+          "add": "ルールを追加",
+          "saving": "保存中…"
         }
       },
       "list": {
@@ -241,10 +165,10 @@
         "next": "次回支払い:",
         "inBudget": "予算内",
         "unbudgeted": "予算外",
-        "save": "保存",
-        "cancel": "キャンセル",
         "edit": "編集",
-        "delete": "削除"
+        "delete": "削除",
+        "save": "保存",
+        "cancel": "キャンセル"
       },
       "errors": {
         "fillTitleAndAmount": "タイトルと金額を入力してください。",
@@ -253,6 +177,19 @@
         "updateFailed": "ルールの更新に失敗しました。",
         "deleteFailed": "ルールの削除に失敗しました。",
         "limitReached": "制限: 無料プランではルールは最大2件。Pro にアップグレードで無制限。"
+      }
+    },
+    "templates": {
+      "title": "取引テンプレート",
+      "description": "入力を高速化：よく使うタイトル・金額・種類・予算を保存します。テンプレートに日付は使用しません。",
+      "loading": "テンプレートを読み込み中…",
+      "empty": "テンプレートはありません",
+      "delete": "削除"
+    },
+    "modals": {
+      "signOut": {
+        "title": "サインアウトしますか？",
+        "text": "本当にサインアウトしますか？"
       }
     },
     "support_title": "サポートとフィードバック",
@@ -267,6 +204,38 @@
       "tip_3": "お使いのデバイスのモデルを記載してください。",
       "btn_continue": "メールを作成"
     }
+  },
+  "pricing": {
+    "perMonth": "月額",
+    "free": {
+      "label": "無料",
+      "short": "はじめるための基本機能",
+      "features": {
+        "trackExpenses": "Track expenses and budgets",
+        "basicCharts": "Basic charts and insights",
+        "localNotifications": "Local device notifications"
+      }
+    },
+    "pro": {
+      "label": "Pro",
+      "short": "成長のための強力な機能",
+      "features": {
+        "aiUnlimited": "AI アシスタント無制限",
+        "advancedCharts": "高度なグラフと比較",
+        "prioritySupport": "優先サポート",
+        "customGoals": "カスタム目標とアラート",
+        "earlyAccess": "新機能への先行アクセス"
+      }
+    }
+  },
+  "payment": {
+    "title": "Upgrade to Pro",
+    "subtitle": "Choose the plan that fits your needs. Billing will be powered by Lemon Squeezy.",
+    "toastComingSoon": "Payments are coming soon via Lemon Squeezy.",
+    "integrationComingSoon": "Lemon Squeezy integration — coming soon.",
+    "successTitle": "Payment Successful",
+    "successMessage": "Thank you for supporting Spendly Pro!",
+    "goToDashboard": "Go to Dashboard"
   },
   "paywall": {
     "hero": {
@@ -339,16 +308,417 @@
       "yearly": "Pro（年間）にアップグレード"
     }
   },
+  "limitReached": {
+    "title": "Limit Reached",
+    "budgets": "You have reached the limit of 3 budgets on the Free plan.",
+    "wallets": "You have reached the limit of 5 wallets on the Free plan.",
+    "description": "Upgrade to Pro to unlock unlimited budgets, AI assistant, and more powerful features.",
+    "upgrade": "Upgrade to Pro",
+    "cancel": "Not now"
+  },
+  "transactions": {
+    "title": "取引📉",
+    "addTransaction": "取引を追加",
+    "search": {
+      "placeholder": "Search transactions..."
+    },
+    "empty": {
+      "title": "まだ取引がありません",
+      "description": "最初の取引を追加して開始",
+      "filtered": "選択したフィルターで取引が見つかりません"
+    },
+    "modal": {
+      "addTitle": "取引を追加"
+    },
+    "toast": {
+      "deleteFailed": "取引の削除に失敗しました。もう一度お試しください。",
+      "deleteSuccess": "取引を削除しました",
+      "updateFailed": "取引の更新に失敗しました",
+      "updateSuccess": "取引を更新しました！"
+    },
+    "table": {
+      "headers": {
+        "title": "取引名",
+        "budget": "予算",
+        "amount": "金額",
+        "type": "種類",
+        "date": "日付",
+        "actions": "操作"
+      },
+      "unbudgeted": "予算なし",
+      "empty": {
+        "default": "取引なし"
+      },
+      "modal": {
+        "deleteTitle": "取引を削除",
+        "deletePrompt": "この取引を削除しますか？",
+        "editTitle": "取引を編集"
+      }
+    },
+    "types": {
+      "expense": "支出",
+      "income": "収入"
+    }
+  },
+  "dashboard": {
+    "welcome": "ようこそ {name}👋",
+    "deleteModal": {
+      "title": "取引を削除",
+      "prompt": "この取引を削除しますか？"
+    },
+    "mainBudget": {
+      "editTitle": "メイン予算を編集"
+    },
+    "counters": {
+      "totalBudget": "合計予算",
+      "totalExpenses": "合計支出",
+      "dailySafeToSpend": "Daily safe-to-spend",
+      "totalIncome": "合計収入",
+      "remaining": "残り",
+      "usedPercent": "使用済み",
+      "overBudget": "予算超過",
+      "daysLeftInMonth": "{days} days left in month",
+      "status": {
+        "exceeded": "超過",
+        "warning": "警告",
+        "notSet": "未設定"
+      },
+      "ofBudget": "予算の",
+      "coversExpenses": "{percent}% の支出をカバー"
+    },
+    "insights": {
+      "critical": "Warning: You've used over 90% of your budget!",
+      "positive": "Great job! You're spending less than last week.",
+      "quietDay": "No spending today. Keep it up!",
+      "default": "Analyze your finances with Spendly Pal"
+    },
+    "recentActivity": "Recent Activity",
+    "showAll": "Show all"
+  },
+  "budgets": {
+    "rollover": {
+      "panelTitle": "ロールオーバー",
+      "toggleLabel": "ロールオーバーを有効にする",
+      "modeLabel": "モード",
+      "positiveOnly": "正のみ",
+      "allowNegative": "負を許可",
+      "label": "Rollover",
+      "positive": "Rollover from last month",
+      "negative": "Overspending from last month"
+    },
+    "meta": {
+      "title": "予算",
+      "description": "予算を作成および管理します。"
+    },
+    "list": {
+      "modal": {
+        "createTitle": "新しい予算を作成💸"
+      },
+      "toast": {
+        "failedLoad": "予算フォルダーの読み込みに失敗しました",
+        "failedCreate": "予算の作成に失敗しました",
+        "createSuccess": "予算を作成しました",
+        "limitReached": "制限: 無料プランでは予算は最大3件。Pro にアップグレードで無制限。"
+      },
+      "card": {
+        "createNew": "新しい予算"
+      }
+    },
+    "labels": {
+      "spent": "支出",
+      "left": "残り",
+      "collected": "集めた額",
+      "leftToGoal": "残り"
+    },
+    "details": {
+      "inlineWarning": {
+        "reduceExpenses": "Reduce spending",
+        "openReport": "Open report"
+      },
+      "controls": {
+        "goToBudgets": "予算へ",
+        "editBudget": "予算を編集",
+        "deleteBudget": "予算を削除"
+      },
+      "deleteModal": {
+        "title": "予算を削除",
+        "text": "この予算を削除しますか？"
+      },
+      "editModal": {
+        "title": "予算を編集"
+      },
+      "toast": {
+        "failedDetermineType": "予算タイプの判定に失敗しました",
+        "typeMissing": "予算タイプがありません",
+        "addFailed": "取引の追加に失敗しました。もう一度お試しください。",
+        "addSuccess": "取引を追加しました！",
+        "deleteFailed": "予算の削除に失敗しました",
+        "deleteSuccess": "予算を削除しました",
+        "updateFailed": "予算の更新に失敗しました",
+        "updateSuccess": "予算を更新しました！"
+      }
+    }
+  },
   "auth": {
     "tabs": {
       "signin": "サインイン",
       "signup": "アカウント作成"
     },
-    "buttons": {
-      "google": "Google で続行"
-    },
     "labels": {
       "rememberMe": "ログイン情報を保存"
+    },
+    "buttons": {
+      "google": "Google で続行",
+      "signIn": "Sign in",
+      "signUp": "Sign up"
+    },
+    "states": {
+      "signingIn": "Signing in...",
+      "creatingAccount": "Creating account..."
+    }
+  },
+  "forgotPassword": {
+    "title": "Forgot your password",
+    "instructions": "Enter your email address and we’ll send you a link to reset your password. After sending, please check your inbox and the Spam folder.",
+    "label": {
+      "email": "Email"
+    },
+    "placeholder": {
+      "email": "you@example.com"
+    },
+    "error": {
+      "invalidEmail": "Please enter a valid email address"
+    },
+    "states": {
+      "sending": "Sending..."
+    },
+    "buttons": {
+      "sendReset": "Send reset link",
+      "backToSignIn": "Back to Sign in"
+    },
+    "success": {
+      "title": "Check your email",
+      "description": "If an account exists for this email, we’ve sent a password reset link. Please check your inbox and the Spam folder."
+    }
+  },
+  "resetPassword": {
+    "title": "Set your new password",
+    "instructions": "Enter your new password below. Make sure it meets all the requirements.",
+    "label": {
+      "password": "New Password",
+      "confirmPassword": "Confirm Password"
+    },
+    "placeholder": {
+      "password": "Enter new password",
+      "confirmPassword": "Confirm new password"
+    },
+    "requirements": {
+      "minimumChars": "At least 6 characters",
+      "lowercase": "One lowercase letter",
+      "uppercase": "One uppercase letter",
+      "number": "One number",
+      "special": "One special character"
+    },
+    "states": {
+      "updating": "Updating password..."
+    },
+    "buttons": {
+      "update": "Update password",
+      "backToSignIn": "Back to Sign in"
+    },
+    "success": {
+      "title": "Password updated!",
+      "description": "Your password has been successfully updated. You will be redirected to the sign in page shortly."
+    }
+  },
+  "notFound": {
+    "title": "申し訳ありません、このページは存在しません",
+    "button": {
+      "goHome": "ホームに戻る"
+    },
+    "alt": {
+      "illustration": "404 イラスト"
+    }
+  },
+  "layout": {
+    "sidebar": {
+      "addTransaction": "取引を追加",
+      "aiAssistant": "AI アシスタント",
+      "dashboard": "ダッシュボード",
+      "transactions": "取引",
+      "budgets": "予算",
+      "charts": "Charts",
+      "assistant": "AI Assistant",
+      "settings": "Settings",
+      "userSettings": "ユーザー設定"
+    },
+    "navbar": {
+      "welcome": "Welcome",
+      "logout": "Log out"
+    },
+    "alt": {
+      "logo": "Spendly logo"
+    },
+    "upgradeBanner": {
+      "title": "Proでインサイトを得る 🚀",
+      "description": "無制限の予算、AI アシスタントなどが利用可能に。",
+      "cta": "Pro にアップグレード"
+    },
+    "periodicBanner": {
+      "title": "Proでインサイトをアンロック 🚀",
+      "description": "推測はやめましょう！キャッシュフロー、取引、予算に関するインサイトを取得します。",
+      "dismiss": "今はしない"
+    },
+    "limitWarning": {
+      "title": "無料プランの上限に達しました",
+      "description": "無料プランの制限に達しました。",
+      "budgets": "無料では最大3つの予算。無制限にはアップグレードしてください。",
+      "assistant": "無料では AI メッセージは最大10件。無制限にはアップグレードしてください。",
+      "cta": "Pro にアップグレード"
+    }
+  },
+  "onboarding": {
+    "title": "オンボーディング",
+    "autodetected": "自動検出",
+    "step0": {
+      "currency_greeting": "こんにちは！私はSpendly Palです。設定しましょう。どの通貨を使用しますか？"
+    },
+    "step1": {
+      "category_question": "わかりました！今日お金を使いましたか？",
+      "action_coffee": "コーヒー",
+      "action_food": "食事",
+      "action_taxi": "タクシー",
+      "action_groceries": "買い物"
+    },
+    "step2": {
+      "amount_question": "いくらでしたか？",
+      "amount_placeholder": "金額を入力"
+    },
+    "step3": {
+      "budget_question": "最後に、月間目標は？スタイルを選んでください：",
+      "budget_hint": "この金額は後でアプリで変更できます",
+      "style_monk": "修行モード",
+      "style_monk_desc": "厳格な予算",
+      "style_balanced": "バランス",
+      "style_balanced_desc": "普通の支出",
+      "style_rich": "リッチ",
+      "style_rich_desc": "柔軟な制限"
+    },
+    "step4": {
+      "processing": "ワークスペースを設定中...",
+      "finish_button": "セットアップ完了"
+    },
+    "actions": {
+      "back": "戻る",
+      "next": "次へ",
+      "finish": "完了"
+    },
+    "transaction": {
+      "modalTitle": "取引を追加",
+      "added": "取引が正常に追加されました！"
+    },
+    "errors": {
+      "authRequired": "続行するにはサインインしてください。",
+      "budgetSaveFailed": "予算の保存に失敗しました。もう一度お試しください。",
+      "transactionSaveFailed": "トランザクションの保存に失敗しました。もう一度お試しください。",
+      "unexpected": "予期しないエラーが発生しました。"
+    }
+  },
+  "modals": {
+    "appInstall": {
+      "title": "アプリをインストール"
+    },
+    "budget": {
+      "pickEmojiOptional": "絵文字を選択（任意）",
+      "pickColor": "色を選択",
+      "color": {
+        "none": "なし/デフォルト"
+      },
+      "placeholder": {
+        "name": "予算名",
+        "amountUSD": "金額（USD）"
+      },
+      "type": {
+        "expense": "支出",
+        "income": "収入"
+      },
+      "toast": {
+        "saveFailed": "予算の保存に失敗しました"
+      }
+    },
+    "mainBudget": {
+      "placeholder": {
+        "amountUSD": "金額（USD）"
+      }
+    },
+    "transaction": {
+      "placeholder": {
+        "title": "取引名",
+        "amountUSD": "金額(USD)"
+      },
+      "date": {
+        "label": "日付を選択",
+        "placeholder": "日付を選択"
+      },
+      "select": {
+        "label": "予算カテゴリを選択",
+        "unbudgeted": "予算なし"
+      },
+      "search": {
+        "placeholder": "予算を検索…"
+      },
+      "loadingBudgets": "予算を読み込み中…",
+      "noResults": "結果が見つかりません。",
+      "type": {
+        "expense": "支出",
+        "income": "収入"
+      },
+      "saveAsTemplate": "テンプレートとして保存",
+      "templates": {
+        "limitTitle": "テンプレートの上限",
+        "limitDescription": "無料プランでは最大3つのテンプレートが利用できます。"
+      },
+      "autoTypeInfo": "Tip: using consistent names helps recognize recurring payments.",
+      "hintRecurring": "ヒント: 定期的な支払いを識別しやすくするために、一貫した名前を使用してください。",
+      "ruleBadge": {
+        "byRule": "ルールによって自動入力されました",
+        "undo": "元に戻す"
+      }
+    },
+    "editProfile": {
+      "title": "プロフィールを編集",
+      "toast": {
+        "updateSuccess": "プロフィールを更新しました！",
+        "updateFailed": "プロフィールの更新に失敗しました"
+      },
+      "fields": {
+        "email": "メール",
+        "currentPassword": "現在のパスワード",
+        "newPassword": "新しいパスワード",
+        "confirmNewPassword": "新しいパスワード（確認）"
+      },
+      "actions": {
+        "update": "プロフィールを更新",
+        "updating": "更新中..."
+      },
+      "validation": {
+        "emailRequired": "メールは必須です",
+        "invalidEmail": "有効なメールアドレスを入力してください",
+        "currentPasswordRequired": "パスワードを変更するには現在のパスワードが必要です",
+        "newPasswordRequired": "新しいパスワードは必須です",
+        "passwordMinLength": "パスワードは6文字以上である必要があります",
+        "passwordsDoNotMatch": "パスワードが一致しません"
+      }
+    }
+  },
+  "setup": {
+    "budget": {
+      "toast": {
+        "signInRequired": "Please sign in to save a budget",
+        "invalidAmount": "Enter a valid budget amount",
+        "saveFailed": "Failed to save budget. Try again.",
+        "saveSuccess": "Budget saved successfully!"
+      }
     }
   },
   "assistant": {
@@ -402,28 +772,6 @@
       "ask": "AI に尋ねる",
       "newChat": "新しいチャット"
     },
-    "history": {
-      "title": "履歴",
-      "empty": "まだ会話がありません",
-      "untitled": "無題のチャット"
-    },
-    "dates": {
-      "today": "今日",
-      "yesterday": "昨日"
-    },
-    "presets": {
-      "header": "すぐ使える提案から始める",
-      "showWeek": "今週の支出を表示",
-      "saveMoney": "私の習慣に基づく節約方法",
-      "analyzePatterns": "支出パターンを分析",
-      "createBudgetPlan": "今月の予算計画を作成",
-      "showBiggest": "支出が最も大きいカテゴリ",
-      "compareMonths": "今月と先月を比較"
-    },
-    "insights": {
-      "title": "AI インサイト",
-      "beta": "ベータ"
-    },
     "tone": {
       "label": "トーン",
       "select_label": "AI アシスタントのトーンを選択",
@@ -434,109 +782,67 @@
         "playful": "遊び心のある"
       }
     },
+    "history": {
+      "title": "履歴",
+      "empty": "まだ会話がありません",
+      "untitled": "無題のチャット",
+      "chatsLabel": "Chats history"
+    },
+    "dates": {
+      "today": "今日",
+      "yesterday": "昨日"
+    },
     "settings": {
       "proOnlyHint": "カスタムアシスタントトーンはProで利用可能です。アップグレードしてロックを解除してください。",
       "title": "Spendly Pal のトーン",
       "description": "AI アシスタントの応答トーンを選択します。"
+    },
+    "presets": {
+      "header": "すぐ使える提案から始める",
+      "showWeek": "今週の支出を表示",
+      "saveMoney": "私の習慣に基づく節約方法",
+      "analyzePatterns": "支出パターンを分析",
+      "createBudgetPlan": "今月の予算計画を作成",
+      "showBiggest": "支出が最も大きいカテゴリ",
+      "compareMonths": "今月と先月を比較"
     },
     "errors": {
       "parseFailed": "取引を作成できませんでした。入力内容や予算の有無を確認してください。形式: Add \"タイトル\" 12.34 to <Budget> budget。",
       "budgetNotFound": "予算 \"{name}\" が見つかりません。名前を確認するか、予算を作成してください。"
     },
     "tipAddTransaction": "ヒント: 次の形式で取引を追加できます — Add \"タイトル\" 12.34 to <Budget> budget。例: Add \"ランチ\" 12.50 to food budget、Add \"タクシー\" 200 to transport budget。カンマや通貨記号も使えます。",
+    "insights": {
+      "title": "AI インサイト",
+      "beta": "ベータ",
+      "messages": {
+        "budgetExceeded": {
+          "title": "Budget exceeded",
+          "message": "You are over budget by {over}."
+        },
+        "budgetAlert": {
+          "title": "Budget alert",
+          "message": "{usedPercent}% of your budget is used."
+        },
+        "risingExpenses": {
+          "title": "Rising expenses",
+          "message": "Expenses are trending up by {trend}%."
+        },
+        "incomeGrowth": {
+          "title": "Income growth",
+          "message": "Income is trending up by {trend}%."
+        },
+        "negativeCashFlow": {
+          "title": "Negative cash flow",
+          "message": "Spending exceeds income. Consider reducing expenses."
+        },
+        "financialHealth": {
+          "title": "Healthy finances",
+          "message": "Your spending and income look balanced."
+        }
+      }
+    },
     "freeTier": {
       "requestsLimit": "無料：1日5リクエスト。Pro — 無制限。"
-    }
-  },
-  "notFound": {
-    "title": "申し訳ありません、このページは存在しません",
-    "button": {
-      "goHome": "ホームに戻る"
-    },
-    "alt": {
-      "illustration": "404 イラスト"
-    }
-  },
-  "meta": {
-    "app": {
-      "title": "Spendly - 個人の資金管理",
-      "description": "Spendly で支出を追跡し、予算を管理。",
-      "keywords": "ファイナンス,予算,支出,お金,トラッキング,個人資産"
-    }
-  },
-  "pages": {
-    "auth": {
-      "home": {
-        "meta": {
-          "title": "サインインまたはアカウント作成",
-          "description": "Spendly であなたの資金を管理。"
-        }
-      },
-      "forgotPassword": {
-        "meta": {
-          "title": "パスワードを忘れた",
-          "description": "安全にパスワードをリセット。"
-        }
-      },
-      "resetPassword": {
-        "meta": {
-          "title": "パスワードを再設定",
-          "description": "アカウントの新しいパスワードを設定。"
-        }
-      }
-    },
-    "budgetDetails": {
-      "meta": {
-        "title": "予算の詳細",
-        "description": "予算の詳細を表示して管理。"
-      }
-    },
-    "dashboard": {
-      "meta": {
-        "title": "ダッシュボード",
-        "description": "予算と活動の概要。"
-      }
-    },
-    "transactions": {
-      "meta": {
-        "title": "取引",
-        "description": "すべての取引を閲覧および管理します。"
-      }
-    },
-    "payment": {
-      "meta": {
-        "title": "支払い",
-        "description": "プランを選択して支払い。"
-      },
-      "successTitle": "お支払い成功",
-      "successMessage": "Spendly Pro をサポートいただきありがとうございます！",
-      "goToDashboard": "ダッシュボードへ移動"
-    },
-    "onboarding": {
-      "meta": {
-        "title": "オンボーディング",
-        "description": "好みを設定して開始。"
-      }
-    },
-    "setup": {
-      "budget": {
-        "meta": {
-          "title": "予算のセットアップ",
-          "description": "国と通貨を選択。"
-        }
-      }
-    },
-    "test": {
-      "meta": {
-        "title": "テストページ",
-        "description": "ローカライゼのプレイグラウンド。"
-      }
-    },
-    "notFound": {
-      "meta": {
-        "title": "ページが見つかりません",
-        "description": "要求されたページは存在しません。"
-      }
     }
   },
   "charts": {
@@ -598,126 +904,114 @@
       "defaultDescription": "選択した予算期間を比較"
     }
   },
-  "transactions": {
-    "title": "取引📉",
-    "addTransaction": "取引を追加",
-    "empty": {
-      "title": "まだ取引がありません",
-      "description": "最初の取引を追加して開始",
-      "filtered": "選択したフィルターで取引が見つかりません"
-    },
-    "modal": {
-      "addTitle": "取引を追加"
-    },
-    "toast": {
-      "deleteFailed": "取引の削除に失敗しました。もう一度お試しください。",
-      "deleteSuccess": "取引を削除しました",
-      "updateFailed": "取引の更新に失敗しました",
-      "updateSuccess": "取引を更新しました！"
-    },
-    "table": {
-      "headers": {
-        "title": "取引名",
-        "budget": "予算",
-        "amount": "金額",
-        "type": "種類",
-        "date": "日付",
-        "actions": "操作"
-      },
-      "unbudgeted": "予算なし",
-      "empty": {
-        "default": "取引なし"
-      },
-      "modal": {
-        "deleteTitle": "取引を削除",
-        "deletePrompt": "この取引を削除しますか？",
-        "editTitle": "取引を編集"
-      }
-    },
-    "types": {
-      "expense": "支出",
-      "income": "収入"
+  "filters": {
+    "options": {
+      "week": "週",
+      "month": "月"
     }
   },
-  "dashboard": {
-    "welcome": "ようこそ {name}👋",
-    "deleteModal": {
-      "title": "取引を削除",
-      "prompt": "この取引を削除しますか？"
-    },
-    "mainBudget": {
-      "editTitle": "メイン予算を編集"
-    },
-    "counters": {
-      "totalBudget": "合計予算",
-      "totalExpenses": "合計支出",
-      "totalIncome": "合計収入",
-      "remaining": "残り",
-      "usedPercent": "使用済み",
-      "overBudget": "予算超過",
-      "status": {
-        "exceeded": "超過",
-        "warning": "警告",
-        "notSet": "未設定"
-      },
-      "ofBudget": "予算の",
-      "coversExpenses": "{percent}% の支出をカバー"
+  "meta": {
+    "app": {
+      "title": "Spendly - 個人の資金管理",
+      "description": "Spendly で支出を追跡し、予算を管理。",
+      "keywords": "ファイナンス,予算,支出,お金,トラッキング,個人資産"
     }
   },
-  "budgets": {
-    "rollover": {
-      "panelTitle": "ロールオーバー",
-      "toggleLabel": "ロールオーバーを有効にする",
-      "modeLabel": "モード",
-      "positiveOnly": "正のみ",
-      "allowNegative": "負を許可"
-    },
-    "meta": {
-      "title": "予算",
-      "description": "予算を作成および管理します。"
-    },
-    "list": {
-      "modal": {
-        "createTitle": "新しい予算を作成💸"
+  "pages": {
+    "auth": {
+      "home": {
+        "meta": {
+          "title": "サインインまたはアカウント作成",
+          "description": "Spendly であなたの資金を管理。"
+        }
       },
-      "toast": {
-        "failedLoad": "予算フォルダーの読み込みに失敗しました",
-        "failedCreate": "予算の作成に失敗しました",
-        "createSuccess": "予算を作成しました",
-        "limitReached": "制限: 無料プランでは予算は最大3件。Pro にアップグレードで無制限。"
+      "forgotPassword": {
+        "meta": {
+          "title": "パスワードを忘れた",
+          "description": "安全にパスワードをリセット。"
+        }
       },
-      "card": {
-        "createNew": "新しい予算"
+      "resetPassword": {
+        "meta": {
+          "title": "パスワードを再設定",
+          "description": "アカウントの新しいパスワードを設定。"
+        }
       }
     },
-    "labels": {
-      "spent": "支出",
-      "left": "残り",
-      "collected": "集めた額",
-      "leftToGoal": "残り"
+    "dashboard": {
+      "meta": {
+        "title": "ダッシュボード",
+        "description": "予算と活動の概要。"
+      }
     },
-    "details": {
-      "controls": {
-        "goToBudgets": "予算へ",
-        "editBudget": "予算を編集",
-        "deleteBudget": "予算を削除"
-      },
-      "deleteModal": {
-        "title": "予算を削除",
-        "text": "この予算を削除しますか？"
-      },
-      "editModal": {
-        "title": "予算を編集"
-      },
-      "toast": {
-        "failedDetermineType": "予算タイプの判定に失敗しました",
-        "typeMissing": "予算タイプがありません",
-        "addFailed": "取引の追加に失敗しました。もう一度お試しください。",
-        "addSuccess": "取引を追加しました！",
-        "deleteFailed": "予算の削除に失敗しました",
-        "deleteSuccess": "予算を削除しました",
-        "updateFailed": "予算の更新に失敗しました",
-        "updateSuccess": "予算を更新しました！"
+    "transactions": {
+      "meta": {
+        "title": "取引",
+        "description": "すべての取引を閲覧および管理します。"
+      }
+    },
+    "budgets": {
+      "meta": {
+        "title": "Budgets",
+        "description": "Create and manage your budgets."
+      }
+    },
+    "budgetDetails": {
+      "meta": {
+        "title": "予算の詳細",
+        "description": "予算の詳細を表示して管理。",
+        "titleWithName": "{name} — Budget",
+        "descriptionWithName": "Details and activity for \"{name}\"."
+      }
+    },
+    "addBudget": {
+      "meta": {
+        "title": "Add New Budget",
+        "description": "Create a new budget to start tracking."
+      }
+    },
+    "userSettings": {
+      "meta": {
+        "title": "User Settings",
+        "description": "Update account preferences and notifications."
+      }
+    },
+    "payment": {
+      "meta": {
+        "title": "支払い",
+        "description": "プランを選択して支払い。"
+      }
+    },
+    "paywall": {
+      "meta": {
+        "title": "Upgrade to Pro - Spendly",
+        "description": "Unlock unlimited budgets, AI assistant, and powerful features. Take control of your finances with Spendly Pro."
+      }
+    },
+    "onboarding": {
+      "meta": {
+        "title": "オンボーディング",
+        "description": "好みを設定して開始。"
+      }
+    },
+    "setup": {
+      "budget": {
+        "meta": {
+          "title": "予算のセットアップ",
+          "description": "国と通貨を選択。"
+        }
+      }
+    },
+    "test": {
+      "meta": {
+        "title": "テストページ",
+        "description": "ローカライゼのプレイグラウンド。"
+      }
+    },
+    "notFound": {
+      "meta": {
+        "title": "ページが見つかりません",
+        "description": "要求されたページは存在しません。"
       }
     }
   },
@@ -750,6 +1044,17 @@
         "description": "この端末で通知を受け取る"
       }
     },
+    "weekly": {
+      "title": "Weekly Digest",
+      "bodyFree": "Your weekly report is ready. Advanced insights available in Pro.",
+      "bodyPro": "Your weekly report with AI insights is ready.",
+      "ctaUpgrade": "Upgrade to Pro"
+    },
+    "push_subscribed": "Push subscribed",
+    "push_failed": "Push subscription failed",
+    "permission_denied": "Notification permission denied",
+    "budget_80": "Budget usage reached 80%",
+    "budget_100": "Budget exceeded",
     "frequency": {
       "title": "通知頻度",
       "aria": "通知頻度",
@@ -789,103 +1094,6 @@
       "sqlScript": "SQL スクリプト",
       "copy": "コピー",
       "copied": "コピーしました！"
-    },
-    "api": {
-      "queueAdded": "通知がキューに追加されました",
-      "subscriptionSaved": "プッシュ登録を保存しました",
-      "subscriptionRemoved": "プッシュ登録を削除しました"
-    }
-  },
-  "filters": {
-    "options": {
-      "week": "週",
-      "month": "月"
-    }
-  },
-  "modals": {
-    "appInstall": {
-      "title": "アプリをインストール"
-    },
-    "editProfile": {
-      "title": "プロフィールを編集",
-      "toast": {
-        "updateSuccess": "プロフィールを更新しました！",
-        "updateFailed": "プロフィールの更新に失敗しました"
-      },
-      "fields": {
-        "email": "メール",
-        "currentPassword": "現在のパスワード",
-        "newPassword": "新しいパスワード",
-        "confirmNewPassword": "新しいパスワード（確認）"
-      },
-      "actions": {
-        "update": "プロフィールを更新",
-        "updating": "更新中..."
-      },
-      "validation": {
-        "emailRequired": "メールは必須です",
-        "invalidEmail": "有効なメールアドレスを入力してください",
-        "currentPasswordRequired": "パスワードを変更するには現在のパスワードが必要です",
-        "newPasswordRequired": "新しいパスワードは必須です",
-        "passwordMinLength": "パスワードは6文字以上である必要があります",
-        "passwordsDoNotMatch": "パスワードが一致しません"
-      }
-    },
-    "budget": {
-      "pickEmojiOptional": "絵文字を選択（任意）",
-      "placeholder": {
-        "name": "予算名",
-        "amountUSD": "金額（USD）"
-      },
-      "type": {
-        "expense": "支出",
-        "income": "収入"
-      },
-      "toast": {
-        "saveFailed": "予算の保存に失敗しました"
-      },
-      "pickColor": "色を選択",
-      "color": {
-        "none": "なし/デフォルト"
-      }
-    },
-    "mainBudget": {
-      "placeholder": {
-        "amountUSD": "金額（USD）"
-      }
-    },
-    "transaction": {
-      "placeholder": {
-        "title": "取引名",
-        "amountUSD": "金額(USD)"
-      },
-      "date": {
-        "label": "日付を選択",
-        "placeholder": "日付を選択"
-      },
-      "select": {
-        "label": "予算カテゴリを選択",
-        "unbudgeted": "予算なし"
-      },
-      "search": {
-        "placeholder": "予算を検索…"
-      },
-      "loadingBudgets": "予算を読み込み中…",
-      "noResults": "結果が見つかりません。",
-      "type": {
-        "expense": "支出",
-        "income": "収入"
-      },
-      "saveAsTemplate": "テンプレートとして保存",
-      "templates": {
-        "limitTitle": "テンプレートの上限",
-        "limitDescription": "無料プランでは最大3つのテンプレートが利用できます。"
-      },
-      "hintRecurring": "ヒント: 定期的な支払いを識別しやすくするために、一貫した名前を使用してください。",
-      "ruleBadge": {
-        "byRule": "ルールによって自動入力されました",
-        "undo": "元に戻す"
-      }
     }
   },
   "recurring": {
@@ -894,18 +1102,25 @@
     "message": "支払い日 {date}。概算 {amount}."
   },
   "errors": {
+    "selectImageFile": "Please select an image file.",
+    "fileTooLarge5mb": "The file is too large (max 5 MB).",
+    "uploadAvatarFailed": "Failed to upload avatar.",
+    "removeAvatarFailed": "Failed to remove avatar.",
+    "auth": {
+      "invalidAuthHeader": "Invalid Authorization header.",
+      "notAuthenticated": "Not authenticated."
+    },
     "common": {
       "internalServerError": "内部サーバーエラー"
     },
     "notifications": {
+      "titleRequired": "Notification title is required.",
+      "invalidAction": "Invalid notification action.",
       "fetchFailed": "通知の取得に失敗しました",
-      "subscriptionInvalid": "通知登録が正しくありません"
+      "createFailed": "Failed to create notification.",
+      "updateFailed": "Failed to update notification.",
+      "queueAdded": "Notification added to queue"
     }
-  },
-  "common": {
-    "save": "保存",
-    "cancel": "キャンセル",
-    "delete": "削除"
   },
   "chat": {
     "empty_state": {
