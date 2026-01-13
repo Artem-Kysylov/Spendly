@@ -151,11 +151,38 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
 
       const keyUint8 = urlBase64ToUint8Array(vapidKey);
 
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        // Передаём ArrayBuffer (совместим с типом BufferSource)
-        applicationServerKey: keyUint8.buffer as ArrayBuffer,
-      });
+      const subscription = await withTimeout(
+        (async () => {
+          const existing = await registration.pushManager.getSubscription();
+          const existingKey = existing?.options?.applicationServerKey;
+          if (existing && existingKey) {
+            const existingUint8 = new Uint8Array(existingKey as ArrayBuffer);
+            if (!areUint8ArraysEqual(existingUint8, keyUint8)) {
+              try {
+                await existing.unsubscribe();
+              } catch {}
+            }
+          }
+
+          const attemptSubscribe = async () =>
+            registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              // Передаём ArrayBuffer (совместим с типом BufferSource)
+              applicationServerKey: keyUint8.buffer as ArrayBuffer,
+            });
+
+          try {
+            return await attemptSubscribe();
+          } catch (e) {
+            await registration.pushManager
+              .getSubscription()
+              .then((sub) => sub?.unsubscribe())
+              .catch(() => {});
+            return await attemptSubscribe();
+          }
+        })(),
+        10_000,
+      );
 
       const token = await getAuthToken();
       if (!token) {
@@ -264,4 +291,23 @@ function urlBase64ToUint8Array(base64String: string): Uint8Array {
     outputArray[i] = rawData.charCodeAt(i);
   }
   return outputArray;
+}
+
+function areUint8ArraysEqual(a: Uint8Array, b: Uint8Array): boolean {
+  if (a.byteLength !== b.byteLength) return false;
+  for (let i = 0; i < a.byteLength; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+}
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<T>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error("Push subscription timeout")), ms);
+  });
+
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timeoutId) clearTimeout(timeoutId);
+  });
 }

@@ -104,11 +104,21 @@ const NotificationSettings = () => {
           type: "success",
         });
       } else {
-        setToast({ text: tN("toasts.pushStatusFailed"), type: "error" });
+        setToast({
+          text: enabled
+            ? "Please reset permissions or clear cache."
+            : tN("toasts.pushStatusFailed"),
+          type: "error",
+        });
       }
     } catch (err) {
       console.error("Failed to toggle push notifications:", err);
-      setToast({ text: tN("toasts.pushStatusFailed"), type: "error" });
+      setToast({
+        text: enabled
+          ? "Please reset permissions or clear cache."
+          : tN("toasts.pushStatusFailed"),
+        type: "error",
+      });
     } finally {
       setIsUpdatingPush(false);
     }
