@@ -235,7 +235,7 @@ export const useNotifications = (): UseNotificationsReturn => {
     if (!session?.user?.id) return;
 
     const channel = supabase
-      .channel("notifications")
+      .channel(`notifications:${session.user.id}`)
       .on(
         "postgres_changes",
         {
@@ -246,8 +246,28 @@ export const useNotifications = (): UseNotificationsReturn => {
         },
         (payload) => {
           console.log("Real-time notification update:", payload);
-          // Перезагружаем уведомления при изменениях
-          fetchNotifications();
+          if (payload.eventType === "INSERT") {
+            const next = payload.new as Notification;
+            setNotifications((prev) => {
+              if (prev.some((n) => n.id === next.id)) return prev;
+              return [next, ...prev];
+            });
+            return;
+          }
+
+          if (payload.eventType === "UPDATE") {
+            const next = payload.new as Notification;
+            setNotifications((prev) =>
+              prev.map((n) => (n.id === next.id ? next : n)),
+            );
+            return;
+          }
+
+          if (payload.eventType === "DELETE") {
+            const oldRow = payload.old as { id?: string };
+            if (!oldRow?.id) return;
+            setNotifications((prev) => prev.filter((n) => n.id !== oldRow.id));
+          }
         },
       )
       .subscribe();

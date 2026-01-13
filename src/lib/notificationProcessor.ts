@@ -11,17 +11,14 @@ function backoffDelayMs(attempts: number) {
 export async function processNotificationQueue(supabase: SupabaseClient) {
   const nowIso = new Date().toISOString();
 
-  const vapidPublic =
-    process.env.VAPID_PUBLIC_KEY ||
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ||
-    "";
-  const vapidPrivate = process.env.VAPID_PRIVATE_KEY || "";
-  
+  const vapidPublic = (process.env.VAPID_PUBLIC_KEY ?? "").trim();
+  const vapidPrivate = (process.env.VAPID_PRIVATE_KEY ?? "").trim();
+
   if (!vapidPublic || !vapidPrivate) {
     console.error("Missing VAPID keys");
     return { error: "Missing VAPID keys" };
   }
-  
+
   webpush.setVapidDetails(
     "mailto:admin@example.com",
     vapidPublic,
@@ -96,6 +93,34 @@ export async function processNotificationQueue(supabase: SupabaseClient) {
 
     const attempts = Number(task.attempts || 0) + 1;
     if (anySuccess) {
+      try {
+        const { data: existingNotif } = await supabase
+          .from("notifications")
+          .select("id")
+          .eq("user_id", task.user_id)
+          .eq("metadata->>queue_id", String(task.id))
+          .limit(1);
+
+        if (!existingNotif || existingNotif.length === 0) {
+          const notificationType = task.notification_type || "general";
+          const metadata = {
+            ...(task.data || {}),
+            queue_id: task.id,
+          };
+
+          await supabase.from("notifications").insert({
+            user_id: task.user_id,
+            title: task.title || "Spendly",
+            message: task.message || "Notification",
+            type: notificationType,
+            metadata,
+            is_read: false,
+          });
+        }
+      } catch (e) {
+        console.warn("processor: failed to sync in-app notifications", e);
+      }
+
       await supabase
         .from("notification_queue")
         .update({ status: "sent", attempts })

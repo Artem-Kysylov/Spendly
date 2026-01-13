@@ -168,9 +168,7 @@ function NotificationBell({
       >
         <Bell className="w-6 h-6" />
         {!hasDbError && unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
+          <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-500" />
         )}
       </button>
 
