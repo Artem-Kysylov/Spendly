@@ -253,6 +253,7 @@ export default function InstallPWA({
   });
 
   const isBlockedInApp = isInAppBrowser && !isStandalone;
+  const showIosInstallButton = isIOS && !isStandalone && !isBlockedInApp;
   const showInstallButton =
     !isStandalone && isInstallPromptAvailable && !isBlockedInApp;
   const shouldAttachIosDrawer = isIOS && !isStandalone && !isBlockedInApp;
@@ -263,7 +264,9 @@ export default function InstallPWA({
     pathname?.includes("/onboarding");
   const canShowInstallUi = !!session && !isAuthRoute && !isStandalone;
   const effectiveShowButton =
-    (forceShowButton && canShowInstallUi && !isStandalone) || showInstallButton;
+    (forceShowButton && canShowInstallUi && !isStandalone) ||
+    showInstallButton ||
+    showIosInstallButton;
   const canShowButtonUi = canShowInstallUi && !isStandalone;
 
   // Check if FAB was dismissed
@@ -300,6 +303,10 @@ export default function InstallPWA({
   }, [isPrimaryInstance, canShowInstallUi, promptInstall]);
 
   const handleInstallClick = async () => {
+    if (isIOS && !isStandalone) {
+      setIosDrawerOpen(true);
+      return;
+    }
     const result = await promptInstall();
     if (result === "ios") {
       setIosDrawerOpen(true);
@@ -332,7 +339,7 @@ export default function InstallPWA({
           />
         </div>
       )}
-      {isPrimaryInstance && canShowInstallUi && shouldAttachIosDrawer && (
+      {canShowInstallUi && shouldAttachIosDrawer && (
         <IOSInstallDrawer
           open={iosDrawerOpen}
           onOpenChange={(open) => {

@@ -75,11 +75,11 @@ function MobileTabBar() {
         exit={prefersReduced ? undefined : { opacity: 0, y: 20 }}
         transition={navTransition}
         style={{ willChange: "opacity, transform" }}
-        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 lg:hidden z-50 border-t border-border bg-background dark:bg-card ${isStandalone ? "h-[calc(84px+env(safe-area-inset-bottom))]" : "h-[84px]"}`}
+        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 lg:hidden z-50 border-t border-border bg-background dark:bg-card ${isStandalone ? "pb-[env(safe-area-inset-bottom)]" : ""}`}
         aria-label="Bottom navigation"
       >
-        <div className={`min-h-[84px] ${isStandalone ? "pb-[env(safe-area-inset-bottom)]" : ""}`}>
-          <ul className="min-h-[84px] grid grid-cols-5 grid-rows-1 items-stretch pt-1 pb-2">
+        <div>
+          <ul className="h-20 grid grid-cols-5 grid-rows-1 items-stretch pt-1 pb-2">
           {/* Дашборд */}
           <li className="flex items-center justify-center">
             <Link

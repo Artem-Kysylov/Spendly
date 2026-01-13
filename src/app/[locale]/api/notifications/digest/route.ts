@@ -6,8 +6,9 @@ import { selectModel } from "@/lib/ai/routing";
 import { buildCountersPrompt } from "@/lib/ai/promptBuilders";
 import { streamOpenAIText } from "@/lib/llm/openai";
 import { streamGeminiText } from "@/lib/llm/google";
+import type { Language } from "@/types/locale";
 
-type DigestLanguage = "en" | "ru";
+type DigestLanguage = Language;
 
 type DigestStrings = {
   weeklyTitle: string;
@@ -34,6 +35,19 @@ const DIGEST_STRINGS: Record<DigestLanguage, DigestStrings> = {
     aiSystem:
       "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
   },
+  uk: {
+    weeklyTitle: "Щотижневий звіт",
+    lastWeekLabel: "Минулий тиждень",
+    expensesLabel: "Витрати",
+    incomeLabel: "Дохід",
+    topLabel: "Топ",
+    expensesDifferenceText: (percent) =>
+      `Витрати змінилися на ${percent}% порівняно з попереднім тижнем.`,
+    incomeDifferenceText: (percent) =>
+      `Дохід змінився на ${percent}% порівняно з попереднім тижнем.`,
+    aiSystem:
+      "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
+  },
   ru: {
     weeklyTitle: "Еженедельный отчёт",
     lastWeekLabel: "Прошлая неделя",
@@ -47,14 +61,78 @@ const DIGEST_STRINGS: Record<DigestLanguage, DigestStrings> = {
     aiSystem:
       "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
   },
+  hi: {
+    weeklyTitle: "साप्ताहिक सारांश",
+    lastWeekLabel: "पिछला सप्ताह",
+    expensesLabel: "खर्च",
+    incomeLabel: "आय",
+    topLabel: "टॉप",
+    expensesDifferenceText: (percent) =>
+      `पिछले सप्ताह की तुलना में खर्च ${percent}% बदल गया।`,
+    incomeDifferenceText: (percent) =>
+      `पिछले सप्ताह की तुलना में आय ${percent}% बदल गई।`,
+    aiSystem:
+      "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
+  },
+  id: {
+    weeklyTitle: "Ringkasan Mingguan",
+    lastWeekLabel: "Minggu lalu",
+    expensesLabel: "Pengeluaran",
+    incomeLabel: "Pemasukan",
+    topLabel: "Teratas",
+    expensesDifferenceText: (percent) =>
+      `Pengeluaran berubah ${percent}% dibanding minggu sebelumnya.`,
+    incomeDifferenceText: (percent) =>
+      `Pemasukan berubah ${percent}% dibanding minggu sebelumnya.`,
+    aiSystem:
+      "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
+  },
+  ja: {
+    weeklyTitle: "週間サマリー",
+    lastWeekLabel: "先週",
+    expensesLabel: "支出",
+    incomeLabel: "収入",
+    topLabel: "トップ",
+    expensesDifferenceText: (percent) =>
+      `支出は前週比で${percent}%変化しました。`,
+    incomeDifferenceText: (percent) =>
+      `収入は前週比で${percent}%変化しました。`,
+    aiSystem:
+      "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
+  },
+  ko: {
+    weeklyTitle: "주간 요약",
+    lastWeekLabel: "지난주",
+    expensesLabel: "지출",
+    incomeLabel: "수입",
+    topLabel: "상위",
+    expensesDifferenceText: (percent) =>
+      `지출은 전주 대비 ${percent}% 변동했습니다.`,
+    incomeDifferenceText: (percent) =>
+      `수입은 전주 대비 ${percent}% 변동했습니다.`,
+    aiSystem:
+      "You are a helpful budgeting assistant. Reply in 2–3 concise sentences.",
+  },
 };
 
-function toDigestLanguage(raw: unknown): DigestLanguage {
-  return raw === "ru" ? "ru" : "en";
-}
-
 function toIntlLocale(lang: DigestLanguage): string {
-  return lang === "ru" ? "ru-RU" : "en-US";
+  switch (lang) {
+    case "ru":
+      return "ru-RU";
+    case "uk":
+      return "uk-UA";
+    case "hi":
+      return "hi-IN";
+    case "id":
+      return "id-ID";
+    case "ja":
+      return "ja-JP";
+    case "ko":
+      return "ko-KR";
+    case "en":
+    default:
+      return "en-US";
+  }
 }
 
 async function getUserPreferredLanguage(
@@ -62,9 +140,9 @@ async function getUserPreferredLanguage(
   userId: string,
 ): Promise<DigestLanguage> {
   const normalize = (l: unknown): DigestLanguage => {
-    if (typeof l !== "string") return DEFAULT_LOCALE === "ru" ? "ru" : "en";
-    if (!isSupportedLanguage(l)) return DEFAULT_LOCALE === "ru" ? "ru" : "en";
-    return toDigestLanguage(l);
+    if (typeof l !== "string") return DEFAULT_LOCALE;
+    if (!isSupportedLanguage(l)) return DEFAULT_LOCALE;
+    return l;
   };
 
   try {
@@ -102,7 +180,7 @@ async function getUserPreferredLanguage(
     // ignore
   }
 
-  return DEFAULT_LOCALE === "ru" ? "ru" : "en";
+  return DEFAULT_LOCALE;
 }
 
 function isAuthorized(req: NextRequest): boolean {

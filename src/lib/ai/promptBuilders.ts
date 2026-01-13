@@ -1,6 +1,8 @@
 /* Prompt builders for AI suggestions based on component-specific data */
 
-export type Locale = "ru" | "en";
+import type { Language } from "@/types/locale";
+
+export type Locale = Language;
 
 type BarPoint = { period: string; amount: number };
 
