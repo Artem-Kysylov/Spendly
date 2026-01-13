@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import { useNotificationSettings } from "@/hooks/useNotificationSettings";
 import { UserAuth } from "@/context/AuthContext";
@@ -31,6 +31,7 @@ const NotificationSettings = () => {
   const [isUpdatingFrequency, setIsUpdatingFrequency] = useState(false);
   const [isUpdatingPush, setIsUpdatingPush] = useState(false);
   const [toast, setToast] = useState<ToastMessageProps | null>(null);
+  const [isIOSBrowser, setIsIOSBrowser] = useState(false);
 
   const [permission, setPermission] = useState<NotificationPermission>(
     typeof Notification !== "undefined" ? Notification.permission : "default",
@@ -40,6 +41,20 @@ const NotificationSettings = () => {
   const tCommon = useTranslations("common");
   const { subscriptionPlan } = useSubscription();
   const isPro = subscriptionPlan === "pro";
+
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof navigator === "undefined") {
+      return;
+    }
+
+    const isIOS =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) &&
+      !(window as any).MSStream;
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (navigator as any).standalone === true;
+    setIsIOSBrowser(isIOS && !isStandalone);
+  }, []);
 
   const frequencyOptions: NotificationFrequencyOption[] = [
     {
@@ -312,20 +327,33 @@ const NotificationSettings = () => {
                   </div>
                 </div>
               )}
+
+              {isIOSBrowser && (
+                <div className="mt-3 rounded-lg border border-yellow-200 dark:border-yellow-900 bg-yellow-50 dark:bg-yellow-950 p-3 text-sm text-yellow-900 dark:text-yellow-100">
+                  <div className="font-medium">
+                    To enable notifications on iPhone, you must add this app to your Home Screen.
+                  </div>
+                  <div className="mt-1 text-xs">
+                    Tap the Share icon (box with arrow) → Select "Add to Home Screen".
+                  </div>
+                </div>
+              )}
             </div>
 
-            <Switch
-              checked={settings.push_enabled}
-              onCheckedChange={handlePushToggle}
-              disabled={isUpdatingPush}
-              aria-label={tN("a11y.togglePush")}
-              className="
-                border border-gray-300 dark:border-border
-                data-[state=unchecked]:bg-gray-200 dark:data-[state=unchecked]:bg-neutral-800
-                data-[state=checked]:bg-primary
-              "
-              thumbClassName="bg-white dark:bg-white shadow-sm"
-            />
+            {!isIOSBrowser && (
+              <Switch
+                checked={settings.push_enabled}
+                onCheckedChange={handlePushToggle}
+                disabled={isUpdatingPush}
+                aria-label={tN("a11y.togglePush")}
+                className="
+                  border border-gray-300 dark:border-border
+                  data-[state=unchecked]:bg-gray-200 dark:data-[state=unchecked]:bg-neutral-800
+                  data-[state=checked]:bg-primary
+                "
+                thumbClassName="bg-white dark:bg-white shadow-sm"
+              />
+            )}
           </div>
 
           {/* Frequency Settings */}
