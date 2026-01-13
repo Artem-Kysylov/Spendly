@@ -67,6 +67,7 @@ function MobileTabBar() {
 
   return (
     <AnimatePresence mode="wait">
+      {/* CRITICAL: Safe Area Insets for iOS PWA. DO NOT REMOVE or change padding-bottom/height. This prevents the white gap bug on iPhones with Home Indicator. */}
       <motion.nav
         key={pathname}
         initial={prefersReduced ? false : { opacity: 0, y: 20 }}
@@ -74,11 +75,11 @@ function MobileTabBar() {
         exit={prefersReduced ? undefined : { opacity: 0, y: 20 }}
         transition={navTransition}
         style={{ willChange: "opacity, transform" }}
-        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 lg:hidden z-50 border-t border-border bg-background dark:bg-card ${isStandalone ? "h-[calc(84px+env(safe-area-inset-bottom))]" : "h-[84px]"}`}
+        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 lg:hidden z-50 border-t border-border bg-background dark:bg-card min-h-[84px] ${isStandalone ? "pb-[env(safe-area-inset-bottom)]" : ""}`}
         aria-label="Bottom navigation"
       >
-        <div className={`h-full ${isStandalone ? "pb-[env(safe-area-inset-bottom)]" : "pb-0"}`}>
-          <ul className="h-full grid grid-cols-5 pt-1 pb-2">
+        <div className="min-h-[84px]">
+          <ul className="min-h-[84px] grid grid-cols-5 grid-rows-1 items-stretch pt-1 pb-2">
           {/* Дашборд */}
           <li className="flex items-center justify-center">
             <Link
