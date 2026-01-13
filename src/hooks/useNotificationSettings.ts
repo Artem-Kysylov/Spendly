@@ -65,7 +65,32 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
 
       const { settings: fetchedSettings } = await response.json();
       console.log("Settings fetched via API:", fetchedSettings);
-      setSettings(fetchedSettings);
+
+      let normalizedSettings = fetchedSettings as NotificationSettings;
+      if (normalizedSettings?.push_enabled) {
+        const pushSupported =
+          typeof window !== "undefined" &&
+          "serviceWorker" in navigator &&
+          "PushManager" in window;
+        if (!pushSupported) {
+          normalizedSettings = { ...normalizedSettings, push_enabled: false };
+        } else {
+          try {
+            const registration = await navigator.serviceWorker.ready;
+            const subscription = await registration.pushManager.getSubscription();
+            if (!subscription) {
+              normalizedSettings = {
+                ...normalizedSettings,
+                push_enabled: false,
+              };
+            }
+          } catch {
+            normalizedSettings = { ...normalizedSettings, push_enabled: false };
+          }
+        }
+      }
+
+      setSettings(normalizedSettings);
     } catch (err) {
       console.error("Error fetching notification settings:", err);
       setError(err instanceof Error ? err.message : "Failed to fetch settings");
@@ -161,6 +186,8 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
               try {
                 await existing.unsubscribe();
               } catch {}
+            } else {
+              return existing;
             }
           }
 
@@ -227,34 +254,36 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
 
+      const token = await getAuthToken();
+      if (!token) {
+        if (prev) setSettings(prev);
+        throw new Error("No auth token available");
+      }
+
       if (subscription) {
         await subscription.unsubscribe();
-
-        const token = await getAuthToken();
-        if (!token) {
-          if (prev) setSettings(prev);
-          throw new Error("No auth token available");
-        }
-
-        const response = await fetch(`${apiBase}/subscribe`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ endpoint: subscription.endpoint }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          if (prev) setSettings(prev);
-          throw new Error(
-            (errorData as any).error || "Failed to remove push subscription",
-          );
-        }
-
-        console.log("Push subscription removed successfully");
       }
+
+      const response = await fetch(`${apiBase}/subscribe`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: subscription
+          ? JSON.stringify({ endpoint: subscription.endpoint })
+          : JSON.stringify({}),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        if (prev) setSettings(prev);
+        throw new Error(
+          (errorData as any).error || "Failed to remove push subscription",
+        );
+      }
+
+      console.log("Push subscription removed successfully");
 
       return true;
     } catch (err) {
