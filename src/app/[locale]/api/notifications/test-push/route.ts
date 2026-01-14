@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       .from("notification_queue")
       .insert({
         user_id: user.id,
-        notification_type: "info",
+        notification_type: "general",
         title: "Test Push",
         message: "Test push successful! 🎉",
         data: { deepLink: "/dashboard", tag: "spendly-test-manual" },
