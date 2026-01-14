@@ -168,35 +168,76 @@ export async function POST(req: NextRequest) {
             .map((r: any) => String(r?.notification_type || "").trim())
             .find((v: string) => v.length > 0) || null;
 
-        if (!resolvedType) {
-          debug = { ok: false, stage: "resolve_type", error: "no_values" };
-          return NextResponse.json({
-            success: true,
-            message: tNotifications("api.subscriptionSaved"),
-            debug,
-          });
+        const candidateTypes = Array.from(
+          new Set(
+            [
+              resolvedType,
+              "weekly_reminder",
+              "daily_reminder",
+              "retention",
+              "aggressive",
+              "budget_warning",
+              "budget_alert",
+              "expense_warning",
+              "reminder",
+              "general",
+              "info",
+              "warning",
+              "error",
+              "success",
+            ].filter(Boolean),
+          ),
+        ) as string[];
+
+        let queued: any = null;
+        let insertErr: any = null;
+
+        for (const notification_type of candidateTypes) {
+          const resp = await adminSupabase
+            .from("notification_queue")
+            .insert({
+              user_id: user.id,
+              notification_type,
+              title: "Test Push",
+              message: "Test push after enabling notifications",
+              data: { deepLink: "/dashboard", tag: "spendly-test" },
+              send_push: true,
+              send_email: false,
+              scheduled_for: nowIso,
+              status: "pending",
+              attempts: 0,
+              max_attempts: 1,
+            })
+            .select()
+            .single();
+
+          if (!resp.error) {
+            queued = resp.data;
+            insertErr = null;
+            break;
+          }
+
+          const code = String((resp.error as any)?.code || "");
+          const msg = String((resp.error as any)?.message || "");
+          if (
+            code === "22P02" &&
+            msg.toLowerCase().includes("enum notification_type")
+          ) {
+            insertErr = resp.error;
+            continue;
+          }
+
+          insertErr = resp.error;
+          break;
         }
 
-        const { data: queued, error: insertErr } = await adminSupabase
-          .from("notification_queue")
-          .insert({
-            user_id: user.id,
-            notification_type: resolvedType,
-            title: "Test Push",
-            message: "Test push after enabling notifications",
-            data: { deepLink: "/dashboard", tag: "spendly-test" },
-            send_push: true,
-            send_email: false,
-            scheduled_for: nowIso,
-            status: "pending",
-            attempts: 0,
-            max_attempts: 1,
-          })
-          .select()
-          .single();
-
         if (insertErr) {
-          debug = { ok: false, stage: "enqueue", error: insertErr };
+          debug = {
+            ok: false,
+            stage: "enqueue",
+            error: insertErr,
+            attemptedTypes: candidateTypes,
+          };
         } else {
           const processor = await processNotificationQueue(adminSupabase as any);
           debug = { ok: true, queued, processor };

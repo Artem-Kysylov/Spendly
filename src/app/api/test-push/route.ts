@@ -61,33 +61,65 @@ export async function POST(req: NextRequest) {
         .map((r: any) => String(r?.notification_type || "").trim())
         .find((v: string) => v.length > 0) || null;
 
-    if (!resolvedType) {
-      return NextResponse.json(
-        {
-          error:
-            "No existing notification_type values found in notification_queue. Cannot enqueue test notification without knowing enum values.",
-        },
-        { status: 500 },
-      );
-    }
+    const candidateTypes = Array.from(
+      new Set(
+        [
+          resolvedType,
+          "weekly_reminder",
+          "daily_reminder",
+          "retention",
+          "aggressive",
+          "budget_warning",
+          "budget_alert",
+          "expense_warning",
+          "reminder",
+          "general",
+          "info",
+          "warning",
+          "error",
+          "success",
+        ].filter(Boolean),
+      ),
+    ) as string[];
 
-    const { data: queued, error: insertErr } = await supabase
-      .from("notification_queue")
-      .insert({
-        user_id,
-        notification_type: resolvedType,
-        title: "Test Push",
-        message: "Test push from /api/test-push",
-        data: { deepLink: "/dashboard", tag: "spendly-test" },
-        send_push: true,
-        send_email: false,
-        scheduled_for: nowIso,
-        status: "pending",
-        attempts: 0,
-        max_attempts: 1,
-      })
-      .select()
-      .single();
+    let queued: any = null;
+    let insertErr: any = null;
+
+    for (const notification_type of candidateTypes) {
+      const resp = await supabase
+        .from("notification_queue")
+        .insert({
+          user_id,
+          notification_type,
+          title: "Test Push",
+          message: "Test push from /api/test-push",
+          data: { deepLink: "/dashboard", tag: "spendly-test" },
+          send_push: true,
+          send_email: false,
+          scheduled_for: nowIso,
+          status: "pending",
+          attempts: 0,
+          max_attempts: 1,
+        })
+        .select()
+        .single();
+
+      if (!resp.error) {
+        queued = resp.data;
+        insertErr = null;
+        break;
+      }
+
+      const code = String((resp.error as any)?.code || "");
+      const msg = String((resp.error as any)?.message || "");
+      if (code === "22P02" && msg.toLowerCase().includes("enum notification_type")) {
+        insertErr = resp.error;
+        continue;
+      }
+
+      insertErr = resp.error;
+      break;
+    }
 
     if (insertErr) {
       return NextResponse.json(
@@ -100,6 +132,7 @@ export async function POST(req: NextRequest) {
                   message: (insertErr as any).message,
                   details: (insertErr as any).details,
                   hint: (insertErr as any).hint,
+                  attemptedTypes: candidateTypes,
                 }
               : undefined,
         },
