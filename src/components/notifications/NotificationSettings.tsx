@@ -51,6 +51,9 @@ const NotificationSettings = () => {
   const { subscriptionPlan } = useSubscription();
   const isPro = subscriptionPlan === "pro";
 
+  const showPushDebug =
+    process.env.NEXT_PUBLIC_ENABLE_PUSH_DEBUG === "true";
+
   useEffect(() => {
     if (typeof window === "undefined" || typeof navigator === "undefined") {
       return;
@@ -427,7 +430,7 @@ const NotificationSettings = () => {
           </div>
 
           {/* Send Test Push Button - visible when push is enabled */}
-          {settings.push_enabled && (
+          {showPushDebug && settings.push_enabled && (
             <div className="py-3 border-b border-border">
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1">

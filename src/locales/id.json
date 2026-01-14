@@ -1097,9 +1097,9 @@
     }
   },
   "recurring": {
-    "dueTodayTitle": "Recurring due today: {name}",
-    "dueSoonTitle": "Recurring due soon: {name}",
-    "message": "Due {date}. Approx. {amount}."
+    "dueTodayTitle": "Pembayaran rutin jatuh tempo hari ini: {name}",
+    "dueSoonTitle": "Pembayaran rutin segera jatuh tempo: {name}",
+    "message": "Jatuh tempo {date}. Perkiraan {amount}."
   },
   "errors": {
     "selectImageFile": "Please select an image file.",

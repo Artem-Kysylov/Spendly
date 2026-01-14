@@ -137,6 +137,36 @@ export async function POST(req: NextRequest) {
         retention: "Мы скучаем",
         budget_alert: "Уведомление о бюджете"
       },
+      uk: {
+        daily_reminder: "Щоденна перевірка",
+        aggressive: "Оновлення бюджету",
+        retention: "Ми сумуємо",
+        budget_alert: "Бюджетне сповіщення",
+      },
+      hi: {
+        daily_reminder: "दैनिक चेक-इन",
+        aggressive: "बजट अपडेट",
+        retention: "हम आपको याद कर रहे हैं",
+        budget_alert: "बजट अलर्ट",
+      },
+      id: {
+        daily_reminder: "Cek Harian",
+        aggressive: "Pembaruan Anggaran",
+        retention: "Kami Merindukanmu",
+        budget_alert: "Peringatan Anggaran",
+      },
+      ja: {
+        daily_reminder: "毎日のチェック",
+        aggressive: "予算アップデート",
+        retention: "お久しぶりです",
+        budget_alert: "予算アラート",
+      },
+      ko: {
+        daily_reminder: "일일 체크인",
+        aggressive: "예산 업데이트",
+        retention: "그리웠어요",
+        budget_alert: "예산 알림",
+      },
       // Fallback for others to English map or basic
     };
     

@@ -1097,9 +1097,9 @@
     }
   },
   "recurring": {
-    "dueTodayTitle": "Recurring due today: {name}",
-    "dueSoonTitle": "Recurring due soon: {name}",
-    "message": "Due {date}. Approx. {amount}."
+    "dueTodayTitle": "Регулярний платіж сьогодні: {name}",
+    "dueSoonTitle": "Скоро регулярний платіж: {name}",
+    "message": "Термін {date}. Прибл. {amount}."
   },
   "errors": {
     "selectImageFile": "Будь ласка, виберіть файл зображення.",
