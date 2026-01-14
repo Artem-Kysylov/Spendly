@@ -6,6 +6,7 @@ import { selectModel } from "@/lib/ai/routing";
 import { buildCountersPrompt } from "@/lib/ai/promptBuilders";
 import { streamOpenAIText } from "@/lib/llm/openai";
 import { streamGeminiText } from "@/lib/llm/google";
+import { computeNextAllowedTime } from "@/lib/quietHours";
 import type { Language } from "@/types/locale";
 
 type DigestLanguage = Language;
@@ -480,38 +481,6 @@ export async function POST(req: NextRequest) {
     if (notifErr) {
       console.warn("digest: notif insert error", notifErr);
     }
-
-    // Тихие часы: перенести scheduled_for на ближайшее разрешённое время
-    const computeNextAllowedTime = (now: Date, pref: any) => {
-      if (
-        !pref?.quiet_hours_enabled ||
-        !pref?.quiet_hours_start ||
-        !pref?.quiet_hours_end
-      )
-        return now;
-      const [sh, sm] = String(pref.quiet_hours_start)
-        .split(":")
-        .map((x: string) => parseInt(x, 10));
-      const [eh, em] = String(pref.quiet_hours_end)
-        .split(":")
-        .map((x: string) => parseInt(x, 10));
-      const nowMin = now.getHours() * 60 + now.getMinutes();
-      const startMin = sh * 60 + sm;
-      const endMin = eh * 60 + em;
-      const inQuiet =
-        startMin < endMin
-          ? nowMin >= startMin && nowMin < endMin
-          : nowMin >= startMin || nowMin < endMin;
-      if (!inQuiet) return now;
-      const next = new Date(now);
-      if (startMin < endMin) {
-        next.setHours(eh, em, 0, 0);
-      } else {
-        next.setDate(next.getDate() + (nowMin >= startMin ? 1 : 0));
-        next.setHours(eh, em, 0, 0);
-      }
-      return next;
-    };
 
     const scheduledAt = computeNextAllowedTime(new Date(), p).toISOString();
 

@@ -40,6 +40,12 @@ const NotificationSettings = () => {
     message: string;
     details?: unknown;
   } | null>(null);
+  const [isSendingTestInApp, setIsSendingTestInApp] = useState(false);
+  const [testInAppResult, setTestInAppResult] = useState<{
+    success: boolean;
+    message: string;
+    details?: unknown;
+  } | null>(null);
   const locale = useLocale();
 
   const [permission, setPermission] = useState<NotificationPermission>(
@@ -170,6 +176,69 @@ const NotificationSettings = () => {
       setTimeout(() => setToast(null), 2500);
     } finally {
       setIsUpdatingPush(false);
+    }
+  }
+
+  async function handleCreateTestInAppNotification() {
+    if (isSendingTestInApp) return;
+
+    try {
+      setIsSendingTestInApp(true);
+      setTestInAppResult(null);
+
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession();
+      const token = currentSession?.access_token;
+
+      if (!token) {
+        setTestInAppResult({
+          success: false,
+          message: "Not authenticated. Please sign in again.",
+        });
+        return;
+      }
+
+      const response = await fetch(`/${locale}/api/notifications`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: "Realtime Test",
+          message: `Created at ${new Date().toISOString()}`,
+          type: "general",
+          metadata: { source: "debug_realtime" },
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        setTestInAppResult({
+          success: true,
+          message: "In-app notification created. Check the bell in another tab.",
+          details: data,
+        });
+        setToast({ text: "In-app notification created", type: "success" });
+      } else {
+        setTestInAppResult({
+          success: false,
+          message: (data as any)?.error || "Failed to create in-app notification",
+          details: data,
+        });
+        setToast({ text: "Failed to create in-app notification", type: "error" });
+      }
+    } catch (err) {
+      console.error("Failed to create test in-app notification:", err);
+      setTestInAppResult({
+        success: false,
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
+      setToast({ text: "Failed to create in-app notification", type: "error" });
+    } finally {
+      setIsSendingTestInApp(false);
     }
   }
 
@@ -484,6 +553,67 @@ const NotificationSettings = () => {
                       </summary>
                       <pre className="mt-1 text-xs overflow-auto max-h-32 bg-black/5 dark:bg-white/5 p-2 rounded">
                         {JSON.stringify(testPushResult.details, null, 2)}
+                      </pre>
+                    </details>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {showPushDebug && (
+            <div className="py-3 border-b border-border">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <h4 className="text-sm font-medium text-foreground">
+                    Test In-App Notification (Realtime)
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Creates a notification record to verify Supabase Realtime updates the bell instantly.
+                  </p>
+                </div>
+                <button
+                  onClick={handleCreateTestInAppNotification}
+                  disabled={isSendingTestInApp}
+                  className="
+                    px-4 py-2 text-sm font-medium rounded-lg
+                    bg-primary text-primary-foreground
+                    hover:bg-primary/90
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-colors
+                    flex items-center gap-2
+                  "
+                >
+                  {isSendingTestInApp ? (
+                    <>
+                      <Spinner />
+                      Creating...
+                    </>
+                  ) : (
+                    "Create Test In-App"
+                  )}
+                </button>
+              </div>
+
+              {testInAppResult && (
+                <div
+                  className={`mt-3 p-3 rounded-lg text-sm ${
+                    testInAppResult.success
+                      ? "bg-green-50 dark:bg-green-950 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-900"
+                      : "bg-red-50 dark:bg-red-950 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-900"
+                  }`}
+                >
+                  <div className="font-medium">
+                    {testInAppResult.success ? "✓ Success" : "✗ Failed"}
+                  </div>
+                  <div className="mt-1">{testInAppResult.message}</div>
+                  {testInAppResult.details !== undefined && testInAppResult.details !== null && (
+                    <details className="mt-2">
+                      <summary className="cursor-pointer text-xs opacity-70">
+                        Show details
+                      </summary>
+                      <pre className="mt-1 text-xs overflow-auto max-h-32 bg-black/5 dark:bg-white/5 p-2 rounded">
+                        {JSON.stringify(testInAppResult.details, null, 2)}
                       </pre>
                     </details>
                   )}

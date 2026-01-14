@@ -6,6 +6,7 @@ import {
   NotificationCategory,
   NotificationVariant,
 } from "@/lib/notificationStrings";
+import { computeNextAllowedTime } from "@/lib/quietHours";
 
 function isAuthorized(req: NextRequest): boolean {
   const bearer = req.headers.get("authorization") || "";
@@ -183,46 +184,6 @@ export async function POST(req: NextRequest) {
     // Let's reuse the quiet hours calculation logic if we can, or just simplify for this MVP.
     // Since this is a cron job running presumably at a good time (or hourly), 
     // we might want to respect the user's quiet hours stored in `p`.
-    
-    const computeNextAllowedTime = (base: Date, pref: any) => {
-      if (
-        !pref?.quiet_hours_enabled ||
-        !pref?.quiet_hours_start ||
-        !pref?.quiet_hours_end
-      )
-        return base;
-      const [sh, sm] = String(pref.quiet_hours_start)
-        .split(":")
-        .map((x: string) => parseInt(x, 10));
-      const [eh, em] = String(pref.quiet_hours_end)
-        .split(":")
-        .map((x: string) => parseInt(x, 10));
-      const nowMin = base.getHours() * 60 + base.getMinutes();
-      const startMin = sh * 60 + sm;
-      const endMin = eh * 60 + em;
-      
-      // logic: if inside quiet hours, move to end of quiet hours
-      const inQuiet =
-        startMin < endMin
-          ? nowMin >= startMin && nowMin < endMin
-          : nowMin >= startMin || nowMin < endMin;
-          
-      if (!inQuiet) return base;
-      
-      const next = new Date(base);
-      if (startMin < endMin) {
-        // e.g. 23:00 to 07:00 next day is handled by `else` usually? 
-        // No, start < end means e.g. 13:00 to 14:00 (siesta). 
-        next.setHours(eh, em, 0, 0);
-      } else {
-        // e.g. 22:00 to 08:00
-        // if now is 23:00, we move to 08:00 tomorrow
-        // if now is 05:00, we move to 08:00 today
-        next.setDate(next.getDate() + (nowMin >= startMin ? 1 : 0));
-        next.setHours(eh, em, 0, 0);
-      }
-      return next;
-    };
 
     const scheduledFor = computeNextAllowedTime(new Date(), p).toISOString();
 

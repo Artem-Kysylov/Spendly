@@ -6,6 +6,7 @@ import {
 import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
 import { getTranslations } from "next-intl/server";
 import { processNotificationQueue } from "@/lib/notificationProcessor";
+import { computeNextAllowedTime } from "@/lib/quietHours";
 
 // POST /api/notifications/queue - добавление уведомления в очередь
 export async function POST(req: NextRequest) {
@@ -45,41 +46,10 @@ export async function POST(req: NextRequest) {
       .eq("user_id", user.id)
       .single();
 
-    const computeNextAllowedTime = (base: Date, pref: any) => {
-      if (
-        !pref?.quiet_hours_enabled ||
-        !pref?.quiet_hours_start ||
-        !pref?.quiet_hours_end
-      )
-        return base;
-      const [sh, sm] = String(pref.quiet_hours_start)
-        .split(":")
-        .map((x: string) => parseInt(x, 10));
-      const [eh, em] = String(pref.quiet_hours_end)
-        .split(":")
-        .map((x: string) => parseInt(x, 10));
-      const nowMin = base.getHours() * 60 + base.getMinutes();
-      const startMin = sh * 60 + sm;
-      const endMin = eh * 60 + em;
-      const inQuiet =
-        startMin < endMin
-          ? nowMin >= startMin && nowMin < endMin
-          : nowMin >= startMin || nowMin < endMin;
-      if (!inQuiet) return base;
-      const next = new Date(base);
-      if (startMin < endMin) {
-        next.setHours(eh, em, 0, 0);
-      } else {
-        next.setDate(next.getDate() + (nowMin >= startMin ? 1 : 0));
-        next.setHours(eh, em, 0, 0);
-      }
-      return next;
-    };
-
     const baseTime = scheduled_for ? new Date(scheduled_for) : new Date();
     const scheduledISO = computeNextAllowedTime(
       baseTime,
-      prefsResp.data,
+      prefsResp.data ?? undefined,
     ).toISOString();
 
     // Добавляем уведомление в очередь
