@@ -147,11 +147,41 @@ export async function POST(req: NextRequest) {
       try {
         const adminSupabase = getServerSupabaseClient();
         const nowIso = new Date().toISOString();
+
+        const { data: existingTypes, error: typesErr } = await adminSupabase
+          .from("notification_queue")
+          .select("notification_type")
+          .not("notification_type", "is", null)
+          .limit(20);
+
+        if (typesErr) {
+          debug = { ok: false, stage: "resolve_type", error: typesErr };
+          return NextResponse.json({
+            success: true,
+            message: tNotifications("api.subscriptionSaved"),
+            debug,
+          });
+        }
+
+        const resolvedType =
+          (existingTypes || [])
+            .map((r: any) => String(r?.notification_type || "").trim())
+            .find((v: string) => v.length > 0) || null;
+
+        if (!resolvedType) {
+          debug = { ok: false, stage: "resolve_type", error: "no_values" };
+          return NextResponse.json({
+            success: true,
+            message: tNotifications("api.subscriptionSaved"),
+            debug,
+          });
+        }
+
         const { data: queued, error: insertErr } = await adminSupabase
           .from("notification_queue")
           .insert({
             user_id: user.id,
-            notification_type: "general",
+            notification_type: resolvedType,
             title: "Test Push",
             message: "Test push after enabling notifications",
             data: { deepLink: "/dashboard", tag: "spendly-test" },

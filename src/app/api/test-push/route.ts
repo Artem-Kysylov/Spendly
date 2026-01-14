@@ -32,11 +32,50 @@ export async function POST(req: NextRequest) {
 
     const supabase = getServerSupabaseClient();
 
+    const { data: existingTypes, error: typesErr } = await supabase
+      .from("notification_queue")
+      .select("notification_type")
+      .not("notification_type", "is", null)
+      .limit(20);
+
+    if (typesErr) {
+      return NextResponse.json(
+        {
+          error: "Failed to resolve notification_type enum value",
+          details:
+            process.env.NODE_ENV !== "production"
+              ? {
+                  code: (typesErr as any).code,
+                  message: (typesErr as any).message,
+                  details: (typesErr as any).details,
+                  hint: (typesErr as any).hint,
+                }
+              : undefined,
+        },
+        { status: 500 },
+      );
+    }
+
+    const resolvedType =
+      (existingTypes || [])
+        .map((r: any) => String(r?.notification_type || "").trim())
+        .find((v: string) => v.length > 0) || null;
+
+    if (!resolvedType) {
+      return NextResponse.json(
+        {
+          error:
+            "No existing notification_type values found in notification_queue. Cannot enqueue test notification without knowing enum values.",
+        },
+        { status: 500 },
+      );
+    }
+
     const { data: queued, error: insertErr } = await supabase
       .from("notification_queue")
       .insert({
         user_id,
-        notification_type: "general",
+        notification_type: resolvedType,
         title: "Test Push",
         message: "Test push from /api/test-push",
         data: { deepLink: "/dashboard", tag: "spendly-test" },
