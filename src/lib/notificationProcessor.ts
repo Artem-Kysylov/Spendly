@@ -11,7 +11,9 @@ function backoffDelayMs(attempts: number) {
 export async function processNotificationQueue(supabase: SupabaseClient) {
   const nowIso = new Date().toISOString();
 
-  const vapidPublic = (process.env.VAPID_PUBLIC_KEY ?? "").trim();
+  const vapidPublic = (
+    process.env.VAPID_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? ""
+  ).trim();
   const vapidPrivate = (process.env.VAPID_PRIVATE_KEY ?? "").trim();
 
   if (!vapidPublic || !vapidPrivate) {
@@ -79,6 +81,7 @@ export async function processNotificationQueue(supabase: SupabaseClient) {
         anySuccess = true;
       } catch (err: any) {
         const code = Number(err?.statusCode || err?.status || 0);
+        const msg = String(err?.body || err?.message || "");
         if ([410, 404, 403].includes(code)) {
           // Деактивируем битую подписку
           await supabase
@@ -87,7 +90,12 @@ export async function processNotificationQueue(supabase: SupabaseClient) {
             .eq("id", sub.id);
         }
         // Не ретраим конкретную подписку, переходим к следующей
-        console.warn("webpush error", code, err?.body || err?.message || "");
+        console.warn("webpush error", code, msg);
+        if (msg.toLowerCase().includes("failed via jose")) {
+          console.warn(
+            "webpush: possible VAPID mismatch. Ensure VAPID_PRIVATE_KEY matches NEXT_PUBLIC_VAPID_PUBLIC_KEY/VAPID_PUBLIC_KEY.",
+          );
+        }
       }
     }
 

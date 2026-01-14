@@ -223,7 +223,12 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ subscription }),
+        body: JSON.stringify({
+          subscription,
+          send_test_push:
+            typeof navigator !== "undefined" &&
+            /iPhone|iPad|iPod/i.test(navigator.userAgent),
+        }),
       });
 
       if (!response.ok) {

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedClient } from "@/lib/serverSupabase";
+import { getServerSupabaseClient } from "@/lib/serverSupabase";
 import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
 import { getTranslations } from "next-intl/server";
+import { processNotificationQueue } from "@/lib/notificationProcessor";
 
 // POST /api/notifications/subscribe - подписка на push-уведомления
 export async function POST(req: NextRequest) {
@@ -22,7 +24,7 @@ export async function POST(req: NextRequest) {
       namespace: "notifications",
     });
 
-    const { subscription } = body;
+    const { subscription, send_test_push } = body;
 
     // Валидация входных данных
     const endpoint: unknown = subscription?.endpoint;
@@ -139,9 +141,45 @@ export async function POST(req: NextRequest) {
       console.error("Error updating push settings:", settingsError);
     }
 
+    // Optional immediate debug push to validate VAPID keys on real device
+    let debug: any = null;
+    if (send_test_push === true) {
+      try {
+        const adminSupabase = getServerSupabaseClient();
+        const nowIso = new Date().toISOString();
+        const { data: queued, error: insertErr } = await adminSupabase
+          .from("notification_queue")
+          .insert({
+            user_id: user.id,
+            notification_type: "internal_test",
+            title: "Test Push",
+            message: "Test push after enabling notifications",
+            data: { deepLink: "/dashboard", tag: "spendly-test" },
+            send_push: true,
+            send_email: false,
+            scheduled_for: nowIso,
+            status: "pending",
+            attempts: 0,
+            max_attempts: 1,
+          })
+          .select()
+          .single();
+
+        if (insertErr) {
+          debug = { ok: false, stage: "enqueue", error: insertErr };
+        } else {
+          const processor = await processNotificationQueue(adminSupabase as any);
+          debug = { ok: true, queued, processor };
+        }
+      } catch (e: any) {
+        debug = { ok: false, stage: "exception", error: e?.message || String(e) };
+      }
+    }
+
     return NextResponse.json({
       success: true,
       message: tNotifications("api.subscriptionSaved"),
+      debug,
     });
   } catch (error) {
     console.error("API Error:", error);

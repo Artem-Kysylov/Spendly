@@ -76,7 +76,7 @@ export function IOSInstallDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="z-[130] border-border bg-card relative">
+      <DrawerContent className="z-[130] border-border bg-card">
         {/* Arrow for Chrome - positioned absolutely at top-right */}
         {isChrome && (
           <div className="absolute top-4 right-4 pointer-events-none">
