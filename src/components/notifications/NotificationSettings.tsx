@@ -16,6 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useSubscription } from "@/hooks/useSubscription";
+import { supabase } from "@/lib/supabaseClient";
+import { useLocale } from "next-intl";
 
 const NotificationSettings = () => {
   const { session, isReady } = UserAuth();
@@ -32,6 +34,13 @@ const NotificationSettings = () => {
   const [isUpdatingPush, setIsUpdatingPush] = useState(false);
   const [toast, setToast] = useState<ToastMessageProps | null>(null);
   const [isIOSBrowser, setIsIOSBrowser] = useState(false);
+  const [isSendingTestPush, setIsSendingTestPush] = useState(false);
+  const [testPushResult, setTestPushResult] = useState<{
+    success: boolean;
+    message: string;
+    details?: unknown;
+  } | null>(null);
+  const locale = useLocale();
 
   const [permission, setPermission] = useState<NotificationPermission>(
     typeof Notification !== "undefined" ? Notification.permission : "default",
@@ -158,6 +167,63 @@ const NotificationSettings = () => {
       setTimeout(() => setToast(null), 2500);
     } finally {
       setIsUpdatingPush(false);
+    }
+  }
+
+  async function handleSendTestPush() {
+    if (isSendingTestPush) return;
+
+    try {
+      setIsSendingTestPush(true);
+      setTestPushResult(null);
+
+      const {
+        data: { session: currentSession },
+      } = await supabase.auth.getSession();
+      const token = currentSession?.access_token;
+
+      if (!token) {
+        setTestPushResult({
+          success: false,
+          message: "Not authenticated. Please sign in again.",
+        });
+        return;
+      }
+
+      const response = await fetch(`/${locale}/api/notifications/test-push`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setTestPushResult({
+          success: true,
+          message: data.message || "Test push sent!",
+          details: data.processor,
+        });
+        setToast({ text: "Test push sent! Check your device.", type: "success" });
+      } else {
+        setTestPushResult({
+          success: false,
+          message: data.error || data.message || "Failed to send test push",
+          details: data,
+        });
+        setToast({ text: data.error || "Test push failed", type: "error" });
+      }
+    } catch (err) {
+      console.error("Test push error:", err);
+      setTestPushResult({
+        success: false,
+        message: err instanceof Error ? err.message : "Unknown error",
+      });
+      setToast({ text: "Test push failed", type: "error" });
+    } finally {
+      setIsSendingTestPush(false);
     }
   }
 
@@ -359,6 +425,69 @@ const NotificationSettings = () => {
               />
             )}
           </div>
+
+          {/* Send Test Push Button - visible when push is enabled */}
+          {settings.push_enabled && (
+            <div className="py-3 border-b border-border">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <h4 className="text-sm font-medium text-foreground">
+                    Test Push Notification
+                  </h4>
+                  <p className="text-xs text-muted-foreground">
+                    Send a test push to verify your VAPID keys and delivery pipeline.
+                  </p>
+                </div>
+                <button
+                  onClick={handleSendTestPush}
+                  disabled={isSendingTestPush}
+                  className="
+                    px-4 py-2 text-sm font-medium rounded-lg
+                    bg-primary text-primary-foreground
+                    hover:bg-primary/90
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    transition-colors
+                    flex items-center gap-2
+                  "
+                >
+                  {isSendingTestPush ? (
+                    <>
+                      <Spinner />
+                      Sending...
+                    </>
+                  ) : (
+                    "Send Test Push"
+                  )}
+                </button>
+              </div>
+
+              {/* Test Push Result */}
+              {testPushResult && (
+                <div
+                  className={`mt-3 p-3 rounded-lg text-sm ${
+                    testPushResult.success
+                      ? "bg-green-50 dark:bg-green-950 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-900"
+                      : "bg-red-50 dark:bg-red-950 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-900"
+                  }`}
+                >
+                  <div className="font-medium">
+                    {testPushResult.success ? "✓ Success" : "✗ Failed"}
+                  </div>
+                  <div className="mt-1">{testPushResult.message}</div>
+                  {testPushResult.details !== undefined && testPushResult.details !== null && (
+                    <details className="mt-2">
+                      <summary className="cursor-pointer text-xs opacity-70">
+                        Show details
+                      </summary>
+                      <pre className="mt-1 text-xs overflow-auto max-h-32 bg-black/5 dark:bg-white/5 p-2 rounded">
+                        {JSON.stringify(testPushResult.details, null, 2)}
+                      </pre>
+                    </details>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Frequency Settings */}
           <div>
