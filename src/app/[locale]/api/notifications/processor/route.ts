@@ -6,7 +6,8 @@ function isAuthorized(req: NextRequest): boolean {
   const bearer = req.headers.get("authorization") || "";
   const cronSecret = req.headers.get("x-cron-secret") ?? "";
   const okByBearer = bearer.startsWith("Bearer ")
-    ? bearer.slice(7) === (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "")
+    ? bearer.slice(7) === (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "") ||
+      bearer.slice(7) === (process.env.CRON_SECRET ?? "")
     : false;
 
   const okBySecret =
@@ -28,4 +29,8 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json(result);
+}
+
+export async function GET(req: NextRequest) {
+  return POST(req);
 }

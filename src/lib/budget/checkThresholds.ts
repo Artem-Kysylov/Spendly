@@ -102,10 +102,12 @@ export async function checkBudgetThresholds(
     };
     const title = titleMap[locale] || titleMap["en"];
 
+    const queueType = threshold === "exceeded" ? "budget_overrun" : "budget_warning";
+
     // Insert into queue
     await supabase.from("notification_queue").insert({
       user_id: userId,
-      notification_type: "budget_alert",
+      notification_type: queueType,
       title,
       message,
       status: "pending",

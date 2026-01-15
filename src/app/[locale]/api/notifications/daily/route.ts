@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
 import { getUserPreferredLanguage } from "@/lib/i18n/user-locale";
+import { isSupportedLanguage } from "@/i18n/config";
 import {
   getNotificationMessage,
   NotificationCategory,
@@ -11,8 +12,10 @@ import { computeNextAllowedTime } from "@/lib/quietHours";
 function isAuthorized(req: NextRequest): boolean {
   const bearer = req.headers.get("authorization") || "";
   const cronSecret = req.headers.get("x-cron-secret") ?? "";
+
   const okByBearer = bearer.startsWith("Bearer ")
-    ? bearer.slice(7) === (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "")
+    ? bearer.slice(7) === (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "") ||
+      bearer.slice(7) === (process.env.CRON_SECRET ?? "")
     : false;
   const okBySecret =
     !!process.env.CRON_SECRET && cronSecret === process.env.CRON_SECRET;
@@ -30,13 +33,35 @@ export async function POST(req: NextRequest) {
   const todayStr = today.toISOString().slice(0, 10);
 
   // 1. Get active users with preferences
-  const { data: prefs, error: prefsErr } = await supabase
+  const selectWithLocale =
+    "user_id, locale, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone";
+  const selectNoLocale =
+    "user_id, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone";
+
+  const first = await supabase
     .from("notification_preferences")
-    .select(
-      "user_id, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone"
-    )
+    .select(selectWithLocale)
     .neq("engagement_frequency", "disabled")
     .or("push_enabled.eq.true,email_enabled.eq.true");
+
+  let prefs: any = first.data;
+  let prefsErr: any = first.error;
+
+  const errMsg = String((prefsErr as any)?.message || "");
+  const errCode = String((prefsErr as any)?.code || "");
+  const missingLocaleColumn =
+    (errCode === "42703" || errMsg.toLowerCase().includes("does not exist")) &&
+    errMsg.toLowerCase().includes("locale");
+
+  if (prefsErr && missingLocaleColumn) {
+    const second = await supabase
+      .from("notification_preferences")
+      .select(selectNoLocale)
+      .neq("engagement_frequency", "disabled")
+      .or("push_enabled.eq.true,email_enabled.eq.true");
+    prefs = second.data;
+    prefsErr = second.error;
+  }
 
   if (prefsErr) {
     console.error("daily: preferences error", prefsErr);
@@ -52,6 +77,11 @@ export async function POST(req: NextRequest) {
   for (const p of prefs || []) {
     const userId = p.user_id;
     const frequency = p.engagement_frequency; // gentle, aggressive, relentless
+
+    const preferredLocale =
+      typeof (p as any).locale === "string" && (p as any).locale.length > 0
+        ? String((p as any).locale)
+        : "";
 
     // 2. Check last activity (transaction)
     const { data: lastTx } = await supabase
@@ -98,30 +128,32 @@ export async function POST(req: NextRequest) {
     // 4. Rate Limiting (Don't spam "gentle" users)
     // Check if we already queued something for this user today (except strictly necessary alerts)
     // For "relentless", maybe we don't skip? But for now let's limit to 1 daily prompt per cron run.
+    const targetCount =
+      frequency === "aggressive"
+        ? 5
+        : frequency === "gentle"
+          ? Math.random() < 0.5
+            ? 1
+            : 2
+          : frequency === "relentless"
+            ? 5
+            : 1;
+
     const { count } = await supabase
       .from("notification_queue")
       .select("*", { count: "exact", head: true })
       .eq("user_id", userId)
       .gte("created_at", todayStr) // created today
-      .in("notification_type", ["daily_reminder", "aggressive", "retention"]);
+      .eq("notification_type", "reminder")
+      .contains("data", { source: "daily" });
 
-    if (count && count > 0) {
-      // If "relentless", maybe allow more? 
-      if (frequency !== "relentless") {
-        skippedCount++;
-        continue;
-      }
-      if (count > 3) {
-        // Even relentless has a limit
-        skippedCount++;
-        continue;
-      }
+    const existingCount = Number(count || 0);
+    const remaining = Math.max(0, targetCount - existingCount);
+    if (remaining <= 0) {
+      skippedCount++;
+      continue;
     }
 
-    // 5. Generate Content
-    const locale = await getUserPreferredLanguage(userId);
-    const message = getNotificationMessage(category, locale, {}, variant);
-    
     // Title? 
     // We can map category to a generic title or add titles to NOTIFICATION_STRINGS later.
     // For now, let's use a mapping here.
@@ -170,11 +202,16 @@ export async function POST(req: NextRequest) {
       },
       // Fallback for others to English map or basic
     };
-    
-    // Simple fallback for title
+
+    // 5. Generate Content
+    const locale =
+      preferredLocale && isSupportedLanguage(preferredLocale)
+        ? (preferredLocale as any)
+        : await getUserPreferredLanguage(userId);
+
     const langMap = titleMap[locale] || titleMap["en"];
     const title = langMap[category] || "Spendly";
-
+    
     // 6. Enqueue
     // Calculate scheduled time (respect quiet hours - handled by queue/route usually, but here we insert directly)
     // We'll trust the processor or just set 'now' and let the user settings quiet hours (if implemented in processor) handle it.
@@ -187,26 +224,39 @@ export async function POST(req: NextRequest) {
 
     const scheduledFor = computeNextAllowedTime(new Date(), p).toISOString();
 
-    const { error: insertErr } = await supabase
-      .from("notification_queue")
-      .insert({
-        user_id: userId,
-        notification_type: category, // use category as type
-        title,
-        message,
-        scheduled_for: scheduledFor,
-        status: "pending",
-        send_push: p.push_enabled,
-        send_email: p.email_enabled, // or false if we only want push for these
-        attempts: 0
-      });
+    for (let i = 0; i < remaining; i++) {
+      const message = getNotificationMessage(category, locale, {}, variant);
 
-    if (!insertErr) {
-      sentCount++;
-    } else {
-      console.error("daily: insert error", insertErr);
+      const { error: insertErr } = await supabase
+        .from("notification_queue")
+        .insert({
+          user_id: userId,
+          notification_type: "reminder",
+          title,
+          message,
+          scheduled_for: scheduledFor,
+          status: "pending",
+          send_push: p.push_enabled,
+          send_email: p.email_enabled, // or false if we only want push for these
+          attempts: 0,
+          data: {
+            source: "daily",
+            category,
+            variant,
+          },
+        });
+
+      if (!insertErr) {
+        sentCount++;
+      } else {
+        console.error("daily: insert error", insertErr);
+      }
     }
   }
 
   return NextResponse.json({ sent: sentCount, skipped: skippedCount });
+}
+
+export async function GET(req: NextRequest) {
+  return POST(req);
 }

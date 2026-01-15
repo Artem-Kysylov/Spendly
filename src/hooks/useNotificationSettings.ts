@@ -124,6 +124,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
             frequency: updates.frequency ?? prev.frequency,
             push_enabled: updates.push_enabled ?? prev.push_enabled,
             email_enabled: updates.email_enabled ?? prev.email_enabled,
+            locale: updates.locale ?? prev.locale ?? locale,
           }),
         });
 
@@ -144,6 +145,12 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
     },
     [session?.user?.id, settings, getAuthToken, apiBase],
   );
+
+  useEffect(() => {
+    if (!settings) return;
+    if (settings.locale === locale) return;
+    updateSettings({ locale });
+  }, [locale, settings, updateSettings]);
 
   const subscribeToPush = useCallback(async (): Promise<boolean> => {
     // Optimistic on

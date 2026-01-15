@@ -103,7 +103,9 @@ export async function POST(req: NextRequest) {
     try {
       const notifTypeMap = (t: string) =>
         t === "budget_warning" ? "budget_alert" :
+        t === "budget_overrun" ? "budget_alert" :
         t === "weekly_reminder" ? "weekly_reminder" :
+        t === "weekly_summary" ? "weekly_reminder" :
         "general";
 
       const candidateType = notifTypeMap(notification_type);

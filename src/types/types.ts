@@ -610,6 +610,7 @@ export type NotificationFrequency =
 export interface NotificationSettings {
   id: string;
   user_id: string;
+  locale: string;
   frequency: NotificationFrequency;
   push_enabled: boolean;
   email_enabled: boolean;

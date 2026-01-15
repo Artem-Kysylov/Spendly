@@ -9,13 +9,38 @@ export async function GET(req: NextRequest) {
     const { supabase, user, locale } = await getAuthenticatedClient(req);
     const tErrors = await getTranslations({ locale, namespace: "errors" });
 
-    const { data, error } = await supabase
+    const selectWithLocale =
+      "id, user_id, locale, engagement_frequency, push_enabled, email_enabled, created_at, updated_at";
+    const selectNoLocale =
+      "id, user_id, engagement_frequency, push_enabled, email_enabled, created_at, updated_at";
+
+    let data: any = null;
+    let error: any = null;
+
+    const first = await supabase
       .from("notification_preferences")
-      .select(
-        "id, user_id, engagement_frequency, push_enabled, email_enabled, created_at, updated_at",
-      )
+      .select(selectWithLocale)
       .eq("user_id", user.id)
       .single();
+
+    data = first.data;
+    error = first.error;
+
+    const errMsg = String((error as any)?.message || "");
+    const errCode = String((error as any)?.code || "");
+    const missingLocaleColumn =
+      (errCode === "42703" || errMsg.toLowerCase().includes("does not exist")) &&
+      errMsg.toLowerCase().includes("locale");
+
+    if (error && missingLocaleColumn) {
+      const second = await supabase
+        .from("notification_preferences")
+        .select(selectNoLocale)
+        .eq("user_id", user.id)
+        .single();
+      data = second.data;
+      error = second.error;
+    }
 
     if (error && error.code !== "PGRST116") {
       console.error("Error fetching notification preferences:", error);
@@ -41,9 +66,15 @@ export async function GET(req: NextRequest) {
           ? dbFreq
           : "gentle";
 
+      const normalizedLocale =
+        typeof row.locale === "string" && isSupportedLanguage(row.locale)
+          ? row.locale
+          : "en";
+
       return {
         id: row.id,
         user_id: row.user_id,
+        locale: normalizedLocale,
         frequency: normalizedFreq,
         push_enabled: row.push_enabled ?? false,
         email_enabled: row.email_enabled ?? true,
@@ -55,20 +86,42 @@ export async function GET(req: NextRequest) {
 
     // Если настроек нет — создаем дефолтные
     if (!data) {
-      const defaultRecord = {
+      const defaultRecordBase = {
         user_id: user.id,
         engagement_frequency: "gentle" as const,
         push_enabled: false,
         email_enabled: true,
       };
 
-      const { data: newRow, error: createError } = await supabase
+      const withLocale = { ...defaultRecordBase, locale };
+
+      let newRow: any = null;
+      let createError: any = null;
+
+      const created = await supabase
         .from("notification_preferences")
-        .insert(defaultRecord)
-        .select(
-          "id, user_id, engagement_frequency, push_enabled, email_enabled, created_at, updated_at",
-        )
+        .insert(withLocale)
+        .select(selectWithLocale)
         .single();
+
+      newRow = created.data;
+      createError = created.error;
+
+      const createMsg = String((createError as any)?.message || "");
+      const createCode = String((createError as any)?.code || "");
+      const createMissingLocale =
+        (createCode === "42703" || createMsg.toLowerCase().includes("does not exist")) &&
+        createMsg.toLowerCase().includes("locale");
+
+      if (createError && createMissingLocale) {
+        const created2 = await supabase
+          .from("notification_preferences")
+          .insert(defaultRecordBase)
+          .select(selectNoLocale)
+          .single();
+        newRow = created2.data;
+        createError = created2.error;
+      }
 
       if (createError) {
         console.error("Error creating default preferences:", createError);
@@ -112,7 +165,7 @@ export async function PUT(req: NextRequest) {
 
     const tErrors = await getTranslations({ locale, namespace: "errors" });
 
-    const { frequency, push_enabled, email_enabled } = body;
+    const { frequency, push_enabled, email_enabled, locale: prefLocale } = body;
 
     // Валидация
     const validFrequencies = ["disabled", "gentle", "aggressive", "relentless"];
@@ -123,21 +176,57 @@ export async function PUT(req: NextRequest) {
       );
     }
 
+    if (
+      prefLocale !== undefined &&
+      (typeof prefLocale !== "string" || !isSupportedLanguage(prefLocale))
+    ) {
+      return NextResponse.json(
+        { error: tErrors("notifications.invalidAction") },
+        { status: 400 },
+      );
+    }
+
     const updateData: any = {};
     if (frequency !== undefined) updateData.engagement_frequency = frequency;
     if (push_enabled !== undefined) updateData.push_enabled = push_enabled;
     if (email_enabled !== undefined) updateData.email_enabled = email_enabled;
+    if (prefLocale !== undefined) updateData.locale = prefLocale;
 
     // Не трогаем updated_at напрямую — пусть триггер/БД обновляют, если настроено
 
-    const { data, error } = await supabase
+    const selectWithLocale =
+      "id, user_id, locale, engagement_frequency, push_enabled, email_enabled, created_at, updated_at";
+    const selectNoLocale =
+      "id, user_id, engagement_frequency, push_enabled, email_enabled, created_at, updated_at";
+
+    const updatedAttempt = await supabase
       .from("notification_preferences")
       .update(updateData)
       .eq("user_id", user.id)
-      .select(
-        "id, user_id, engagement_frequency, push_enabled, email_enabled, created_at, updated_at",
-      )
+      .select(selectWithLocale)
       .single();
+
+    let data: any = updatedAttempt.data;
+    let error: any = updatedAttempt.error;
+
+    const errMsg = String((error as any)?.message || "");
+    const errCode = String((error as any)?.code || "");
+    const missingLocaleColumn =
+      (errCode === "42703" || errMsg.toLowerCase().includes("does not exist")) &&
+      errMsg.toLowerCase().includes("locale");
+
+    if (error && missingLocaleColumn) {
+      const safeUpdateData = { ...updateData };
+      delete safeUpdateData.locale;
+      const updatedAttempt2 = await supabase
+        .from("notification_preferences")
+        .update(safeUpdateData)
+        .eq("user_id", user.id)
+        .select(selectNoLocale)
+        .single();
+      data = updatedAttempt2.data;
+      error = updatedAttempt2.error;
+    }
 
     if (error) {
       const isDisabledRequested = frequency === "disabled";
@@ -152,7 +241,7 @@ export async function PUT(req: NextRequest) {
           .update({ push_enabled: false, email_enabled: false })
           .eq("user_id", user.id)
           .select(
-            "id, user_id, engagement_frequency, push_enabled, email_enabled, created_at, updated_at",
+            "id, user_id, locale, engagement_frequency, push_enabled, email_enabled, created_at, updated_at",
           )
           .single();
 
@@ -164,6 +253,10 @@ export async function PUT(req: NextRequest) {
         const updated = {
           id: fbData.id,
           user_id: fbData.user_id,
+          locale:
+            typeof fbData.locale === "string" && isSupportedLanguage(fbData.locale)
+              ? fbData.locale
+              : locale,
           frequency: "disabled" as const,
           push_enabled: fbData.push_enabled,
           email_enabled: fbData.email_enabled,
@@ -180,6 +273,11 @@ export async function PUT(req: NextRequest) {
     const updated = {
       id: data.id,
       user_id: data.user_id,
+      locale:
+        typeof (data as any).locale === "string" &&
+        isSupportedLanguage((data as any).locale)
+          ? (data as any).locale
+          : "en",
       frequency: data.engagement_frequency,
       push_enabled: data.push_enabled,
       email_enabled: data.email_enabled,

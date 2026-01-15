@@ -187,8 +187,10 @@ async function getUserPreferredLanguage(
 function isAuthorized(req: NextRequest): boolean {
   const bearer = req.headers.get("authorization") || "";
   const cronSecret = req.headers.get("x-cron-secret") ?? "";
+
   const okByBearer = bearer.startsWith("Bearer ")
-    ? bearer.slice(7) === (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "")
+    ? bearer.slice(7) === (process.env.SUPABASE_SERVICE_ROLE_KEY ?? "") ||
+      bearer.slice(7) === (process.env.CRON_SECRET ?? "")
     : false;
   // ВСЕГДА boolean: есть CRON_SECRET и заголовок совпадает
   const okBySecret =
@@ -225,12 +227,33 @@ export async function POST(req: NextRequest) {
     getLastWeekRange(lastWeekStart);
 
   // 1) Выбираем активных пользователей по preferences
-  const { data: prefs, error: prefsErr } = await supabase
+  const selectWithLocale =
+    "user_id, locale, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone";
+  const selectNoLocale =
+    "user_id, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone";
+
+  const first = await supabase
     .from("notification_preferences")
-    .select(
-      "user_id, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone",
-    )
+    .select(selectWithLocale)
     .neq("engagement_frequency", "disabled");
+
+  let prefs: any = first.data;
+  let prefsErr: any = first.error;
+
+  const errMsg = String((prefsErr as any)?.message || "");
+  const errCode = String((prefsErr as any)?.code || "");
+  const missingLocaleColumn =
+    (errCode === "42703" || errMsg.toLowerCase().includes("does not exist")) &&
+    errMsg.toLowerCase().includes("locale");
+
+  if (prefsErr && missingLocaleColumn) {
+    const second = await supabase
+      .from("notification_preferences")
+      .select(selectNoLocale)
+      .neq("engagement_frequency", "disabled");
+    prefs = second.data;
+    prefsErr = second.error;
+  }
 
   if (prefsErr) {
     console.error("digest: preferences error", prefsErr);
@@ -243,7 +266,7 @@ export async function POST(req: NextRequest) {
   }
 
   const targets = (prefs || []).filter(
-    (p) => p.push_enabled || p.email_enabled,
+    (p: any) => p.push_enabled || p.email_enabled,
   );
   let created = 0;
   let skipped = 0;
@@ -251,7 +274,10 @@ export async function POST(req: NextRequest) {
   for (const p of targets) {
     const userId = p.user_id;
 
-    const lang = await getUserPreferredLanguage(supabase, userId);
+    const lang =
+      typeof (p as any).locale === "string" && isSupportedLanguage((p as any).locale)
+        ? ((p as any).locale as DigestLanguage)
+        : await getUserPreferredLanguage(supabase, userId);
     const strings = DIGEST_STRINGS[lang];
     const intlLocale = toIntlLocale(lang);
 
@@ -489,12 +515,12 @@ export async function POST(req: NextRequest) {
       .from("notification_queue")
       .insert({
         user_id: userId,
-        notification_type: "weekly_reminder",
+        notification_type: "weekly_summary",
         title,
         message: body,
         data: {
           deepLink,
-          tag: "weekly_reminder",
+          tag: "weekly_summary",
           renotify: true,
           idempotent_key: idemKey,
         },
@@ -545,4 +571,8 @@ export async function POST(req: NextRequest) {
     skipped,
     period: { lastWeekStart, lastWeekEnd },
   });
+}
+
+export async function GET(req: NextRequest) {
+  return POST(req);
 }
