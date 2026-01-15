@@ -16,6 +16,11 @@ export async function processNotificationQueue(supabase: SupabaseClient) {
   ).trim();
   const vapidPrivate = (process.env.VAPID_PRIVATE_KEY ?? "").trim();
 
+  console.log(
+    "webpush: VAPID_PRIVATE_KEY prefix:",
+    vapidPrivate ? vapidPrivate.slice(0, 4) : "(missing)",
+  );
+
   if (!vapidPublic || !vapidPrivate) {
     console.error("Missing VAPID keys");
     return { error: "Missing VAPID keys" };

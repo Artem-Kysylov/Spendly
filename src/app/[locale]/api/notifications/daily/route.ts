@@ -2,12 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
 import { getUserPreferredLanguage } from "@/lib/i18n/user-locale";
 import { isSupportedLanguage } from "@/i18n/config";
+import type { Language } from "@/types/locale";
 import {
   getNotificationMessage,
   NotificationCategory,
   NotificationVariant,
 } from "@/lib/notificationStrings";
 import { computeNextAllowedTime } from "@/lib/quietHours";
+
+function normalizeLanguage(input: unknown): Language | null {
+  if (typeof input !== "string") return null;
+  const trimmed = input.trim().toLowerCase();
+  const base = trimmed.split(/[-_]/)[0] || "";
+  return isSupportedLanguage(base) ? (base as Language) : null;
+}
 
 function isAuthorized(req: NextRequest): boolean {
   const bearer = req.headers.get("authorization") || "";
@@ -29,6 +37,7 @@ export async function POST(req: NextRequest) {
   }
 
   const supabase = getServerSupabaseClient();
+  const onlyUserId = (req.nextUrl.searchParams.get("userId") || "").trim();
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
 
@@ -38,11 +47,13 @@ export async function POST(req: NextRequest) {
   const selectNoLocale =
     "user_id, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone";
 
-  const first = await supabase
+  const firstBase = supabase
     .from("notification_preferences")
     .select(selectWithLocale)
     .neq("engagement_frequency", "disabled")
     .or("push_enabled.eq.true,email_enabled.eq.true");
+
+  const first = onlyUserId ? await firstBase.eq("user_id", onlyUserId) : await firstBase;
 
   let prefs: any = first.data;
   let prefsErr: any = first.error;
@@ -54,11 +65,13 @@ export async function POST(req: NextRequest) {
     errMsg.toLowerCase().includes("locale");
 
   if (prefsErr && missingLocaleColumn) {
-    const second = await supabase
+    const secondBase = supabase
       .from("notification_preferences")
       .select(selectNoLocale)
       .neq("engagement_frequency", "disabled")
       .or("push_enabled.eq.true,email_enabled.eq.true");
+
+    const second = onlyUserId ? await secondBase.eq("user_id", onlyUserId) : await secondBase;
     prefs = second.data;
     prefsErr = second.error;
   }
@@ -78,10 +91,7 @@ export async function POST(req: NextRequest) {
     const userId = p.user_id;
     const frequency = p.engagement_frequency; // gentle, aggressive, relentless
 
-    const preferredLocale =
-      typeof (p as any).locale === "string" && (p as any).locale.length > 0
-        ? String((p as any).locale)
-        : "";
+    const preferredLocaleRaw = (p as any).locale;
 
     // 2. Check last activity (transaction)
     const { data: lastTx } = await supabase
@@ -204,10 +214,8 @@ export async function POST(req: NextRequest) {
     };
 
     // 5. Generate Content
-    const locale =
-      preferredLocale && isSupportedLanguage(preferredLocale)
-        ? (preferredLocale as any)
-        : await getUserPreferredLanguage(userId);
+    const preferredLocale = normalizeLanguage(preferredLocaleRaw);
+    const locale = preferredLocale ?? (await getUserPreferredLanguage(userId));
 
     const langMap = titleMap[locale] || titleMap["en"];
     const title = langMap[category] || "Spendly";
