@@ -10,6 +10,7 @@ interface ChatMessagesProps {
   isTyping?: boolean;
   currency?: string;
   onSuggestionClick?: (text: string) => void;
+  pendingAction?: unknown;
 }
 
 // Minimal cleaner to fix "AI laziness" with newlines
@@ -83,6 +84,7 @@ export const ChatMessages = ({
   messages,
   isTyping,
   onSuggestionClick,
+  pendingAction,
 }: ChatMessagesProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
