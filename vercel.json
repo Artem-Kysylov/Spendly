@@ -1,15 +1,15 @@
 {
   "crons": [
     {
-      "path": "/en/api/notifications/processor",
+      "path": "/api/cron/processor",
       "schedule": "*/2 * * * *"
     },
     {
-      "path": "/en/api/notifications/daily",
+      "path": "/api/cron/daily",
       "schedule": "0 9 * * *"
     },
     {
-      "path": "/en/api/notifications/digest",
+      "path": "/api/cron/digest",
       "schedule": "0 9 * * 1"
     }
   ]
