@@ -15,67 +15,35 @@ export default function PaymentClient() {
   const tCTA = useTranslations("cta");
   const locale = useLocale();
   const { session } = UserAuth();
-  const CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL;
 
   const handleUpgradeClick = async () => {
     try {
-      // 1) Всегда предпочитаем UUID‑ссылку из ENV
-      if (CHECKOUT_URL) {
-        console.log("[Payment] Using env checkout URL ->", CHECKOUT_URL);
-        if (CHECKOUT_URL.includes("/checkout/buy/")) {
-          console.warn(
-            "[Payment] Env contains legacy buy URL; skipping to avoid 404.",
-          );
-          setToast({ text: tPayment("toastComingSoon"), type: "success" });
-          setTimeout(() => setToast(null), 3000);
-          return;
-        }
-        const urlWithCustomData = (() => {
-          try {
-            const userId = session?.user?.id;
-            if (!userId) return CHECKOUT_URL;
-            const u = new URL(CHECKOUT_URL);
-            u.searchParams.set("checkout[custom][user_id]", userId);
-            return u.toString();
-          } catch {
-            return CHECKOUT_URL;
-          }
-        })();
+      const priceId = "pri_01kf3g78sjap8307ctf6p6e0xm";
 
-        window.location.href = urlWithCustomData;
-        return;
-      }
-
-      // 2) Если ENV нет — пробуем серверный API
-      const token = session?.access_token;
-      if (!token) throw new Error("No auth token");
-
-      const res = await fetch("/api/checkout-url", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ locale }),
-      });
-      if (!res.ok) throw new Error("Failed to create checkout");
-
-      const { url } = await res.json();
-      console.log("[Payment] Fresh checkout URL ->", url);
-
-      if (typeof url !== "string" || url.includes("/checkout/buy/")) {
-        console.warn(
-          "[Payment] API returned legacy buy link or invalid URL; skipping to avoid 404.",
-        );
-        setToast({ text: tPayment("toastComingSoon"), type: "success" });
+      const paddle = (window as any)?.Paddle;
+      if (!paddle?.Checkout?.open) {
+        console.warn("[Payment] Paddle is not available on window yet");
+        setToast({ text: "Checkout is unavailable. Please try again.", type: "error" });
         setTimeout(() => setToast(null), 3000);
         return;
       }
 
-      window.location.href = url;
+      paddle.Checkout.open({
+        settings: {
+          displayMode: "overlay",
+          locale,
+          theme: "light",
+        },
+        items: [{ priceId, quantity: 1 }],
+        customData: {
+          user_id: session?.user?.id,
+          plan: "monthly",
+        },
+        customer: session?.user?.email ? { email: session.user.email } : undefined,
+      });
     } catch (e) {
-      console.warn("[Payment] No checkout URL available:", e);
-      setToast({ text: tPayment("toastComingSoon"), type: "success" });
+      console.warn("[Payment] Paddle checkout failed:", e);
+      setToast({ text: "Checkout failed. Please try again.", type: "error" });
       setTimeout(() => setToast(null), 3000);
     }
   };

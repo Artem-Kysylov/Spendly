@@ -1,10 +1,13 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/routing";
 import { useState, useEffect } from "react";
+import { useLocale } from "next-intl";
+import { UserAuth } from "@/context/AuthContext";
 
 export default function UpgradeCornerPanel() {
   const t = useTranslations("layout");
+  const locale = useLocale();
+  const { session } = UserAuth();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -22,6 +25,29 @@ export default function UpgradeCornerPanel() {
 
   if (!visible) return null;
 
+  const handleUpgradeClick = () => {
+    const priceId = "pri_01kf3g78sjap8307ctf6p6e0xm";
+    const paddle = (window as any)?.Paddle;
+    if (!paddle?.Checkout?.open) {
+      console.warn("[UpgradeCornerPanel] Paddle is not available on window yet");
+      return;
+    }
+
+    paddle.Checkout.open({
+      settings: {
+        displayMode: "overlay",
+        locale,
+        theme: "light",
+      },
+      items: [{ priceId, quantity: 1 }],
+      customData: {
+        user_id: session?.user?.id,
+        plan: "monthly",
+      },
+      customer: session?.user?.email ? { email: session.user.email } : undefined,
+    });
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-50 w-[320px] max-w-[90vw] rounded-lg border border-primary/30 bg-card shadow-lg p-4">
       {/* содержимое без изменений */}
@@ -36,11 +62,9 @@ export default function UpgradeCornerPanel() {
             <li>• {t("limitWarning.budgets")}</li>
             <li>• {t("limitWarning.assistant")}</li>
           </ul>
-          <Link href="/paywall">
-            <Button size="sm" className="mt-3 w-full">
-              {t("upgradeBanner.cta")}
-            </Button>
-          </Link>
+          <Button size="sm" className="mt-3 w-full" onClick={handleUpgradeClick}>
+            {t("upgradeBanner.cta")}
+          </Button>
         </div>
         <button
           className="ml-2 text-muted-foreground hover:text-foreground"

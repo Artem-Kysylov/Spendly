@@ -54,39 +54,37 @@ export default function PaywallClient() {
         // trackEvent("paywall_cta_clicked", { plan, from: "paywall" });
 
         try {
-            const token = session?.access_token;
-            if (!token) {
-                setToast({ text: "Please sign in to continue", type: "error" });
+            const priceId =
+                plan === "monthly"
+                    ? "pri_01kf3g78sjap8307ctf6p6e0xm"
+                    : plan === "yearly"
+                        ? "pri_01kf3g8fzd9gy4j08sw69rcey8"
+                        : "pri_01kf3g9jqpwq3xr25shbk7x8pq";
+
+            const paddle = (window as any)?.Paddle;
+            if (!paddle?.Checkout?.open) {
+                console.warn("[Paywall] Paddle is not available on window yet");
+                setToast({ text: "Checkout is unavailable. Please try again.", type: "error" });
                 setTimeout(() => setToast(null), 3000);
                 return;
             }
 
-            const res = await fetch("/api/checkout-url", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
+            paddle.Checkout.open({
+                settings: {
+                    displayMode: "overlay",
+                    locale,
+                    theme: "light",
                 },
-                body: JSON.stringify({ locale, plan }),
+                items: [{ priceId, quantity: 1 }],
+                customData: {
+                    user_id: session?.user?.id,
+                    plan,
+                },
+                customer: session?.user?.email ? { email: session.user.email } : undefined,
             });
-            if (!res.ok) throw new Error("Failed to create checkout");
-
-            const { url } = await res.json();
-            console.log("[Paywall] Fresh checkout URL ->", url);
-
-            if (typeof url !== "string" || url.includes("/checkout/buy/")) {
-                console.warn(
-                    "[Paywall] API returned legacy buy link or invalid URL; skipping to avoid 404.",
-                );
-                setToast({ text: "Coming soon!", type: "success" });
-                setTimeout(() => setToast(null), 3000);
-                return;
-            }
-
-            window.location.href = url;
         } catch (e) {
-            console.warn("[Paywall] No checkout URL available:", e);
-            setToast({ text: "Coming soon!", type: "success" });
+            console.warn("[Paywall] Paddle checkout failed:", e);
+            setToast({ text: "Checkout failed. Please try again.", type: "error" });
             setTimeout(() => setToast(null), 3000);
         }
     };

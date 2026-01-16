@@ -54,7 +54,6 @@ export default function UserSettingsClient() {
   const tAI = useTranslations("assistant");
   const locale = useLocale();
   const { subscriptionPlan } = useSubscription();
-  const CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL;
 
   // Appearance & App Controls
   const isPWAInstalled = useIsPWAInstalled();
@@ -126,55 +125,36 @@ export default function UserSettingsClient() {
     }
   }
 
-  async function handleUpgradeClick() {
+  async function handleUpgradeClick(plan: "monthly" | "yearly" | "lifetime" = "monthly") {
     if (isUpgradeLoading) return;
     setIsUpgradeLoading(true);
     try {
-      if (CHECKOUT_URL) {
-        if (CHECKOUT_URL.includes("/checkout/buy/")) {
-          console.warn(
-            "[Settings] Env contains legacy buy URL; skipping to avoid 404.",
-          );
-          return;
-        }
-        const urlWithCustomData = (() => {
-          try {
-            const userId = session?.user?.id;
-            if (!userId) return CHECKOUT_URL;
-            const u = new URL(CHECKOUT_URL);
-            u.searchParams.set("checkout[custom][user_id]", userId);
-            return u.toString();
-          } catch {
-            return CHECKOUT_URL;
-          }
-        })();
+      const priceId =
+        plan === "monthly"
+          ? "pri_01kf3g78sjap8307ctf6p6e0xm"
+          : plan === "yearly"
+            ? "pri_01kf3g8fzd9gy4j08sw69rcey8"
+            : "pri_01kf3g9jqpwq3xr25shbk7x8pq";
 
-        window.location.href = urlWithCustomData;
+      const paddle = (window as any)?.Paddle;
+      if (!paddle?.Checkout?.open) {
+        console.warn("[Settings] Paddle is not available on window yet");
         return;
       }
 
-      const token = session?.access_token;
-      if (!token) throw new Error("No auth token");
-
-      const res = await fetch("/api/checkout-url", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      paddle.Checkout.open({
+        settings: {
+          displayMode: "overlay",
+          locale,
+          theme: "light",
         },
-        body: JSON.stringify({ locale }),
+        items: [{ priceId, quantity: 1 }],
+        customData: {
+          user_id: session?.user?.id,
+          plan,
+        },
+        customer: session?.user?.email ? { email: session.user.email } : undefined,
       });
-      if (!res.ok) throw new Error("Failed to create checkout");
-
-      const { url } = await res.json();
-      if (typeof url !== "string" || url.includes("/checkout/buy/")) {
-        console.warn(
-          "[Settings] API returned legacy buy link or invalid URL; skipping to avoid 404.",
-        );
-        return;
-      }
-
-      window.location.href = url;
     } catch (e) {
       console.warn("[Settings] No checkout URL available:", e);
     } finally {
@@ -321,7 +301,7 @@ export default function UserSettingsClient() {
                   text={tPaywall("monthly.cta")}
                   variant="primary"
                   className="w-full text-xs h-9"
-                  onClick={handleUpgradeClick}
+                  onClick={() => handleUpgradeClick("monthly")}
                   isLoading={isUpgradeLoading}
                   disabled={isUpgradeLoading}
                 />
@@ -358,7 +338,7 @@ export default function UserSettingsClient() {
                   text={tPaywall("yearly.cta")}
                   variant="primary"
                   className="w-full text-xs h-9"
-                  onClick={handleUpgradeClick}
+                  onClick={() => handleUpgradeClick("yearly")}
                   isLoading={isUpgradeLoading}
                   disabled={isUpgradeLoading}
                 />
@@ -395,7 +375,7 @@ export default function UserSettingsClient() {
                   text={tPaywall("lifetime.cta")}
                   variant="primary"
                   className="w-full text-xs h-9 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0"
-                  onClick={handleUpgradeClick}
+                  onClick={() => handleUpgradeClick("lifetime")}
                   isLoading={isUpgradeLoading}
                   disabled={isUpgradeLoading}
                 />

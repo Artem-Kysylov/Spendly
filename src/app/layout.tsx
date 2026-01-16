@@ -37,6 +37,16 @@ export default async function RootLayout({
           content="black-translucent"
         />
         <link rel="apple-touch-startup-image" href="/icons/apple-splash-dark.png" />
+        <script src="https://cdn.paddle.com/paddle/v2/paddle.js"></script>
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              'try { if (typeof Paddle !== "undefined" && Paddle && typeof Paddle.Initialize === "function") { Paddle.Initialize({ token: "' +
+              (process.env.NEXT_PUBLIC_PADDLE_TOKEN ||
+                "live_23bd232d227c212d3901ff2e1da") +
+              '" }); } } catch (e) {}',
+          }}
+        />
       </head>
       <body className={`${montserrat.className} min-h-[100dvh]`}>
         {children}

@@ -1,12 +1,15 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Link } from "@/i18n/routing";
 import { useState, useEffect } from "react";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useLocale } from "next-intl";
+import { UserAuth } from "@/context/AuthContext";
 // import { trackEvent } from "@/lib/telemetry";
 
 export default function PeriodicUpgradeBanner() {
   const t = useTranslations("layout");
+  const locale = useLocale();
+  const { session } = UserAuth();
   const { subscriptionPlan } = useSubscription();
   const [visible, setVisible] = useState(false);
 
@@ -41,6 +44,27 @@ export default function PeriodicUpgradeBanner() {
 
   const handleUpgradeClick = () => {
     // trackEvent("upgrade_cta_clicked", { from: "periodic_banner" });
+
+    const priceId = "pri_01kf3g78sjap8307ctf6p6e0xm";
+    const paddle = (window as any)?.Paddle;
+    if (!paddle?.Checkout?.open) {
+      console.warn("[PeriodicBanner] Paddle is not available on window yet");
+      return;
+    }
+
+    paddle.Checkout.open({
+      settings: {
+        displayMode: "overlay",
+        locale,
+        theme: "light",
+      },
+      items: [{ priceId, quantity: 1 }],
+      customData: {
+        user_id: session?.user?.id,
+        plan: "monthly",
+      },
+      customer: session?.user?.email ? { email: session.user.email } : undefined,
+    });
   };
 
   const handleDismiss = () => {
@@ -70,9 +94,9 @@ export default function PeriodicUpgradeBanner() {
         <Button variant="ghost" size="sm" onClick={handleDismiss} className="flex-1 sm:flex-initial text-xs sm:text-sm">
           {t("periodicBanner.dismiss")}
         </Button>
-        <Link href="/paywall" onClick={handleUpgradeClick} className="flex-1 sm:flex-initial">
-          <Button size="sm" className="w-full text-xs sm:text-sm">{t("upgradeBanner.cta")}</Button>
-        </Link>
+        <Button size="sm" className="w-full text-xs sm:text-sm flex-1 sm:flex-initial" onClick={handleUpgradeClick}>
+          {t("upgradeBanner.cta")}
+        </Button>
       </div>
     </div>
   );
