@@ -26,7 +26,7 @@ export default function usePWAInstall() {
     const isGenericWebView =
       /\bwv\b/i.test(userAgent) ||
       /\bWebView\b/i.test(userAgent) ||
-      /Version\/[\d.]+.*Safari\//i.test(userAgent);
+      (isIosDevice && /AppleWebKit/i.test(userAgent) && !/Safari/i.test(userAgent));
     const inApp = (isSocialInApp || isGenericWebView) || false;
 
     setIsIOS(isIosDevice);
