@@ -50,7 +50,10 @@
   "pwa": {
     "guard": {
       "title": "Buka Spendly di browser",
-      "description": "Untuk keamanan dan fitur AI, buka Spendly di Safari atau Chrome melalui menu di pojok kanan atas."
+      "description": "Untuk keamanan dan fitur AI, buka Spendly di Safari atau Chrome melalui menu di pojok kanan atas.",
+      "openInBrowser": "Buka di browser",
+      "copyLink": "Salin tautan",
+      "copied": "Tersalin!"
     },
     "ios": {
       "title": "Instal Aplikasi Spendly",

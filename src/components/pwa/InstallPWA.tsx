@@ -23,8 +23,36 @@ type InAppBrowserGuardProps = {
 
 export function InAppBrowserGuard({ open }: InAppBrowserGuardProps) {
   const tPwa = useTranslations("pwa");
+  const [copied, setCopied] = useState(false);
 
   if (!open) return null;
+
+  const handleCopyLink = async () => {
+    if (typeof window === "undefined") return;
+    const url = window.location.href;
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Fallback for older browsers / restricted contexts
+      const input = document.createElement("input");
+      input.value = url;
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand("copy");
+      document.body.removeChild(input);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    }
+  };
+
+  const handleOpenInBrowser = () => {
+    if (typeof window === "undefined") return;
+    const url = window.location.href;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
 
   return (
     <div className="fixed inset-0 z-[120] flex flex-col items-center justify-center bg-black/70 backdrop-blur-md px-6">
@@ -44,14 +72,13 @@ export function InAppBrowserGuard({ open }: InAppBrowserGuardProps) {
         <p className="mt-2 text-sm text-muted-foreground">
           {tPwa("guard.description")}
         </p>
-        <div className="mt-6 flex flex-col items-end">
-          <Image
-            src="/assets/install/arrow-guide.png"
-            alt="Open in browser hint"
-            width={120}
-            height={120}
-            className="h-24 w-24 animate-bounce drop-shadow-[0_10px_25px_rgba(0,0,0,0.45)]"
-          />
+        <div className="mt-6 grid grid-cols-1 gap-3">
+          <Button type="button" onClick={handleOpenInBrowser}>
+            {tPwa("guard.openInBrowser")}
+          </Button>
+          <Button type="button" variant="outline" onClick={handleCopyLink}>
+            {copied ? tPwa("guard.copied") : tPwa("guard.copyLink")}
+          </Button>
         </div>
       </div>
     </div>
@@ -77,19 +104,6 @@ export function IOSInstallDrawer({
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent className="z-[130] border-border bg-card">
-        {/* Arrow for Chrome - positioned absolutely at top-right */}
-        {isChrome && (
-          <div className="absolute top-4 right-4 pointer-events-none">
-            <Image
-              src="/assets/install/arrow-guide.png"
-              alt="Arrow pointing to share button"
-              width={80}
-              height={80}
-              className="rotate-180 drop-shadow-[0_10px_25px_rgba(0,0,0,0.45)]"
-            />
-          </div>
-        )}
-
         <div className="mx-auto flex w-full max-w-md flex-col gap-4 pb-4">
           <DrawerHeader className="items-center text-center gap-3">
             <div className="flex items-center justify-center">
@@ -153,19 +167,6 @@ export function IOSInstallDrawer({
               </div>
             </div>
           </div>
-
-          {/* Arrow for Safari - positioned below instructions */}
-          {!isChrome && (
-            <div className="flex flex-col items-end px-4">
-              <Image
-                src="/assets/install/arrow-guide.png"
-                alt="Arrow pointing down"
-                width={120}
-                height={120}
-                className="h-24 w-24 animate-bounce drop-shadow-[0_10px_25px_rgba(0,0,0,0.45)]"
-              />
-            </div>
-          )}
 
           <DrawerFooter className="pt-0">
             <Button

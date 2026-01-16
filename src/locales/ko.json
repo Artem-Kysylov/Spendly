@@ -50,7 +50,10 @@
   "pwa": {
     "guard": {
       "title": "브라우저에서 Spendly를 열어 주세요",
-      "description": "보안과 AI 기능을 위해 오른쪽 상단 메뉴에서 Safari 또는 Chrome으로 Spendly를 여세요."
+      "description": "보안과 AI 기능을 위해 오른쪽 상단 메뉴에서 Safari 또는 Chrome으로 Spendly를 여세요.",
+      "openInBrowser": "브라우저에서 열기",
+      "copyLink": "링크 복사",
+      "copied": "복사됨!"
     },
     "ios": {
       "title": "Spendly 앱 설치",

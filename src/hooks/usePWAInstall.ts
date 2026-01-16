@@ -22,8 +22,12 @@ export default function usePWAInstall() {
       window.matchMedia("(display-mode: standalone)").matches ||
       (window.navigator as any).standalone === true;
     const isIosDevice = /iPhone|iPad|iPod/i.test(userAgent);
-    const inApp =
-      /TikTok|Instagram|FBAN|FBAV|FB_IAB/i.test(userAgent) || false;
+    const isSocialInApp = /TikTok|Instagram|FBAN|FBAV|FB_IAB/i.test(userAgent);
+    const isGenericWebView =
+      /\bwv\b/i.test(userAgent) ||
+      /\bWebView\b/i.test(userAgent) ||
+      /Version\/[\d.]+.*Safari\//i.test(userAgent);
+    const inApp = (isSocialInApp || isGenericWebView) || false;
 
     setIsIOS(isIosDevice);
     setIsInAppBrowser(inApp);

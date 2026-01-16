@@ -50,7 +50,10 @@
   "pwa": {
     "guard": {
       "title": "Відкрийте Spendly у браузері",
-      "description": "Для безпеки та роботи AI відкрийте Spendly в Safari або Chrome через меню у правому верхньому куті."
+      "description": "Для безпеки та роботи AI відкрийте Spendly в Safari або Chrome через меню у правому верхньому куті.",
+      "openInBrowser": "Відкрити в браузері",
+      "copyLink": "Скопіювати посилання",
+      "copied": "Скопійовано!"
     },
     "ios": {
       "title": "Встановити застосунок Spendly",
