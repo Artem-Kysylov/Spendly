@@ -20,11 +20,15 @@ async function callDailyGenerator(req: NextRequest, userId: string) {
   const url = new URL(`/en/api/notifications/daily?userId=${encodeURIComponent(userId)}`, req.nextUrl.origin);
   const authorization = req.headers.get("authorization");
   const cronSecret = req.headers.get("x-cron-secret");
+  const fallbackAuthorization = process.env.CRON_SECRET
+    ? `Bearer ${process.env.CRON_SECRET}`
+    : null;
+  const injectedAuthorization = authorization ?? fallbackAuthorization;
 
   const res = await fetch(url, {
     method: "POST",
     headers: {
-      ...(authorization ? { authorization } : {}),
+      ...(injectedAuthorization ? { authorization: injectedAuthorization } : {}),
       ...(cronSecret ? { "x-cron-secret": cronSecret } : {}),
     },
     cache: "no-store",
