@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedClient } from "@/lib/serverSupabase";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
 import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
+import type { Language } from "@/types/locale";
 import { getTranslations } from "next-intl/server";
 import { processNotificationQueue } from "@/lib/notificationProcessor";
 
@@ -145,6 +146,38 @@ export async function POST(req: NextRequest) {
     let debug: any = null;
     if (send_test_push === true) {
       try {
+        const welcomeByLocale: Record<Language, { title: string; body: string }> = {
+          en: {
+            title: "You're all set! 🚀",
+            body: "Notifications are on. We'll help you keep track of your spending habits.",
+          },
+          ru: {
+            title: "Всё готово! 🚀",
+            body: "Уведомления включены. Мы поможем тебе следить за привычками в расходах.",
+          },
+          uk: {
+            title: "Все готово! 🚀",
+            body: "Сповіщення увімкнено. Ми допоможемо тобі стежити за витратами.",
+          },
+          hi: {
+            title: "सब तैयार है! 🚀",
+            body: "नोटिफ़िकेशन चालू हैं। हम आपके खर्च की आदतों पर नज़र रखने में मदद करेंगे।",
+          },
+          id: {
+            title: "Semua siap! 🚀",
+            body: "Notifikasi sudah aktif. Kami akan membantu kamu melacak kebiasaan pengeluaranmu.",
+          },
+          ja: {
+            title: "準備完了！🚀",
+            body: "通知をオンにしました。支出の習慣を把握できるようお手伝いします。",
+          },
+          ko: {
+            title: "준비 완료! 🚀",
+            body: "알림이 켜졌어요. 지출 습관을 추적할 수 있도록 도와드릴게요.",
+          },
+        };
+        const welcome = welcomeByLocale[(locale as Language) ?? "en"] ?? welcomeByLocale.en;
+
         const adminSupabase = getServerSupabaseClient();
         const nowIso = new Date().toISOString();
 
@@ -198,9 +231,9 @@ export async function POST(req: NextRequest) {
             .insert({
               user_id: user.id,
               notification_type,
-              title: "Test Push",
-              message: "Test push after enabling notifications",
-              data: { deepLink: "/dashboard", tag: "spendly-test" },
+              title: welcome.title,
+              message: welcome.body,
+              data: { deepLink: "/dashboard", tag: "spendly-welcome" },
               send_push: true,
               send_email: false,
               scheduled_for: nowIso,
