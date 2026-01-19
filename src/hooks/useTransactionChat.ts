@@ -221,6 +221,7 @@ export function useTransactionChat(): UseTransactionChatReturn {
         setIsLoading(false);
         setAbortController(null);
         
+        console.log("Chat transaction finished. Loading state reset.");
         // Если после всего этого сообщений от ассистента нет (пустой ответ), удаляем "висяк"
         setMessages(prev => {
             const last = prev[prev.length - 1];
