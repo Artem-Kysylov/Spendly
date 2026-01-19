@@ -1127,10 +1127,10 @@
   },
   "chat": {
     "empty_state": {
-      "quick_add_title": "⚡️ 빠른 추가",
-      "quick_add_desc": "이 순서대로 세부 정보를 입력하세요:",
-      "quick_add_pattern": "Add [Item] [Amount] [Budget]",
-      "pattern_example": "예시: Add 커피 50 음식"
+      "quick_add_title": "⚡ 스마트 추가",
+      "quick_add_desc": "자연스럽게 입력하세요 - 간단하게 또는 자세하게:",
+      "quick_add_pattern": "간단: '택시 200' • AI: '점심 150 어제'",
+      "pattern_example": "간단한 입력 = 즉시. 복잡한 = AI."
     }
   }
 }

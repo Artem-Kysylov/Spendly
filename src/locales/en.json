@@ -1127,10 +1127,10 @@
   },
   "chat": {
     "empty_state": {
-      "quick_add_title": "⚡️ Quick Add",
-      "quick_add_desc": "Just type the details in this order:",
-      "quick_add_pattern": "Add [Item] [Amount] [Budget]",
-      "pattern_example": "Example: Add Coffee 50 Food"
+      "quick_add_title": "⚡ Smart Add",
+      "quick_add_desc": "Type naturally - simple or detailed:",
+      "quick_add_pattern": "Simple: 'Taxi 200' • AI: 'Lunch 150 yesterday'",
+      "pattern_example": "Simple inputs = instant, no AI tokens. Complex = AI-powered."
     }
   }
 }

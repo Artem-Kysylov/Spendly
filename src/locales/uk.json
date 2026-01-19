@@ -1127,10 +1127,10 @@
   },
   "chat": {
     "empty_state": {
-      "quick_add_title": "⚡️ Швидке додавання",
-      "quick_add_desc": "Просто напишіть дані в такому порядку:",
-      "quick_add_pattern": "Add [Item] [Amount] [Budget]",
-      "pattern_example": "Приклад: Add Кава 50 Їжа"
+      "quick_add_title": "⚡ Розумне додавання",
+      "quick_add_desc": "Пишіть як зручно - просто або детально:",
+      "quick_add_pattern": "Просто: 'Таксі 200' • ШІ: 'Обід 150 вчора'",
+      "pattern_example": "Прості запити = миттєво. Складні = через ШІ."
     }
   }
 }

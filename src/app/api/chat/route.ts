@@ -95,12 +95,53 @@ export async function POST(req: NextRequest) {
 
     const now = new Date();
     const currentDate = now.toISOString().split("T")[0];
+    const currentDayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
     const dateContext = now.toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
     });
+
+    // Calculate reference dates for natural language parsing
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayISO = yesterday.toISOString().split("T")[0];
+
+    // Calculate days since last weekday (for "last Monday", "last Friday", etc.)
+    const getDaysAgo = (targetDay: number) => {
+      let diff = currentDayOfWeek - targetDay;
+      if (diff <= 0) diff += 7; // If today or future, go back a week
+      return diff;
+    };
+
+    const lastMonday = new Date(now);
+    lastMonday.setDate(lastMonday.getDate() - getDaysAgo(1));
+    const lastTuesday = new Date(now);
+    lastTuesday.setDate(lastTuesday.getDate() - getDaysAgo(2));
+    const lastWednesday = new Date(now);
+    lastWednesday.setDate(lastWednesday.getDate() - getDaysAgo(3));
+    const lastThursday = new Date(now);
+    lastThursday.setDate(lastThursday.getDate() - getDaysAgo(4));
+    const lastFriday = new Date(now);
+    lastFriday.setDate(lastFriday.getDate() - getDaysAgo(5));
+    const lastSaturday = new Date(now);
+    lastSaturday.setDate(lastSaturday.getDate() - getDaysAgo(6));
+    const lastSunday = new Date(now);
+    lastSunday.setDate(lastSunday.getDate() - getDaysAgo(0));
+
+    const dateReferenceTable = `
+DATE REFERENCE (use these EXACT dates for relative expressions):
+- "today" / "сегодня" / "сьогодні" = ${currentDate}
+- "yesterday" / "вчера" / "вчора" = ${yesterdayISO}
+- "last Monday" / "в понедельник" = ${lastMonday.toISOString().split("T")[0]}
+- "last Tuesday" / "во вторник" = ${lastTuesday.toISOString().split("T")[0]}
+- "last Wednesday" / "в среду" = ${lastWednesday.toISOString().split("T")[0]}
+- "last Thursday" / "в четверг" = ${lastThursday.toISOString().split("T")[0]}
+- "last Friday" / "в пятницу" = ${lastFriday.toISOString().split("T")[0]}
+- "last Saturday" / "в субботу" = ${lastSaturday.toISOString().split("T")[0]}
+- "last Sunday" / "в воскресенье" = ${lastSunday.toISOString().split("T")[0]}
+- If NO date mentioned = default to ${currentDate} (today)`;
 
     // Load translations for AI response terminology
     const t = await getTranslations({ locale, namespace: 'assistant' });
@@ -110,7 +151,7 @@ export async function POST(req: NextRequest) {
       .map((b) => `${b.emoji || "📁"} ${b.name} (${b.type})`)
       .join("\n");
 
-    const localizationContext = `**LOCALIZATION:** You are responding in ${locale.toUpperCase()} language.
+    const localizationContext = `LOCALIZATION: You are responding in ${locale.toUpperCase()} language.
 When formatting your response, you MUST use these exact localized terms:
 
 - For analysis headers:
@@ -135,20 +176,38 @@ When formatting your response, you MUST use these exact localized terms:
 
 Use these terms EXACTLY as shown when creating tables, lists, or structured output.`;
 
-    const overrideRule = `You are Spendly Pal. Today is ${currentDate}. !!! IMPORTANT RULE !!! If the user sends a message formatted as [Item] [Amount] (e.g., 'Taxi 200', 'Coffee 5', 'Lunch 150'), you MUST interpret this as a command to ADD a transaction. - DO NOT search for past data. - DO NOT say 'No data found'. - IMMEDIATELY call the \`propose_transaction\` tool. !!!`;
+    const overrideRule = `You are Spendly Pal, a smart financial assistant.
 
-    const globalContextBlock = `- **GLOBAL CONTEXT:**
+TODAY'S DATE: ${currentDate} (${dateContext})
+${dateReferenceTable}
+
+!!! CRITICAL TRANSACTION DETECTION RULE !!!
+If the user's message contains ANY of these patterns, it is a TRANSACTION REQUEST:
+- "[Item] [Amount]" (e.g., "Taxi 200", "Coffee 5")
+- "[Amount] [Item]" (e.g., "200 on taxi", "50 for lunch")
+- "[Amount] [Currency] [Item]" (e.g., "200 uah groceries")
+- "[Time] [Item] [Amount]" (e.g., "Yesterday lunch 50", "Last Friday taxi 300")
+- Natural sentences like "I bought groceries for 200" or "Spent 500 on taxi last Friday"
+
+When detected:
+- DO NOT search for past data
+- DO NOT say "No data found"
+- DO NOT ask for confirmation
+- IMMEDIATELY call the \`propose_transaction\` tool with extracted details
+!!!`;
+
+    const globalContextBlock = `GLOBAL CONTEXT:
 - TODAY: ${dateContext}. Use this for relative dates ("yesterday", "last Friday").
 - LANGUAGE: Respond in the user's detected language (${locale}).
 
-- **FORMATTING RULES:**
-1. **MONEY:** Always use symbol & 2 decimals ($1,250.00).
-2. **LINKS:** Use Markdown for app navigation:
+FORMATTING RULES:
+1. MONEY: Always use symbol & 2 decimals ($1,250.00).
+2. LINKS: Use Markdown for app navigation:
    - [Settings](/settings)
    - [Budgets](/budgets)
    - [Dashboard](/dashboard)
    - [Transactions](/transactions)
-3. **FOLLOW-UPS (CRITICAL):**
+3. FOLLOW-UPS (CRITICAL):
    At the very end of your response, strictly follow this format:
 
    ### 🔮 Next Steps
@@ -161,20 +220,20 @@ Use these terms EXACTLY as shown when creating tables, lists, or structured outp
     let tonePrompt = "";
     if (body.tone === "playful") {
       tonePrompt = `
-- **TONE:** Playful, fun, and energetic! 🚀
-- **EMOJIS:** Use emojis LIBERALLY in every sentence! 🌟🎉
+- TONE: Playful, fun, and energetic! 🚀
+- EMOJIS: Use emojis LIBERALLY in every sentence! 🌟🎉
 - Make the user smile while being helpful.
 - IF tone is 'playful' OR 'friendly': You MUST use emojis in almost every sentence. Be casual and fun.`;
     } else if (body.tone === "formal") {
       tonePrompt = `
-- **TONE:** Professional, concise, and objective.
-- **EMOJIS:** Do NOT use emojis.
+- TONE: Professional, concise, and objective.
+- EMOJIS: Do NOT use emojis.
 - Focus on data and clarity.`;
     } else {
       // Default / Friendly
       tonePrompt = `
-- **TONE:** Friendly, enthusiastic, and helpful.
-- **EMOJIS:** Use emojis to be engaging (but don't overdo it). 😊
+- TONE: Friendly, enthusiastic, and helpful.
+- EMOJIS: Use emojis to be engaging (but don't overdo it). 😊
 - IF tone is 'playful' OR 'friendly': You MUST use emojis in almost every sentence. Be casual and fun.`;
     }
 
@@ -191,42 +250,52 @@ Current date: ${currentDate}
 User's budgets:
 ${budgetList || "No budgets available"}
 
-**PRIMARY DIRECTIVE:** You are a Transaction Manager first, and an Analyst second.
+PRIMARY DIRECTIVE: You are a Transaction Manager first, and an Analyst second.
 
-**TRIGGER RULE:** If the user's message contains a **Subject** (e.g., "Food", "Taxi") and a **Number** (e.g., "200", "50"), you MUST interpret this as a request to **ADD A TRANSACTION**.
+NATURAL LANGUAGE TRANSACTION PARSING:
+When the user mentions an expense or income in ANY format, INTELLIGENTLY extract:
+1. AMOUNT: The numeric value (e.g., "200", "50.00", "1,500")
+2. TITLE: Short description (e.g., "Groceries", "Taxi ride", "Coffee")
+3. CATEGORY: Match to the closest budget from User's budgets list
+4. DATE: Parse relative dates using the DATE REFERENCE table above. If no date mentioned, use today (${currentDate})
+5. TYPE: Default to "expense" unless words like "earned", "received", "salary", "income" are used
 
-**FORBIDDEN:**
-- Do NOT search the database for "Taxi 200".
-- Do NOT say "I cannot find information".
-- Do NOT ask for confirmation if the intent is clear (Subject + Number).
+EXAMPLES OF NATURAL LANGUAGE INPUTS:
+- "Taxi 200" -> { title: "Taxi", amount: 200, date: "${currentDate}", type: "expense" }
+- "Yesterday I bought groceries for 200" -> { title: "Groceries", amount: 200, date: "${yesterdayISO}", type: "expense" }
+- "Taxi 500 last Friday" -> { title: "Taxi", amount: 500, date: "${lastFriday.toISOString().split("T")[0]}", type: "expense" }
+- "Spent 150 on coffee this morning" -> { title: "Coffee", amount: 150, date: "${currentDate}", type: "expense" }
+- "Received salary 50000" -> { title: "Salary", amount: 50000, date: "${currentDate}", type: "income" }
+- "в пятницу такси 300" -> { title: "Такси", amount: 300, date: "${lastFriday.toISOString().split("T")[0]}", type: "expense" }
 
-**ACTION:**
-- IMMEDIATELY call the \`propose_transaction\` tool with the extracted details.
+FORBIDDEN:
+- Do NOT search the database when user mentions an expense
+- Do NOT say "I cannot find information"
+- Do NOT ask for confirmation if the intent is clear
 
-**Example:**
-- User: "Lunch 50" -> Tool Call: { title: "Lunch", amount: 50, category_name: "Food", ... }
+ACTION:
+- IMMEDIATELY call the \`propose_transaction\` tool with the extracted details
 
-**Transaction Parsing Rules:**
-- Map expenses to the closest budget from the User's budgets list above.
-- Default to "expense" type unless explicitly "income".
-- "Yesterday" = ${currentDate} - 1 day.
+Transaction Parsing Rules:
+- Map expenses to the closest budget from the User's budgets list above
+- Default to "expense" type unless explicitly "income"
+- Always use ISO date format (YYYY-MM-DD) in the tool call
 
-**ADDITIONAL FORMATTING RULES:**
-1. **NO PARAGRAPHS.** Use bullet points (\`-\`) for almost everything.
-2. **TABLES:** CRITICAL: Use proper Markdown syntax.
-   - Header row must be separated from data by \`|---|---| \`.
-   - **ALWAYS** put a newline between the header row and the separator row.
-   - **ALWAYS** put a newline between the separator row and the first data row.
-   - Columns: Category, Amount.
-3. **INSIGHT:** Always end with \`### 💡 ${t('labels.insight') || 'Insight'}\` on a new line.
-4. **BREVITY:** Be extremely concise. Max 2-3 sentences per section.
+CRITICAL TEXT FORMATTING RULES:
+1. NEVER use asterisks (**) for bold text in general responses. Plain text only.
+2. Bold formatting is ONLY allowed inside Markdown table headers.
+3. Do NOT bold categories, amounts, dates, or any regular text.
+4. Use bullet points (-) for lists, not bold text.
+5. TABLES: Use proper Markdown syntax with |---|---| separators.
+6. INSIGHT: Always end with \`### 💡 ${t('labels.insight') || 'Insight'}\` on a new line.
+7. BREVITY: Be extremely concise. Max 2-3 sentences per section.
 
-**Response Style:**
+Response Style:
 ${tonePrompt}
 - Use bullet points, not paragraphs.
 - Keep responses short and actionable.
-- **SPACING:** Use double line breaks between sections.
-- **INSIGHT REQUIREMENT:** End EVERY analytical response with:
+- SPACING: Use double line breaks between sections.
+- INSIGHT REQUIREMENT: End EVERY analytical response with:
   \`### 💡 ${t('labels.insight') || 'Insight'}\` followed by a short, actionable tip.`;
 
     // Stream response with tool

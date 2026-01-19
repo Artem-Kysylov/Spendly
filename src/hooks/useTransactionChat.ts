@@ -2,6 +2,7 @@
 
 import { UserAuth } from "@/context/AuthContext";
 import { useState, useCallback } from "react";
+import { parseTransactionLocally } from "@/lib/parseTransactionLocally";
 
 export interface Message {
   id: string;
@@ -56,6 +57,38 @@ export function useTransactionChat(): UseTransactionChatReturn {
       const controller = new AbortController();
       setAbortController(controller);
 
+      // ECONOMY MODE: Try to parse simple patterns locally first
+      const localParse = parseTransactionLocally(input);
+      
+      if (localParse.success && localParse.transaction) {
+        // Simple pattern detected! Skip LLM, create tool invocation directly
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: "assistant",
+          content: "", // No text content needed, just the tool card
+          toolInvocations: [
+            {
+              toolCallId: `local-${Date.now()}`,
+              toolName: "propose_transaction",
+              args: {
+                transactions: [localParse.transaction],
+              },
+              state: "result",
+              result: {
+                success: true,
+                transactions: [localParse.transaction],
+              },
+            },
+          ],
+        };
+        
+        setMessages((prev) => [...prev, assistantMessage]);
+        setIsLoading(false);
+        setAbortController(null);
+        return; // Skip LLM call entirely!
+      }
+
+      // Complex input - send to AI
       try {
         const response = await fetch("/api/chat", {
           method: "POST",
@@ -94,22 +127,47 @@ export function useTransactionChat(): UseTransactionChatReturn {
 
           for (const line of lines) {
             if (line.startsWith("0:")) {
-              // Text chunk
-              const text = line.slice(3, line.lastIndexOf('"'));
-              currentMessage.content += text;
-              setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === currentMessage.id
-                    ? { ...m, content: currentMessage.content }
-                    : m,
-                ),
-              );
-            } else if (line.includes('"propose_transaction"')) {
-              // Tool invocation
+              // Text chunk - AI SDK format: 0:"text content"
               try {
-                const toolData = JSON.parse(line);
-                if (toolData.toolInvocations) {
-                  currentMessage.toolInvocations = toolData.toolInvocations;
+                const jsonStr = line.slice(2);
+                const text = JSON.parse(jsonStr);
+                if (typeof text === "string") {
+                  currentMessage.content += text;
+                  setMessages((prev) =>
+                    prev.map((m) =>
+                      m.id === currentMessage.id
+                        ? { ...m, content: currentMessage.content }
+                        : m,
+                    ),
+                  );
+                }
+              } catch {
+                // Fallback: try old parsing method
+                const text = line.slice(3, line.lastIndexOf('"'));
+                currentMessage.content += text;
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === currentMessage.id
+                      ? { ...m, content: currentMessage.content }
+                      : m,
+                  ),
+                );
+              }
+            } else if (line.startsWith("9:")) {
+              // Tool call - AI SDK format: 9:{toolCallId, toolName, args}
+              try {
+                const toolCall = JSON.parse(line.slice(2));
+                if (toolCall.toolName === "propose_transaction") {
+                  const toolInvocation = {
+                    toolCallId: toolCall.toolCallId,
+                    toolName: toolCall.toolName,
+                    args: toolCall.args,
+                    state: "call",
+                  };
+                  currentMessage.toolInvocations = [
+                    ...(currentMessage.toolInvocations || []),
+                    toolInvocation,
+                  ];
                   setMessages((prev) =>
                     prev.map((m) =>
                       m.id === currentMessage.id ? { ...currentMessage } : m,
@@ -117,7 +175,27 @@ export function useTransactionChat(): UseTransactionChatReturn {
                   );
                 }
               } catch (e) {
-                console.error("Failed to parse tool data:", e);
+                console.error("Failed to parse tool call:", e);
+              }
+            } else if (line.startsWith("a:")) {
+              // Tool result - AI SDK format: a:{toolCallId, result}
+              try {
+                const toolResult = JSON.parse(line.slice(2));
+                if (currentMessage.toolInvocations) {
+                  currentMessage.toolInvocations = currentMessage.toolInvocations.map(
+                    (inv: any) =>
+                      inv.toolCallId === toolResult.toolCallId
+                        ? { ...inv, state: "result", result: toolResult.result }
+                        : inv,
+                  );
+                  setMessages((prev) =>
+                    prev.map((m) =>
+                      m.id === currentMessage.id ? { ...currentMessage } : m,
+                    ),
+                  );
+                }
+              } catch (e) {
+                console.error("Failed to parse tool result:", e);
               }
             }
           }

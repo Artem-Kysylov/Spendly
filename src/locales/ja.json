@@ -1127,10 +1127,10 @@
   },
   "chat": {
     "empty_state": {
-      "quick_add_title": "⚡️ クイック追加",
-      "quick_add_desc": "この順序で詳細を入力してください:",
-      "quick_add_pattern": "Add [Item] [Amount] [Budget]",
-      "pattern_example": "例: Add コーヒー 50 食費"
+      "quick_add_title": "⚡ スマート追加",
+      "quick_add_desc": "シンプルでも詳細でも自然に入力:",
+      "quick_add_pattern": "シンプル: 'タクシー 200' • AI: 'ランチ 150 昨日'",
+      "pattern_example": "シンプル入力 = 即時。複雑 = AI処理。"
     }
   }
 }

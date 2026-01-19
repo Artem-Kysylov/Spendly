@@ -1127,10 +1127,10 @@
   },
   "chat": {
     "empty_state": {
-      "quick_add_title": "⚡️ Быстрое добавление",
-      "quick_add_desc": "Просто напишите данные в таком порядке:",
-      "quick_add_pattern": "Add [Item] [Amount] [Budget]",
-      "pattern_example": "Пример: Add Кофе 50 Еда"
+      "quick_add_title": "⚡ Умное добавление",
+      "quick_add_desc": "Пишите как удобно - просто или подробно:",
+      "quick_add_pattern": "Просто: 'Такси 200' • ИИ: 'Обед 150 вчера'",
+      "pattern_example": "Простые запросы = мгновенно. Сложные = через ИИ."
     }
   }
 }

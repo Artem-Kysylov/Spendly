@@ -1127,10 +1127,10 @@
   },
   "chat": {
     "empty_state": {
-      "quick_add_title": "⚡️ Tambah Cepat",
-      "quick_add_desc": "Cukup ketik detail dalam urutan ini:",
-      "quick_add_pattern": "Add [Item] [Amount] [Budget]",
-      "pattern_example": "Contoh: Add Kopi 50 Makanan"
+      "quick_add_title": "⚡ Tambah Pintar",
+      "quick_add_desc": "Ketik dengan cara alami - sederhana atau detail:",
+      "quick_add_pattern": "Sederhana: 'Taksi 200' • AI: 'Makan siang 150 kemarin'",
+      "pattern_example": "Input sederhana = instan. Kompleks = AI."
     }
   }
 }
