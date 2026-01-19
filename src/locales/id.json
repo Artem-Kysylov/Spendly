@@ -1128,10 +1128,11 @@
   },
   "chat": {
     "empty_state": {
-      "quick_add_title": "⚡ Tambah Pintar",
-      "quick_add_desc": "Ketik dengan cara alami - sederhana atau detail:",
-      "quick_add_pattern": "Sederhana: 'Taksi 200' • AI: 'Makan siang 150 kemarin'",
-      "pattern_example": "Input sederhana = instan. Kompleks = AI."
+      "quick_add_title": "Tambah Pintar",
+      "quick_add_desc": "Catat pengeluaran dalam hitungan detik. Cukup ketik secara alami.",
+      "quick_add_pattern": "Taksi 200",
+      "pattern_example": "Makan siang 150 kemarin",
+      "quick_add_footer": "Sisanya biar aku yang urus."
     }
   }
 }

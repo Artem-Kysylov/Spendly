@@ -44,6 +44,14 @@ export function useTransactionChat(): UseTransactionChatReturn {
         return;
       }
 
+      // If a previous request is still in-flight, make sure we cancel it and reset loading.
+      // This prevents any chance of the UI being stuck in a loading state.
+      if (abortController) {
+        abortController.abort();
+      }
+      setAbortController(null);
+      setIsLoading(false);
+
       const userMessage: Message = {
         id: Date.now().toString(),
         role: "user",
@@ -212,7 +220,7 @@ export function useTransactionChat(): UseTransactionChatReturn {
         setAbortController(null);
       }
     },
-    [userId, input],
+    [userId, input, abortController],
   );
 
   const stop = useCallback(() => {

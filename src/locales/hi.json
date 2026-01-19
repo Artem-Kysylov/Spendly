@@ -1128,10 +1128,11 @@
   },
   "chat": {
     "empty_state": {
-      "quick_add_title": "⚡ स्मार्ट जोड़ें",
-      "quick_add_desc": "स्वाभाविक रूप से लिखें - सरल या विस्तृत:",
-      "quick_add_pattern": "सरल: 'टैक्सी 200' • AI: 'लंच 150 कल'",
-      "pattern_example": "सरल इनपुट = तुरंत। जटिल = AI।"
+      "quick_add_title": "स्मार्ट जोड़ें",
+      "quick_add_desc": "कुछ सेकंड में खर्च दर्ज करें। बस स्वाभाविक रूप से लिखें।",
+      "quick_add_pattern": "टैक्सी 200",
+      "pattern_example": "लंच 150 कल",
+      "quick_add_footer": "बाकी मैं संभाल लूंगा।"
     }
   }
 }

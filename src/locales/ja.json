@@ -1128,10 +1128,11 @@
   },
   "chat": {
     "empty_state": {
-      "quick_add_title": "⚡ スマート追加",
-      "quick_add_desc": "シンプルでも詳細でも自然に入力:",
-      "quick_add_pattern": "シンプル: 'タクシー 200' • AI: 'ランチ 150 昨日'",
-      "pattern_example": "シンプル入力 = 即時。複雑 = AI処理。"
+      "quick_add_title": "スマート追加",
+      "quick_add_desc": "数秒で支出を記録。自然に入力するだけ。",
+      "quick_add_pattern": "タクシー 200",
+      "pattern_example": "ランチ 150 昨日",
+      "quick_add_footer": "あとは任せて。"
     }
   }
 }

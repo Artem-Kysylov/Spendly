@@ -147,7 +147,7 @@ export default function AIAssistantPage() {
                       </div>
                       <button
                         type="button"
-                        className="inline-flex h-6 w-6 items-center justify-center rounded text-error hover:bg-red-50"
+                        className="inline-flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-primary/10 hover:text-primary"
                         onClick={(e) => {
                           e.stopPropagation();
                           void deleteSession(s.id);
@@ -225,6 +225,9 @@ export default function AIAssistantPage() {
                     </div>
                     <div className="text-sm text-muted-foreground">
                       {tChat("empty_state.pattern_example")}
+                    </div>
+                    <div className="text-sm text-muted-foreground">
+                      {tChat("empty_state.quick_add_footer")}
                     </div>
                   </div>
                 </div>

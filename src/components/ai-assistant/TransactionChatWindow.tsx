@@ -110,6 +110,9 @@ export function TransactionChatWindow({
                   <div className="text-sm text-muted-foreground">
                     {tChat("empty_state.pattern_example")}
                   </div>
+                  <div className="text-sm text-muted-foreground">
+                    {tChat("empty_state.quick_add_footer")}
+                  </div>
                 </div>
               </div>
             </div>

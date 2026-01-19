@@ -1128,10 +1128,11 @@
   },
   "chat": {
     "empty_state": {
-      "quick_add_title": "⚡ 스마트 추가",
-      "quick_add_desc": "자연스럽게 입력하세요 - 간단하게 또는 자세하게:",
-      "quick_add_pattern": "간단: '택시 200' • AI: '점심 150 어제'",
-      "pattern_example": "간단한 입력 = 즉시. 복잡한 = AI."
+      "quick_add_title": "스마트 추가",
+      "quick_add_desc": "몇 초 만에 지출을 기록하세요. 자연스럽게 입력만 하세요.",
+      "quick_add_pattern": "택시 200",
+      "pattern_example": "점심 150 어제",
+      "quick_add_footer": "나머지는 제가 할게요."
     }
   }
 }
