@@ -20,6 +20,9 @@ export default function AIAssistantPage() {
     isTyping,
     sendMessage,
     abort,
+    confirmAction,
+    hasPendingAction,
+    pendingActionPayload,
     assistantTone,
     setAssistantTone,
     isRateLimited,
@@ -253,9 +256,71 @@ export default function AIAssistantPage() {
           : "pb-[env(safe-area-inset-bottom)]"
           }`}
       >
+        {hasPendingAction && !isTyping && (
+          <div className="px-4 pt-3">
+            <div className="text-sm font-semibold text-secondary-black dark:text-white mb-1">
+              {tAI("confirm.title")}
+            </div>
+            {pendingActionPayload && (
+              <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+                {pendingActionPayload.title && (
+                  <>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {tAI("confirm.fields.title")}:
+                      </span>{" "}
+                      {pendingActionPayload.title}
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {tAI("confirm.fields.budget")}:
+                      </span>{" "}
+                      {pendingActionPayload.budget_name}
+                    </div>
+                    <div>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {tAI("confirm.fields.amount")}:
+                      </span>{" "}
+                      {String(pendingActionPayload.amount ?? "")}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+            <div className="flex items-center justify-center gap-2 pb-2">
+              <button
+                type="button"
+                className="px-3 py-1 rounded bg-green-600 text-white text-sm"
+                onClick={() => void confirmAction(true)}
+              >
+                {tAI("actions.accept")}
+              </button>
+              <button
+                type="button"
+                className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-700 text-secondary-black dark:text-white text-sm"
+                onClick={() => void confirmAction(false)}
+              >
+                {tAI("actions.decline")}
+              </button>
+            </div>
+          </div>
+        )}
         <div className="pt-2 px-2 pb-2">
           <ChatInput
-            onSendMessage={sendMessage}
+            onSendMessage={async (text) => {
+              const trimmed = (text || "").trim();
+              const yes = /^(yes|y|да|ага)$/i;
+              const no = /^(no|n|нет|неа)$/i;
+              if (hasPendingAction && yes.test(trimmed)) {
+                await confirmAction(true);
+                return;
+              }
+              if (hasPendingAction && no.test(trimmed)) {
+                await confirmAction(false);
+                return;
+              }
+              await sendMessage(text);
+            }}
             isThinking={isTyping}
             onAbort={abort}
             assistantTone={assistantTone}

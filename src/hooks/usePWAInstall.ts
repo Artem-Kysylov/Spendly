@@ -23,10 +23,12 @@ export default function usePWAInstall() {
       (window.navigator as any).standalone === true;
     const isIosDevice = /iPhone|iPad|iPod/i.test(userAgent);
     const isSocialInApp = /TikTok|Instagram|FBAN|FBAV|FB_IAB/i.test(userAgent);
+    const isIosAltBrowser =
+      isIosDevice && /(CriOS|FxiOS|EdgiOS|OPiOS)/i.test(userAgent);
     const isGenericWebView =
       /\bwv\b/i.test(userAgent) ||
       /\bWebView\b/i.test(userAgent) ||
-      (isIosDevice && /AppleWebKit/i.test(userAgent) && !/Safari/i.test(userAgent));
+      (isIosDevice && /AppleWebKit/i.test(userAgent) && !/Safari/i.test(userAgent) && !isIosAltBrowser);
     const inApp = (isSocialInApp || isGenericWebView) || false;
 
     setIsIOS(isIosDevice);

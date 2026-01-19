@@ -33,7 +33,13 @@ import { localizeEmptyWeekly } from "@/prompts/spendlyPal/canonicalPhrases";
 // Исполнение транзакции (вставка expense)
 export const executeTransaction = async (
   userId: string,
-  payload: { title: string; amount: number; budget_folder_id: string | null },
+  payload: {
+    title: string;
+    amount: number;
+    budget_folder_id: string | null;
+    date?: string;
+    created_at?: string;
+  },
 ) => {
   const supabase = getServerSupabaseClient();
 
@@ -68,6 +74,21 @@ export const executeTransaction = async (
   const txType: "expense" | "income" =
     folder.type === "income" ? "income" : "expense";
 
+  const normalizeCreatedAt = (input?: string) => {
+    if (!input) return null;
+    const s = String(input).trim();
+    if (!s) return null;
+    const isDateOnly = /^\d{4}-\d{2}-\d{2}$/.test(s);
+    const d = isDateOnly ? new Date(`${s}T12:00:00.000Z`) : new Date(s);
+    if (isNaN(d.getTime())) return null;
+    return d.toISOString();
+  };
+
+  const createdAtIso =
+    normalizeCreatedAt(payload.created_at) ||
+    normalizeCreatedAt(payload.date) ||
+    new Date().toISOString();
+
   const { error } = await supabase
     .from("transactions")
     .insert({
@@ -76,7 +97,7 @@ export const executeTransaction = async (
       amount,
       type: txType,
       budget_folder_id: payload.budget_folder_id,
-      created_at: new Date().toISOString(),
+      created_at: createdAtIso,
     })
     .select();
 
@@ -461,6 +482,49 @@ export const aiResponse = async (req: AIRequest): Promise<AIResponse> => {
     confirm = false,
     actionPayload,
     locale } = req;
+
+  const parseNaturalSpent = (input: string) => {
+    const raw = (input || "").trim();
+    const text = raw.toLowerCase();
+    const hasSpentWord = /(spent|paid|bought|потратил|заплатил|купил)/i.test(raw);
+    if (!hasSpentWord) return null;
+
+    // amount: first number with optional decimals
+    const amtMatch = raw.match(/(\d+(?:[\.,]\d+)?)/);
+    if (!amtMatch) return null;
+    const amount = Number(String(amtMatch[1]).replace(",", "."));
+    if (!isFinite(amount) || amount <= 0) return null;
+
+    // date
+    let date: string | null = null;
+    const now = new Date();
+    const toISO = (d: Date) => d.toISOString().slice(0, 10);
+    if (/\byesterday\b|\bвчера\b/i.test(raw)) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - 1);
+      date = toISO(d);
+    } else if (/\btoday\b|\bсегодня\b/i.test(raw)) {
+      date = toISO(now);
+    }
+
+    // title: try "on X" / "for X"; otherwise last token-ish
+    let title: string | null = null;
+    const onMatch = raw.match(/\b(?:on|for)\s+([a-zA-Zа-яА-ЯёЁ\-\s]{2,})$/);
+    if (onMatch?.[1]) title = onMatch[1].trim();
+    if (!title) {
+      // remove leading verbs and date words
+      const stripped = raw
+        .replace(/\b(spent|paid|bought|yesterday|today|вчера|сегодня)\b/gi, " ")
+        .replace(amtMatch[0], " ")
+        .replace(/\b(on|for)\b/gi, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (stripped) title = stripped;
+    }
+    if (!title) return null;
+
+    return { title, amount, date };
+  };
   // Локализация (server-side)
   const { DEFAULT_LOCALE, isSupportedLanguage, loadMessages } = await import("@/i18n/config");
   const lang = isSupportedLanguage(locale ?? "") ? (locale as any) : DEFAULT_LOCALE;
@@ -483,6 +547,48 @@ export const aiResponse = async (req: AIRequest): Promise<AIResponse> => {
   };
 
   const ctx = await prepareUserContext(userId);
+
+  // Natural language spent/paid patterns (e.g., "Yesterday spent 100 on taxi")
+  if (!confirm) {
+    const natural = parseNaturalSpent(message);
+    if (natural) {
+      const budgets = (ctx.budgets || []) as Array<{
+        id: string;
+        name: string;
+        type: "expense" | "income";
+      }>;
+
+      // Reuse local category detection via parseTransactionLocally on a synthetic 2-part string.
+      // (Title may be multi-word, so only use first word for category detection.)
+      const firstWord = natural.title.split(/\s+/)[0] || natural.title;
+      const localCat = parseTransactionLocally(`${firstWord} ${natural.amount}`);
+      const category = (localCat.transaction?.category_name || "Other").toLowerCase();
+
+      const exact = budgets.find(
+        (b) => b.type !== "income" && b.name?.toLowerCase() === category,
+      );
+      const partial = budgets.find(
+        (b) => b.type !== "income" && b.name?.toLowerCase().includes(category),
+      );
+      const fallback = budgets.find((b) => b.type !== "income") || budgets[0];
+      const picked = exact || partial || fallback;
+      if (!picked?.id) {
+        return { kind: "message", message: tParseFailed, model: "gemini-2.5-flash" };
+      }
+
+      const payload = {
+        title: sanitizeTitle(natural.title),
+        amount: natural.amount,
+        budget_folder_id: picked.id,
+        budget_name: picked.name,
+        date: natural.date || new Date().toISOString().slice(0, 10),
+      } as any;
+
+      const action: AIAction = { type: "add_transaction", payload };
+      const confirmText = `Confirm adding $${payload.amount.toFixed(2)} "${payload.title}" to ${payload.budget_name}? Reply Yes/No.`;
+      return { kind: "action", action, confirmText };
+    }
+  }
 
   // Fast path: handle simple 2-part transactions like "Taxi 200" without LLM.
   // This keeps the AI Assistant from asking clarifying questions for obvious add intents.
@@ -513,6 +619,7 @@ export const aiResponse = async (req: AIRequest): Promise<AIResponse> => {
       amount: local.transaction.amount,
       budget_folder_id: picked.id,
       budget_name: picked.name,
+      date: local.transaction.date,
     };
     const action: AIAction = { type: "add_transaction", payload };
     const confirmText = `Confirm adding $${payload.amount.toFixed(2)} "${payload.title}" to ${payload.budget_name}? Reply Yes/No.`;

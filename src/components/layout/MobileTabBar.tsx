@@ -48,6 +48,10 @@ function MobileTabBar() {
 
   const navTransition = { duration: 0.5, ease: "easeOut" } as const;
 
+  // iOS PWA (standalone) often breaks fixed positioning when transforms are applied.
+  // Avoid y/transform animations in standalone mode to keep the tab bar pinned to bottom.
+  const allowTransform = !isStandalone && !prefersReduced;
+
   // заметный fade+slide; variants передаём только если не reduced
   const routeVariants = {
     initial: { opacity: 0, y: 20 },
@@ -70,9 +74,9 @@ function MobileTabBar() {
       {/* DO NOT REMOVE: Fixed for iOS PWA Safe Area */}
       <motion.nav
         key={pathname}
-        initial={prefersReduced ? false : { opacity: 0, y: 20 }}
-        animate={prefersReduced ? { opacity: 1 } : { opacity: 1, y: 0 }}
-        exit={prefersReduced ? undefined : { opacity: 0, y: 20 }}
+        initial={allowTransform ? { opacity: 0, y: 20 } : { opacity: 0 }}
+        animate={allowTransform ? { opacity: 1, y: 0 } : { opacity: 1 }}
+        exit={allowTransform ? { opacity: 0, y: 20 } : { opacity: 0 }}
         transition={navTransition}
         style={{ willChange: "opacity, transform" }}
         className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 lg:hidden z-50 border-t border-border bg-background dark:bg-card ${isStandalone ? "pb-[env(safe-area-inset-bottom)]" : ""}`}
