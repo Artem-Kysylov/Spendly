@@ -4,6 +4,7 @@
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
 import { prepareUserContext } from "@/lib/ai/context";
 import { parseAddCommand, sanitizeTitle } from "@/lib/ai/commands";
+import { parseTransactionLocally } from "@/lib/parseTransactionLocally";
 import { isComplexRequest, selectModel } from "@/lib/ai/routing";
 import {
   detectIntentFromMessage,
@@ -482,6 +483,41 @@ export const aiResponse = async (req: AIRequest): Promise<AIResponse> => {
   };
 
   const ctx = await prepareUserContext(userId);
+
+  // Fast path: handle simple 2-part transactions like "Taxi 200" without LLM.
+  // This keeps the AI Assistant from asking clarifying questions for obvious add intents.
+  const local = parseTransactionLocally(message);
+  if (local.success && local.transaction && !confirm) {
+    const budgets = (ctx.budgets || []) as Array<{
+      id: string;
+      name: string;
+      type: "expense" | "income";
+    }>;
+    const category = (local.transaction.category_name || "").toLowerCase();
+
+    const exact = budgets.find(
+      (b) => b.type !== "income" && b.name?.toLowerCase() === category,
+    );
+    const partial = budgets.find(
+      (b) => b.type !== "income" && b.name?.toLowerCase().includes(category),
+    );
+    const fallback = budgets.find((b) => b.type !== "income") || budgets[0];
+    const picked = exact || partial || fallback;
+
+    if (!picked?.id) {
+      return { kind: "message", message: tParseFailed, model: "gemini-2.5-flash" };
+    }
+
+    const payload = {
+      title: local.transaction.title,
+      amount: local.transaction.amount,
+      budget_folder_id: picked.id,
+      budget_name: picked.name,
+    };
+    const action: AIAction = { type: "add_transaction", payload };
+    const confirmText = `Confirm adding $${payload.amount.toFixed(2)} "${payload.title}" to ${payload.budget_name}? Reply Yes/No.`;
+    return { kind: "action", action, confirmText };
+  }
 
   const parsed = parseAddCommand(message, ctx.budgets as any);
   if (parsed && !confirm) {

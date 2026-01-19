@@ -464,7 +464,9 @@ export const useChat = (): UseChatReturn => {
       }
 
       try {
-        const response = await fetch(getAssistantApiUrl(locale), {
+        const apiUrl = getAssistantApiUrl(locale);
+        console.log("ASSISTANT_API_URL:", apiUrl);
+        const response = await fetch(apiUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -481,6 +483,13 @@ export const useChat = (): UseChatReturn => {
         const contentType = response.headers.get("content-type") || "";
         const headerCurrency = response.headers.get("X-Currency") || "";
         if (headerCurrency) setUICurrency(headerCurrency);
+
+        console.log(
+          "ASSISTANT_API_STATUS:",
+          response.status,
+          response.ok,
+          contentType,
+        );
 
         if (!response.ok) {
           if (contentType.includes("text/html") || response.status === 404) {
@@ -561,7 +570,7 @@ export const useChat = (): UseChatReturn => {
 
         if (contentType.includes("application/json")) {
           const json = (await response.json()) as AssistantJSON;
-
+          console.log("ASSISTANT_API_JSON_KIND:", (json as any)?.kind || "(none)");
           if ("kind" in json) {
             if (json.kind === "action") {
               const confirmText = json.confirmText;
