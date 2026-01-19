@@ -65,6 +65,7 @@ export function useTransactionChat(): UseTransactionChatReturn {
       // ECONOMY MODE: Try to parse simple patterns locally first
       // Do this BEFORE enabling loading state to avoid any chance of being stuck.
       const localParse = parseTransactionLocally(rawInput);
+      console.log("Local Parse Result:", localParse);
       
       if (localParse.success && localParse.transaction) {
         // Simple pattern detected! Skip LLM, create tool invocation directly
@@ -216,8 +217,19 @@ export function useTransactionChat(): UseTransactionChatReturn {
           console.error("Transaction chat error:", err);
         }
       } finally {
+        // ГАРАНТИРОВАННЫЙ СБРОС
         setIsLoading(false);
         setAbortController(null);
+        
+        // Если после всего этого сообщений от ассистента нет (пустой ответ), удаляем "висяк"
+        setMessages(prev => {
+            const last = prev[prev.length - 1];
+            if (last.role === 'assistant' && !last.content && (!last.toolInvocations || last.toolInvocations.length === 0)) {
+                // Удаляем пустое сообщение, чтобы не висело "печатает..."
+                return prev.slice(0, -1);
+            }
+            return prev;
+        });
       }
     },
     [userId, input, abortController],
