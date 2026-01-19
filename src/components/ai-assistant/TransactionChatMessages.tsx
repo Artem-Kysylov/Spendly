@@ -8,6 +8,14 @@ import { useEffect, useRef } from "react";
 import { TransactionProposalCard } from "./TransactionProposalCard";
 import { Loader2 } from "lucide-react";
 
+function normalizeProposedTransaction(input: any): any {
+  if (!input) return null;
+  if (Array.isArray(input)) return input[0] ?? null;
+  if (Array.isArray(input.transactions)) return input.transactions[0] ?? null;
+  if (input.transaction) return input.transaction;
+  return input;
+}
+
 interface TransactionChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
@@ -197,7 +205,11 @@ export const TransactionChatMessages = ({
                 // Let's assume toolInvocation.args contains the proposal details
                 // formatted as: { title, amount, type, category_name, date }
 
-                const proposal = toolInvocation.args as any;
+                const proposal =
+                  normalizeProposedTransaction(toolInvocation.args) ??
+                  normalizeProposedTransaction(result);
+
+                if (!proposal) return null;
 
                 return (
                   <div key={toolInvocation.toolCallId} className="w-full mt-2">

@@ -14,15 +14,17 @@ export const maxDuration = 60;
 
 // Zod Schema for transaction proposal
 const proposeTransactionSchema = z.object({
-  transactions: z.array(
-    z.object({
-      title: z.string().describe('Short description of the transaction (e.g., "Gas Station", "Coffee")'),
-      amount: z.number().describe("Transaction amount (positive number)"),
-      type: z.enum(["expense", "income"]).describe('The type of transaction: "expense" or "income"'),
-      category_name: z.string().describe("The closest matching budget name from the user's list"),
-      date: z.string().describe("Transaction date in ISO format (YYYY-MM-DD)"),
-    })
-  ),
+  title: z
+    .string()
+    .describe('Short description of the transaction (e.g., "Gas Station", "Coffee")'),
+  amount: z.number().describe("Transaction amount (positive number)"),
+  type: z
+    .enum(["expense", "income"])
+    .describe('The type of transaction: "expense" or "income"'),
+  category_name: z
+    .string()
+    .describe("The closest matching budget name from the user's list"),
+  date: z.string().describe("Transaction date in ISO format (YYYY-MM-DD)"),
 });
 
 
@@ -42,10 +44,9 @@ const proposeTransactionTool = tool({
   description: "Propose one or more transactions based on user input. This does NOT save to database.",
   parameters: proposeTransactionSchema,
   execute: async (args: any) => {
-    const { transactions } = args as unknown as z.infer<typeof proposeTransactionSchema>;
     return {
       success: true,
-      transactions,
+      transactions: [args as unknown as z.infer<typeof proposeTransactionSchema>],
     };
   },
 } as any);
@@ -287,6 +288,12 @@ FORBIDDEN:
 
 ACTION:
 - IMMEDIATELY call the \`propose_transaction\` tool with the extracted details
+
+WHEN CREATING A TRANSACTION (MOST IMPORTANT):
+- If the message is a transaction request, you MUST call \`propose_transaction\`.
+- Do NOT refuse. Do NOT say you cannot add transactions.
+- Do NOT ask the user to do it manually.
+- Prefer sending NO extra text (or 1 short plain sentence) when making the tool call.
 
 Transaction Parsing Rules:
 - Map expenses to the closest budget from the User's budgets list above

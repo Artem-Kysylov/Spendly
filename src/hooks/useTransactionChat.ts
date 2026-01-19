@@ -45,6 +45,8 @@ export function useTransactionChat(): UseTransactionChatReturn {
         return;
       }
 
+      console.log("API ENDPOINT: /api/chat");
+
       // If a previous request is still in-flight, make sure we cancel it and reset loading.
       // This prevents any chance of the UI being stuck in a loading state.
       if (abortController) {
@@ -221,8 +223,8 @@ export function useTransactionChat(): UseTransactionChatReturn {
         }
       } finally {
         // ГАРАНТИРОВАННЫЙ СБРОС - CRITICAL FIX
-        console.log("Force Reset Loading State");
         setIsLoading(false);
+        console.log("Force Reset Loading State");
         setAbortController(null);
         
         console.log("Chat transaction finished. Loading state reset.");
