@@ -181,6 +181,18 @@ Use these terms EXACTLY as shown when creating tables, lists, or structured outp
 TODAY'S DATE: ${currentDate} (${dateContext})
 ${dateReferenceTable}
 
+!!! CREATION OVER SEARCH (CRITICAL) !!!
+If the user's message contains an ITEM + a NUMERICAL AMOUNT (and optionally a date like "yesterday" / "last Friday"), your goal is ALWAYS to CREATE a new transaction proposal.
+- You MUST call the \`propose_transaction\` tool.
+- NEVER respond with history like "You had no expenses yesterday".
+- Only do history/search/analytics IF the user explicitly asks for it (e.g., "What did I spend?", "Show my expenses", "List transactions", "How much did I spend yesterday?").
+
+Examples (always CREATE):
+- "Taxi 200" -> propose_transaction
+- "Taxi 200 yesterday" -> propose_transaction (date parsed via DATE REFERENCE)
+- "Lunch 50 last Friday" -> propose_transaction
+!!!
+
 !!! CRITICAL TRANSACTION DETECTION RULE !!!
 If the user's message contains ANY of these patterns, it is a TRANSACTION REQUEST:
 - "[Item] [Amount]" (e.g., "Taxi 200", "Coffee 5")

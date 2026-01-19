@@ -39,26 +39,24 @@ export function useTransactionChat(): UseTransactionChatReturn {
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      if (!userId || !input.trim()) {
+      const rawInput = input.trim();
+      if (!userId || !rawInput) {
         return;
       }
 
       const userMessage: Message = {
         id: Date.now().toString(),
         role: "user",
-        content: input,
+        content: rawInput,
       };
 
       setMessages((prev) => [...prev, userMessage]);
       setInput("");
-      setIsLoading(true);
       setError(undefined);
 
-      const controller = new AbortController();
-      setAbortController(controller);
-
       // ECONOMY MODE: Try to parse simple patterns locally first
-      const localParse = parseTransactionLocally(input);
+      // Do this BEFORE enabling loading state to avoid any chance of being stuck.
+      const localParse = parseTransactionLocally(rawInput);
       
       if (localParse.success && localParse.transaction) {
         // Simple pattern detected! Skip LLM, create tool invocation directly
@@ -70,9 +68,8 @@ export function useTransactionChat(): UseTransactionChatReturn {
             {
               toolCallId: `local-${Date.now()}`,
               toolName: "propose_transaction",
-              args: {
-                transactions: [localParse.transaction],
-              },
+              // UI expects a single proposal object shape (title/amount/category/date)
+              args: localParse.transaction,
               state: "result",
               result: {
                 success: true,
@@ -88,6 +85,11 @@ export function useTransactionChat(): UseTransactionChatReturn {
         return; // Skip LLM call entirely!
       }
 
+      setIsLoading(true);
+
+      const controller = new AbortController();
+      setAbortController(controller);
+
       // Complex input - send to AI
       try {
         const response = await fetch("/api/chat", {
@@ -97,7 +99,7 @@ export function useTransactionChat(): UseTransactionChatReturn {
           },
           body: JSON.stringify({
             userId,
-            message: input,
+            message: rawInput,
           }),
           signal: controller.signal,
         });
