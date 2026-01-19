@@ -399,6 +399,11 @@
     "showAll": "Show all"
   },
   "budgets": {
+    "actions": {
+      "edit": "संपादित करें",
+      "delete": "हटाएं",
+      "create": "बनाएं"
+    },
     "rollover": {
       "panelTitle": "रोलओवर",
       "toggleLabel": "रोलओवर सक्षम करें",

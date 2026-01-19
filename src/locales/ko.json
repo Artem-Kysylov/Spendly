@@ -399,6 +399,11 @@
     "showAll": "Show all"
   },
   "budgets": {
+    "actions": {
+      "edit": "편집",
+      "delete": "삭제",
+      "create": "생성"
+    },
     "rollover": {
       "panelTitle": "이월",
       "toggleLabel": "이월 활성화",

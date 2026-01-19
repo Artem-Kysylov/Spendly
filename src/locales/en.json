@@ -399,6 +399,11 @@
     "showAll": "Show all"
   },
   "budgets": {
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "create": "Create"
+    },
     "rollover": {
       "panelTitle": "Rollover",
       "toggleLabel": "Enable rollover",

@@ -399,6 +399,11 @@
     "showAll": "Показати все"
   },
   "budgets": {
+    "actions": {
+      "edit": "Редагувати",
+      "delete": "Видалити",
+      "create": "Створити"
+    },
     "rollover": {
       "panelTitle": "Перенесення залишку",
       "toggleLabel": "Увімкнути перенесення",

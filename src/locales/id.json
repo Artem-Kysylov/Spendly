@@ -399,6 +399,11 @@
     "showAll": "Show all"
   },
   "budgets": {
+    "actions": {
+      "edit": "Edit",
+      "delete": "Hapus",
+      "create": "Buat"
+    },
     "rollover": {
       "panelTitle": "Rollover",
       "toggleLabel": "Aktifkan rollover",

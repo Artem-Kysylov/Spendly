@@ -26,7 +26,7 @@ export interface UseTransactionChatReturn {
  * Custom implementation to handle streaming and tool invocations
  */
 export function useTransactionChat(): UseTransactionChatReturn {
-  console.log("HOOK UPDATED v2");
+  console.log("HOOK_VERSION_FINAL_3");
   const { session } = UserAuth();
   const userId = session?.user?.id;
 

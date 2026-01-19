@@ -399,6 +399,11 @@
     "showAll": "Show all"
   },
   "budgets": {
+    "actions": {
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "create": "Создать"
+    },
     "rollover": {
       "panelTitle": "Перенос остатка",
       "toggleLabel": "Включить перенос",
