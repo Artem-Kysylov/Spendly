@@ -773,7 +773,8 @@
     "buttons": {
       "close": "Tutup AI Assistant",
       "ask": "Tanya AI",
-      "newChat": "Obrolan baru"
+      "newChat": "Obrolan baru",
+      "delete": "Delete"
     },
     "tone": {
       "label": "Nada",

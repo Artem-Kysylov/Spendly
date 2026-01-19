@@ -773,7 +773,8 @@
     "buttons": {
       "close": "AI असिस्टेंट बंद करें",
       "ask": "AI से पूछें",
-      "newChat": "नई चैट"
+      "newChat": "नई चैट",
+      "delete": "Delete"
     },
     "tone": {
       "label": "टोन",

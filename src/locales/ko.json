@@ -773,7 +773,8 @@
     "buttons": {
       "close": "Close AI assistant",
       "ask": "Ask AI",
-      "newChat": "새 채팅"
+      "newChat": "새 채팅",
+      "delete": "Delete"
     },
     "tone": {
       "label": "톤",

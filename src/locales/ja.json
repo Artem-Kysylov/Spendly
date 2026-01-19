@@ -773,7 +773,8 @@
     "buttons": {
       "close": "AI アシスタントを閉じる",
       "ask": "AI に尋ねる",
-      "newChat": "新しいチャット"
+      "newChat": "新しいチャット",
+      "delete": "Delete"
     },
     "tone": {
       "label": "トーン",
