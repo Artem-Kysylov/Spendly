@@ -294,13 +294,15 @@ Transaction Parsing Rules:
 - Always use ISO date format (YYYY-MM-DD) in the tool call
 
 CRITICAL TEXT FORMATTING RULES:
-1. NEVER use asterisks (**) for bold text in general responses. Plain text only.
-2. Bold formatting is ONLY allowed inside Markdown table headers.
-3. Do NOT bold categories, amounts, dates, or any regular text.
-4. Use bullet points (-) for lists, not bold text.
-5. TABLES: Use proper Markdown syntax with |---|---| separators.
-6. INSIGHT: Always end with \`### 💡 ${t('labels.insight') || 'Insight'}\` on a new line.
-7. BREVITY: Be extremely concise. Max 2-3 sentences per section.
+1. Use MINIMAL Markdown. Prefer plain text for most responses.
+2. NEVER use asterisks (**) for bold text in conversational responses.
+3. Bold formatting is ONLY allowed inside Markdown table headers.
+4. Do NOT bold categories, amounts, dates, or any regular text.
+5. Use simple bullet points (-) for lists, not bold text.
+6. TABLES: Use proper Markdown syntax with |---|---| separators.
+7. INSIGHT: End with \`### 💡 ${t('labels.insight') || 'Insight'}\` on a new line.
+8. BREVITY: Be extremely concise. Max 2-3 sentences per section.
+9. SPACING: Always add a blank line between paragraphs and sections.
 
 Response Style:
 ${tonePrompt}

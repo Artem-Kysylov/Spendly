@@ -26,6 +26,7 @@ export interface UseTransactionChatReturn {
  * Custom implementation to handle streaming and tool invocations
  */
 export function useTransactionChat(): UseTransactionChatReturn {
+  console.log("HOOK UPDATED v2");
   const { session } = UserAuth();
   const userId = session?.user?.id;
 
@@ -68,6 +69,7 @@ export function useTransactionChat(): UseTransactionChatReturn {
       console.log("Local Parse Result:", localParse);
       
       if (localParse.success && localParse.transaction) {
+        console.log("Local parse SUCCESS - skipping LLM");
         // Simple pattern detected! Skip LLM, create tool invocation directly
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
@@ -89,6 +91,7 @@ export function useTransactionChat(): UseTransactionChatReturn {
         };
         
         setMessages((prev) => [...prev, assistantMessage]);
+        console.log("Force Reset Loading State (local parse)");
         setIsLoading(false);
         setAbortController(null);
         return; // Skip LLM call entirely!
@@ -217,7 +220,8 @@ export function useTransactionChat(): UseTransactionChatReturn {
           console.error("Transaction chat error:", err);
         }
       } finally {
-        // ГАРАНТИРОВАННЫЙ СБРОС
+        // ГАРАНТИРОВАННЫЙ СБРОС - CRITICAL FIX
+        console.log("Force Reset Loading State");
         setIsLoading(false);
         setAbortController(null);
         
