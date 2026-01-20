@@ -17,7 +17,7 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import useDeviceType from "@/hooks/useDeviceType";
-import { ChevronRight, Sparkles, X } from "lucide-react";
+import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import type { TransactionModalProps } from "@/types/types";
@@ -85,22 +85,35 @@ function TransactionModal({
               <Button
                 type="button"
                 variant="outline"
-                className="w-full h-auto py-3 justify-start border-primary/20 text-primary hover:bg-primary/5"
+                className="w-full h-auto py-3 justify-center border-primary/20 hover:bg-primary/5 mb-4"
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("transactions:chat"));
                   handleClose();
                 }}
               >
-                <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shrink-0">
-                  <Sparkles className="h-4 w-4 text-white" />
-                </div>
-                <div className="ml-3 flex flex-col items-start text-left">
-                  <div className="font-semibold text-sm">{tAIFeature("title")}</div>
-                  <div className="text-xs text-muted-foreground font-normal">
-                    {tAIFeature("examples")}
+                <div className="flex items-center gap-3">
+                  <div
+                    className="gradient-animated w-6 h-6 bg-gradient-to-r from-primary to-primary-800 shrink-0"
+                    style={{
+                      WebkitMaskImage: "url(/sparkles.svg)",
+                      maskImage: "url(/sparkles.svg)",
+                      WebkitMaskRepeat: "no-repeat",
+                      maskRepeat: "no-repeat",
+                      WebkitMaskPosition: "center",
+                      maskPosition: "center",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
+                    }}
+                  />
+                  <div className="flex flex-col items-center text-center">
+                    <div className="font-semibold text-sm text-primary">
+                      {tAIFeature("title")}
+                    </div>
+                    <div className="text-xs text-muted-foreground font-normal">
+                      {tAIFeature("examples")}
+                    </div>
                   </div>
                 </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground/50 ml-auto" />
               </Button>
 
               <TransactionForm
@@ -146,22 +159,35 @@ function TransactionModal({
           <Button
             type="button"
             variant="outline"
-            className="w-full h-auto py-3 justify-start border-primary/20 text-primary hover:bg-primary/5"
+            className="w-full h-auto py-3 justify-center border-primary/20 hover:bg-primary/5 mb-4"
             onClick={() => {
               window.dispatchEvent(new CustomEvent("transactions:chat"));
               handleClose();
             }}
           >
-            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shrink-0">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
-            <div className="ml-3 flex flex-col items-start text-left">
-              <div className="font-semibold text-sm">{tAIFeature("title")}</div>
-              <div className="text-xs text-muted-foreground font-normal">
-                {tAIFeature("examples")}
+            <div className="flex items-center gap-3">
+              <div
+                className="gradient-animated w-6 h-6 bg-gradient-to-r from-primary to-primary-800 shrink-0"
+                style={{
+                  WebkitMaskImage: "url(/sparkles.svg)",
+                  maskImage: "url(/sparkles.svg)",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  maskPosition: "center",
+                  WebkitMaskSize: "contain",
+                  maskSize: "contain",
+                }}
+              />
+              <div className="flex flex-col items-center text-center">
+                <div className="font-semibold text-sm text-primary">
+                  {tAIFeature("title")}
+                </div>
+                <div className="text-xs text-muted-foreground font-normal">
+                  {tAIFeature("examples")}
+                </div>
               </div>
             </div>
-            <ChevronRight className="h-4 w-4 text-muted-foreground/50 ml-auto" />
           </Button>
 
           <TransactionForm
