@@ -158,6 +158,20 @@ export function useTransactionChat(): UseTransactionChatReturn {
 
         const reader = response.body?.getReader();
         streamReader = reader ?? null;
+        if (!reader) {
+          const msg =
+            locale === "ru"
+              ? "Ассистент временно недоступен. Попробуйте повторить позже."
+              : "Assistant is temporarily unavailable. Please try again later.";
+          const aiMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: msg,
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          setError(new Error(msg));
+          return;
+        }
         const decoder = new TextDecoder();
         let buffer = "";
         let currentMessage: Message = {
@@ -251,6 +265,24 @@ export function useTransactionChat(): UseTransactionChatReturn {
             }
           }
         }
+
+        const isEmptyAssistantMessage =
+          !currentMessage.content.trim() &&
+          (!currentMessage.toolInvocations || currentMessage.toolInvocations.length === 0);
+
+        if (isEmptyAssistantMessage) {
+          const msg =
+            locale === "ru"
+              ? "Ассистент временно недоступен. Попробуйте повторить позже."
+              : "Assistant is temporarily unavailable. Please try again later.";
+
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === currentMessage.id ? { ...m, content: msg } : m,
+            ),
+          );
+          setError(new Error(msg));
+        }
       } catch (err) {
         const errName = (err as any)?.name;
         if (errName === "AbortError") {
@@ -273,6 +305,32 @@ export function useTransactionChat(): UseTransactionChatReturn {
           setError(err);
           console.error("Transaction chat error:", err);
         }
+
+        const msg =
+          locale === "ru"
+            ? "Ассистент временно недоступен. Попробуйте повторить позже."
+            : "Assistant is temporarily unavailable. Please try again later.";
+
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (
+            last?.role === "assistant" &&
+            !last.content &&
+            (!last.toolInvocations || last.toolInvocations.length === 0)
+          ) {
+            return prev.map((m, idx) =>
+              idx === prev.length - 1 ? { ...m, content: msg } : m,
+            );
+          }
+          return [
+            ...prev,
+            {
+              id: (Date.now() + 1).toString(),
+              role: "assistant",
+              content: msg,
+            },
+          ];
+        });
       } finally {
         if (timeoutId) {
           window.clearTimeout(timeoutId);
@@ -283,15 +341,6 @@ export function useTransactionChat(): UseTransactionChatReturn {
         setAbortController(null);
         
         console.log("Chat transaction finished. Loading state reset.");
-        // Если после всего этого сообщений от ассистента нет (пустой ответ), удаляем "висяк"
-        setMessages(prev => {
-            const last = prev[prev.length - 1];
-            if (last.role === 'assistant' && !last.content && (!last.toolInvocations || last.toolInvocations.length === 0)) {
-                // Удаляем пустое сообщение, чтобы не висело "печатает..."
-                return prev.slice(0, -1);
-            }
-            return prev;
-        });
       }
     },
     [userId, input, abortController],
