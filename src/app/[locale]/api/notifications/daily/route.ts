@@ -40,6 +40,10 @@ export async function POST(req: NextRequest) {
   const onlyUserId = (req.nextUrl.searchParams.get("userId") || "").trim();
   const today = new Date();
   const todayStr = today.toISOString().slice(0, 10);
+  const utcHour = today.getUTCHours();
+  if (utcHour < 7 || utcHour >= 19) {
+    return NextResponse.json({ sent: 0, skipped: 0, reason: "outside_window" });
+  }
 
   // 1. Get active users with preferences
   const selectWithLocale =
@@ -88,6 +92,7 @@ export async function POST(req: NextRequest) {
   let skippedCount = 0;
 
   for (const p of prefs || []) {
+    if (sentCount >= 1) break;
     const userId = p.user_id;
     const frequency = p.engagement_frequency; // gentle, aggressive, relentless
 
@@ -106,6 +111,32 @@ export async function POST(req: NextRequest) {
     const daysSinceLastTx = lastTxDate
       ? Math.floor((today.getTime() - lastTxDate.getTime()) / (1000 * 60 * 60 * 24))
       : 30; // Treat no tx as long inactive
+
+    const threeHoursAgoIso = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
+    const { data: lastNotification } = await supabase
+      .from("notifications")
+      .select("created_at")
+      .eq("user_id", userId)
+      .gte("created_at", threeHoursAgoIso)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (lastNotification?.created_at) {
+      skippedCount++;
+      continue;
+    }
+
+    const { count: pendingCount } = await supabase
+      .from("notification_queue")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", "pending");
+
+    if (Number(pendingCount || 0) > 0) {
+      skippedCount++;
+      continue;
+    }
 
     // 3. Determine Category & Variant
     let category: NotificationCategory = "daily_reminder";
@@ -158,7 +189,7 @@ export async function POST(req: NextRequest) {
       .contains("data", { source: "daily" });
 
     const existingCount = Number(count || 0);
-    const remaining = Math.max(0, targetCount - existingCount);
+    const remaining = Math.max(0, Math.min(1, targetCount - existingCount));
     if (remaining <= 0) {
       skippedCount++;
       continue;
