@@ -346,7 +346,7 @@ export default function AIAssistantPage() {
           {ChatPane}
           <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
             <SheetContent side="left" className="p-0 w-[90vw] sm:w-[400px]">
-              <div className="h-full flex flex-col">
+              <div className="h-full min-h-0 flex flex-col">
                 <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                   <button
                     type="button"
@@ -370,7 +370,7 @@ export default function AIAssistantPage() {
                   </button>
                 </div>
                 {/* История тянется на всю высоту шторки */}
-                <div className="flex-1 p-3">{HistoryPane}</div>
+                <div className="flex-1 min-h-0 p-3">{HistoryPane}</div>
               </div>
             </SheetContent>
           </Sheet>

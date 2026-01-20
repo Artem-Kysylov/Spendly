@@ -306,7 +306,7 @@ export default function TransactionsClient() {
               </SheetTrigger>
               <SheetContent
                 side="left"
-                className="w-[300px] sm:w-[400px] overflow-y-auto bg-background border-r border-border"
+                className="w-[300px] sm:w-[400px] bg-background border-r border-border flex flex-col overflow-hidden"
               >
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
@@ -314,7 +314,7 @@ export default function TransactionsClient() {
                     AI Spending Insights
                   </SheetTitle>
                 </SheetHeader>
-                <div className="mt-6 px-1">
+                <div className="flex-1 min-h-0 overflow-y-auto mt-6 px-1 pb-6">
                   {isInsightsLoading ? (
                     <div className="space-y-3">
                       <Skeleton className="h-32 w-full rounded-lg bg-muted/80 border border-border/80 shadow-sm" />

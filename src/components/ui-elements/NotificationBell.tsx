@@ -248,7 +248,6 @@ function NotificationBell({
                       onClick={() => handleNotificationClick(notification)}
                       className={`
                                           p-4 cursor-pointer hover:bg-gray-50 transition-colors
-                                          ${!notification.is_read ? "bg-blue-50/50" : ""}
                                       `}
                     >
                       <div className="flex gap-3">
