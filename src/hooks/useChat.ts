@@ -11,6 +11,7 @@ import {
   localizeEmptyGeneric,
   periodLabel as canonicalPeriodLabel,
 } from "@/prompts/spendlyPal/canonicalPhrases";
+import { parseTransactionLocally } from "@/lib/parseTransactionLocally";
 // import { trackEvent } from "@/lib/telemetry";
 import { supabase } from "@/lib/supabaseClient";
 import type { AIResponse, AssistantTone, Period } from "@/types/ai";
@@ -444,6 +445,30 @@ export const useChat = (): UseChatReturn => {
 
       const sid = await createSessionIfNeeded(content);
       await persistMessage("user", content, sid);
+
+      const localParse = parseTransactionLocally(content);
+      if (localParse.success && localParse.transaction) {
+        const proposal = localParse.transaction;
+        const aiMessage: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          content: "",
+          role: "assistant",
+          timestamp: new Date(),
+          toolInvocations: [
+            {
+              toolCallId: `local-${Date.now()}`,
+              toolName: "propose_transaction",
+              args: proposal,
+              state: "result",
+              result: { success: true, transactions: [proposal] },
+            },
+          ],
+        };
+        setMessages((prev) => [...prev, aiMessage]);
+        setIsTyping(false);
+        setAbortController(null);
+        return;
+      }
 
       const controller = new AbortController();
       setAbortController(controller);
