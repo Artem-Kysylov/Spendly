@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Safe-area helpers (iOS Safari/Chrome/PWA). */
+/* Keep these global so they also apply in iPhone Chrome (not only standalone). */
+.pwa-safe-bottom {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.pwa-install-fab-offset {
+  bottom: calc(constant(safe-area-inset-bottom) + 104px);
+  bottom: calc(env(safe-area-inset-bottom) + 104px);
+}
+
+@media (display-mode: standalone) {
+  .pwa-safe-bottom {
+    padding-bottom: constant(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pwa-install-fab-offset {
+    bottom: calc(constant(safe-area-inset-bottom) + 104px);
+    bottom: calc(env(safe-area-inset-bottom) + 104px);
+  }
+}
+
 @layer base {
   :root {
     --background: 0 0% 98%;

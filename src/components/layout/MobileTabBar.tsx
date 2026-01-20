@@ -4,82 +4,21 @@
 import { CreditCard, LayoutDashboard, Wallet, Plus } from "lucide-react";
 import { usePathname, Link, useRouter } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import Image from "next/image";
-import router from "next/router";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useUIStore } from "@/store/ui-store";
 
 function MobileTabBar() {
-  const t = useTranslations("Sidenav");
   const pathname = usePathname();
-  const prefersReduced = useReducedMotion();
   const tLayout = useTranslations("layout");
   const router = useRouter();
 
-  const [isStandalone, setIsStandalone] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const checkStandalone = () => {
-      const mq = window.matchMedia
-        ? window.matchMedia("(display-mode: standalone)")
-        : null;
-      const isStandaloneMatch = mq?.matches ?? false;
-      const isNavigatorStandalone =
-        (window.navigator as any).standalone === true;
-      setIsStandalone(isStandaloneMatch || isNavigatorStandalone);
-    };
-
-    checkStandalone();
-
-    const mq = window.matchMedia
-      ? window.matchMedia("(display-mode: standalone)")
-      : null;
-    mq?.addEventListener("change", checkStandalone);
-
-    return () => {
-      mq?.removeEventListener("change", checkStandalone);
-    };
-  }, []);
-
   const { isTabBarVisible } = useUIStore();
 
-  const navTransition = { duration: 0.5, ease: "easeOut" } as const;
-
-  // iOS PWA (standalone) often breaks fixed positioning when transforms are applied.
-  // Avoid y/transform animations in standalone mode to keep the tab bar pinned to bottom.
-  const allowTransform = !isStandalone && !prefersReduced;
-
-  // заметный fade+slide; variants передаём только если не reduced
-  const routeVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: 20 },
-  };
-
-  const items: {
-    href: "/dashboard" | "/transactions" | "/budgets";
-    icon: any;
-    label: string;
-  }[] = [
-      { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-      { href: "/transactions", icon: CreditCard, label: "Transactions" },
-      { href: "/budgets", icon: Wallet, label: "Budgets" },
-    ];
-
   return (
-    <AnimatePresence mode="wait">
+    <>
       {/* DO NOT REMOVE: Fixed for iOS PWA Safe Area */}
-      <motion.nav
-        key={pathname}
-        initial={allowTransform ? { opacity: 0, y: 20 } : { opacity: 0 }}
-        animate={allowTransform ? { opacity: 1, y: 0 } : { opacity: 1 }}
-        exit={allowTransform ? { opacity: 0, y: 20 } : { opacity: 0 }}
-        transition={navTransition}
-        style={{ willChange: "opacity, transform" }}
-        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 lg:hidden z-50 border-t border-border bg-background dark:bg-card ${isStandalone ? "pb-[env(safe-area-inset-bottom)]" : ""}`}
+      <nav
+        className={`${!isTabBarVisible ? "hidden" : ""} fixed bottom-0 left-0 right-0 lg:hidden z-50 border-t border-border bg-background dark:bg-card pwa-safe-bottom`}
         aria-label="Bottom navigation"
       >
         <div>
@@ -161,7 +100,7 @@ function MobileTabBar() {
             >
               <span className="sr-only">{tLayout("sidebar.aiAssistant")}</span>
               <div
-                className={`${prefersReduced ? "" : "gradient-animated"} w-6 h-6 bg-gradient-to-r from-primary to-primary-800`}
+                className={`gradient-animated w-6 h-6 bg-gradient-to-r from-primary to-primary-800`}
                 style={{
                   WebkitMaskImage: "url(/sparkles.svg)",
                   maskImage: "url(/sparkles.svg)",
@@ -182,8 +121,8 @@ function MobileTabBar() {
           </li>
           </ul>
         </div>
-      </motion.nav>
-    </AnimatePresence>
+      </nav>
+    </>
   );
 }
 

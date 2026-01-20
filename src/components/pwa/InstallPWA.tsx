@@ -324,11 +324,11 @@ export default function InstallPWA({
   return (
     <>
       {isPrimaryInstance && <InAppBrowserGuard open={isBlockedInApp} />}
-      {canShowButtonUi && showButton && effectiveShowButton && !fabDismissed && (
+      {canShowButtonUi && showButton && effectiveShowButton && (!fabDismissed || forceShowButton) && (
         <div
           className={
             floating
-              ? "fixed right-4 bottom-[104px] z-[110] pointer-events-auto"
+              ? "fixed right-4 bottom-[104px] z-[9999] pointer-events-auto pwa-install-fab-offset"
               : ""
           }
         >
