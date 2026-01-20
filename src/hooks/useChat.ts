@@ -852,6 +852,7 @@ export const useChat = (): UseChatReturn => {
             userId: session.user.id,
             isPro: subscriptionPlan === "pro",
             enableLimits: true,
+            message: "confirm",
             confirm: true,
             actionType:
               pendingAction.type === "add_transaction"
@@ -879,9 +880,46 @@ export const useChat = (): UseChatReturn => {
           return;
         }
 
+        if (!res.ok) {
+          let errMsg = "Failed to process action. Please try again.";
+          try {
+            const ctErr = res.headers.get("content-type") || "";
+            if (ctErr.includes("application/json")) {
+              const json = (await res.json().catch(() => null)) as any;
+              if (json && typeof json.message === "string") errMsg = json.message;
+              else if (json && typeof json.error === "string") errMsg = json.error;
+            } else {
+              const text = await res.text().catch(() => "");
+              if (text && text.trim().length > 0) errMsg = text;
+            }
+          } catch {
+            // ignore
+          }
+
+          const aiMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            content: errMsg,
+            role: "assistant",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          setPendingAction(null);
+          await persistMessage(
+            "assistant",
+            aiMessage.content,
+            currentSessionId || undefined,
+          );
+          return;
+        }
+
         const ct = res.headers.get("content-type") || "";
         if (ct.includes("application/json")) {
-          const json = (await res.json()) as { kind?: "message"; message?: string };
+          const json = (await res.json()) as {
+            kind?: "message";
+            message?: string;
+            ok?: boolean;
+            shouldRefetch?: boolean;
+          };
           const text = json?.message || "Action confirmed and processed.";
           const aiMessage: ChatMessage = {
             id: (Date.now() + 1).toString(),
@@ -892,6 +930,11 @@ export const useChat = (): UseChatReturn => {
           setMessages((prev) => [...prev, aiMessage]);
           setPendingAction(null);
           await persistMessage("assistant", aiMessage.content, currentSessionId || undefined);
+
+          if (json?.shouldRefetch) {
+            window.dispatchEvent(new CustomEvent("transaction:created"));
+            window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
+          }
         } else {
           const aiMessage: ChatMessage = {
             id: (Date.now() + 1).toString(),

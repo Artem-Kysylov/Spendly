@@ -17,7 +17,7 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import useDeviceType from "@/hooks/useDeviceType";
-import { X } from "lucide-react";
+import { MessageSquarePlus, X } from "lucide-react";
 
 import type { TransactionModalProps } from "@/types/types";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
@@ -70,9 +70,24 @@ function TransactionModal({
             {/* Drawer handle */}
             <div className="mx-auto mt-2 mb-2 h-1.5 w-12 rounded-full bg-muted" />
             <SheetHeader>
-              <SheetTitle className="text-center text-xl font-semibold w-full">
-                {title} 📉
-              </SheetTitle>
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-10" />
+                <SheetTitle className="text-center text-xl font-semibold w-full">
+                  {title} 📉
+                </SheetTitle>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center h-10 w-10 rounded-full border border-border bg-background"
+                  aria-label="Add via AI"
+                  title="Add via AI"
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent("transactions:chat"));
+                    handleClose();
+                  }}
+                >
+                  <MessageSquarePlus className="h-5 w-5 text-primary" />
+                </button>
+              </div>
             </SheetHeader>
 
             <div className="mt-[10px] px-4 flex-1">
@@ -106,10 +121,24 @@ function TransactionModal({
     >
       <DialogContent className="transaction-modal sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-center">{title}</DialogTitle>
-          <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground">
-            <X size={22} />
-          </DialogClose>
+          <div className="flex items-center justify-between gap-2">
+            <DialogClose className="inline-flex items-center justify-center h-10 w-10 rounded-full border border-border bg-background text-muted-foreground hover:text-foreground">
+              <X size={18} />
+            </DialogClose>
+            <DialogTitle className="text-center flex-1">{title}</DialogTitle>
+            <button
+              type="button"
+              className="inline-flex items-center justify-center h-10 w-10 rounded-full border border-border bg-background"
+              aria-label="Add via AI"
+              title="Add via AI"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("transactions:chat"));
+                handleClose();
+              }}
+            >
+              <MessageSquarePlus className="h-5 w-5 text-primary" />
+            </button>
+          </div>
         </DialogHeader>
 
         <div className="mt-[20px]">

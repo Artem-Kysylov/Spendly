@@ -186,6 +186,25 @@ export const useTransactionsInfinite = ({
     }
   }, [session?.user?.id, debouncedSearch, filterType]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const onCreated = () => {
+      setPage(0);
+      setTransactions([]);
+      setHasNextPage(true);
+      void fetchTransactions(0, true);
+      void fetchStats();
+    };
+
+    window.addEventListener("transaction:created", onCreated);
+    window.addEventListener("budgetTransactionAdded", onCreated);
+    return () => {
+      window.removeEventListener("transaction:created", onCreated);
+      window.removeEventListener("budgetTransactionAdded", onCreated);
+    };
+  }, [fetchTransactions, fetchStats]);
+
   // Initial fetch and refetch on filter change
   useEffect(() => {
     fetchTransactions(0, true);

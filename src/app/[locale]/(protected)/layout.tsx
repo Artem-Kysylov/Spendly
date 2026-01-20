@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import TopBar from "@/components/layout/TopBar";
 import Sidebar from "@/components/layout/Sidebar";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
-import { AIAssistantProvider } from "@/components/ai-assistant";
+import { AIAssistantProvider, TransactionChatProvider } from "@/components/ai-assistant";
 import MobileTabBar from "@/components/layout/MobileTabBar";
 import AddTransactionProvider from "@/components/layout/AddTransactionProvider";
 import useDeviceType from "@/hooks/useDeviceType";
@@ -116,6 +116,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     <ProtectedRoute>
       {/* Удалён глобальный AIAssistantProvider */}
       <AddTransactionProvider />
+      <TransactionChatProvider showFloatingButton={false} />
       <div className="flex h-[100dvh] transition-colors duration-300 overflow-hidden">
         <Sidebar />
         <div className="flex-1 flex flex-col h-full overflow-hidden lg:ml-64 transition-colors duration-300">
