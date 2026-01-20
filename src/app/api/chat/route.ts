@@ -321,7 +321,7 @@ ${tonePrompt}
 
     // Stream response with tool
     const result = await streamText({
-      model: google("gemini-2.0-flash-exp"),
+      model: google("gemini-2.5-flash"),
       system: systemPrompt,
       prompt: message,
       tools: {

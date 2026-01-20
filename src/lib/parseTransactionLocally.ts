@@ -129,8 +129,51 @@ export function parseTransactionLocally(input: string): ParseResult {
   // Split by whitespace
   const parts = trimmed.split(/\s+/);
   
+  let normalizedParts = parts;
+  let dateOverride: string | undefined;
+
+  if (parts.length === 3) {
+    const singleWordDateMap: Record<string, () => string> = {
+      yesterday: () => {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return d.toISOString().split('T')[0];
+      },
+      today: () => new Date().toISOString().split('T')[0],
+      tomorrow: () => {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        return d.toISOString().split('T')[0];
+      },
+      вчера: () => {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return d.toISOString().split('T')[0];
+      },
+      сегодня: () => new Date().toISOString().split('T')[0],
+      завтра: () => {
+        const d = new Date();
+        d.setDate(d.getDate() + 1);
+        return d.toISOString().split('T')[0];
+      },
+      вчора: () => {
+        const d = new Date();
+        d.setDate(d.getDate() - 1);
+        return d.toISOString().split('T')[0];
+      },
+      сьогодні: () => new Date().toISOString().split('T')[0],
+    };
+
+    const lowerParts = parts.map((p) => p.toLowerCase());
+    const dateIdx = lowerParts.findIndex((p) => Object.prototype.hasOwnProperty.call(singleWordDateMap, p));
+    if (dateIdx >= 0) {
+      dateOverride = singleWordDateMap[lowerParts[dateIdx]]();
+      normalizedParts = parts.filter((_, idx) => idx !== dateIdx);
+    }
+  }
+
   // Only handle simple 2-part inputs
-  if (parts.length !== 2) {
+  if (normalizedParts.length !== 2) {
     return {
       success: false,
       requiresAI: true,
@@ -155,7 +198,7 @@ export function parseTransactionLocally(input: string): ParseResult {
     };
   }
   
-  const [first, second] = parts;
+  const [first, second] = normalizedParts;
   
   // Try to parse: [Item] [Amount] or [Amount] [Item]
   let title: string;
@@ -210,7 +253,7 @@ export function parseTransactionLocally(input: string): ParseResult {
       amount,
       type: 'expense', // Default to expense
       category_name: detectedCategory, // Smart category detection
-      date: today,
+      date: dateOverride ?? today,
     },
   };
 }

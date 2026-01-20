@@ -104,6 +104,11 @@ export function useTransactionChat(): UseTransactionChatReturn {
       const controller = new AbortController();
       setAbortController(controller);
 
+      const locale =
+        typeof document !== "undefined" && document.documentElement.lang
+          ? document.documentElement.lang.split("-")[0]
+          : "en";
+
       // Complex input - send to AI
       try {
         const response = await fetch("/api/chat", {
@@ -114,12 +119,27 @@ export function useTransactionChat(): UseTransactionChatReturn {
           body: JSON.stringify({
             userId,
             message: rawInput,
+            locale,
           }),
           signal: controller.signal,
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          let details = "";
+          try {
+            const ct = response.headers.get("content-type") || "";
+            if (ct.includes("application/json")) {
+              const json = await response.json().catch(() => null);
+              details = json ? JSON.stringify(json) : "";
+            } else {
+              details = await response.text().catch(() => "");
+            }
+          } catch {
+            // ignore
+          }
+          throw new Error(
+            `HTTP error! status: ${response.status}${details ? `, details: ${details}` : ""}`,
+          );
         }
 
         const reader = response.body?.getReader();
