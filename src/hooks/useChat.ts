@@ -463,7 +463,19 @@ export const useChat = (): UseChatReturn => {
         return;
       }
 
+      let timeoutId: number | null = null;
+      let didTimeout = false;
+      let streamReader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+
       try {
+        timeoutId = window.setTimeout(() => {
+          didTimeout = true;
+          try {
+            streamReader?.cancel();
+          } catch { }
+          controller.abort();
+        }, 45000);
+
         const apiUrl = getAssistantApiUrl(locale);
         console.log("ASSISTANT_API_URL:", apiUrl);
         const response = await fetch(apiUrl, {
@@ -776,6 +788,7 @@ export const useChat = (): UseChatReturn => {
 
         // Стриминговый ответ (LLM)
         const reader = response.body?.getReader();
+        streamReader = reader ?? null;
         const decoder = new TextDecoder();
         let acc = "";
 
@@ -820,6 +833,24 @@ export const useChat = (): UseChatReturn => {
           if (isPresetMessage(content)) writePresetCache(content, acc);
         }
       } catch (error) {
+        const errName = (error as any)?.name;
+        if (errName === "AbortError") {
+          if (!didTimeout) return;
+          const isRu = (navigator.language || "en-US")
+            .toLowerCase()
+            .startsWith("ru");
+          const msg = isRu
+            ? "Запрос занял слишком много времени. Попробуйте ещё раз."
+            : "Request timed out. Please try again.";
+          const aiMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            content: msg,
+            role: "assistant",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          return;
+        }
         console.error("Error sending message:", error);
         const isRu = (navigator.language || "en-US").toLowerCase().startsWith("ru");
         const msg = isRu
@@ -833,6 +864,9 @@ export const useChat = (): UseChatReturn => {
         };
         setMessages((prev) => [...prev, aiMessage]);
       } finally {
+        if (timeoutId) {
+          window.clearTimeout(timeoutId);
+        }
         setIsTyping(false);
         setAbortController(null);
       }
