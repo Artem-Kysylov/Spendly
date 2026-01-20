@@ -20,6 +20,25 @@ const cleanContent = (text: string) => {
 
   cleaned = cleaned.replace(/\|\|/g, "|\n|");
 
+  const insightTerms =
+    "Insight|Tip|Advice|Совет|Порада|सुझाव|Wawasan|インサイト|인사이트";
+
+  cleaned = cleaned.replace(
+    new RegExp(
+      `\\s*💡\\s*\\n\\s*(?:\\*\\*\\s*)?(${insightTerms})(?:\\s*\\*\\*)?\\s*[:\\-]?\\s*`,
+      "gu",
+    ),
+    "\n\n$1 ",
+  );
+
+  cleaned = cleaned.replace(
+    new RegExp(
+      `\\s*💡\\s*(?:\\*\\*\\s*)?(${insightTerms})(?:\\s*\\*\\*)?\\s*[:\\-]?\\s*`,
+      "gu",
+    ),
+    "\n\n$1 ",
+  );
+
   cleaned = cleaned.replace(/^([^|\n]+)(\|.*\|)/gm, "$1\n\n$2");
 
   cleaned = cleaned.replace(/(\|\s*[^\n]+\s*)\|(\s*\|[-:]+)/g, "$1\n$2");
@@ -30,7 +49,6 @@ const cleanContent = (text: string) => {
   let inCode = false;
   const out: string[] = [];
 
-  const insightTerms = "Insight|Совет|Порада|सुझाव|Wawasan|インサイト|인사이트";
   const insightPattern = new RegExp(
     `^(\\s*(?:-\\s*)?)(?:\\*\\*\\s*)?(?:💡\\s*)?(${insightTerms})(?:\\s*\\*\\*)?\\s*[:\\-]?\\s*`,
     "u",

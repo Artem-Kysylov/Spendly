@@ -30,6 +30,9 @@ const cleanContent = (text: string) => {
   if (!text) return "";
   let cleaned = text;
 
+  const insightTerms =
+    "Insight|Tip|Advice|Совет|Порада|सुझाव|Wawasan|インサイト|인사이트";
+
   // 1. CRITICAL: Aggressive fix for "AI laziness" where it puts double pipes instead of newline
   // Matches "||" anywhere and forces it to be "|\n|"
   cleaned = cleaned.replace(/\|\|/g, "|\n|");
@@ -47,10 +50,25 @@ const cleanContent = (text: string) => {
   // 4. Ensure double newline before Lists
   cleaned = cleaned.replace(/([^\n])(\s)([\*\-])(?=\s)/g, '$1\n\n$3');
 
+  cleaned = cleaned.replace(
+    new RegExp(
+      `\\s*💡\\s*\\n\\s*(?:\\*\\*\\s*)?(${insightTerms})(?:\\s*\\*\\*)?\\s*[:\\-]?\\s*`,
+      "gu",
+    ),
+    "\n\n$1 ",
+  );
+
+  cleaned = cleaned.replace(
+    new RegExp(
+      `\\s*💡\\s*(?:\\*\\*\\s*)?(${insightTerms})(?:\\s*\\*\\*)?\\s*[:\\-]?\\s*`,
+      "gu",
+    ),
+    "\n\n$1 ",
+  );
+
   // 5. Specific fix for "Insight" label merging with previous text
   // Step 1: Normalize all "Insight" variations to "💡 Insight" (or localized equivalent)
   // Terms: Insight, Совет (RU), Порада (UK), सुझाव (HI), Wawasan (ID), インサイト (JA), 인사이트 (KO)
-  const insightTerms = "Insight|Совет|Порада|सुझाव|Wawasan|インサイト|인사이트";
   const insightRegex = new RegExp(`\\*\\*(${insightTerms})\\*\\*`, 'g');
   // const insightPunctuation = new RegExp(`(${insightTerms})[-:]|###\\s*(${insightTerms})`, 'g'); 
   const insightPrefix = new RegExp(`([^\\n])(${insightTerms})`, 'g');
