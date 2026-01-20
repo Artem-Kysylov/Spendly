@@ -139,11 +139,22 @@ export function TransactionChatWindow({
               className="flex-1"
             />
             {isLoading ? (
-              <Button type="button" variant="outline" size="icon" onClick={stop}>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-lg"
+                onClick={stop}
+              >
                 <X className="w-4 h-4" />
               </Button>
             ) : (
-              <Button type="submit" size="icon" disabled={!input.trim()}>
+              <Button
+                type="submit"
+                size="icon"
+                className="h-10 w-10 rounded-lg"
+                disabled={!input.trim()}
+              >
                 <Send className="w-4 h-4" />
               </Button>
             )}
