@@ -109,9 +109,6 @@ function TransactionModal({
                     <div className="font-semibold text-sm text-primary">
                       {tAIFeature("title")}
                     </div>
-                    <div className="text-xs text-muted-foreground font-normal">
-                      {tAIFeature("examples")}
-                    </div>
                   </div>
                 </div>
               </Button>
@@ -182,9 +179,6 @@ function TransactionModal({
               <div className="flex flex-col items-center text-center">
                 <div className="font-semibold text-sm text-primary">
                   {tAIFeature("title")}
-                </div>
-                <div className="text-xs text-muted-foreground font-normal">
-                  {tAIFeature("examples")}
                 </div>
               </div>
             </div>
