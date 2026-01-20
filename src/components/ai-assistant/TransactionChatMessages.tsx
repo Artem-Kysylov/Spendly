@@ -236,6 +236,7 @@ export const TransactionChatMessages = ({
                       budgets={budgets}
                       onSuccess={onTransactionSuccess}
                       onError={onTransactionError}
+                      autoDismissSuccess={false}
                     />
                   </div>
                 );

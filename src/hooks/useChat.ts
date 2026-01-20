@@ -575,14 +575,44 @@ export const useChat = (): UseChatReturn => {
             if (json.kind === "action") {
               const confirmText = json.confirmText;
               const action = json.action as PendingAction;
-              setPendingAction(action);
-              const aiMessage: ChatMessage = {
-                id: (Date.now() + 1).toString(),
-                content: confirmText,
-                role: "assistant",
-                timestamp: new Date(),
-              };
-              setMessages((prev) => [...prev, aiMessage]);
+              if (action.type === "add_transaction") {
+                setPendingAction(null);
+                const today = new Date().toISOString().split("T")[0];
+                const proposal = {
+                  title: action.payload.title,
+                  amount: action.payload.amount,
+                  type: "expense",
+                  category_name: action.payload.budget_name,
+                  date: today,
+                };
+
+                const aiMessage: ChatMessage = {
+                  id: (Date.now() + 1).toString(),
+                  content: "",
+                  role: "assistant",
+                  timestamp: new Date(),
+                  toolInvocations: [
+                    {
+                      toolCallId: `assistant-${Date.now()}`,
+                      toolName: "propose_transaction",
+                      args: proposal,
+                      state: "result",
+                      result: { success: true, transactions: [proposal] },
+                    },
+                  ],
+                };
+                setMessages((prev) => [...prev, aiMessage]);
+                await persistMessage("assistant", confirmText, sid);
+              } else {
+                setPendingAction(action);
+                const aiMessage: ChatMessage = {
+                  id: (Date.now() + 1).toString(),
+                  content: confirmText,
+                  role: "assistant",
+                  timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, aiMessage]);
+              }
             } else if (json.kind === "message") {
               const aiMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),

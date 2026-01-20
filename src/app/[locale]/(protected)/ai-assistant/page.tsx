@@ -35,11 +35,29 @@ export default function AIAssistantPage() {
   const tChat = useTranslations("chat");
   const { isDesktop } = useDeviceType();
   const { session } = UserAuth();
+  const [budgets, setBudgets] = useState<
+    Array<{ id: string; name: string; emoji?: string; type: "expense" | "income" }>
+  >([]);
   const [sessions, setSessions] = useState<
     Array<{ id: string; title: string | null; created_at: string }>
   >([]);
   const [historyOpen, setHistoryOpen] = useState(false);
   const { isTabBarVisible } = useUIStore();
+
+  useEffect(() => {
+    async function fetchBudgets() {
+      const userId = session?.user?.id;
+      if (!userId) return;
+      const { data, error } = await supabase
+        .from("budget_folders")
+        .select("id, name, emoji, type")
+        .eq("user_id", userId)
+        .order("name", { ascending: true });
+      if (!error && Array.isArray(data)) setBudgets(data);
+    }
+
+    fetchBudgets();
+  }, [session?.user?.id]);
 
   const refreshSessions = useCallback(async () => {
     const userId = session?.user?.id;
@@ -245,6 +263,7 @@ export default function AIAssistantPage() {
             messages={messages}
             isTyping={isTyping}
             onSuggestionClick={sendMessage}
+            budgets={budgets}
           />
         </div>
       )}

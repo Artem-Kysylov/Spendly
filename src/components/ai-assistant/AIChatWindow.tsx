@@ -10,6 +10,9 @@ import { SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useSubscription } from "@/hooks/useSubscription";
 import { formatMoney } from "@/lib/format/money";
 import UpgradeCornerPanel from "@/components/free/UpgradeCornerPanel";
+import { useEffect, useState } from "react";
+import { UserAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
 
 export const AIChatWindow = ({
   isOpen,
@@ -53,7 +56,27 @@ export const AIChatWindow = ({
 }) => {
   const tAI = useTranslations("assistant");
   const { subscriptionPlan } = useSubscription();
+  const { session } = UserAuth();
   const isFree = subscriptionPlan === "free";
+  const [budgets, setBudgets] = useState<
+    Array<{ id: string; name: string; emoji?: string; type: "expense" | "income" }>
+  >([]);
+
+  useEffect(() => {
+    async function fetchBudgets() {
+      if (!session?.user?.id) return;
+      const { data, error } = await supabase
+        .from("budget_folders")
+        .select("id, name, emoji, type")
+        .eq("user_id", session.user.id)
+        .order("name", { ascending: true });
+      if (!error && Array.isArray(data)) setBudgets(data);
+    }
+
+    if (isOpen) {
+      fetchBudgets();
+    }
+  }, [session?.user?.id, isOpen]);
   if (!isOpen) return null;
 
   return (
@@ -108,6 +131,7 @@ export const AIChatWindow = ({
                     isTyping={isTyping}
                     currency={currency}
                     onSuggestionClick={onSendMessage}
+                    budgets={budgets}
                   />
                 </div>
               </div>

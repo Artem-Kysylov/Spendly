@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { useEffect, useRef } from "react";
+import { TransactionProposalCard } from "./TransactionProposalCard";
 
 interface ChatMessagesProps {
   messages: ChatMessage[];
@@ -11,6 +12,15 @@ interface ChatMessagesProps {
   currency?: string;
   onSuggestionClick?: (text: string) => void;
   pendingAction?: unknown;
+  budgets?: any[];
+}
+
+function normalizeProposedTransaction(input: any): any {
+  if (!input) return null;
+  if (Array.isArray(input)) return input[0] ?? null;
+  if (Array.isArray(input.transactions)) return input.transactions[0] ?? null;
+  if (input.transaction) return input.transaction;
+  return input;
 }
 
 // Minimal cleaner to fix "AI laziness" with newlines
@@ -103,6 +113,7 @@ export const ChatMessages = ({
   isTyping,
   onSuggestionClick,
   pendingAction,
+  budgets,
 }: ChatMessagesProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -141,48 +152,50 @@ export const ChatMessages = ({
               isUser ? "self-end items-end" : "self-start items-start"
             )}
           >
-            <div
-              className={cn(
-                "rounded-2xl px-4 py-3 shadow-sm w-full",
-                isUser
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted/50"
-              )}
-            >
-              <div className={cn(
-                "prose prose-sm dark:prose-invert max-w-none leading-relaxed",
-                // Customizing prose specifics
-                "prose-headings:mt-4 prose-headings:mb-2 prose-headings:font-bold",
-                "prose-p:my-2",
-                "prose-ul:my-2 prose-li:my-0",
-                "prose-table:my-2",
-                isUser && "prose-headings:text-primary-foreground prose-p:text-primary-foreground prose-li:text-primary-foreground prose-strong:text-primary-foreground"
-              )}>
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm, remarkBreaks]}
-                  components={{
-                    table: ({ node, ...props }) => (
-                      <div className="my-4 w-full overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-                        <div className="overflow-x-auto">
-                          <table className="w-full text-sm border-collapse" {...props} />
+            {content && (
+              <div
+                className={cn(
+                  "rounded-2xl px-4 py-3 shadow-sm w-full",
+                  isUser
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted/50"
+                )}
+              >
+                <div className={cn(
+                  "prose prose-sm dark:prose-invert max-w-none leading-relaxed",
+                  // Customizing prose specifics
+                  "prose-headings:mt-4 prose-headings:mb-2 prose-headings:font-bold",
+                  "prose-p:my-2",
+                  "prose-ul:my-2 prose-li:my-0",
+                  "prose-table:my-2",
+                  isUser && "prose-headings:text-primary-foreground prose-p:text-primary-foreground prose-li:text-primary-foreground prose-strong:text-primary-foreground"
+                )}>
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm, remarkBreaks]}
+                    components={{
+                      table: ({ node, ...props }) => (
+                        <div className="my-4 w-full overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+                          <div className="overflow-x-auto">
+                            <table className="w-full text-sm border-collapse" {...props} />
+                          </div>
                         </div>
-                      </div>
-                    ),
-                    th: ({ node, ...props }) => (
-                      <th className="px-4 py-2 text-left font-semibold bg-muted/50 border-b border-border" {...props} />
-                    ),
-                    td: ({ node, ...props }) => (
-                      <td className="px-4 py-2 align-top border-b border-border" {...props} />
-                    ),
-                    a: ({ node, ...props }) => (
-                      <a target="_blank" rel="noopener noreferrer" className="underline font-medium" {...props} />
-                    ),
-                  }}
-                >
-                  {cleanContent(content)}
-                </ReactMarkdown>
+                      ),
+                      th: ({ node, ...props }) => (
+                        <th className="px-4 py-2 text-left font-semibold bg-muted/50 border-b border-border" {...props} />
+                      ),
+                      td: ({ node, ...props }) => (
+                        <td className="px-4 py-2 align-top border-b border-border" {...props} />
+                      ),
+                      a: ({ node, ...props }) => (
+                        <a target="_blank" rel="noopener noreferrer" className="underline font-medium" {...props} />
+                      ),
+                    }}
+                  >
+                    {cleanContent(content)}
+                  </ReactMarkdown>
+                </div>
               </div>
-            </div>
+            )}
 
             {!isUser && suggestions.length > 0 && onSuggestionClick && (
               <div className="mt-2 flex flex-wrap gap-5 md:gap-2">
@@ -198,6 +211,30 @@ export const ChatMessages = ({
                 ))}
               </div>
             )}
+
+            {message.toolInvocations?.map((toolInvocation) => {
+              if (toolInvocation.toolName === "propose_transaction") {
+                const proposal =
+                  normalizeProposedTransaction(toolInvocation.args) ??
+                  normalizeProposedTransaction(toolInvocation.result);
+                if (!proposal) return null;
+
+                return (
+                  <div key={toolInvocation.toolCallId} className="w-full mt-2">
+                    <TransactionProposalCard
+                      proposal={proposal}
+                      budgets={(budgets || []) as any}
+                      autoDismissSuccess={false}
+                      onSuccess={() => {
+                        window.dispatchEvent(new CustomEvent("transaction:created"));
+                        window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
+                      }}
+                    />
+                  </div>
+                );
+              }
+              return null;
+            })}
           </div>
         );
       })}

@@ -44,6 +44,7 @@ interface TransactionProposalCardProps {
   budgets: Budget[];
   onSuccess?: () => void;
   onError?: (error: string) => void;
+  autoDismissSuccess?: boolean;
 }
 
 export function TransactionProposalCard({
@@ -51,6 +52,7 @@ export function TransactionProposalCard({
   budgets,
   onSuccess,
   onError,
+  autoDismissSuccess = true,
 }: TransactionProposalCardProps) {
   const { session } = UserAuth();
   const userId = session?.user?.id;
@@ -140,9 +142,11 @@ export function TransactionProposalCard({
         onSuccess?.();
 
         // Auto-dismiss after 3 seconds
-        setTimeout(() => {
-          setIsSuccess(false);
-        }, 3000);
+        if (autoDismissSuccess) {
+          setTimeout(() => {
+            setIsSuccess(false);
+          }, 3000);
+        }
       } else {
         onError?.(result.error || "Failed to save transaction");
       }

@@ -51,10 +51,6 @@ export function TransactionChatWindow({
   }, [session?.user?.id, isOpen]);
 
   const handleTransactionSuccess = () => {
-    toast({
-      title: "Success",
-      description: "Transaction saved successfully!",
-    });
     // Optionally trigger refetch of dashboard data
     window.dispatchEvent(new CustomEvent("transaction:created"));
   };
