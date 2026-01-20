@@ -125,7 +125,7 @@ export function TransactionChatWindow({
         </div>
 
         {/* Input */}
-        <div className="bg-background flex-shrink-0 border-t border-border px-4 pb-2 pt-4">
+        <div className="bg-background flex-shrink-0 border-t border-border px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
             <Input
               value={input}
