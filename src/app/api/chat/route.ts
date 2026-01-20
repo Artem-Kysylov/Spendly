@@ -329,6 +329,10 @@ ${tonePrompt}
       },
       maxSteps: 5,
     } as any); // Cast to any to resolve generic inference issues with tools and maxSteps
+    const anyResult = result as any;
+    if (typeof anyResult?.toDataStreamResponse === "function") {
+      return anyResult.toDataStreamResponse();
+    }
     return result.toTextStreamResponse();
   } catch (error) {
     console.error("Error in /api/chat:", error);
