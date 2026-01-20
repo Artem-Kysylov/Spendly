@@ -182,7 +182,7 @@ export function parseTransactionLocally(input: string): ParseResult {
   }
   
   // Check for date/complex keywords
-  if (containsDateKeywords(trimmed)) {
+  if (!dateOverride && containsDateKeywords(trimmed)) {
     return {
       success: false,
       requiresAI: true,
