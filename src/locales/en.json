@@ -47,6 +47,10 @@
     "downloadApp": "Download the app",
     "signOut": "Sign Out"
   },
+  "ai_feature": {
+    "title": "Describe with AI",
+    "examples": "Taxi 200, Lunch yesterday"
+  },
   "pwa": {
     "guard": {
       "title": "Open Spendly in your browser",

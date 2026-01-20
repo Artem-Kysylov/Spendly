@@ -47,6 +47,10 @@
     "downloadApp": "앱 다운로드",
     "signOut": "로그아웃"
   },
+  "ai_feature": {
+    "title": "AI로 설명하기",
+    "examples": "택시 200, 어제 점심"
+  },
   "pwa": {
     "guard": {
       "title": "브라우저에서 Spendly를 열어 주세요",

@@ -47,6 +47,10 @@
     "downloadApp": "Unduh Aplikasi",
     "signOut": "Keluar"
   },
+  "ai_feature": {
+    "title": "Jelaskan dengan AI",
+    "examples": "Taksi 200, Makan siang kemarin"
+  },
   "pwa": {
     "guard": {
       "title": "Buka Spendly di browser",

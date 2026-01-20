@@ -47,6 +47,10 @@
     "downloadApp": "Скачать приложение",
     "signOut": "Выйти"
   },
+  "ai_feature": {
+    "title": "Описать через ИИ",
+    "examples": "Такси 200, Обед вчера"
+  },
   "pwa": {
     "guard": {
       "title": "Откройте Spendly в браузере",

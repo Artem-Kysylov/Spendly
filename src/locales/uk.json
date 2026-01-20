@@ -47,6 +47,10 @@
     "downloadApp": "Завантажити застосунок",
     "signOut": "Вийти"
   },
+  "ai_feature": {
+    "title": "Описати через AI",
+    "examples": "Таксі 200, Обід вчора"
+  },
   "pwa": {
     "guard": {
       "title": "Відкрийте Spendly у браузері",

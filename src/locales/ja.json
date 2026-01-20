@@ -47,6 +47,10 @@
     "downloadApp": "アプリをダウンロード",
     "signOut": "サインアウト"
   },
+  "ai_feature": {
+    "title": "AIで説明する",
+    "examples": "タクシー 200, 昨日のランチ"
+  },
   "pwa": {
     "guard": {
       "title": "ブラウザで Spendly を開いてください",

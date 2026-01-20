@@ -17,7 +17,8 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import useDeviceType from "@/hooks/useDeviceType";
-import { MessageSquarePlus, X } from "lucide-react";
+import { ChevronRight, Sparkles, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import type { TransactionModalProps } from "@/types/types";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
@@ -32,6 +33,7 @@ function TransactionModal({
   allowTypeChange = true,
 }: TransactionModalProps) {
   const tCommon = useTranslations("common");
+  const tAIFeature = useTranslations("ai_feature");
   const { isMobile } = useDeviceType();
   const { mobileSheetsEnabled } = useFeatureFlags();
   const [internalOpen, setInternalOpen] = useState(true);
@@ -75,22 +77,32 @@ function TransactionModal({
                 <SheetTitle className="text-center text-xl font-semibold w-full">
                   {title} 📉
                 </SheetTitle>
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center h-10 w-10 rounded-full border border-border bg-background"
-                  aria-label="Add via AI"
-                  title="Add via AI"
-                  onClick={() => {
-                    window.dispatchEvent(new CustomEvent("transactions:chat"));
-                    handleClose();
-                  }}
-                >
-                  <MessageSquarePlus className="h-5 w-5 text-primary" />
-                </button>
+                <div className="w-10" />
               </div>
             </SheetHeader>
 
             <div className="mt-[10px] px-4 flex-1">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-auto py-3 justify-start border-primary/20 text-primary hover:bg-primary/5"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("transactions:chat"));
+                  handleClose();
+                }}
+              >
+                <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shrink-0">
+                  <Sparkles className="h-4 w-4 text-white" />
+                </div>
+                <div className="ml-3 flex flex-col items-start text-left">
+                  <div className="font-semibold text-sm">{tAIFeature("title")}</div>
+                  <div className="text-xs text-muted-foreground font-normal">
+                    {tAIFeature("examples")}
+                  </div>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground/50 ml-auto" />
+              </Button>
+
               <TransactionForm
                 initialData={initialData}
                 initialBudgetId={initialBudgetId}
@@ -126,22 +138,32 @@ function TransactionModal({
               <X size={18} />
             </DialogClose>
             <DialogTitle className="text-center flex-1">{title}</DialogTitle>
-            <button
-              type="button"
-              className="inline-flex items-center justify-center h-10 w-10 rounded-full border border-border bg-background"
-              aria-label="Add via AI"
-              title="Add via AI"
-              onClick={() => {
-                window.dispatchEvent(new CustomEvent("transactions:chat"));
-                handleClose();
-              }}
-            >
-              <MessageSquarePlus className="h-5 w-5 text-primary" />
-            </button>
+            <div className="w-10" />
           </div>
         </DialogHeader>
 
         <div className="mt-[20px]">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full h-auto py-3 justify-start border-primary/20 text-primary hover:bg-primary/5"
+            onClick={() => {
+              window.dispatchEvent(new CustomEvent("transactions:chat"));
+              handleClose();
+            }}
+          >
+            <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shrink-0">
+              <Sparkles className="h-4 w-4 text-white" />
+            </div>
+            <div className="ml-3 flex flex-col items-start text-left">
+              <div className="font-semibold text-sm">{tAIFeature("title")}</div>
+              <div className="text-xs text-muted-foreground font-normal">
+                {tAIFeature("examples")}
+              </div>
+            </div>
+            <ChevronRight className="h-4 w-4 text-muted-foreground/50 ml-auto" />
+          </Button>
+
           <TransactionForm
             initialData={initialData}
             initialBudgetId={initialBudgetId}
