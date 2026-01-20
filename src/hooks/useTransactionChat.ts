@@ -104,6 +104,10 @@ export function useTransactionChat(): UseTransactionChatReturn {
       const controller = new AbortController();
       setAbortController(controller);
 
+      let timeoutId: number | null = null;
+      let didTimeout = false;
+      let streamReader: ReadableStreamDefaultReader<Uint8Array> | null = null;
+
       const locale =
         typeof document !== "undefined" && document.documentElement.lang
           ? document.documentElement.lang.split("-")[0]
@@ -111,6 +115,16 @@ export function useTransactionChat(): UseTransactionChatReturn {
 
       // Complex input - send to AI
       try {
+        timeoutId = window.setTimeout(() => {
+          didTimeout = true;
+          try {
+            streamReader?.cancel();
+          } catch {
+            // ignore
+          }
+          controller.abort();
+        }, 45000);
+
         const response = await fetch("/api/chat", {
           method: "POST",
           headers: {
@@ -143,6 +157,7 @@ export function useTransactionChat(): UseTransactionChatReturn {
         }
 
         const reader = response.body?.getReader();
+        streamReader = reader ?? null;
         const decoder = new TextDecoder();
         let buffer = "";
         let currentMessage: Message = {
@@ -237,11 +252,31 @@ export function useTransactionChat(): UseTransactionChatReturn {
           }
         }
       } catch (err) {
-        if (err instanceof Error && err.name !== "AbortError") {
+        const errName = (err as any)?.name;
+        if (errName === "AbortError") {
+          if (!didTimeout) return;
+          const msg =
+            locale === "ru"
+              ? "Запрос занял слишком много времени. Попробуйте ещё раз."
+              : "Request timed out. Please try again.";
+          const aiMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: msg,
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          setError(new Error(msg));
+          return;
+        }
+
+        if (err instanceof Error) {
           setError(err);
           console.error("Transaction chat error:", err);
         }
       } finally {
+        if (timeoutId) {
+          window.clearTimeout(timeoutId);
+        }
         // ГАРАНТИРОВАННЫЙ СБРОС - CRITICAL FIX
         setIsLoading(false);
         console.log("Force Reset Loading State");
