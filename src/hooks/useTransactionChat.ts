@@ -324,8 +324,32 @@ export function useTransactionChat(): UseTransactionChatReturn {
               } catch (e) {
                 console.error("Failed to parse tool result:", e);
               }
+            } else {
+              const candidate = line.replace(/^data:\s*/, "").trimEnd();
+              if (candidate) {
+                currentMessage.content += (currentMessage.content ? "\n" : "") + candidate;
+                setMessages((prev) =>
+                  prev.map((m) =>
+                    m.id === currentMessage.id
+                      ? { ...m, content: currentMessage.content }
+                      : m,
+                  ),
+                );
+              }
             }
           }
+        }
+
+        const trailing = buffer.replace(/^data:\s*/, "").trim();
+        if (trailing && !trailing.startsWith("0:") && !trailing.startsWith("9:") && !trailing.startsWith("a:")) {
+          currentMessage.content += (currentMessage.content ? "\n" : "") + trailing;
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === currentMessage.id
+                ? { ...m, content: currentMessage.content }
+                : m,
+            ),
+          );
         }
 
         const isEmptyAssistantMessage =
