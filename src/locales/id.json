@@ -738,6 +738,7 @@
     "welcomeTitle": "Temui Spendly Pal",
     "welcomeDesc": "Asisten keuangan bertenaga AI Anda. Ajukan pertanyaan seperti \"Berapa pengeluaran saya bulan ini?\" atau \"Tambahkan transaksi baru.\"",
     "rateLimited": "Anda telah mencapai batas permintaan AI. Silakan coba lagi dalam beberapa detik.",
+    "transactionFallback": "Aku belum bisa membaca itu sebagai transaksi. Coba: 'Makan siang 150', 'Taksi 200 kemarin', atau 'Pizza 150, Cola 50 kemarin'.",
     "input": {
       "placeholder": "Pesan Spendly Pal..."
     },

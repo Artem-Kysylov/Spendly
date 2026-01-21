@@ -1,0 +1,34 @@
+# PROJECT CONTEXT & TECH STACK
+- Framework: Next.js 14 (App Router)
+- Database: Supabase (PostgreSQL + RLS)
+- UI: Tailwind CSS, Shadcn/ui, Lucide React
+- Deployment: Vercel (PWA enabled)
+
+# CRITICAL RULES (THE "SURGEON" MINDSET)
+1. **Minimal Changes:** Do NOT rewrite entire files. Only modify the specific lines needed for the task.
+2. **Preserve Logic:** Never remove existing error handling, logging, or edge-case checks unless explicitly asked.
+3. **No Placeholders:** Never leave comments like "// ...rest of code". Always output the full functional block if you touch it.
+4. **Mobile First:** All UI changes must be verified for mobile responsiveness (iPhone SE/XR sizes).
+
+# LOCALIZATION PROTOCOL (STRICT)
+We support 7 languages. When adding or changing ANY text in the UI:
+1. You MUST update the JSON files for ALL 7 locales simultaneously:
+   - `messages/en.json` (Source)
+   - `messages/ru.json`
+   - `messages/uk.json`
+   - `messages/ja.json`
+   - `messages/id.json`
+   - `messages/hi.json`
+   - `messages/ko.json`
+2. Ensure keys match exactly across all files.
+3. Keep the translation tone: Friendly, concise, financial app context.
+
+# DATABASE & SUPABASE
+- Always assume RLS (Row Level Security) is on.
+- When creating tables, always include `created_at` and `updated_at`.
+- Use snake_case for DB columns and camelCase for TypeScript variables.
+
+# CODING STYLE
+- Use TypeScript interfaces for all props and data models.
+- Prefer functional components with Hooks.
+- Don't use `any`. Define proper types.

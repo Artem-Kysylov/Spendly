@@ -738,6 +738,7 @@
     "welcomeTitle": "Spendly Pal을 만나보세요",
     "welcomeDesc": "AI 기반 금융 비서입니다. \"이번 달 지출이 얼마인가요?\" 또는 \"새 거래 추가\"와 같은 질문을 해보세요.",
     "rateLimited": "AI 요청 제한에 도달했습니다. 몇 초 후에 다시 시도하세요.",
+    "transactionFallback": "거래로 해석하지 못했어요. 예: '점심 150', '택시 200 어제', 또는 '피자 150, 콜라 50 어제'.",
     "input": {
       "placeholder": "Spendly Pal에게 메시지 보내기..."
     },

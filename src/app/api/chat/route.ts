@@ -13,7 +13,7 @@ const google = createGoogleGenerativeAI({
 export const maxDuration = 60;
 
 // Zod Schema for transaction proposal
-const proposeTransactionSchema = z.object({
+const proposeTransactionItemSchema = z.object({
   title: z
     .string()
     .describe('Short description of the transaction (e.g., "Gas Station", "Coffee")'),
@@ -25,6 +25,13 @@ const proposeTransactionSchema = z.object({
     .string()
     .describe("The closest matching budget name from the user's list"),
   date: z.string().describe("Transaction date in ISO format (YYYY-MM-DD)"),
+});
+
+const proposeTransactionSchema = z.object({
+  transactions: z
+    .array(proposeTransactionItemSchema)
+    .min(1)
+    .describe("One or more extracted transactions"),
 });
 
 
@@ -46,7 +53,8 @@ const proposeTransactionTool = tool({
   execute: async (args: any) => {
     return {
       success: true,
-      transactions: [args as unknown as z.infer<typeof proposeTransactionSchema>],
+      transactions:
+        (args?.transactions as unknown as z.infer<typeof proposeTransactionItemSchema>[]) || [],
     };
   },
 } as any);

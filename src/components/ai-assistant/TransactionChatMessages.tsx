@@ -8,12 +8,12 @@ import { useEffect, useRef } from "react";
 import { TransactionProposalCard } from "./TransactionProposalCard";
 import { Loader2 } from "lucide-react";
 
-function normalizeProposedTransaction(input: any): any {
-  if (!input) return null;
-  if (Array.isArray(input)) return input[0] ?? null;
-  if (Array.isArray(input.transactions)) return input.transactions[0] ?? null;
-  if (input.transaction) return input.transaction;
-  return input;
+function normalizeProposedTransactions(input: any): any[] {
+  if (!input) return [];
+  if (Array.isArray(input)) return input.filter(Boolean);
+  if (Array.isArray(input.transactions)) return input.transactions.filter(Boolean);
+  if (input.transaction) return [input.transaction];
+  return [input];
 }
 
 interface TransactionChatMessagesProps {
@@ -223,21 +223,26 @@ export const TransactionChatMessages = ({
                 // Let's assume toolInvocation.args contains the proposal details
                 // formatted as: { title, amount, type, category_name, date }
 
-                const proposal =
-                  normalizeProposedTransaction(toolInvocation.args) ??
-                  normalizeProposedTransaction(result);
+                const proposals =
+                  normalizeProposedTransactions(toolInvocation.args).length > 0
+                    ? normalizeProposedTransactions(toolInvocation.args)
+                    : normalizeProposedTransactions(result);
 
-                if (!proposal) return null;
+                if (proposals.length === 0) return null;
 
                 return (
                   <div key={toolInvocation.toolCallId} className="w-full mt-2">
-                    <TransactionProposalCard
-                      proposal={proposal}
-                      budgets={budgets}
-                      onSuccess={onTransactionSuccess}
-                      onError={onTransactionError}
-                      autoDismissSuccess={false}
-                    />
+                    {proposals.map((proposal, idx) => (
+                      <div key={`${toolInvocation.toolCallId}-${idx}`} className={idx === 0 ? "" : "mt-2"}>
+                        <TransactionProposalCard
+                          proposal={proposal}
+                          budgets={budgets}
+                          onSuccess={onTransactionSuccess}
+                          onError={onTransactionError}
+                          autoDismissSuccess={false}
+                        />
+                      </div>
+                    ))}
                   </div>
                 );
               }

@@ -3,6 +3,8 @@
 import { UserAuth } from "@/context/AuthContext";
 import { useState, useCallback } from "react";
 import { parseTransactionLocally } from "@/lib/parseTransactionLocally";
+import { supabase } from "@/lib/supabaseClient";
+import { useTranslations } from "next-intl";
 
 export interface Message {
   id: string;
@@ -29,6 +31,7 @@ export function useTransactionChat(): UseTransactionChatReturn {
   console.log("HOOK_VERSION_FINAL_3");
   const { session } = UserAuth();
   const userId = session?.user?.id;
+  const tAssistant = useTranslations("assistant");
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -65,13 +68,75 @@ export function useTransactionChat(): UseTransactionChatReturn {
       setInput("");
       setError(undefined);
 
+      const locale =
+        typeof document !== "undefined" && document.documentElement.lang
+          ? document.documentElement.lang.split("-")[0]
+          : "en";
+
+      const isTransactionLike = /\d/.test(rawInput) && /[\p{L}]/u.test(rawInput);
+      const transactionFallback = tAssistant("transactionFallback");
+
       // ECONOMY MODE: Try to parse simple patterns locally first
       // Do this BEFORE enabling loading state to avoid any chance of being stuck.
-      const localParse = parseTransactionLocally(rawInput);
+      const localParse = parseTransactionLocally(rawInput, locale);
       console.log("Local Parse Result:", localParse);
       
-      if (localParse.success && localParse.transaction) {
+      if (localParse.success && (localParse.transactions?.length || localParse.transaction)) {
         console.log("Local parse SUCCESS - skipping LLM");
+        const transactions =
+          localParse.transactions && localParse.transactions.length > 0
+            ? localParse.transactions
+            : localParse.transaction
+              ? [localParse.transaction]
+              : [];
+
+        let finalTransactions = transactions;
+        try {
+          const normalizeTitle = (s: string) =>
+            String(s || "")
+              .trim()
+              .toLowerCase()
+              .replace(/\s+/g, " ");
+
+          const { data: recent, error: recentErr } = await supabase
+            .from("transactions")
+            .select(
+              `
+              title,
+              budget_folders (
+                name
+              )
+            `,
+            )
+            .eq("user_id", userId)
+            .order("created_at", { ascending: false })
+            .limit(50);
+
+          if (!recentErr && recent && recent.length > 0) {
+            const pairs = recent
+              .map((r) => ({
+                title: normalizeTitle((r as any).title),
+                category: (r as any).budget_folders?.name as string | undefined,
+              }))
+              .filter((p) => p.title && p.category);
+
+            finalTransactions = transactions.map((tx) => {
+              const txTitle = normalizeTitle(tx.title);
+              const match = pairs.find(
+                (p) => p.title === txTitle || p.title.includes(txTitle) || txTitle.includes(p.title),
+              );
+              return match?.category
+                ? { ...tx, category_name: match.category }
+                : tx;
+            });
+          }
+        } catch (e) {
+          console.warn("Smart category lookup failed:", e);
+        }
+
+        if (transactions.length === 0) {
+          setIsLoading(true);
+        } else {
         // Simple pattern detected! Skip LLM, create tool invocation directly
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
@@ -82,11 +147,11 @@ export function useTransactionChat(): UseTransactionChatReturn {
               toolCallId: `local-${Date.now()}`,
               toolName: "propose_transaction",
               // UI expects a single proposal object shape (title/amount/category/date)
-              args: localParse.transaction,
+              args: { transactions: finalTransactions },
               state: "result",
               result: {
                 success: true,
-                transactions: [localParse.transaction],
+                transactions: finalTransactions,
               },
             },
           ],
@@ -97,6 +162,7 @@ export function useTransactionChat(): UseTransactionChatReturn {
         setIsLoading(false);
         setAbortController(null);
         return; // Skip LLM call entirely!
+        }
       }
 
       setIsLoading(true);
@@ -107,11 +173,6 @@ export function useTransactionChat(): UseTransactionChatReturn {
       let timeoutId: number | null = null;
       let didTimeout = false;
       let streamReader: ReadableStreamDefaultReader<Uint8Array> | null = null;
-
-      const locale =
-        typeof document !== "undefined" && document.documentElement.lang
-          ? document.documentElement.lang.split("-")[0]
-          : "en";
 
       // Complex input - send to AI
       try {
@@ -159,8 +220,9 @@ export function useTransactionChat(): UseTransactionChatReturn {
         const reader = response.body?.getReader();
         streamReader = reader ?? null;
         if (!reader) {
-          const msg =
-            locale === "ru"
+          const msg = isTransactionLike
+            ? transactionFallback
+            : locale === "ru"
               ? "Ассистент временно недоступен. Попробуйте повторить позже."
               : "Assistant is temporarily unavailable. Please try again later.";
           const aiMessage: Message = {
@@ -271,8 +333,9 @@ export function useTransactionChat(): UseTransactionChatReturn {
           (!currentMessage.toolInvocations || currentMessage.toolInvocations.length === 0);
 
         if (isEmptyAssistantMessage) {
-          const msg =
-            locale === "ru"
+          const msg = isTransactionLike
+            ? transactionFallback
+            : locale === "ru"
               ? "Ассистент временно недоступен. Попробуйте повторить позже."
               : "Assistant is temporarily unavailable. Please try again later.";
 
@@ -306,8 +369,9 @@ export function useTransactionChat(): UseTransactionChatReturn {
           console.error("Transaction chat error:", err);
         }
 
-        const msg =
-          locale === "ru"
+        const msg = isTransactionLike
+          ? transactionFallback
+          : locale === "ru"
             ? "Ассистент временно недоступен. Попробуйте повторить позже."
             : "Assistant is temporarily unavailable. Please try again later.";
 

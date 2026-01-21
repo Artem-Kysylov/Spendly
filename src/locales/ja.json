@@ -738,6 +738,7 @@
     "welcomeTitle": "Spendly Pal を紹介",
     "welcomeDesc": "あなたの AI 搭載ファイナンスアシスタント。「今月の支出はいくら？」や「新しい取引を追加して」といった質問ができます。",
     "rateLimited": "AI リクエストの上限に達しました。しばらくしてから再試行してください。",
+    "transactionFallback": "取引として解析できませんでした。例: 「ランチ 150」「タクシー 200 昨日」「ピザ 150, コーラ 50 昨日」。",
     "input": {
       "placeholder": "Spendly Pal にメッセージ…"
     },

@@ -15,12 +15,12 @@ interface ChatMessagesProps {
   budgets?: any[];
 }
 
-function normalizeProposedTransaction(input: any): any {
-  if (!input) return null;
-  if (Array.isArray(input)) return input[0] ?? null;
-  if (Array.isArray(input.transactions)) return input.transactions[0] ?? null;
-  if (input.transaction) return input.transaction;
-  return input;
+function normalizeProposedTransactions(input: any): any[] {
+  if (!input) return [];
+  if (Array.isArray(input)) return input.filter(Boolean);
+  if (Array.isArray(input.transactions)) return input.transactions.filter(Boolean);
+  if (input.transaction) return [input.transaction];
+  return [input];
 }
 
 // Minimal cleaner to fix "AI laziness" with newlines
@@ -214,22 +214,27 @@ export const ChatMessages = ({
 
             {message.toolInvocations?.map((toolInvocation) => {
               if (toolInvocation.toolName === "propose_transaction") {
-                const proposal =
-                  normalizeProposedTransaction(toolInvocation.args) ??
-                  normalizeProposedTransaction(toolInvocation.result);
-                if (!proposal) return null;
+                const proposals =
+                  normalizeProposedTransactions(toolInvocation.args).length > 0
+                    ? normalizeProposedTransactions(toolInvocation.args)
+                    : normalizeProposedTransactions(toolInvocation.result);
+                if (proposals.length === 0) return null;
 
                 return (
                   <div key={toolInvocation.toolCallId} className="w-full mt-2">
-                    <TransactionProposalCard
-                      proposal={proposal}
-                      budgets={(budgets || []) as any}
-                      autoDismissSuccess={false}
-                      onSuccess={() => {
-                        window.dispatchEvent(new CustomEvent("transaction:created"));
-                        window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
-                      }}
-                    />
+                    {proposals.map((proposal, idx) => (
+                      <div key={`${toolInvocation.toolCallId}-${idx}`} className={idx === 0 ? "" : "mt-2"}>
+                        <TransactionProposalCard
+                          proposal={proposal}
+                          budgets={(budgets || []) as any}
+                          autoDismissSuccess={false}
+                          onSuccess={() => {
+                            window.dispatchEvent(new CustomEvent("transaction:created"));
+                            window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
+                          }}
+                        />
+                      </div>
+                    ))}
                   </div>
                 );
               }

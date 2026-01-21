@@ -738,6 +738,7 @@
     "welcomeTitle": "Meet Spendly Pal",
     "welcomeDesc": "Your AI-powered financial assistant. Ask questions like \"What's my spending this month?\" or \"Add a new transaction.\"",
     "rateLimited": "You've reached the rate limit for AI requests. Please try again in a few seconds.",
+    "transactionFallback": "I couldn't parse that as a transaction. Try: 'Lunch 150', 'Taxi 200 yesterday', or 'Pizza 150, Cola 50 yesterday'.",
     "input": {
       "placeholder": "Message Spendly Pal..."
     },

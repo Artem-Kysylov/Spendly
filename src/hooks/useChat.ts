@@ -422,6 +422,9 @@ export const useChat = (): UseChatReturn => {
     async (content: string) => {
       // trackEvent("ai_request_used");
 
+      const isTransactionLike = /\d/.test(content) && /[\p{L}]/u.test(content);
+      const transactionFallback = tAssistant("transactionFallback");
+
       const userMessage: ChatMessage = {
         id: Date.now().toString(),
         content,
@@ -446,9 +449,62 @@ export const useChat = (): UseChatReturn => {
       const sid = await createSessionIfNeeded(content);
       await persistMessage("user", content, sid);
 
-      const localParse = parseTransactionLocally(content);
-      if (localParse.success && localParse.transaction) {
-        const proposal = localParse.transaction;
+      const localParse = parseTransactionLocally(content, locale);
+      if (localParse.success && (localParse.transactions?.length || localParse.transaction)) {
+        const transactions =
+          localParse.transactions && localParse.transactions.length > 0
+            ? localParse.transactions
+            : localParse.transaction
+              ? [localParse.transaction]
+              : [];
+
+        if (transactions.length === 0) {
+          // Fall through to server call
+        } else {
+        let finalTransactions = transactions;
+        try {
+          const normalizeTitle = (s: string) =>
+            String(s || "")
+              .trim()
+              .toLowerCase()
+              .replace(/\s+/g, " ");
+
+          const { data: recent, error: recentErr } = await supabase
+            .from("transactions")
+            .select(
+              `
+              title,
+              budget_folders (
+                name
+              )
+            `,
+            )
+            .eq("user_id", session.user.id)
+            .order("created_at", { ascending: false })
+            .limit(50);
+
+          if (!recentErr && recent && recent.length > 0) {
+            const pairs = recent
+              .map((r) => ({
+                title: normalizeTitle((r as any).title),
+                category: (r as any).budget_folders?.name as string | undefined,
+              }))
+              .filter((p) => p.title && p.category);
+
+            finalTransactions = transactions.map((tx) => {
+              const txTitle = normalizeTitle(tx.title);
+              const match = pairs.find(
+                (p) => p.title === txTitle || p.title.includes(txTitle) || txTitle.includes(p.title),
+              );
+              return match?.category
+                ? { ...tx, category_name: match.category }
+                : tx;
+            });
+          }
+        } catch (e) {
+          console.warn("Smart category lookup failed:", e);
+        }
+
         const aiMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
           content: "",
@@ -458,9 +514,9 @@ export const useChat = (): UseChatReturn => {
             {
               toolCallId: `local-${Date.now()}`,
               toolName: "propose_transaction",
-              args: proposal,
+              args: { transactions: finalTransactions },
               state: "result",
-              result: { success: true, transactions: [proposal] },
+              result: { success: true, transactions: finalTransactions },
             },
           ],
         };
@@ -468,6 +524,7 @@ export const useChat = (): UseChatReturn => {
         setIsTyping(false);
         setAbortController(null);
         return;
+        }
       }
 
       const controller = new AbortController();
@@ -574,7 +631,9 @@ export const useChat = (): UseChatReturn => {
         }
 
         if (response.status === 503) {
-          let msg = "Assistant is temporarily unavailable. Please try again later.";
+          let msg = isTransactionLike
+            ? transactionFallback
+            : "Assistant is temporarily unavailable. Please try again later.";
           try {
             const json = (await response.json().catch(() => null)) as any;
             if (json && typeof json.message === "string") msg = json.message;
@@ -589,7 +648,9 @@ export const useChat = (): UseChatReturn => {
           return;
         }
         if (response.status >= 500) {
-          let msg = "Assistant encountered an error. Please try again later.";
+          let msg = isTransactionLike
+            ? transactionFallback
+            : "Assistant encountered an error. Please try again later.";
           try {
             const json = (await response.json().catch(() => null)) as any;
             if (json && typeof json.error === "string") msg = json.error;
@@ -864,9 +925,11 @@ export const useChat = (): UseChatReturn => {
           const isRu = (navigator.language || "en-US")
             .toLowerCase()
             .startsWith("ru");
-          const msg = isRu
-            ? "Запрос занял слишком много времени. Попробуйте ещё раз."
-            : "Request timed out. Please try again.";
+          const msg = isTransactionLike
+            ? transactionFallback
+            : isRu
+              ? "Запрос занял слишком много времени. Попробуйте ещё раз."
+              : "Request timed out. Please try again.";
           const aiMessage: ChatMessage = {
             id: (Date.now() + 1).toString(),
             content: msg,
@@ -878,9 +941,11 @@ export const useChat = (): UseChatReturn => {
         }
         console.error("Error sending message:", error);
         const isRu = (navigator.language || "en-US").toLowerCase().startsWith("ru");
-        const msg = isRu
-          ? "Ассистент временно недоступен. Попробуйте повторить позже."
-          : "Assistant is temporarily unavailable. Please try again later.";
+        const msg = isTransactionLike
+          ? transactionFallback
+          : isRu
+            ? "Ассистент временно недоступен. Попробуйте повторить позже."
+            : "Assistant is temporarily unavailable. Please try again later.";
         const aiMessage: ChatMessage = {
           id: (Date.now() + 1).toString(),
           content: msg,

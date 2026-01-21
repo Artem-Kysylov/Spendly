@@ -28,6 +28,18 @@ const COMPLEX_KEYWORDS = [
   'купив', 'витратив', 'заплатив', 'отримав', 'заробив',
 ];
 
+const LOCALE_SPLITTER_WORDS: Record<string, string[]> = {
+  en: ["and"],
+  ru: ["и"],
+  uk: ["і", "та", "й"],
+  ja: ["と", "そして"],
+  id: ["dan"],
+  hi: ["और"],
+  ko: ["그리고"],
+};
+
+const CURRENCY_SYMBOLS_REGEX = /[$€£¥₴₽]/g;
+
 // Keyword-to-category mapping (multilingual)
 // Maps common expense keywords to category names
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
@@ -97,6 +109,8 @@ export interface LocalParsedTransaction {
 export interface ParseResult {
   success: boolean;
   transaction?: LocalParsedTransaction;
+  transactions?: LocalParsedTransaction[];
+  unparsedSegments?: string[];
   requiresAI: boolean;
   reason?: string;
 }
@@ -117,151 +131,222 @@ function containsComplexKeywords(input: string): boolean {
   return COMPLEX_KEYWORDS.some(keyword => lowerInput.includes(keyword.toLowerCase()));
 }
 
+function normalizeLocale(locale?: string): string {
+  const base = String(locale || "en")
+    .split("-")[0]
+    .trim()
+    .toLowerCase();
+  return base || "en";
+}
+
+function toIsoDate(offsetDays: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return d.toISOString().split("T")[0];
+}
+
+function singleWordDateToIso(word: string): string | undefined {
+  const w = word.trim().toLowerCase();
+  if (w === "yesterday" || w === "вчера" || w === "вчора") return toIsoDate(-1);
+  if (w === "today" || w === "сегодня" || w === "сьогодні") return toIsoDate(0);
+  if (w === "tomorrow" || w === "завтра") return toIsoDate(1);
+  return undefined;
+}
+
+function extractGlobalSingleWordDate(input: string): { text: string; date?: string } {
+  const parts = input.trim().split(/\s+/);
+  if (parts.length < 2) return { text: input.trim() };
+
+  const lastRaw = parts[parts.length - 1];
+  const last = lastRaw.replace(/[.,!?]+$/g, "");
+  const iso = singleWordDateToIso(last);
+  if (!iso) return { text: input.trim() };
+
+  const text = parts.slice(0, -1).join(" ").trim();
+  return { text, date: iso };
+}
+
+function replaceLocaleSplittersWithComma(input: string, locale: string): string {
+  const words = LOCALE_SPLITTER_WORDS[locale] || LOCALE_SPLITTER_WORDS.en;
+  let out = input;
+  for (const w of words) {
+    const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp(`(^|\\s+)${escaped}(?=\\s+|$)`, "giu");
+    out = out.replace(re, ",");
+  }
+  return out;
+}
+
+function splitIntoSegments(input: string, locale: string): string[] {
+  let out = input;
+  out = out.replace(/[\n;]+/g, ",");
+  out = out.replace(/[&+]+/g, ",");
+  out = replaceLocaleSplittersWithComma(out, locale);
+
+  return out
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
+function parseAmountToken(token: string): number {
+  const raw = token.replace(CURRENCY_SYMBOLS_REGEX, "").trim();
+  if (!raw) return Number.NaN;
+
+  const decimalComma = /^\d+,\d+$/;
+  const thousandsComma = /^\d{1,3}(,\d{3})+(\.\d+)?$/;
+
+  let normalized = raw;
+  if (decimalComma.test(raw) && !raw.includes(".")) {
+    normalized = raw.replace(",", ".");
+  } else if (raw.includes(",") && thousandsComma.test(raw)) {
+    normalized = raw.replace(/,/g, "");
+  } else {
+    normalized = raw.replace(/,/g, "");
+  }
+
+  normalized = normalized.replace(/\s+/g, "");
+  return parseFloat(normalized);
+}
+
+function hasUnsupportedDateKeywords(input: string): boolean {
+  const lowerInput = input.toLowerCase();
+  for (const keyword of DATE_KEYWORDS) {
+    const lowerKw = keyword.toLowerCase();
+    if (!lowerInput.includes(lowerKw)) continue;
+    if (singleWordDateToIso(lowerKw)) continue;
+    return true;
+  }
+  return false;
+}
+
+function parseSegment(segment: string, globalDate?: string): LocalParsedTransaction | null {
+  const trimmed = segment.trim();
+  if (!trimmed) return null;
+
+  const tokens = trimmed.split(/\s+/).map((t) => t.trim()).filter(Boolean);
+  if (tokens.length < 2) return null;
+
+  let dateOverride: string | undefined;
+  const kept: string[] = [];
+  for (const t of tokens) {
+    const cleaned = t.replace(/[.,!?]+$/g, "");
+    const d = singleWordDateToIso(cleaned);
+    if (!dateOverride && d) {
+      dateOverride = d;
+      continue;
+    }
+    kept.push(t);
+  }
+
+  const amountIdxs: number[] = [];
+  const amounts: number[] = [];
+  for (let i = 0; i < kept.length; i++) {
+    const n = parseAmountToken(kept[i]);
+    if (Number.isFinite(n)) {
+      amountIdxs.push(i);
+      amounts.push(n);
+    }
+  }
+
+  if (amountIdxs.length !== 1) return null;
+  const amount = amounts[0];
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+
+  const titleTokens = kept.filter((_, idx) => idx !== amountIdxs[0]);
+  const title = titleTokens.join(" ").trim();
+  if (!title) return null;
+
+  const capitalizedTitle = title.charAt(0).toUpperCase() + title.slice(1).toLowerCase();
+  const detectedCategory = detectCategory(title);
+  const today = new Date().toISOString().split('T')[0];
+
+  return {
+    title: capitalizedTitle,
+    amount,
+    type: 'expense',
+    category_name: detectedCategory,
+    date: dateOverride ?? globalDate ?? today,
+  };
+}
+
 /**
  * Parse a simple transaction pattern locally
  * Patterns supported:
  * - "[Item] [Amount]" (e.g., "Coffee 50", "Taxi 200", "Еда 100")
  * - "[Amount] [Item]" (e.g., "50 Coffee", "200 Taxi")
  */
-export function parseTransactionLocally(input: string): ParseResult {
+export function parseTransactionLocally(input: string, locale?: string): ParseResult {
   const trimmed = input.trim();
-  
-  // Split by whitespace
-  const parts = trimmed.split(/\s+/);
-  
-  let normalizedParts = parts;
-  let dateOverride: string | undefined;
 
-  if (parts.length === 3) {
-    const singleWordDateMap: Record<string, () => string> = {
-      yesterday: () => {
-        const d = new Date();
-        d.setDate(d.getDate() - 1);
-        return d.toISOString().split('T')[0];
-      },
-      today: () => new Date().toISOString().split('T')[0],
-      tomorrow: () => {
-        const d = new Date();
-        d.setDate(d.getDate() + 1);
-        return d.toISOString().split('T')[0];
-      },
-      вчера: () => {
-        const d = new Date();
-        d.setDate(d.getDate() - 1);
-        return d.toISOString().split('T')[0];
-      },
-      сегодня: () => new Date().toISOString().split('T')[0],
-      завтра: () => {
-        const d = new Date();
-        d.setDate(d.getDate() + 1);
-        return d.toISOString().split('T')[0];
-      },
-      вчора: () => {
-        const d = new Date();
-        d.setDate(d.getDate() - 1);
-        return d.toISOString().split('T')[0];
-      },
-      сьогодні: () => new Date().toISOString().split('T')[0],
-    };
-
-    const lowerParts = parts.map((p) => p.toLowerCase());
-    const dateIdx = lowerParts.findIndex((p) => Object.prototype.hasOwnProperty.call(singleWordDateMap, p));
-    if (dateIdx >= 0) {
-      dateOverride = singleWordDateMap[lowerParts[dateIdx]]();
-      normalizedParts = parts.filter((_, idx) => idx !== dateIdx);
-    }
-  }
-
-  // Only handle simple 2-part inputs
-  if (normalizedParts.length !== 2) {
+  if (!trimmed) {
     return {
       success: false,
       requiresAI: true,
-      reason: 'Input has more than 2 parts, requires AI processing',
+      reason: "Empty input",
     };
   }
-  
-  // Check for date/complex keywords
-  if (!dateOverride && containsDateKeywords(trimmed)) {
-    return {
-      success: false,
-      requiresAI: true,
-      reason: 'Contains date keywords, requires AI for date parsing',
-    };
-  }
-  
+
+  const currentLocale = normalizeLocale(locale);
+
   if (containsComplexKeywords(trimmed)) {
     return {
       success: false,
       requiresAI: true,
-      reason: 'Contains complex keywords, requires AI processing',
+      reason: "Contains complex keywords, requires AI processing",
     };
   }
-  
-  const [first, second] = normalizedParts;
-  
-  // Try to parse: [Item] [Amount] or [Amount] [Item]
-  let title: string;
-  let amount: number;
-  
-  // Remove currency symbols and commas for number parsing
-  const cleanNumber = (str: string) => str.replace(/[$€₴₽¥£,\s]/g, '');
-  
-  const firstAsNumber = parseFloat(cleanNumber(first));
-  const secondAsNumber = parseFloat(cleanNumber(second));
-  
-  if (!isNaN(secondAsNumber) && isNaN(firstAsNumber)) {
-    // Pattern: [Item] [Amount] (e.g., "Coffee 50")
-    title = first;
-    amount = secondAsNumber;
-  } else if (!isNaN(firstAsNumber) && isNaN(secondAsNumber)) {
-    // Pattern: [Amount] [Item] (e.g., "50 Coffee")
-    title = second;
-    amount = firstAsNumber;
-  } else {
-    // Can't determine pattern
+
+  if (hasUnsupportedDateKeywords(trimmed)) {
     return {
       success: false,
       requiresAI: true,
-      reason: 'Cannot determine amount/title pattern',
+      reason: "Contains unsupported date keywords, requires AI processing",
     };
   }
-  
-  // Validate amount
-  if (amount <= 0 || !isFinite(amount)) {
+
+  const { text, date: globalDate } = extractGlobalSingleWordDate(trimmed);
+  const segments = splitIntoSegments(text, currentLocale);
+
+  if (segments.length === 0) {
     return {
       success: false,
       requiresAI: true,
-      reason: 'Invalid amount',
+      reason: "No segments to parse",
     };
   }
-  
-  // Capitalize first letter of title
-  const capitalizedTitle = title.charAt(0).toUpperCase() + title.slice(1).toLowerCase();
-  
-  // Detect category from title keywords
-  const detectedCategory = detectCategory(title);
-  
-  // Get today's date in ISO format
-  const today = new Date().toISOString().split('T')[0];
-  
+
+  const transactions: LocalParsedTransaction[] = [];
+  const unparsedSegments: string[] = [];
+
+  for (const segment of segments) {
+    const tx = parseSegment(segment, globalDate);
+    if (tx) transactions.push(tx);
+    else unparsedSegments.push(segment);
+  }
+
+  if (transactions.length === 0) {
+    return {
+      success: false,
+      requiresAI: true,
+      reason: "Cannot parse locally",
+    };
+  }
+
+  const requiresAI = unparsedSegments.length > 0;
   return {
     success: true,
-    requiresAI: false,
-    transaction: {
-      title: capitalizedTitle,
-      amount,
-      type: 'expense', // Default to expense
-      category_name: detectedCategory, // Smart category detection
-      date: dateOverride ?? today,
-    },
+    requiresAI,
+    transaction: transactions[0],
+    transactions,
+    unparsedSegments: unparsedSegments.length > 0 ? unparsedSegments : undefined,
   };
 }
 
 /**
  * Check if input should be processed locally or sent to AI
  */
-export function shouldProcessLocally(input: string): boolean {
-  const result = parseTransactionLocally(input);
+export function shouldProcessLocally(input: string, locale?: string): boolean {
+  const result = parseTransactionLocally(input, locale);
   return result.success && !result.requiresAI;
 }
