@@ -10,6 +10,7 @@ export type AIAction =
         amount: number;
         budget_folder_id: string | null;
         budget_name: string;
+        date?: string;
       };
     }
   | {

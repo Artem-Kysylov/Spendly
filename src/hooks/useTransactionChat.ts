@@ -5,6 +5,7 @@ import { useState, useCallback } from "react";
 import { parseTransactionLocally } from "@/lib/parseTransactionLocally";
 import { supabase } from "@/lib/supabaseClient";
 import { useTranslations } from "next-intl";
+import { getAssistantApiUrl } from "@/lib/assistantApi";
 
 export interface Message {
   id: string;
@@ -186,18 +187,72 @@ export function useTransactionChat(): UseTransactionChatReturn {
           controller.abort();
         }, 45000);
 
-        const response = await fetch("/api/chat", {
+        const response = await fetch(getAssistantApiUrl(locale), {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "Accept-Language":
+              typeof document !== "undefined" && document.documentElement.lang
+                ? document.documentElement.lang
+                : locale,
           },
           body: JSON.stringify({
             userId,
             message: rawInput,
+            tone: "neutral",
             locale,
           }),
           signal: controller.signal,
         });
+
+        const contentType = response.headers.get("content-type") || "";
+
+        if (response.ok && contentType.includes("application/json")) {
+          const json = (await response.json().catch(() => null)) as any;
+          if (json && typeof json === "object" && "kind" in json) {
+            if (json.kind === "action" && json.action?.type === "add_transaction") {
+              const payload = json.action.payload || {};
+              const proposal = {
+                title: payload.title,
+                amount: payload.amount,
+                type: "expense",
+                category_name: payload.budget_name,
+                date:
+                  typeof payload.date === "string"
+                    ? payload.date
+                    : new Date().toISOString().split("T")[0],
+              };
+
+              const assistantMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                role: "assistant",
+                content: "",
+                toolInvocations: [
+                  {
+                    toolCallId: `assistant-${Date.now()}`,
+                    toolName: "propose_transaction",
+                    args: { transactions: [proposal] },
+                    state: "result",
+                    result: { success: true, transactions: [proposal] },
+                  },
+                ],
+              };
+
+              setMessages((prev) => [...prev, assistantMessage]);
+              return;
+            }
+
+            if (json.kind === "message" && typeof json.message === "string") {
+              const assistantMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                role: "assistant",
+                content: json.message,
+              };
+              setMessages((prev) => [...prev, assistantMessage]);
+              return;
+            }
+          }
+        }
 
         if (!response.ok) {
           let details = "";

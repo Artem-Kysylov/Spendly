@@ -676,12 +676,54 @@ export const useChat = (): UseChatReturn => {
               if (action.type === "add_transaction") {
                 setPendingAction(null);
                 const today = new Date().toISOString().split("T")[0];
+                const computeIsoWithOffset = (offsetDays: number) => {
+                  const d = new Date();
+                  d.setDate(d.getDate() + offsetDays);
+                  return d.toISOString().split("T")[0];
+                };
+
+                const contentLower = String(content || "").toLowerCase();
+                const localeKey = String(locale || "en")
+                  .split("-")[0]
+                  .toLowerCase();
+
+                const includesAny = (tokens: string[]) =>
+                  tokens.some((t) => t && contentLower.includes(t));
+
+                const relativeTokens: Record<
+                  string,
+                  { today: string[]; yesterday: string[]; tomorrow: string[] }
+                > = {
+                  en: { today: ["today"], yesterday: ["yesterday"], tomorrow: ["tomorrow"] },
+                  ru: { today: ["сегодня"], yesterday: ["вчера"], tomorrow: ["завтра"] },
+                  uk: { today: ["сьогодні"], yesterday: ["вчора"], tomorrow: ["завтра"] },
+                  ja: { today: ["今日"], yesterday: ["昨日"], tomorrow: ["明日"] },
+                  id: { today: ["hari ini"], yesterday: ["kemarin"], tomorrow: ["besok"] },
+                  hi: { today: ["आज"], yesterday: [], tomorrow: [] },
+                  ko: { today: ["오늘"], yesterday: ["어제"], tomorrow: ["내일"] },
+                };
+
+                const tokens = relativeTokens[localeKey] || relativeTokens.en;
+                const dateFromContent = includesAny(tokens.yesterday)
+                  ? computeIsoWithOffset(-1)
+                  : includesAny(tokens.tomorrow)
+                    ? computeIsoWithOffset(1)
+                    : includesAny(tokens.today)
+                      ? computeIsoWithOffset(0)
+                      : null;
+
+                const dateFromAction =
+                  typeof (action as any)?.payload?.date === "string"
+                    ? ((action as any).payload.date as string)
+                    : null;
+
+                const finalDate = dateFromContent || dateFromAction || today;
                 const proposal = {
                   title: action.payload.title,
                   amount: action.payload.amount,
                   type: "expense",
                   category_name: action.payload.budget_name,
-                  date: today,
+                  date: finalDate,
                 };
 
                 const aiMessage: ChatMessage = {
