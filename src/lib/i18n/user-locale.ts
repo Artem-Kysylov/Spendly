@@ -9,8 +9,10 @@ export async function getUserPreferredLanguage(
   
   const normalize = (l: unknown): Language => {
     if (typeof l !== "string") return DEFAULT_LOCALE;
-    if (!isSupportedLanguage(l)) return DEFAULT_LOCALE;
-    return l;
+    const trimmed = l.trim().toLowerCase();
+    const base = trimmed.split(/[-_]/)[0] || "";
+    if (!isSupportedLanguage(base)) return DEFAULT_LOCALE;
+    return base as Language;
   };
 
   try {
@@ -22,6 +24,16 @@ export async function getUserPreferredLanguage(
 
     if (!error && data?.locale) {
       return normalize(data.locale);
+    }
+  } catch {
+    // ignore
+  }
+
+  try {
+    const { data, error } = await supabase.auth.admin.getUserById(userId);
+    if (!error && data?.user) {
+      const metaLocale = (data.user.user_metadata as any)?.locale;
+      if (metaLocale) return normalize(metaLocale);
     }
   } catch {
     // ignore

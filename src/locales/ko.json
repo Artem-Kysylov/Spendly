@@ -1105,9 +1105,14 @@
       "togglePush": "푸시 알림 전환"
     },
     "dev": {
-      "sqlScript": "SQL 스크립트",
-      "copy": "복사",
+      "sqlScript": "SQL Script",
+      "copy": "Copy",
       "copied": "복사됨!"
+    },
+    "api": {
+      "queueAdded": "대기열에 추가되었습니다",
+      "subscriptionSaved": "구독이 저장되었습니다",
+      "subscriptionRemoved": "구독이 제거되었습니다"
     }
   },
   "recurring": {
@@ -1133,7 +1138,12 @@
       "fetchFailed": "알림 가져오기 실패.",
       "createFailed": "알림 생성 실패.",
       "updateFailed": "알림 업데이트 실패.",
-      "queueAdded": "Notification added to queue"
+      "queueAdded": "대기열에 추가되었습니다",
+      "queueAddFailed": "알림을 대기열에 추가하지 못했습니다.",
+      "queueFetchFailed": "알림 대기열을 가져오지 못했습니다.",
+      "subscriptionInvalid": "유효하지 않은 푸시 구독입니다.",
+      "subscriptionSaveFailed": "푸시 구독을 저장하지 못했습니다.",
+      "deactivateFailed": "푸시 구독을 비활성화하지 못했습니다."
     }
   },
   "chat": {

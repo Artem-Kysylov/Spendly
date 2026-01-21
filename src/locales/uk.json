@@ -1108,6 +1108,11 @@
       "sqlScript": "SQL-скрипт",
       "copy": "Копіювати",
       "copied": "Скопійовано!"
+    },
+    "api": {
+      "queueAdded": "Додано в чергу",
+      "subscriptionSaved": "Підписку збережено",
+      "subscriptionRemoved": "Підписку видалено"
     }
   },
   "recurring": {
@@ -1133,7 +1138,12 @@
       "fetchFailed": "Не вдалося отримати сповіщення",
       "createFailed": "Не вдалося створити сповіщення",
       "updateFailed": "Не вдалося оновити сповіщення",
-      "queueAdded": "Додано в чергу"
+      "queueAdded": "Додано в чергу",
+      "queueAddFailed": "Не вдалося додати сповіщення в чергу.",
+      "queueFetchFailed": "Не вдалося отримати чергу сповіщень.",
+      "subscriptionInvalid": "Некоректна push-підписка.",
+      "subscriptionSaveFailed": "Не вдалося зберегти push-підписку.",
+      "deactivateFailed": "Не вдалося вимкнути push-підписку."
     }
   },
   "chat": {

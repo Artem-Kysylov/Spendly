@@ -1105,9 +1105,14 @@
       "togglePush": "पुश सूचनाएँ टॉगल करें"
     },
     "dev": {
-      "sqlScript": "SQL स्क्रिप्ट",
-      "copy": "कॉपी",
+      "sqlScript": "SQL Script",
+      "copy": "Copy",
       "copied": "कॉपी किया गया!"
+    },
+    "api": {
+      "queueAdded": "नोटिफ़िकेशन कतार में जोड़ा गया",
+      "subscriptionSaved": "सब्सक्रिप्शन सेव हो गया",
+      "subscriptionRemoved": "सब्सक्रिप्शन हटा दिया गया"
     }
   },
   "recurring": {
@@ -1133,7 +1138,12 @@
       "fetchFailed": "सूचनाएँ प्राप्त करने में विफल",
       "createFailed": "Failed to create notification.",
       "updateFailed": "Failed to update notification.",
-      "queueAdded": "Notification added to queue"
+      "queueAdded": "Notification added to queue",
+      "queueAddFailed": "नोटिफ़िकेशन को कतार में जोड़ने में विफल।",
+      "queueFetchFailed": "नोटिफ़िकेशन कतार प्राप्त करने में विफल।",
+      "subscriptionInvalid": "अमान्य पुश सब्सक्रिप्शन।",
+      "subscriptionSaveFailed": "पुश सब्सक्रिप्शन सेव करने में विफल।",
+      "deactivateFailed": "पुश सब्सक्रिप्शन बंद करने में विफल।"
     }
   },
   "chat": {

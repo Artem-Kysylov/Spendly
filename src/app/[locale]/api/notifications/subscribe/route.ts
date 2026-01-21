@@ -5,6 +5,7 @@ import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
 import type { Language } from "@/types/locale";
 import { getTranslations } from "next-intl/server";
 import { processNotificationQueue } from "@/lib/notificationProcessor";
+import { getUserPreferredLanguage } from "@/lib/i18n/user-locale";
 
 // POST /api/notifications/subscribe - подписка на push-уведомления
 export async function POST(req: NextRequest) {
@@ -146,6 +147,7 @@ export async function POST(req: NextRequest) {
     let debug: any = null;
     if (send_test_push === true) {
       try {
+        const preferredLanguage = await getUserPreferredLanguage(user.id);
         const welcomeByLocale: Record<Language, { title: string; body: string }> = {
           en: {
             title: "You're all set! 🚀",
@@ -176,7 +178,7 @@ export async function POST(req: NextRequest) {
             body: "알림이 켜졌어요. 지출 습관을 추적할 수 있도록 도와드릴게요.",
           },
         };
-        const welcome = welcomeByLocale[(locale as Language) ?? "en"] ?? welcomeByLocale.en;
+        const welcome = welcomeByLocale[preferredLanguage] ?? welcomeByLocale.en;
 
         const adminSupabase = getServerSupabaseClient();
         const nowIso = new Date().toISOString();

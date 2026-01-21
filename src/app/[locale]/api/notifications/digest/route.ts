@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
-import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
+import { isSupportedLanguage } from "@/i18n/config";
 import { getWeekRange, getLastWeekRange } from "@/lib/ai/stats";
 import { selectModel } from "@/lib/ai/routing";
 import { buildCountersPrompt } from "@/lib/ai/promptBuilders";
 import { streamOpenAIText } from "@/lib/llm/openai";
 import { streamGeminiText } from "@/lib/llm/google";
 import { computeNextAllowedTime } from "@/lib/quietHours";
+import { getUserPreferredLanguage } from "@/lib/i18n/user-locale";
 import type { Language } from "@/types/locale";
 
 type DigestLanguage = Language;
@@ -136,52 +137,11 @@ function toIntlLocale(lang: DigestLanguage): string {
   }
 }
 
-async function getUserPreferredLanguage(
-  supabase: any,
-  userId: string,
-): Promise<DigestLanguage> {
-  const normalize = (l: unknown): DigestLanguage => {
-    if (typeof l !== "string") return DEFAULT_LOCALE;
-    if (!isSupportedLanguage(l)) return DEFAULT_LOCALE;
-    return l;
-  };
-
-  try {
-    const { data, error } = await supabase
-      .from("user_settings")
-      .select("locale")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (!error && data?.locale) {
-      return normalize(data.locale);
-    }
-
-    const code = (error as any)?.code;
-    const msg = String((error as any)?.message || "");
-    const relationMissing = code === "42P01" || msg.includes("does not exist");
-    if (error && !relationMissing) {
-      console.warn("digest: user_settings locale read failed", error);
-    }
-  } catch {
-    // ignore
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from("users")
-      .select("locale")
-      .eq("id", userId)
-      .maybeSingle();
-
-    if (!error && data?.locale) {
-      return normalize(data.locale);
-    }
-  } catch {
-    // ignore
-  }
-
-  return DEFAULT_LOCALE;
+function normalizeLanguage(input: unknown): DigestLanguage | null {
+  if (typeof input !== "string") return null;
+  const trimmed = input.trim().toLowerCase();
+  const base = trimmed.split(/[-_]/)[0] || "";
+  return isSupportedLanguage(base) ? (base as DigestLanguage) : null;
 }
 
 function isAuthorized(req: NextRequest): boolean {
@@ -274,10 +234,7 @@ export async function POST(req: NextRequest) {
   for (const p of targets) {
     const userId = p.user_id;
 
-    const lang =
-      typeof (p as any).locale === "string" && isSupportedLanguage((p as any).locale)
-        ? ((p as any).locale as DigestLanguage)
-        : await getUserPreferredLanguage(supabase, userId);
+    const lang = normalizeLanguage((p as any).locale) ?? (await getUserPreferredLanguage(userId));
     const strings = DIGEST_STRINGS[lang];
     const intlLocale = toIntlLocale(lang);
 

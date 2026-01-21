@@ -1105,9 +1105,14 @@
       "togglePush": "プッシュ通知を切り替え"
     },
     "dev": {
-      "sqlScript": "SQL スクリプト",
-      "copy": "コピー",
+      "sqlScript": "SQL Script",
+      "copy": "Copy",
       "copied": "コピーしました！"
+    },
+    "api": {
+      "queueAdded": "キューに追加しました",
+      "subscriptionSaved": "購読を保存しました",
+      "subscriptionRemoved": "購読を削除しました"
     }
   },
   "recurring": {
@@ -1133,7 +1138,12 @@
       "fetchFailed": "通知の取得に失敗しました",
       "createFailed": "Failed to create notification.",
       "updateFailed": "Failed to update notification.",
-      "queueAdded": "Notification added to queue"
+      "queueAdded": "Notification added to queue",
+      "queueAddFailed": "通知をキューに追加できませんでした。",
+      "queueFetchFailed": "通知キューを取得できませんでした。",
+      "subscriptionInvalid": "無効なプッシュ購読です。",
+      "subscriptionSaveFailed": "プッシュ購読を保存できませんでした。",
+      "deactivateFailed": "プッシュ購読を無効化できませんでした。"
     }
   },
   "chat": {
