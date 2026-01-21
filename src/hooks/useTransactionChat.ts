@@ -22,6 +22,10 @@ export interface UseTransactionChatReturn {
   isLoading: boolean;
   error: Error | undefined;
   stop: () => void;
+  isRateLimited: boolean;
+  isLimitModalOpen: boolean;
+  limitModalMessage?: string | null;
+  closeLimitModal: () => void;
 }
 
 /**
@@ -40,6 +44,9 @@ export function useTransactionChat(): UseTransactionChatReturn {
   const [error, setError] = useState<Error | undefined>();
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
+  const [rateLimitedUntil, setRateLimitedUntil] = useState<number | null>(null);
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
+  const [limitModalMessage, setLimitModalMessage] = useState<string | null>(null);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -206,6 +213,65 @@ export function useTransactionChat(): UseTransactionChatReturn {
         });
 
         const contentType = response.headers.get("content-type") || "";
+
+        if (response.status === 429) {
+          const retryAfter = Number(response.headers.get("Retry-After") ?? "0");
+          const cooldownMs =
+            Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 3000;
+          setRateLimitedUntil(Date.now() + cooldownMs);
+          setIsLimitModalOpen(true);
+
+          let custom = "";
+          try {
+            if (contentType.includes("application/json")) {
+              const json = (await response.json().catch(() => null)) as any;
+              if (json && typeof json.message === "string") custom = json.message;
+              else if (json && typeof json.error === "string") custom = json.error;
+            }
+          } catch {
+            // ignore
+          }
+
+          const baseMsg = tAssistant("rateLimited");
+          const msg =
+            custom || (retryAfter > 0 ? `${baseMsg} (${retryAfter}s)` : baseMsg);
+          setLimitModalMessage(msg);
+          const aiMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: msg,
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          setError(new Error(msg));
+          return;
+        }
+
+        if (response.status === 403) {
+          setRateLimitedUntil(Date.now() + 60_000);
+          setIsLimitModalOpen(true);
+
+          let custom = "";
+          try {
+            if (contentType.includes("application/json")) {
+              const json = (await response.json().catch(() => null)) as any;
+              if (json && typeof json.message === "string") custom = json.message;
+              else if (json && typeof json.error === "string") custom = json.error;
+            }
+          } catch {
+            // ignore
+          }
+
+          const msg = custom || tAssistant("rateLimited");
+          setLimitModalMessage(msg);
+          const aiMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: msg,
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          setError(new Error(msg));
+          return;
+        }
 
         if (response.ok && contentType.includes("application/json")) {
           const json = (await response.json().catch(() => null)) as any;
@@ -494,6 +560,12 @@ export function useTransactionChat(): UseTransactionChatReturn {
     setIsLoading(false);
   }, [abortController]);
 
+  const isRateLimited = !!(rateLimitedUntil && Date.now() < rateLimitedUntil);
+  const closeLimitModal = useCallback(() => {
+    setIsLimitModalOpen(false);
+    setLimitModalMessage(null);
+  }, []);
+
   return {
     messages,
     input,
@@ -502,5 +574,9 @@ export function useTransactionChat(): UseTransactionChatReturn {
     isLoading,
     error,
     stop,
+    isRateLimited,
+    isLimitModalOpen,
+    limitModalMessage,
+    closeLimitModal,
   };
 }

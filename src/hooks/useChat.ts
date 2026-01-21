@@ -77,6 +77,8 @@ export const useChat = (): UseChatReturn => {
     null,
   );
   const [rateLimitedUntil, setRateLimitedUntil] = useState<number | null>(null);
+  const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
+  const [limitModalMessage, setLimitModalMessage] = useState<string | null>(null);
 
   const tAssistant = useTranslations("assistant");
   const locale = useLocale();
@@ -605,10 +607,52 @@ export const useChat = (): UseChatReturn => {
           const cooldownMs =
             Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 3000;
           setRateLimitedUntil(Date.now() + cooldownMs);
+          setIsLimitModalOpen(true);
+
+          let custom = "";
+          try {
+            const ct = response.headers.get("content-type") || "";
+            if (ct.includes("application/json")) {
+              const json = (await response.json().catch(() => null)) as any;
+              if (json && typeof json.message === "string") custom = json.message;
+              else if (json && typeof json.error === "string") custom = json.error;
+            }
+          } catch {
+            // ignore
+          }
 
           const baseMsg = tAssistant("rateLimited");
           const msg =
-            retryAfter > 0 ? `${baseMsg} (${retryAfter}s)` : baseMsg;
+            custom || (retryAfter > 0 ? `${baseMsg} (${retryAfter}s)` : baseMsg);
+          setLimitModalMessage(msg);
+
+          const aiMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            content: msg,
+            role: "assistant",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          return;
+        }
+        if (response.status === 403) {
+          setRateLimitedUntil(Date.now() + 60_000);
+          setIsLimitModalOpen(true);
+
+          let custom = "";
+          try {
+            const ct = response.headers.get("content-type") || "";
+            if (ct.includes("application/json")) {
+              const json = (await response.json().catch(() => null)) as any;
+              if (json && typeof json.message === "string") custom = json.message;
+              else if (json && typeof json.error === "string") custom = json.error;
+            }
+          } catch {
+            // ignore
+          }
+
+          const msg = custom || tAssistant("rateLimited");
+          setLimitModalMessage(msg);
 
           const aiMessage: ChatMessage = {
             id: (Date.now() + 1).toString(),
@@ -1309,6 +1353,10 @@ export const useChat = (): UseChatReturn => {
 
   const hasPendingAction = !!pendingAction;
   const isRateLimited = !!(rateLimitedUntil && Date.now() < rateLimitedUntil);
+  const closeLimitModal = useCallback(() => {
+    setIsLimitModalOpen(false);
+    setLimitModalMessage(null);
+  }, []);
 
   // Приведение pendingAction к payload интерфейса UseChatReturn
   const pendingActionPayload = pendingAction
@@ -1349,5 +1397,8 @@ export const useChat = (): UseChatReturn => {
     newChat,
     syncLocalToCloud,
     deleteSession,
+    isLimitModalOpen,
+    limitModalMessage,
+    closeLimitModal,
   };
 };

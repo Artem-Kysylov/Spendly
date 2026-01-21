@@ -21,6 +21,7 @@ import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { Rocket, X } from "lucide-react";
 import { useLocale } from "next-intl";
 import { UserAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 // import { trackEvent } from "@/lib/telemetry";
 
 type LimitReachedModalProps = {
@@ -42,30 +43,21 @@ export default function LimitReachedModal({
     const { session } = UserAuth();
     const { isMobile } = useDeviceType();
     const { mobileSheetsEnabled } = useFeatureFlags();
+    const router = useRouter();
 
     const handleUpgrade = () => {
         // trackEvent("limit_reached_upgrade_clicked", { limitType });
-        const priceId = "pri_01kf3g78sjap8307ctf6p6e0xm";
-        const paddle = (window as any)?.Paddle;
-        if (!paddle?.Checkout?.open) {
-            console.warn("[LimitReachedModal] Paddle is not available on window yet");
-            return;
-        }
-
-        paddle.Checkout.open({
-            settings: {
-                displayMode: "overlay",
-                locale,
-                theme: "light",
-            },
-            items: [{ priceId, quantity: 1 }],
-            customData: {
-                user_id: session?.user?.id,
-                plan: "monthly",
-                limit_type: limitType,
-            },
-            customer: session?.user?.email ? { email: session.user.email } : undefined,
+        const safeLocale = (locale || "en").trim();
+        const qs = new URLSearchParams({
+            plan: "monthly",
+            from: "limit_reached",
+            limitType,
         });
+        if (session?.user?.id) {
+            qs.set("userId", session.user.id);
+        }
+        router.push(`/${safeLocale}/paywall?${qs.toString()}`);
+        onClose();
     };
 
     const getMessage = () => {

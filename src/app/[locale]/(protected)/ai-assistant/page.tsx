@@ -13,6 +13,7 @@ import { useChat } from "@/hooks/useChat";
 import useDeviceType from "@/hooks/useDeviceType";
 import { supabase } from "@/lib/supabaseClient";
 import { useUIStore } from "@/store/ui-store";
+import LimitReachedModal from "@/components/modals/LimitReachedModal";
 
 export default function AIAssistantPage() {
   const {
@@ -26,6 +27,9 @@ export default function AIAssistantPage() {
     assistantTone,
     setAssistantTone,
     isRateLimited,
+    isLimitModalOpen,
+    limitModalMessage,
+    closeLimitModal,
     currentSessionId,
     loadSessionMessages,
     newChat,
@@ -354,7 +358,8 @@ export default function AIAssistantPage() {
 
   // Основной рендер страницы: сетка на десктопе, мобильная история через Sheet
   return (
-    <div className="relative h-full w-full md:grid md:grid-cols-[320px_1fr] md:gap-3 md:p-3 overflow-hidden">
+    <>
+      <div className="relative h-full w-full md:grid md:grid-cols-[320px_1fr] md:gap-3 md:p-3 overflow-hidden">
       {isDesktop ? (
         <>
           {HistoryPane}
@@ -395,6 +400,14 @@ export default function AIAssistantPage() {
           </Sheet>
         </>
       )}
-    </div>
+      </div>
+
+      <LimitReachedModal
+        isOpen={isLimitModalOpen}
+        onClose={closeLimitModal}
+        limitType="custom"
+        customMessage={limitModalMessage || tAI("rateLimited")}
+      />
+    </>
   );
 }

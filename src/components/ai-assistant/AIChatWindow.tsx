@@ -13,6 +13,7 @@ import UpgradeCornerPanel from "@/components/free/UpgradeCornerPanel";
 import { useEffect, useState } from "react";
 import { UserAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
+import LimitReachedModal from "@/components/modals/LimitReachedModal";
 
 export const AIChatWindow = ({
   isOpen,
@@ -24,6 +25,9 @@ export const AIChatWindow = ({
   onConfirmAction,
   hasPendingAction,
   isRateLimited,
+  isLimitModalOpen,
+  limitModalMessage,
+  onCloseLimitModal,
   pendingAction,
   assistantTone,
   onToneChange,
@@ -38,6 +42,9 @@ export const AIChatWindow = ({
   onConfirmAction: (confirm: boolean) => Promise<void>;
   hasPendingAction: boolean;
   isRateLimited: boolean;
+  isLimitModalOpen: boolean;
+  limitModalMessage?: string | null;
+  onCloseLimitModal: () => void;
   pendingAction?: {
     title?: string;
     amount?: number;
@@ -241,6 +248,13 @@ export const AIChatWindow = ({
           </div>
         </div>
       </div>
+
+      <LimitReachedModal
+        isOpen={isLimitModalOpen}
+        onClose={onCloseLimitModal}
+        limitType="custom"
+        customMessage={limitModalMessage || tAI("rateLimited")}
+      />
     </>
   );
 };

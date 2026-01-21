@@ -737,7 +737,7 @@
     "title": "Spendly Pal",
     "welcomeTitle": "Temui Spendly Pal",
     "welcomeDesc": "Asisten keuangan bertenaga AI Anda. Ajukan pertanyaan seperti \"Berapa pengeluaran saya bulan ini?\" atau \"Tambahkan transaksi baru.\"",
-    "rateLimited": "Anda telah mencapai batas permintaan AI. Silakan coba lagi dalam beberapa detik.",
+    "rateLimited": "Anda sudah mencapai batas permintaan AI. Coba lagi nanti atau upgrade ke Pro.",
     "transactionFallback": "Aku belum bisa membaca itu sebagai transaksi. Coba: 'Makan siang 150', 'Taksi 200 kemarin', atau 'Pizza 150, Cola 50 kemarin'.",
     "input": {
       "placeholder": "Pesan Spendly Pal..."
@@ -856,7 +856,7 @@
       }
     },
     "freeTier": {
-      "requestsLimit": "Gratis: 5 permintaan per hari. Pro — tidak terbatas."
+      "requestsLimit": "Gratis: 10 permintaan per hari. Pro — tidak terbatas."
     }
   },
   "charts": {

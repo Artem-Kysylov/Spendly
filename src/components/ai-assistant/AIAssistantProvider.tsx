@@ -19,6 +19,9 @@ const AIAssistantProvider: React.FC = () => {
     confirmAction,
     hasPendingAction,
     isRateLimited,
+    isLimitModalOpen,
+    limitModalMessage,
+    closeLimitModal,
     pendingActionPayload,
     assistantTone,
     setAssistantTone,
@@ -51,6 +54,9 @@ const AIAssistantProvider: React.FC = () => {
             onConfirmAction={confirmAction}
             hasPendingAction={hasPendingAction}
             isRateLimited={isRateLimited}
+            isLimitModalOpen={isLimitModalOpen}
+            limitModalMessage={limitModalMessage}
+            onCloseLimitModal={closeLimitModal}
             pendingAction={pendingActionPayload}
             assistantTone={assistantTone}
             onToneChange={setAssistantTone}

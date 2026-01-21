@@ -575,6 +575,9 @@ export interface UseChatReturn {
   confirmAction: (confirm: boolean) => Promise<void>;
   hasPendingAction: boolean;
   isRateLimited: boolean;
+  isLimitModalOpen: boolean;
+  limitModalMessage?: string | null;
+  closeLimitModal: () => void;
   pendingActionPayload?: {
     title?: string;
     amount?: number;

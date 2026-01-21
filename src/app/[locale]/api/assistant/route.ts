@@ -56,12 +56,45 @@ async function verifyUserId(userId: string): Promise<boolean> {
   }
 }
 
+const FREE_DAILY_REQUESTS_LIMIT = 10;
+const PRO_DAILY_REQUESTS_LIMIT = 2147483647;
+
+function getUtcDayStartIso(date: Date): string {
+  const d = new Date(date);
+  d.setUTCHours(0, 0, 0, 0);
+  return d.toISOString();
+}
+
+async function getIsProUser(userId: string): Promise<boolean> {
+  const supabase = getServerSupabaseClient();
+  const { data, error } = await supabase
+    .from("users")
+    .select("is_pro")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) return false;
+  return !!data?.is_pro;
+}
+
+async function getUsageCountSince(userId: string, startIso: string): Promise<number> {
+  const supabase = getServerSupabaseClient();
+  const { count, error } = await supabase
+    .from("ai_usage_logs")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .gte("created_at", startIso);
+
+  if (error) return 0;
+  return count ?? 0;
+}
+
 async function getTodayUsageCount(userId: string): Promise<number> {
   const supabase = getServerSupabaseClient();
   const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
+  startOfDay.setUTCHours(0, 0, 0, 0);
   const endOfDay = new Date();
-  endOfDay.setHours(23, 59, 59, 999);
+  endOfDay.setUTCHours(23, 59, 59, 999);
 
   const { count, error } = await supabase
     .from("ai_usage_logs")
@@ -76,57 +109,113 @@ async function getTodayUsageCount(userId: string): Promise<number> {
   return count ?? 0;
 }
 
-// Новая реализация: читаем из remote_config -> id='ai_daily_limit'
-async function getDailyLimitFromConfig(): Promise<number> {
-  try {
-    const supabase = getServerSupabaseClient();
-    const { data, error } = await supabase
-      .from("remote_config")
-      .select("value")
-      .eq("id", "ai_daily_limit")
-      .single();
+async function ensureDailyRateLimitRow(opts: {
+  userId: string;
+  isPro: boolean;
+  todayStartIso: string;
+}): Promise<{ dailyLimit: number; used: number }> {
+  const { userId, isPro, todayStartIso } = opts;
+  const supabase = getServerSupabaseClient();
+  const dailyLimit = isPro ? PRO_DAILY_REQUESTS_LIMIT : FREE_DAILY_REQUESTS_LIMIT;
 
-    if (error) throw error;
+  const { data: current, error: readErr } = await supabase
+    .from("ai_rate_limits")
+    .select("user_id, daily_requests_limit, daily_requests_count, window_reset_at")
+    .eq("user_id", userId)
+    .maybeSingle();
 
-    const raw = (data as any)?.value;
-    // Ожидаем формат { limit: 5 | 10 } или число
-    const parsed =
-      typeof raw === "object" && raw !== null
-        ? Number((raw as any).limit)
-        : Number(raw);
-
-    if (Number.isFinite(parsed) && parsed > 0) return parsed;
-    return Number(process.env.FREE_DAILY_LIMIT ?? "5");
-  } catch {
-    return Number(process.env.FREE_DAILY_LIMIT ?? "5");
+  if (readErr) {
+    const usedFromLogs = await getUsageCountSince(userId, todayStartIso);
+    return { dailyLimit, used: usedFromLogs };
   }
+
+  const currentResetIso = current?.window_reset_at
+    ? new Date(current.window_reset_at).toISOString()
+    : null;
+  const needsReset = !currentResetIso || currentResetIso < todayStartIso;
+
+  if (!current) {
+    await supabase.from("ai_rate_limits").insert({
+      user_id: userId,
+      daily_requests_limit: dailyLimit,
+      daily_requests_count: 0,
+      window_reset_at: todayStartIso,
+    });
+  } else if (needsReset) {
+    await supabase
+      .from("ai_rate_limits")
+      .update({
+        daily_requests_limit: dailyLimit,
+        daily_requests_count: 0,
+        window_reset_at: todayStartIso,
+      })
+      .eq("user_id", userId);
+  } else if ((current.daily_requests_limit ?? dailyLimit) !== dailyLimit) {
+    await supabase
+      .from("ai_rate_limits")
+      .update({ daily_requests_limit: dailyLimit })
+      .eq("user_id", userId);
+  }
+
+  const usedRow =
+    typeof current?.daily_requests_count === "number" && !needsReset
+      ? current.daily_requests_count
+      : 0;
+  const usedFromLogs = await getUsageCountSince(userId, todayStartIso);
+  const used = Math.max(usedRow, usedFromLogs);
+
+  if (used !== usedRow) {
+    await supabase
+      .from("ai_rate_limits")
+      .update({ daily_requests_count: used })
+      .eq("user_id", userId);
+  }
+
+  return { dailyLimit, used };
 }
 
-// Обновлено: возвращаем также used и dailyLimit
+async function incrementDailyUsage(opts: {
+  userId: string;
+  usedBefore: number;
+  dailyLimit: number;
+  todayStartIso: string;
+}) {
+  const { userId, usedBefore, dailyLimit, todayStartIso } = opts;
+  const supabase = getServerSupabaseClient();
+
+  await supabase
+    .from("ai_rate_limits")
+    .update({
+      daily_requests_limit: dailyLimit,
+      daily_requests_count: usedBefore + 1,
+      window_reset_at: todayStartIso,
+    })
+    .eq("user_id", userId);
+}
+
 async function checkLimits(
   userId: string,
   isPro: boolean,
-  enableLimits: boolean,
-): Promise<{ ok: boolean; reason?: string; used: number; dailyLimit: number }> {
-  if (!enableLimits || isPro)
-    return { ok: true, used: 0, dailyLimit: Infinity };
+): Promise<{ ok: boolean; reason?: string; used: number; dailyLimit: number; todayStartIso: string }> {
+  if (isPro) return { ok: true, used: 0, dailyLimit: Infinity, todayStartIso: getUtcDayStartIso(new Date()) };
 
-  const dailyLimit = await getDailyLimitFromConfig();
-  const used = await getTodayUsageCount(userId);
-  if (used >= dailyLimit) {
+  const todayStartIso = getUtcDayStartIso(new Date());
+  const limits = await ensureDailyRateLimitRow({ userId, isPro, todayStartIso });
+  if (limits.used >= limits.dailyLimit) {
     return {
       ok: false,
-      reason: `Daily limit reached (${dailyLimit} requests). Please try again tomorrow.`,
-      used,
-      dailyLimit,
+      reason: `Daily limit reached (${limits.dailyLimit} requests). Please try again tomorrow.`,
+      used: limits.used,
+      dailyLimit: limits.dailyLimit,
+      todayStartIso,
     };
   }
-  return { ok: true, used, dailyLimit };
+  return { ok: true, used: limits.used, dailyLimit: limits.dailyLimit, todayStartIso };
 }
 
 async function logUsage(entry: {
   userId: string;
-  provider: "openai" | "gemini" | "canonical";
+  provider: "openai" | "google";
   model: string;
   promptLength: number;
   responseLength: number;
@@ -136,6 +225,7 @@ async function logUsage(entry: {
   period?: string;
   bypassUsed?: boolean;
   blockReason?: string;
+  requestType?: "chat" | "action" | "hint";
 }) {
   try {
     const supabase = getServerSupabaseClient();
@@ -143,15 +233,11 @@ async function logUsage(entry: {
       user_id: entry.userId,
       provider: entry.provider,
       model: entry.model,
-      prompt_length: entry.promptLength,
-      response_length: entry.responseLength,
+      request_type: entry.requestType ?? "chat",
+      prompt_chars: entry.promptLength,
+      completion_chars: entry.responseLength,
       success: entry.success,
       error_message: entry.errorMessage ?? null,
-      intent: entry.intent ?? null,
-      period: entry.period ?? null,
-      bypass_used: entry.bypassUsed ?? null,
-      block_reason: entry.blockReason ?? null,
-      created_at: new Date().toISOString(),
     });
   } catch {
     // no-op
@@ -164,7 +250,7 @@ function streamProviderWithUsage(
   meta: {
     requestId: string;
     userId: string;
-    provider: "openai" | "gemini";
+    provider: "openai" | "google";
     model: string;
     promptLength: number;
     intent?: string;
@@ -174,6 +260,7 @@ function streamProviderWithUsage(
     tone?: "neutral" | "friendly" | "formal" | "playful";
     dailyLimit: number;
     usedBefore: number;
+    todayStartIso: string;
   },
 ) {
   const encoder = new TextEncoder();
@@ -185,6 +272,13 @@ function streamProviderWithUsage(
 
   const out = new ReadableStream({
     start(controller) {
+      void incrementDailyUsage({
+        userId: meta.userId,
+        usedBefore: meta.usedBefore,
+        dailyLimit: meta.dailyLimit,
+        todayStartIso: meta.todayStartIso,
+      });
+
       const reader = providerStream.getReader();
       const loop = async () => {
         try {
@@ -223,6 +317,7 @@ function streamProviderWithUsage(
               intent: meta.intent,
               period: meta.period,
               bypassUsed: false,
+              requestType: "chat",
             });
             return;
           }
@@ -251,6 +346,7 @@ function streamProviderWithUsage(
         period: meta.period,
         bypassUsed: false,
         blockReason: "client_canceled",
+        requestType: "chat",
       });
     },
   });
@@ -284,8 +380,8 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const {
     userId,
-    isPro = false,
-    enableLimits = false,
+    isPro: _isPro,
+    enableLimits: _enableLimits,
     message,
     confirm = false,
     actionPayload,
@@ -318,6 +414,8 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  const isPro = await getIsProUser(userId);
+
   // Защита от злоупотреблений: ограничиваем размер prompt/контекста
   const MAX_PROMPT = Number(process.env.MAX_PROMPT_CHARS ?? "4000");
   const safeMessage = String(message).slice(0, MAX_PROMPT);
@@ -332,16 +430,17 @@ export async function POST(req: NextRequest) {
   const periodDetected = detectPeriodFromMessage(safeMessage);
 
   // Check a limits not a pro users
-  const limits = await checkLimits(userId, isPro, enableLimits);
+  const limits = await checkLimits(userId, isPro);
   if (!limits.ok) {
     await logUsage({
       userId,
-      provider: "gemini", // по умолчанию
+      provider: "google", // по умолчанию
       model: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
       promptLength: safeMessage.length,
       responseLength: 0,
       success: false,
       errorMessage: limits.reason,
+      requestType: "chat",
     });
     return new Response(JSON.stringify({ error: limits.reason }), {
       status: 429,
@@ -360,12 +459,13 @@ export async function POST(req: NextRequest) {
       const res = await upsertRecurringRule(userId, actionPayload);
       await logUsage({
         userId,
-        provider: "canonical",
-        model: "action",
+        provider: "google",
+        model: "canonical_action",
         promptLength: 0,
         responseLength: 0,
         success: res.ok,
         intent: "save_recurring_rule",
+        requestType: "action",
       });
       return new Response(
         JSON.stringify({
@@ -382,12 +482,13 @@ export async function POST(req: NextRequest) {
     const res = await executeTransaction(userId, actionPayload);
     await logUsage({
       userId,
-      provider: "canonical",
-      model: "action",
+      provider: "google",
+      model: "canonical_action",
       promptLength: 0,
       responseLength: 0,
       success: res.ok,
       intent: "add_transaction",
+      requestType: "action",
     });
     return new Response(
       JSON.stringify({
@@ -406,7 +507,6 @@ export async function POST(req: NextRequest) {
   const pre = await aiResponse({
     userId,
     isPro,
-    enableLimits,
     message: safeMessage,
     locale, // передаём текущую локаль
   });
@@ -417,20 +517,21 @@ export async function POST(req: NextRequest) {
   } else if (pre.kind === "message" && pre.message && pre.message.trim().length > 0) {
     await logUsage({
       userId,
-      provider: "canonical",
-      model: "pre",
+      provider: "google",
+      model: "canonical_pre",
       promptLength: safeMessage.length,
       responseLength: pre.message.length,
       success: true,
       intent,
       period: periodDetected,
       bypassUsed: true,
+      requestType: "chat",
     });
     return new Response(JSON.stringify(pre), {
       headers: {
         "Content-Type": "application/json",
-        "X-Provider": "canonical",
-        "X-Model": "pre",
+        "X-Provider": "google",
+        "X-Model": "canonical_pre",
         "X-Request-Id": requestId,
         "X-Daily-Limit": String(limits.dailyLimit),
         "X-Usage-Used": String(Math.min(limits.used + 1, limits.dailyLimit)),
@@ -514,7 +615,7 @@ export async function POST(req: NextRequest) {
 
     await logUsage({
       userId,
-      provider: "canonical",
+      provider: "google",
       model: "canonical",
       promptLength: prompt.length,
       responseLength: JSON.stringify(jsonContract).length,
@@ -522,12 +623,13 @@ export async function POST(req: NextRequest) {
       intent,
       period: canonical.period,
       bypassUsed: true,
+      requestType: "chat",
     });
 
     return new Response(JSON.stringify(jsonContract), {
       headers: {
         "Content-Type": "application/json",
-        "X-Provider": "canonical",
+        "X-Provider": "google",
         "X-Model": "canonical",
         "X-Request-Id": requestId,
         "X-Prompt-Version": PROMPT_VERSION,
@@ -549,12 +651,12 @@ export async function POST(req: NextRequest) {
   const hasOpenAI = !!process.env.OPENAI_API_KEY;
   const hasGemini = !!process.env.GOOGLE_API_KEY;
 
-  let provider: "openai" | "gemini" = "gemini";
+  let provider: "openai" | "google" = "google";
   if (preferredProvider === "openai" && hasOpenAI) provider = "openai";
-  else if (preferredProvider === "gemini" && hasGemini) provider = "gemini";
+  else if (preferredProvider === "gemini" && hasGemini) provider = "google";
   else {
     // Авто по сложности: OpenAI для комплексных, иначе Gemini
-    provider = complex && hasOpenAI ? "openai" : "gemini";
+    provider = complex && hasOpenAI ? "openai" : "google";
   }
 
   if (debug) {
@@ -608,6 +710,7 @@ export async function POST(req: NextRequest) {
         tone,
         dailyLimit: limits.dailyLimit,
         usedBefore: limits.used,
+        todayStartIso: limits.todayStartIso,
       });
     } else {
       const model = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
@@ -620,7 +723,7 @@ export async function POST(req: NextRequest) {
       return streamProviderWithUsage(stream, {
         requestId,
         userId,
-        provider: "gemini",
+        provider: "google",
         model,
         promptLength: prompt.length,
         intent,
@@ -630,6 +733,7 @@ export async function POST(req: NextRequest) {
         tone,
         dailyLimit: limits.dailyLimit,
         usedBefore: limits.used,
+        todayStartIso: limits.todayStartIso,
       });
     }
   } catch (e) {
@@ -637,9 +741,9 @@ export async function POST(req: NextRequest) {
 
     // Корректная отдача 429/503 от Gemini без fallback на OpenAI
     const isGemini429 =
-      provider === "gemini" && typeof msg === "string" && /^GeminiHttp:429/.test(msg);
+      provider === "google" && typeof msg === "string" && /^GeminiHttp:429/.test(msg);
     const isGemini503 =
-      provider === "gemini" && typeof msg === "string" && /^GeminiHttp:503/.test(msg);
+      provider === "google" && typeof msg === "string" && /^GeminiHttp:503/.test(msg);
 
     await logUsage({
       userId,
@@ -660,6 +764,7 @@ export async function POST(req: NextRequest) {
         : isGemini503
           ? "unavailable"
           : "provider_error",
+      requestType: "chat",
     });
 
     if (isGemini429 || isGemini503) {
@@ -675,7 +780,7 @@ export async function POST(req: NextRequest) {
         status,
         headers: {
           "Content-Type": "application/json",
-          "X-Provider": "gemini",
+          "X-Provider": "google",
           "X-Model": process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
           "X-Request-Id": requestId,
         },

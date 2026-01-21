@@ -11,6 +11,7 @@ import { UserAuth } from "@/context/AuthContext";
 import { useTransactionChat } from "@/hooks/useTransactionChat";
 import { supabase } from "@/lib/supabaseClient";
 import { TransactionChatMessages } from "./TransactionChatMessages";
+import LimitReachedModal from "@/components/modals/LimitReachedModal";
 
 export function TransactionChatWindow({
   isOpen,
@@ -25,8 +26,18 @@ export function TransactionChatWindow({
   const tAI = useTranslations("assistant");
   const tChat = useTranslations("chat");
   const tTx = useTranslations("transactions");
-  const { messages, input, setInput, handleSubmit, isLoading, stop } =
-    useTransactionChat();
+  const {
+    messages,
+    input,
+    setInput,
+    handleSubmit,
+    isLoading,
+    stop,
+    isRateLimited,
+    isLimitModalOpen,
+    limitModalMessage,
+    closeLimitModal,
+  } = useTransactionChat();
   const [budgets, setBudgets] = useState<Budget[]>([]);
 
   // Fetch budgets on mount
@@ -87,6 +98,11 @@ export function TransactionChatWindow({
       {/* Chat Content */}
       <div className="flex-1 min-h-0 grid grid-rows-[1fr_auto] bg-background">
         <div className="min-h-0 overflow-y-auto">
+          {isRateLimited && (
+            <div className="px-4 py-2 text-xs text-amber-700 bg-amber-50 border-t border-b border-amber-200 dark:text-amber-100 dark:bg-amber-900 dark:border-amber-800">
+              {tAI("rateLimited")}
+            </div>
+          )}
           {messages.length === 0 ? (
             <div className="px-4 py-6">
               <div className="border border-dashed border-white/10 bg-white/5 rounded-xl p-4">
@@ -131,7 +147,7 @@ export function TransactionChatWindow({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={tAI("input.placeholder")}
-              disabled={isLoading}
+              disabled={isLoading || isRateLimited}
               className="flex-1"
             />
             {isLoading ? (
@@ -149,7 +165,7 @@ export function TransactionChatWindow({
                 type="submit"
                 size="icon"
                 className="h-10 w-10 rounded-lg"
-                disabled={!input.trim()}
+                disabled={!input.trim() || isRateLimited}
               >
                 <Send className="w-4 h-4" />
               </Button>
@@ -157,6 +173,13 @@ export function TransactionChatWindow({
           </form>
         </div>
       </div>
+
+      <LimitReachedModal
+        isOpen={isLimitModalOpen}
+        onClose={closeLimitModal}
+        limitType="custom"
+        customMessage={limitModalMessage || tAI("rateLimited")}
+      />
     </div>
   );
 }
