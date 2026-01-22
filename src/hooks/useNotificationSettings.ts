@@ -133,9 +133,7 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
             email_enabled: updates.email_enabled ?? prev.email_enabled,
             locale: updates.locale ?? prev.locale ?? locale,
             quiet_hours_timezone:
-              updates.quiet_hours_timezone ??
-              prev.quiet_hours_timezone ??
-              resolvedTimeZone,
+              updates.quiet_hours_timezone ?? resolvedTimeZone ?? prev.quiet_hours_timezone,
           }),
         });
 
