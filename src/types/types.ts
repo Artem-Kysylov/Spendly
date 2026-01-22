@@ -617,6 +617,10 @@ export interface NotificationSettings {
   frequency: NotificationFrequency;
   push_enabled: boolean;
   email_enabled: boolean;
+  quiet_hours_enabled?: boolean;
+  quiet_hours_start?: string | null;
+  quiet_hours_end?: string | null;
+  quiet_hours_timezone?: string | null;
   created_at: string;
   updated_at: string;
 }

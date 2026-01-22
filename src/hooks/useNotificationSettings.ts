@@ -108,6 +108,13 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
         // Оптимистичное обновление UI
         setSettings({ ...prev, ...updates });
 
+        const resolvedTimeZone =
+          typeof Intl !== "undefined" &&
+          typeof Intl.DateTimeFormat === "function" &&
+          typeof Intl.DateTimeFormat().resolvedOptions === "function"
+            ? Intl.DateTimeFormat().resolvedOptions().timeZone
+            : undefined;
+
         const token = await getAuthToken();
         if (!token) {
           setSettings(prev);
@@ -125,6 +132,10 @@ export const useNotificationSettings = (): UseNotificationSettingsReturn => {
             push_enabled: updates.push_enabled ?? prev.push_enabled,
             email_enabled: updates.email_enabled ?? prev.email_enabled,
             locale: updates.locale ?? prev.locale ?? locale,
+            quiet_hours_timezone:
+              updates.quiet_hours_timezone ??
+              prev.quiet_hours_timezone ??
+              resolvedTimeZone,
           }),
         });
 

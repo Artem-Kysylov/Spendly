@@ -10,9 +10,9 @@ export async function GET(req: NextRequest) {
     const tErrors = await getTranslations({ locale, namespace: "errors" });
 
     const selectWithLocale =
-      "id, user_id, locale, engagement_frequency, push_enabled, email_enabled, created_at, updated_at";
+      "id, user_id, locale, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone, created_at, updated_at";
     const selectNoLocale =
-      "id, user_id, engagement_frequency, push_enabled, email_enabled, created_at, updated_at";
+      "id, user_id, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone, created_at, updated_at";
 
     let data: any = null;
     let error: any = null;
@@ -78,6 +78,10 @@ export async function GET(req: NextRequest) {
         frequency: normalizedFreq,
         push_enabled: row.push_enabled ?? false,
         email_enabled: row.email_enabled ?? true,
+        quiet_hours_enabled: row.quiet_hours_enabled ?? false,
+        quiet_hours_start: row.quiet_hours_start ?? null,
+        quiet_hours_end: row.quiet_hours_end ?? null,
+        quiet_hours_timezone: row.quiet_hours_timezone ?? null,
         created_at: row.created_at ?? new Date().toISOString(),
         updated_at:
           row.updated_at ?? row.created_at ?? new Date().toISOString(),
@@ -165,7 +169,13 @@ export async function PUT(req: NextRequest) {
 
     const tErrors = await getTranslations({ locale, namespace: "errors" });
 
-    const { frequency, push_enabled, email_enabled, locale: prefLocale } = body;
+    const {
+      frequency,
+      push_enabled,
+      email_enabled,
+      locale: prefLocale,
+      quiet_hours_timezone,
+    } = body;
 
     // Валидация
     const validFrequencies = ["disabled", "gentle", "aggressive", "relentless"];
@@ -186,18 +196,36 @@ export async function PUT(req: NextRequest) {
       );
     }
 
+    if (quiet_hours_timezone !== undefined) {
+      if (typeof quiet_hours_timezone !== "string") {
+        return NextResponse.json(
+          { error: tErrors("notifications.invalidAction") },
+          { status: 400 },
+        );
+      }
+      if (quiet_hours_timezone.trim().length > 100) {
+        return NextResponse.json(
+          { error: tErrors("notifications.invalidAction") },
+          { status: 400 },
+        );
+      }
+    }
+
     const updateData: any = {};
     if (frequency !== undefined) updateData.engagement_frequency = frequency;
     if (push_enabled !== undefined) updateData.push_enabled = push_enabled;
     if (email_enabled !== undefined) updateData.email_enabled = email_enabled;
     if (prefLocale !== undefined) updateData.locale = prefLocale;
+    if (quiet_hours_timezone !== undefined) {
+      updateData.quiet_hours_timezone = quiet_hours_timezone.trim() || null;
+    }
 
     // Не трогаем updated_at напрямую — пусть триггер/БД обновляют, если настроено
 
     const selectWithLocale =
-      "id, user_id, locale, engagement_frequency, push_enabled, email_enabled, created_at, updated_at";
+      "id, user_id, locale, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone, created_at, updated_at";
     const selectNoLocale =
-      "id, user_id, engagement_frequency, push_enabled, email_enabled, created_at, updated_at";
+      "id, user_id, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone, created_at, updated_at";
 
     const updatedAttempt = await supabase
       .from("notification_preferences")
@@ -241,7 +269,7 @@ export async function PUT(req: NextRequest) {
           .update({ push_enabled: false, email_enabled: false })
           .eq("user_id", user.id)
           .select(
-            "id, user_id, locale, engagement_frequency, push_enabled, email_enabled, created_at, updated_at",
+            "id, user_id, locale, engagement_frequency, push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone, created_at, updated_at",
           )
           .single();
 
@@ -260,6 +288,10 @@ export async function PUT(req: NextRequest) {
           frequency: "disabled" as const,
           push_enabled: fbData.push_enabled,
           email_enabled: fbData.email_enabled,
+          quiet_hours_enabled: (fbData as any).quiet_hours_enabled ?? false,
+          quiet_hours_start: (fbData as any).quiet_hours_start ?? null,
+          quiet_hours_end: (fbData as any).quiet_hours_end ?? null,
+          quiet_hours_timezone: (fbData as any).quiet_hours_timezone ?? null,
           created_at: fbData.created_at,
           updated_at: fbData.updated_at,
         };
@@ -281,6 +313,10 @@ export async function PUT(req: NextRequest) {
       frequency: data.engagement_frequency,
       push_enabled: data.push_enabled,
       email_enabled: data.email_enabled,
+      quiet_hours_enabled: (data as any).quiet_hours_enabled ?? false,
+      quiet_hours_start: (data as any).quiet_hours_start ?? null,
+      quiet_hours_end: (data as any).quiet_hours_end ?? null,
+      quiet_hours_timezone: (data as any).quiet_hours_timezone ?? null,
       created_at: data.created_at,
       updated_at: data.updated_at,
     };
