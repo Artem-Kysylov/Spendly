@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import Button from "../ui-elements/Button";
 import TextInput from "../ui-elements/TextInput";
@@ -33,11 +33,6 @@ const EditTransactionModal = ({
   const [selectedDate, setSelectedDate] = useState<Date>(
     initialData.created_at ? new Date(initialData.created_at) : new Date(),
   );
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (inputRef.current) inputRef.current.focus();
-  }, []);
 
   const tCommon = useTranslations("common");
   const tModals = useTranslations("modals");
@@ -124,7 +119,6 @@ const EditTransactionModal = ({
               onInput={handleAmountInput}
               disabled={isLoading}
               inputMode="decimal"
-              autoFocus
               className={`text-3xl font-medium ${type === "expense" ? "text-error" : "text-success"}`}
             />
             <TextInput

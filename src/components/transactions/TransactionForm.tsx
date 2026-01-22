@@ -99,14 +99,6 @@ export default function TransactionForm({
   const currentTitle = watch("title");
   const currentBudgetId = watch("budget_folder_id");
 
-  // Auto-focus on mount (Mobile fix)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      amountRef.current?.focus();
-    }, 300);
-    return () => clearTimeout(timer);
-  }, []);
-
   // Fetch Data
   useEffect(() => {
     if (!session?.user?.id) return;
