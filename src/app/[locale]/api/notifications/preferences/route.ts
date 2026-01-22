@@ -169,6 +169,8 @@ export async function PUT(req: NextRequest) {
 
     const tErrors = await getTranslations({ locale, namespace: "errors" });
 
+    const inferredTimeZone = (req.headers.get("x-vercel-ip-timezone") || "").trim();
+
     const {
       frequency,
       push_enabled,
@@ -218,6 +220,18 @@ export async function PUT(req: NextRequest) {
     if (prefLocale !== undefined) updateData.locale = prefLocale;
     if (quiet_hours_timezone !== undefined) {
       updateData.quiet_hours_timezone = quiet_hours_timezone.trim() || null;
+    }
+
+    if (
+      inferredTimeZone &&
+      inferredTimeZone.length <= 100 &&
+      inferredTimeZone.toUpperCase() !== "UTC" &&
+      inferredTimeZone.includes("/")
+    ) {
+      const incoming = typeof quiet_hours_timezone === "string" ? quiet_hours_timezone.trim() : undefined;
+      if (!incoming || incoming.toUpperCase() === "UTC") {
+        updateData.quiet_hours_timezone = inferredTimeZone;
+      }
     }
 
     // Не трогаем updated_at напрямую — пусть триггер/БД обновляют, если настроено
