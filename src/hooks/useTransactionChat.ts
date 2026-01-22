@@ -142,6 +142,60 @@ export function useTransactionChat(): UseTransactionChatReturn {
           console.warn("Smart category lookup failed:", e);
         }
 
+        try {
+          const {
+            data: { session: currentSession },
+          } = await supabase.auth.getSession();
+          const token = currentSession?.access_token;
+
+          if (token) {
+            const consumeResp = await fetch("/api/ai/consume", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                requestType: "chat",
+                promptChars: String(rawInput || "").length,
+              }),
+            });
+
+            if (!consumeResp.ok) {
+              setRateLimitedUntil(Date.now() + 60_000);
+              setIsLimitModalOpen(true);
+
+              let custom = "";
+              try {
+                const ct = consumeResp.headers.get("content-type") || "";
+                if (ct.includes("application/json")) {
+                  const json = (await consumeResp.json().catch(() => null)) as unknown;
+                  if (json && typeof json === "object") {
+                    const j = json as { message?: unknown; error?: unknown };
+                    if (typeof j.message === "string") custom = j.message;
+                    else if (typeof j.error === "string") custom = j.error;
+                  }
+                }
+              } catch {
+                // ignore
+              }
+
+              const msg = custom || tAssistant("rateLimited");
+              setLimitModalMessage(msg);
+              const aiMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                role: "assistant",
+                content: msg,
+              };
+              setMessages((prev) => [...prev, aiMessage]);
+              setError(new Error(msg));
+              return;
+            }
+          }
+        } catch {
+          // If limiter fails, fall back to existing behavior to avoid blocking due to infra.
+        }
+
         if (transactions.length === 0) {
           setIsLoading(true);
         } else {

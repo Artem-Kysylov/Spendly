@@ -463,6 +463,64 @@ export const useChat = (): UseChatReturn => {
         if (transactions.length === 0) {
           // Fall through to server call
         } else {
+        try {
+          const {
+            data: { session: currentSession },
+          } = await supabase.auth.getSession();
+          const token = currentSession?.access_token;
+
+          if (token) {
+            const consumeResp = await fetch("/api/ai/consume", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                requestType: "chat",
+                promptChars: String(content || "").length,
+              }),
+            });
+
+            if (!consumeResp.ok) {
+              setRateLimitedUntil(Date.now() + 60_000);
+              setIsLimitModalOpen(true);
+
+              let custom = "";
+              try {
+                const ct = consumeResp.headers.get("content-type") || "";
+                if (ct.includes("application/json")) {
+                  const json = (await consumeResp.json().catch(() => null)) as unknown;
+                  if (json && typeof json === "object") {
+                    const j = json as { message?: unknown; error?: unknown };
+                    if (typeof j.message === "string") custom = j.message;
+                    else if (typeof j.error === "string") custom = j.error;
+                  }
+                }
+              } catch {
+                // ignore
+              }
+
+              const msg = custom || tAssistant("rateLimited");
+              setLimitModalMessage(msg);
+
+              const aiMessage: ChatMessage = {
+                id: (Date.now() + 1).toString(),
+                content: msg,
+                role: "assistant",
+                timestamp: new Date(),
+              };
+              setMessages((prev) => [...prev, aiMessage]);
+              await persistMessage("assistant", msg, sid);
+              setIsTyping(false);
+              setAbortController(null);
+              return;
+            }
+          }
+        } catch {
+          // If limiter fails, fall back to existing behavior to avoid blocking due to infra.
+        }
+
         let finalTransactions = transactions;
         try {
           const normalizeTitle = (s: string) =>
