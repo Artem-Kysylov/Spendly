@@ -23,6 +23,7 @@ import { saveProposedTransaction } from "@/app/[locale]/actions/transaction";
 import { UserAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
 import { HybridDatePicker } from "../ui-elements";
+import { formatMoney } from "@/lib/format/money";
 
 interface Budget {
   id: string;
@@ -45,6 +46,8 @@ interface TransactionProposalCardProps {
   onSuccess?: () => void;
   onError?: (error: string) => void;
   autoDismissSuccess?: boolean;
+  currency?: string;
+  locale?: string;
 }
 
 export function TransactionProposalCard({
@@ -53,6 +56,8 @@ export function TransactionProposalCard({
   onSuccess,
   onError,
   autoDismissSuccess = true,
+  currency,
+  locale,
 }: TransactionProposalCardProps) {
   const { session } = UserAuth();
   const userId = session?.user?.id;
@@ -158,10 +163,9 @@ export function TransactionProposalCard({
   };
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(value);
+    const resolvedLocale =
+      locale || (typeof navigator !== "undefined" ? navigator.language : "en-US");
+    return formatMoney(value, currency || "USD", resolvedLocale);
   };
 
   const formatDate = (d: Date) => {

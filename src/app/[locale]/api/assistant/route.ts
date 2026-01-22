@@ -59,6 +59,18 @@ async function verifyUserId(userId: string): Promise<boolean> {
 const FREE_DAILY_REQUESTS_LIMIT = 10;
 const PRO_DAILY_REQUESTS_LIMIT = 2147483647;
 
+const SUPPORTED_LOCALES = ["en", "ru", "uk", "ja", "id", "hi", "ko"] as const;
+type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+
+function normalizeLocale(raw: unknown): SupportedLocale | null {
+  if (typeof raw !== "string") return null;
+  const candidate = raw.trim().toLowerCase().split("-")[0];
+  if (!candidate) return null;
+  return (SUPPORTED_LOCALES as readonly string[]).includes(candidate)
+    ? (candidate as SupportedLocale)
+    : null;
+}
+
 function getUtcDayStartIso(date: Date): string {
   const d = new Date(date);
   d.setUTCHours(0, 0, 0, 0);
@@ -420,10 +432,14 @@ export async function POST(req: NextRequest) {
   const MAX_PROMPT = Number(process.env.MAX_PROMPT_CHARS ?? "4000");
   const safeMessage = String(message).slice(0, MAX_PROMPT);
 
-  // Парсим локаль и назначаем валюту (MVP: ru -> RUB, иначе USD)
+  // Локаль берём приоритетно из URL-сегмента /[locale]/api/assistant,
+  // а accept-language используем только как fallback.
+  const pathLocaleRaw = req.nextUrl?.pathname?.split("/")?.[1];
   const acceptLang = req.headers.get("accept-language") || "";
-  const locale = acceptLang.split(",")[0] || "en-US";
-  const currency = locale.toLowerCase().startsWith("ru") ? "RUB" : "USD";
+  const acceptLocaleRaw = acceptLang.split(",")?.[0];
+  const locale: SupportedLocale =
+    normalizeLocale(pathLocaleRaw) || normalizeLocale(acceptLocaleRaw) || "en";
+  const currency = locale === "ru" ? "RUB" : "USD";
 
   // Определяем intent и период
   const intent = detectIntentFromMessage(safeMessage);

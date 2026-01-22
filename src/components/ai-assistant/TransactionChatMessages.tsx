@@ -7,6 +7,7 @@ import remarkBreaks from "remark-breaks";
 import { useEffect, useRef } from "react";
 import { TransactionProposalCard } from "./TransactionProposalCard";
 import { Loader2 } from "lucide-react";
+import { formatMoney } from "@/lib/format/money";
 
 function normalizeProposedTransactions(input: any): any[] {
   if (!input) return [];
@@ -23,6 +24,7 @@ interface TransactionChatMessagesProps {
   onTransactionSuccess: () => void;
   onTransactionError: (error: string) => void;
   onSuggestionClick?: (text: string) => void;
+  currency?: string;
 }
 
 // Minimal cleaner to fix "AI laziness" with newlines
@@ -102,6 +104,47 @@ const cleanContent = (text: string) => {
   return cleaned;
 };
 
+function normalizeCurrencyInText(input: string, currency?: string): string {
+  if (!input) return "";
+  if (!currency) return input;
+
+  const locale = typeof navigator !== "undefined" ? navigator.language : "en-US";
+
+  const parseLooseNumber = (raw: string): number | null => {
+    const s = String(raw || "").trim().replace(/\s+/g, "");
+    if (!s) return null;
+
+    const hasDot = s.includes(".");
+    const hasComma = s.includes(",");
+
+    let normalized = s;
+    if (hasComma && !hasDot) {
+      normalized = normalized.replace(/,/g, ".");
+    } else if (hasComma && hasDot) {
+      normalized = normalized.replace(/,/g, "");
+    }
+
+    const n = Number(normalized);
+    return Number.isFinite(n) ? n : null;
+  };
+
+  const replace = (match: string, numRaw: string) => {
+    const n = parseLooseNumber(numRaw);
+    if (n === null) return match;
+    return formatMoney(n, currency, locale);
+  };
+
+  let out = input;
+  const currencyToken =
+    "(?:\\b(?:USD|EUR|UAH|RUB|JPY|KRW|INR|IDR)\\b|\\$|€|₴|₽|¥|₩|₹|Rp)";
+  const prefix = new RegExp(`${currencyToken}\\s*([0-9][0-9\\s.,]*)`, "giu");
+  const suffix = new RegExp(`([0-9][0-9\\s.,]*)\\s*${currencyToken}`, "giu");
+
+  out = out.replace(prefix, replace);
+  out = out.replace(suffix, (m, num) => replace(m, num));
+  return out;
+}
+
 export const TransactionChatMessages = ({
   messages,
   isLoading,
@@ -109,6 +152,7 @@ export const TransactionChatMessages = ({
   onTransactionSuccess,
   onTransactionError,
   onSuggestionClick,
+  currency,
 }: TransactionChatMessagesProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -186,7 +230,7 @@ export const TransactionChatMessages = ({
                       )
                     }}
                   >
-                    {cleanContent(content)}
+                    {normalizeCurrencyInText(cleanContent(content), currency)}
                   </ReactMarkdown>
                 </div>
               </div>
@@ -240,6 +284,7 @@ export const TransactionChatMessages = ({
                           onSuccess={onTransactionSuccess}
                           onError={onTransactionError}
                           autoDismissSuccess={false}
+                          currency={currency}
                         />
                       </div>
                     ))}

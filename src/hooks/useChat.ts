@@ -158,6 +158,31 @@ export const useChat = (): UseChatReturn => {
     initTone();
   }, [session?.user, subscriptionPlan]);
 
+  useEffect(() => {
+    const meta = session?.user?.user_metadata;
+    const metaCurrency =
+      meta && typeof meta === "object"
+        ? (meta as { currency_preference?: unknown }).currency_preference
+        : undefined;
+
+    if (typeof metaCurrency === "string" && metaCurrency.trim()) {
+      setUICurrency(metaCurrency.trim().toUpperCase());
+      return;
+    }
+
+    try {
+      const ls =
+        typeof window !== "undefined"
+          ? window.localStorage.getItem("user-currency")
+          : null;
+      if (ls && ls.trim()) {
+        setUICurrency(ls.trim().toUpperCase());
+      }
+    } catch {
+      // ignore
+    }
+  }, [session?.user?.user_metadata]);
+
   const setAssistantTone = useCallback(
     async (tone: AssistantTone) => {
       if (subscriptionPlan === "free") {
