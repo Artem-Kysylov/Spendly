@@ -47,13 +47,8 @@ const AIInsightPreloader = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-full py-12 space-y-4">
-      {/* Blue Spinner */}
-      <div className="flex items-center justify-center">
-        <span className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
-      </div>
-      
       {/* Sparkles Icon */}
-      <Sparkles className="w-6 h-6 text-primary" />
+      <Sparkles className="w-8 h-8 text-primary animate-pulse" />
       
       {/* Step Text */}
       <p className="text-sm text-muted-foreground text-center max-w-[200px] animate-pulse">
