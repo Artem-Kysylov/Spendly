@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { Brain } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 const AIInsightPreloader = () => {
   const t = useTranslations("ai_insight_loader");
@@ -46,14 +46,14 @@ const AIInsightPreloader = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center py-12 space-y-4">
+    <div className="flex flex-col items-center justify-center h-full py-12 space-y-4">
       {/* Blue Spinner */}
       <div className="flex items-center justify-center">
         <span className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
       </div>
       
-      {/* Brain Icon */}
-      <Brain className="w-6 h-6 text-primary" />
+      {/* Sparkles Icon */}
+      <Sparkles className="w-6 h-6 text-primary" />
       
       {/* Step Text */}
       <p className="text-sm text-muted-foreground text-center max-w-[200px] animate-pulse">
