@@ -861,6 +861,11 @@
       "requestsLimit": "無料：1日10リクエスト。Pro — 無制限。"
     }
   },
+  "ai_insight_loader": {
+    "step1": "AIがインサイトのデータを収集中",
+    "step2": "AIが収集したデータを分析中",
+    "step3": "AIがあなたのインサイトを準備中"
+  },
   "charts": {
     "titles": {
       "analytics": "予算分析",

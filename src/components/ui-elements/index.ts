@@ -1,5 +1,6 @@
 // UI Elements exports
 export { default as AIInsights } from "./AIInsights";
+export { default as AIInsightPreloader } from "./AIInsightPreloader";
 export { default as AvatarUpload } from "./AvatarUpload";
 export { default as BudgetPreset } from "./BudgetPreset";
 export { default as BudgetProgressBar } from "./BudgetProgressBar";

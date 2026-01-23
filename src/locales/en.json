@@ -861,6 +861,11 @@
       "requestsLimit": "Free: 10 requests per day. Pro — unlimited."
     }
   },
+  "ai_insight_loader": {
+    "step1": "AI is gathering data for the insight",
+    "step2": "AI is analyzing the gathered data",
+    "step3": "AI is preparing your insight"
+  },
   "charts": {
     "titles": {
       "analytics": "Spending Overview",

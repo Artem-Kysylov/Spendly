@@ -861,6 +861,11 @@
       "requestsLimit": "Gratis: 10 permintaan per hari. Pro — tidak terbatas."
     }
   },
+  "ai_insight_loader": {
+    "step1": "AI sedang mengumpulkan data untuk insight",
+    "step2": "AI sedang menganalisis data yang dikumpulkan",
+    "step3": "AI sedang menyiapkan insight Anda"
+  },
   "charts": {
     "titles": {
       "analytics": "Spending Overview",

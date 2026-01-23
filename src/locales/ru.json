@@ -90,7 +90,7 @@
       }
     },
     "header": {
-      "title": "Настройки пользователя⚙️",
+      "title": "Настройки пользователя",
       "subtitle": "Управляйте настройками аккаунта и предпочтениями"
     },
     "profile": {
@@ -733,141 +733,9 @@
         "saveFailed": "Failed to save budget. Try again.",
         "saveSuccess": "Budget saved successfully!"
       }
-    }
-  },
-  "assistant": {
-    "title": "Spendly Pal",
-    "welcomeTitle": "Познакомьтесь со Spendly Pal",
-    "welcomeDesc": "Ваш AI-ассистент по финансам. Спросите: «Сколько я потратил в этом месяце?» или «Добавить новую транзакцию».",
-    "rateLimited": "Вы достигли дневного лимита AI. Попробуйте позже или обновитесь до Pro.",
-    "transactionFallback": "Не смог распознать это как транзакцию. Попробуйте: «Обед 150», «Такси 200 вчера» или «Пицца 150, Кола 50 вчера».",
-    "input": {
-      "placeholder": "Сообщение для Spendly Pal…"
-    },
-    "toasts": {
-      "usedNOfDailyLimit": "Вы использовали {count} из {limit} AI-сообщений сегодня."
-    },
-    "actions": {
-      "send": "Отправить",
-      "abort": "Отменить",
-      "accept": "Принять",
-      "decline": "Отклонить"
-    },
-    "confirm": {
-      "title": "Подтвердить действие?",
-      "fields": {
-        "title": "Название",
-        "budget": "Бюджет",
-        "amount": "Сумма"
-      }
-    },
-    "headings": {
-      "spendingAnalysis": "Анализ расходов",
-      "weeklySummary": "Недельная сводка",
-      "monthlyComparison": "Сравнение по месяцам"
-    },
-    "labels": {
-      "thisWeek": "Эта неделя",
-      "lastWeek": "Прошлая неделя",
-      "thisMonth": "Этот месяц",
-      "lastMonth": "Прошлый месяц",
-      "insight": "Совет"
-    },
-    "table": {
-      "period": "Период",
-      "totalSpending": "Всего потрачено",
-      "difference": "Разница",
-      "category": "Категория",
-      "item": "Элемент",
-      "topCategories": "Топ категорий",
-      "topExpenses": "Топ расходов"
-    },
-    "buttons": {
-      "close": "Закрыть AI-ассистента",
-      "ask": "Спросить AI",
-      "newChat": "Новый чат",
-      "delete": "Удалить"
-    },
-    "tone": {
-      "label": "Тон",
-      "select_label": "Выберите тон ответа ассистента",
-      "options": {
-        "neutral": "Нейтральный",
-        "friendly": "Дружелюбный",
-        "formal": "Официальный",
-        "playful": "Игривый"
-      }
-    },
-    "history": {
-      "title": "История",
-      "empty": "Пока нет разговоров",
-      "untitled": "Без названия",
-      "chatsLabel": "История чатов"
-    },
-    "dates": {
-      "today": "Сегодня",
-      "yesterday": "Вчера"
-    },
-    "settings": {
-      "proOnlyHint": "Пользовательский тон ассистента доступен в Pro. Обновите план, чтобы разблокировать.",
-      "title": "Тон Spendly Pal",
-      "description": "Выберите тон ответа для вашего AI-ассистента."
-    },
-    "presets": {
-      "header": "Начните с готовых подсказок",
-      "showWeek": "Показать расходы за неделю",
-      "saveMoney": "Как сэкономить на моих привычках",
-      "analyzePatterns": "Анализ паттернов расходов",
-      "createBudgetPlan": "План бюджета на месяц",
-      "showBiggest": "Самые большие категории расходов",
-      "compareMonths": "Сравнить с прошлым месяцем"
-    },
-    "errors": {
-      "parseFailed": "Не получается создать транзакцию. Проверьте правильность ввода и наличие бюджета. Формат: Add \"Название\" 12,34 to <Бюджет> budget.",
-      "budgetNotFound": "Бюджет \"{name}\" не найден. Проверьте название или создайте его."
-    },
-    "tipAddTransaction": "Подсказка: добавляйте транзакции так — Add \"Название\" 12,34 to \"Бюджет budget\". Примеры: Add \"Обед\" 12,50 to food budget; Add \"Такси\" 200 to transport budget. Поддерживаются запятая и символы валют.",
-    "insights": {
-      "title": "AI-инсайты",
-      "beta": "Бета",
-      "messages": {
-        "budgetExceeded": {
-          "title": "Бюджет превышен",
-          "message": "Вы вышли за бюджет на {over}."
-        },
-        "budgetAlert": {
-          "title": "Предупреждение по бюджету",
-          "message": "Использовано {usedPercent}% вашего бюджета."
-        },
-        "risingExpenses": {
-          "title": "Рост расходов",
-          "message": "Расходы растут на {trend}%."
-        },
-        "incomeGrowth": {
-          "title": "Рост доходов",
-          "message": "Доходы растут на {trend}%."
-        },
-        "negativeCashFlow": {
-          "title": "Отрицательный денежный поток",
-          "message": "Расходы превышают доходы. Подумайте о сокращении расходов."
-        },
-        "financialHealth": {
-          "title": "Стабильное состояние",
-          "message": "Ваши расходы и доходы выглядят сбалансированными."
-        }
-      }
     },
     "freeTier": {
-      "requestsLimit": "Бесплатно: 10 запросов в день. Pro — без ограничений."
-    }
-  },
-  "charts": {
-    "titles": {
-      "analytics": "Аналитика бюджета",
-      "comparisonBar": "Сравнение бюджетов"
-    },
-    "bar": {
-      "titleByCategory": "Расходы по категориям"
+      "requestsLimit": "Бесплатно: 10 запросов в день. Pro — безлимит."
     },
     "line": {
       "titleOverTime": "Расходы во времени"

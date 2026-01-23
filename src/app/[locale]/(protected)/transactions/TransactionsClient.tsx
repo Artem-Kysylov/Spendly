@@ -26,7 +26,8 @@ import {
   type SpendingInsights,
 } from "@/app/[locale]/actions/get-insights";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-elements";
+import { AIInsightPreloader } from "@/components/ui-elements";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -230,10 +231,13 @@ export default function TransactionsClient() {
           variant="default"
           onClick={handleAddClick}
           className="hidden md:inline-flex"
-        >
-          <Plus size={16} className="mr-2 text-white" />
-          {t("addTransaction")}
-        </Button>
+          text={
+            <>
+              <Plus size={16} className="mr-2 text-white" />
+              {t("addTransaction")}
+            </>
+          }
+        />
       </div>
 
       {/* 2. Summary Ribbon */}
@@ -292,17 +296,19 @@ export default function TransactionsClient() {
               <SheetTrigger>
                 <Button
                   variant="ghost"
-                  size="sm"
-                  className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1.5"
+                  className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1.5 text-xs"
                   aria-label="AI Insights"
                   onClick={(e) => {
                     e.stopPropagation();
                     handleAiSheetOpen();
                   }}
-                >
-                  <Sparkles size={14} />
-                  <span className="text-xs font-medium">AI Insight</span>
-                </Button>
+                  text={
+                    <>
+                      <Sparkles size={14} />
+                      <span className="font-medium">AI Insight</span>
+                    </>
+                  }
+                />
               </SheetTrigger>
               <SheetContent
                 side="left"
@@ -316,11 +322,7 @@ export default function TransactionsClient() {
                 </SheetHeader>
                 <div className="flex-1 min-h-0 overflow-y-auto mt-6 px-1 pb-6">
                   {isInsightsLoading ? (
-                    <div className="space-y-3">
-                      <Skeleton className="h-32 w-full rounded-lg bg-muted/80 border border-border/80 shadow-sm" />
-                      <Skeleton className="h-20 w-full rounded-lg bg-muted/80 border border-border/80 shadow-sm" />
-                      <Skeleton className="h-16 w-full rounded-lg bg-muted/80 border border-border/80 shadow-sm" />
-                    </div>
+                    <AIInsightPreloader />
                   ) : insightsError ? (
                     <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-sm text-destructive">
                       {insightsError}
@@ -450,7 +452,7 @@ export default function TransactionsClient() {
                 onChange={(e) =>
                   setFilterType(e.target.value as TransactionFilterType)
                 }
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 appearance-none bg-muted/50 border-transparent focus:bg-background focus:border-primary pl-9"
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-muted/50 px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1 appearance-none focus:bg-background focus:border-primary pl-9"
               >
                 <option value="all">All Types</option>
                 <option value="expense">Expenses</option>

@@ -861,6 +861,11 @@
       "requestsLimit": "무료: 하루 10회 요청. Pro — 무제한."
     }
   },
+  "ai_insight_loader": {
+    "step1": "AI가 인사이트 데이터를 수집 중",
+    "step2": "AI가 수집된 데이터를 분석 중",
+    "step3": "AI가 사용자의 인사이트를 준비 중"
+  },
   "charts": {
     "titles": {
       "analytics": "분석",
