@@ -98,8 +98,6 @@ const cleanContent = (text: string) => {
 
     l = l.replace(/([.:])\s*(\d+\.)/g, "$1\n\n$2");
 
-    l = l.replace(/([\p{L}])\*\*/gu, "$1 **");
-
     l = l.replace(/([.:])\s*(\*\*)/g, "$1\n\n$2");
 
     l = l.replace(/([.!?])(?=\p{L})/gu, "$1\n\n");
