@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 import { UserAuth } from "@/context/AuthContext";
@@ -14,13 +14,13 @@ import { saveUserLocaleSettings } from "@/app/[locale]/actions/saveUserLocaleSet
 import { cn } from "@/lib/utils";
 import { Coffee, UtensilsCrossed, Car, ShoppingCart, Wallet, Scale, Sparkles } from "lucide-react";
 
-type Step = 0 | 1 | 2 | 3 | 4;
+type Step = 0 | 1 | 2 | 3 | 4 | 5;
 type BudgetStyle = "monk" | "balanced" | "rich";
 
 interface ChatMessage {
   id: string;
   role: "assistant" | "user";
-  content: string;
+  content: ReactNode;
   isTyping?: boolean;
 }
 
@@ -143,16 +143,19 @@ export default function ChatOnboarding() {
     setTimeout(() => setToast(null), 3000);
   };
 
-  const addBotMessage = useCallback((content: string) => {
-    setIsTyping(true);
-    
-    setTimeout(() => {
-      setIsTyping(false);
-      setMessages((prev) => [
-        ...prev,
-        { id: `bot-${Date.now()}`, role: "assistant", content },
-      ]);
-    }, 800 + Math.random() * 400);
+  const addBotMessage = useCallback((content: ReactNode) => {
+    return new Promise<void>((resolve) => {
+      setIsTyping(true);
+
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages((prev) => [
+          ...prev,
+          { id: `bot-${Date.now()}`, role: "assistant", content },
+        ]);
+        resolve();
+      }, 800 + Math.random() * 400);
+    });
   }, []);
 
   const addUserMessage = useCallback((content: string) => {
@@ -286,16 +289,54 @@ export default function ChatOnboarding() {
         }
       }
 
-      // Success - move to next step
-      setTimeout(() => {
+      const settingsLinkTextByLocale: Partial<Record<Language, string>> = {
+        en: "settings",
+        ru: "настройках",
+        uk: "налаштуваннях",
+        ja: "設定",
+        ko: "설정",
+        id: "pengaturan",
+        hi: "सेटिंग्स",
+      };
+
+      const renderNotificationsMessage = (fullText: string): ReactNode => {
+        const needle = settingsLinkTextByLocale[currentLocale];
+
+        if (!needle || !fullText.includes(needle)) {
+          return fullText;
+        }
+
+        const [before, after] = fullText.split(needle);
+        return (
+          <>
+            {before}
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window === "undefined") return;
+                window.location.href = `/${currentLocale}/user-settings?open=notifications`;
+              }}
+              className="underline underline-offset-4"
+            >
+              {needle}
+            </button>
+            {after}
+          </>
+        );
+      };
+
+      // Success - move to next steps
+      setTimeout(async () => {
         setStep(4);
-        addBotMessage(t("step4.processing"));
+        await addBotMessage(t("step4.processing"));
+        await addBotMessage(renderNotificationsMessage(t("notifications_step")));
+        setStep(5);
       }, 300);
     } catch (e) {
       console.error("Failed to save onboarding data", e);
       showToast(t("errors.unexpected"), "error");
     }
-  }, [session?.user?.id, currency, language, selectedCategory, transactionAmount, addBotMessage, addUserMessage, t, showToast]);
+  }, [session?.user?.id, currency, language, selectedCategory, transactionAmount, addBotMessage, addUserMessage, t, showToast, currentLocale]);
 
   // Handle finish
   const handleFinish = useCallback(async () => {
@@ -354,7 +395,11 @@ export default function ChatOnboarding() {
                     : "bg-gray-100 text-gray-900"
                 )}
               >
-                <p className="text-sm leading-relaxed">{message.content}</p>
+                {typeof message.content === "string" ? (
+                  <p className="text-sm leading-relaxed">{message.content}</p>
+                ) : (
+                  <div className="text-sm leading-relaxed">{message.content}</div>
+                )}
               </div>
             </div>
           ))}
@@ -465,8 +510,8 @@ export default function ChatOnboarding() {
             </div>
           )}
 
-          {/* Step 4: Finish */}
-          {step === 4 && !isTyping && (
+          {/* Step 5: Finish */}
+          {step === 5 && !isTyping && (
             <div className="mt-4">
               <Button onClick={handleFinish} className="w-full" size="lg">
                 {t("step4.finish_button")}

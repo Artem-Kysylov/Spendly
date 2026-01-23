@@ -621,6 +621,7 @@
       "processing": "Menyiapkan workspace-mu...",
       "finish_button": "Selesaikan Setup"
     },
+    "notifications_step": "Jangan lewatkan apa pun. Aktifkan notifikasi di pengaturan agar saya dapat memberi tahu Anda tentang pengeluaran berlebih dan tagihan tepat waktu.",
     "actions": {
       "back": "Kembali",
       "next": "Berikutnya",

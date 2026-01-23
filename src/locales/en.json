@@ -621,6 +621,7 @@
       "processing": "Setting up your workspace...",
       "finish_button": "Finish Setup"
     },
+    "notifications_step": "Don't miss a thing. Enable notifications in settings so I can alert you about budget overruns and upcoming bills in real-time.",
     "actions": {
       "back": "Back",
       "next": "Next",

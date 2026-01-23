@@ -621,6 +621,7 @@
       "processing": "워크스페이스 설정 중...",
       "finish_button": "설정 완료"
     },
+    "notifications_step": "중요한 알림을 놓치지 마세요. 설정에서 알림을 켜두시면 예산 초과나 결제 일정을 실시간으로 알려드릴게요.",
     "actions": {
       "back": "뒤로",
       "next": "다음",

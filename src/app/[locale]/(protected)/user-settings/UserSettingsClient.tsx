@@ -15,7 +15,7 @@ import { useRouter, usePathname } from "@/i18n/routing";
 import { supabase } from "@/lib/supabaseClient";
 import LanguageSelect from "@/components/ui-elements/locale/LanguageSelect";
 import { useTranslations, useLocale } from "next-intl";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import ToneSettings from "@/components/ai-assistant/ToneSettings";
 import { SupportSection } from "@/components/user-settings/SupportSection";
 import InstallPWA from "@/components/pwa/InstallPWA";
@@ -67,6 +67,7 @@ export default function UserSettingsClient() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useParams();
+  const searchParams = useSearchParams();
 
   // Unsubscribe modal state
   const [isUnsubscribeOpen, setIsUnsubscribeOpen] = useState(false);
@@ -86,6 +87,13 @@ export default function UserSettingsClient() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    const open = searchParams?.get("open");
+    if (open === "notifications") {
+      setIsNotificationsOpen(true);
+    }
+  }, [searchParams]);
 
   async function handleLanguageChange(next: typeof language) {
     setLanguage(next);
