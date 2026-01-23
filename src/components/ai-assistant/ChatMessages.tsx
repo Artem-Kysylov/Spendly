@@ -87,7 +87,7 @@ const cleanContent = (text: string) => {
     let l = line;
 
     l = l.replace(
-      /(\d)(?=(?:Budget\s+breakdown|Top\s+expenses|Transactions)\b)/g,
+      /(\S)(?=(?:Budget\s+breakdown|Top\s+expenses|Total\s+spending|Transactions)\b)/gi,
       "$1\n\n",
     );
 
