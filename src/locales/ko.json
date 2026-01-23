@@ -366,6 +366,32 @@
     "types": {
       "expense": "지출",
       "income": "수입"
+    },
+    "aiInsights": {
+      "trigger": "AI 인사이트",
+      "title": "AI 지출 인사이트",
+      "trendTitle": "지출 추세",
+      "topCategoryTitle": "최고 카테고리: {category}",
+      "financialTipTitle": "금융 팁",
+      "footer": "최근 거래를 기반으로 AI가 생성했습니다.",
+      "empty": "버튼을 눌러 인사이트를 생성하세요",
+      "errors": {
+        "generateFailed": "인사이트 생성에 실패했습니다. 잠시 후 다시 시도해 주세요."
+      },
+      "aiFallback": {
+        "uncategorized": "미분류",
+        "noExpensesYet": "아직 지출이 없습니다",
+        "noTransactionsYet": "거래가 없습니다",
+        "trendIncreased": "이전 기간 대비 지출이 {percent}% 증가했습니다.",
+        "trendDecreased": "이전 기간 대비 지출이 {percent}% 감소했습니다.",
+        "trendFlat": "이전 기간 대비 지출이 거의 변동이 없습니다.",
+        "noTrendData": "지출 추세를 계산하기에 데이터가 부족합니다.",
+        "topCategoryAdvice": "선택한 기간에서 가장 많이 지출한 카테고리입니다. 지출을 점검하고 필요하면 별도의 예산을 설정해 보세요.",
+        "generalCategoryName": "일반",
+        "generalCategoryAdvice": "더 나은 인사이트를 위해 계속 지출을 기록해 주세요.",
+        "generalTipWithData": "최고 지출 카테고리에 집중해서 이번 기간에 줄이거나 미룰 수 있는 지출 1–2가지를 찾아보세요.",
+        "generalTipNoData": "먼저 몇 가지 거래를 추가해 보세요. 기록이 쌓이면 더 자세한 인사이트를 제공할 수 있어요."
+      }
     }
   },
   "dashboard": {

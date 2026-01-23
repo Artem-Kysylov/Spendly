@@ -366,6 +366,32 @@
     "types": {
       "expense": "支出",
       "income": "収入"
+    },
+    "aiInsights": {
+      "trigger": "AIインサイト",
+      "title": "AI支出インサイト",
+      "trendTitle": "支出トレンド",
+      "topCategoryTitle": "トップカテゴリ: {category}",
+      "financialTipTitle": "ファイナンシャルヒント",
+      "footer": "最近の取引に基づいてAIが生成しました。",
+      "empty": "ボタンを押してインサイトを生成",
+      "errors": {
+        "generateFailed": "インサイトの生成に失敗しました。後でもう一度お試しください。"
+      },
+      "aiFallback": {
+        "uncategorized": "未分類",
+        "noExpensesYet": "まだ支出がありません",
+        "noTransactionsYet": "取引がありません",
+        "trendIncreased": "前の期間と比べて支出が{percent}%増えました。",
+        "trendDecreased": "前の期間と比べて支出が{percent}%減りました。",
+        "trendFlat": "前の期間と比べて支出はほぼ横ばいです。",
+        "noTrendData": "支出トレンドを計算するにはデータが不足しています。",
+        "topCategoryAdvice": "選択した期間で最も支出が多いカテゴリです。内容を見直し、必要ならカテゴリ別の予算を設定しましょう。",
+        "generalCategoryName": "全般",
+        "generalCategoryAdvice": "より良いインサイトのために、引き続き支出を記録してください。",
+        "generalTipWithData": "トップカテゴリに注目して、今期減らせる／先延ばしできる支出を1〜2個見つけましょう。",
+        "generalTipNoData": "まずはいくつか取引を追加してください。履歴が増えると、より詳しいインサイトが表示されます。"
+      }
     }
   },
   "dashboard": {

@@ -366,6 +366,32 @@
     "types": {
       "expense": "Expense",
       "income": "Income"
+    },
+    "aiInsights": {
+      "trigger": "AI Insight",
+      "title": "AI Spending Insights",
+      "trendTitle": "Spending Trend",
+      "topCategoryTitle": "Top Category: {category}",
+      "financialTipTitle": "Financial Tip",
+      "footer": "AI-generated based on your recent transactions.",
+      "empty": "Click the button to generate insights",
+      "errors": {
+        "generateFailed": "Failed to generate insights. Please try again later."
+      },
+      "aiFallback": {
+        "uncategorized": "Uncategorized",
+        "noExpensesYet": "No expenses yet",
+        "noTransactionsYet": "No transactions",
+        "trendIncreased": "Your spending increased by {percent}% compared to the previous period.",
+        "trendDecreased": "Your spending decreased by {percent}% compared to the previous period.",
+        "trendFlat": "Your spending is roughly flat compared to the previous period.",
+        "noTrendData": "Not enough data yet to calculate a spending trend.",
+        "topCategoryAdvice": "This is your top spending category for the selected period. Consider reviewing these expenses and setting a specific budget if needed.",
+        "generalCategoryName": "General",
+        "generalCategoryAdvice": "Keep tracking your expenses to get better insights.",
+        "generalTipWithData": "Focus on your top spending category and look for 1–2 concrete places where you can reduce or postpone expenses this period.",
+        "generalTipNoData": "Start by adding a few transactions. Once you have some history, you'll get more detailed spending insights."
+      }
     }
   },
   "dashboard": {

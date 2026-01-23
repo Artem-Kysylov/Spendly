@@ -4,6 +4,7 @@ import { generateObject } from "ai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { z } from "zod";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
+import { getTranslations } from "next-intl/server";
 
 // Initialize Google AI provider
 const google = createGoogleGenerativeAI({
@@ -32,6 +33,7 @@ interface GenerateInsightsParams {
     userId: string;
     startDate: Date;
     endDate: Date;
+    locale: string;
 }
 
 // Simple in-memory cache with TTL
@@ -44,17 +46,43 @@ const insightsCache = new Map<string, CacheEntry>();
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 // Helper to generate cache key
-function getCacheKey(userId: string, startDate: Date, endDate: Date): string {
-    return `${userId}_${startDate.toISOString()}_${endDate.toISOString()}`;
+function getCacheKey(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+    locale: string,
+): string {
+    return `${userId}_${startDate.toISOString()}_${endDate.toISOString()}_${locale}`;
+}
+
+function getLanguageName(locale: string): string {
+    const base = locale.split("-")[0];
+    switch (base) {
+        case "ru":
+            return "Russian";
+        case "uk":
+            return "Ukrainian";
+        case "ja":
+            return "Japanese";
+        case "id":
+            return "Indonesian";
+        case "hi":
+            return "Hindi";
+        case "ko":
+            return "Korean";
+        default:
+            return "English";
+    }
 }
 
 export async function generateSpendingInsights({
     userId,
     startDate,
     endDate,
+    locale,
 }: GenerateInsightsParams): Promise<SpendingInsights> {
     // Check cache first
-    const cacheKey = getCacheKey(userId, startDate, endDate);
+    const cacheKey = getCacheKey(userId, startDate, endDate, locale);
     const cached = insightsCache.get(cacheKey);
 
     if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
@@ -66,6 +94,10 @@ export async function generateSpendingInsights({
     let fallbackPreviousExpenses = 0;
     let fallbackTrendPercentage = 0;
     let fallbackTopCategory: { name: string; amount: number; emoji: string } | null = null;
+    const tFallback = await getTranslations({
+        locale,
+        namespace: "transactions.aiInsights.aiFallback",
+    });
 
     try {
         const supabase = getServerSupabaseClient();
@@ -156,17 +188,27 @@ export async function generateSpendingInsights({
         }
 
         // Prepare context for AI
+        const dateFormatter = new Intl.DateTimeFormat(locale, {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        });
+        const numberFormatter = new Intl.NumberFormat(locale, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        });
+
         const transactionsList = (currentTransactions || [])
             .slice(0, 50)
             .map((t) => {
-                const budgetName = (t.budget_folders as any)?.name || "Uncategorized";
-                return `- ${t.title}: ${t.amount.toFixed(2)} (${budgetName}) - ${new Date(t.created_at).toLocaleDateString()}`;
+                const budgetName = (t.budget_folders as any)?.name || tFallback("uncategorized");
+                return `- ${t.title}: ${numberFormatter.format(t.amount)} (${budgetName}) - ${dateFormatter.format(new Date(t.created_at))}`;
             })
             .join("\n");
 
         const categorySummary = sortedCategories
             .slice(0, 5)
-            .map((data) => `${data.emoji} ${data.name}: ${data.total.toFixed(2)}`)
+            .map((data) => `${data.emoji} ${data.name}: ${numberFormatter.format(data.total)}`)
             .join("\n");
 
         const trendPercentage =
@@ -176,18 +218,20 @@ export async function generateSpendingInsights({
 
         fallbackTrendPercentage = trendPercentage;
 
+        const languageName = getLanguageName(locale);
         const systemPrompt = `You are a financial advisor analyzing spending patterns. Be specific, helpful, and slightly friendly in your advice.
+IMPORTANT: Respond ONLY in ${languageName} (locale: ${locale}).
 
-Current Period: ${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}
-Total Spending: $${currentExpenses.toFixed(2)}
-Previous Period Spending: $${previousExpenses.toFixed(2)}
+Current Period: ${dateFormatter.format(startDate)} - ${dateFormatter.format(endDate)}
+Total Spending: $${numberFormatter.format(currentExpenses)}
+Previous Period Spending: $${numberFormatter.format(previousExpenses)}
 Trend: ${trendPercentage > 0 ? "+" : ""}${trendPercentage.toFixed(1)}%
 
 Top Categories:
-${categorySummary || "No expenses yet"}
+${categorySummary || tFallback("noExpensesYet")}
 
 Recent Transactions:
-${transactionsList || "No transactions"}
+${transactionsList || tFallback("noTransactionsYet")}
 
 Analyze this data and provide:
 1. A trend message comparing current vs previous period (be specific about the percentage)
@@ -242,11 +286,11 @@ Be conversational but concise. Use emojis sparingly. Make the advice actionable.
 
         const trendMessage = hasExpensesData
             ? direction === "up"
-                ? `Your spending increased by ${absTrend.toFixed(1)}% compared to the previous period.`
+                ? tFallback("trendIncreased", { percent: absTrend.toFixed(1) })
                 : direction === "down"
-                    ? `Your spending decreased by ${absTrend.toFixed(1)}% compared to the previous period.`
-                    : "Your spending is roughly flat compared to the previous period."
-            : "Not enough data yet to calculate a spending trend.";
+                    ? tFallback("trendDecreased", { percent: absTrend.toFixed(1) })
+                    : tFallback("trendFlat")
+            : tFallback("noTrendData");
 
         const topCategory = hasTopCategory
             ? {
@@ -254,18 +298,18 @@ Be conversational but concise. Use emojis sparingly. Make the advice actionable.
                   amount: fallbackTopCategory!.amount,
                   emoji: fallbackTopCategory!.emoji,
                   advice:
-                      "This is your top spending category for the selected period. Consider reviewing these expenses and setting a specific budget if needed.",
+                      tFallback("topCategoryAdvice"),
               }
             : {
-                  name: "General",
+                  name: tFallback("generalCategoryName"),
                   amount: 0,
                   emoji: "📊",
-                  advice: "Keep tracking your expenses to get better insights.",
+                  advice: tFallback("generalCategoryAdvice"),
               };
 
         const generalTip = hasExpensesData
-            ? "Focus on your top spending category and look for 1–2 concrete places where you can reduce or postpone expenses this period."
-            : "Start by adding a few transactions. Once you have some history, you'll get more detailed spending insights.";
+            ? tFallback("generalTipWithData")
+            : tFallback("generalTipNoData");
 
         return {
             trend: {

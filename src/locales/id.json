@@ -366,6 +366,32 @@
     "types": {
       "expense": "Pengeluaran",
       "income": "Pemasukan"
+    },
+    "aiInsights": {
+      "trigger": "AI Insight",
+      "title": "Insight Pengeluaran AI",
+      "trendTitle": "Tren Pengeluaran",
+      "topCategoryTitle": "Kategori Teratas: {category}",
+      "financialTipTitle": "Tips Keuangan",
+      "footer": "Dihasilkan AI berdasarkan transaksi terbaru Anda.",
+      "empty": "Klik tombol untuk membuat insight",
+      "errors": {
+        "generateFailed": "Gagal membuat insight. Silakan coba lagi nanti."
+      },
+      "aiFallback": {
+        "uncategorized": "Tanpa kategori",
+        "noExpensesYet": "Belum ada pengeluaran",
+        "noTransactionsYet": "Tidak ada transaksi",
+        "trendIncreased": "Pengeluaran Anda naik {percent}% dibanding periode sebelumnya.",
+        "trendDecreased": "Pengeluaran Anda turun {percent}% dibanding periode sebelumnya.",
+        "trendFlat": "Pengeluaran Anda relatif stabil dibanding periode sebelumnya.",
+        "noTrendData": "Belum cukup data untuk menghitung tren pengeluaran.",
+        "topCategoryAdvice": "Ini adalah kategori pengeluaran terbesar Anda untuk periode yang dipilih. Tinjau pengeluaran ini dan, jika perlu, tetapkan anggaran khusus.",
+        "generalCategoryName": "Umum",
+        "generalCategoryAdvice": "Terus catat pengeluaran agar insight semakin akurat.",
+        "generalTipWithData": "Fokus pada kategori terbesar dan cari 1–2 cara konkret untuk mengurangi atau menunda pengeluaran periode ini.",
+        "generalTipNoData": "Mulailah dengan menambahkan beberapa transaksi. Setelah ada riwayat, insight akan lebih detail."
+      }
     }
   },
   "dashboard": {

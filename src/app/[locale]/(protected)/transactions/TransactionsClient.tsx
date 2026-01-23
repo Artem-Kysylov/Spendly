@@ -10,7 +10,7 @@ import {
   ChevronUp,
   Sparkles,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import useModal from "@/hooks/useModal";
 import useDeviceType from "@/hooks/useDeviceType";
@@ -48,6 +48,7 @@ import { ToastMessage } from "@/components/ui-elements";
 
 export default function TransactionsClient() {
   const { session } = UserAuth();
+  const locale = useLocale();
   const t = useTranslations("transactions");
   const tCommon = useTranslations("common");
   const { isMobile } = useDeviceType();
@@ -198,13 +199,14 @@ export default function TransactionsClient() {
         userId: session.user.id,
         startDate,
         endDate,
+        locale,
       });
 
       setInsightsData(data);
     } catch (error) {
       console.error("Failed to fetch AI insights:", error);
       setInsightsError(
-        "Failed to generate insights. Please try again later.",
+        t("aiInsights.errors.generateFailed"),
       );
     } finally {
       setIsInsightsLoading(false);
@@ -297,7 +299,7 @@ export default function TransactionsClient() {
                 <Button
                   variant="ghost"
                   className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1.5 text-xs"
-                  aria-label="AI Insights"
+                  aria-label={t("aiInsights.title")}
                   onClick={(e) => {
                     e.stopPropagation();
                     handleAiSheetOpen();
@@ -305,7 +307,7 @@ export default function TransactionsClient() {
                   text={
                     <>
                       <Sparkles size={14} />
-                      <span className="font-medium">AI Insight</span>
+                      <span className="font-medium">{t("aiInsights.trigger")}</span>
                     </>
                   }
                 />
@@ -317,7 +319,7 @@ export default function TransactionsClient() {
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
                     <Sparkles className="w-5 h-5 text-primary" />
-                    AI Spending Insights
+                    {t("aiInsights.title")}
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex-1 min-h-0 overflow-y-auto mt-6 px-1 pb-6">
@@ -341,7 +343,7 @@ export default function TransactionsClient() {
                           </div>
                           <div className="flex-1">
                             <p className="text-sm font-medium text-foreground">
-                              Spending Trend
+                              {t("aiInsights.trendTitle")}
                             </p>
                             <p className="text-sm text-muted-foreground mt-1">
                               {insightsData.trend.message}
@@ -358,12 +360,14 @@ export default function TransactionsClient() {
                           </div>
                           <div className="flex-1">
                             <p className="text-sm font-medium text-foreground">
-                              Top Category: {insightsData.topCategory.name}
+                              {t("aiInsights.topCategoryTitle", {
+                                category: insightsData.topCategory.name,
+                              })}
                             </p>
                             <p className="text-xs text-muted-foreground mt-0.5">
                               $
                               {insightsData.topCategory.amount.toLocaleString(
-                                undefined,
+                                locale,
                                 {
                                   minimumFractionDigits: 2,
                                   maximumFractionDigits: 2,
@@ -383,7 +387,7 @@ export default function TransactionsClient() {
                           <div className="text-2xl">💡</div>
                           <div className="flex-1">
                             <p className="text-sm font-medium text-foreground mb-2">
-                              Financial Tip
+                              {t("aiInsights.financialTipTitle")}
                             </p>
                             <p className="text-sm text-muted-foreground leading-relaxed">
                               {insightsData.generalTip}
@@ -393,12 +397,12 @@ export default function TransactionsClient() {
                       </div>
 
                       <div className="text-xs text-muted-foreground text-center pt-2">
-                        AI-generated based on your recent transactions.
+                        {t("aiInsights.footer")}
                       </div>
                     </div>
                   ) : (
                     <div className="p-4 bg-muted/50 rounded-lg text-sm text-center text-muted-foreground">
-                      Click the button to generate insights
+                      {t("aiInsights.empty")}
                     </div>
                   )}
                 </div>
