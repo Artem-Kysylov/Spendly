@@ -31,6 +31,8 @@ const cleanContent = (text: string) => {
 
   cleaned = cleaned.replace(/\\([*_])/g, "$1");
 
+  cleaned = cleaned.replace(/\u00A0/g, " ");
+
   cleaned = cleaned.replace(/\|\|/g, "|\n|");
 
   const insightTerms =
@@ -84,6 +86,13 @@ const cleanContent = (text: string) => {
 
     let l = line;
 
+    l = l.replace(
+      /(\d)(?=(?:Budget\s+breakdown|Top\s+expenses|Transactions)\b)/g,
+      "$1\n\n",
+    );
+
+    l = l.replace(/\*{4,}/g, "**");
+
     l = l.replace(/\*\*\s+/g, "**");
     l = l.replace(/\s+\*\*/g, "**");
 
@@ -112,6 +121,18 @@ const cleanContent = (text: string) => {
     l = l.replace(insightPattern, "$1**💡 $2** ");
 
     l = l.replace(/(\*\*[^*]+\*\*)(?=[^\s\n.,:;!?])/g, "$1 ");
+
+    const boldSegments: string[] = [];
+    l = l.replace(/\*\*([^\s][\s\S]*?[^\s])\*\*/g, (_m, inner: string) => {
+      const idx = boldSegments.push(inner) - 1;
+      return `@@BOLD_${idx}@@`;
+    });
+    l = l.replace(/\*\*/g, "");
+    l = l.replace(/@@BOLD_(\d+)@@/g, (_m, i: string) => {
+      const idx = Number(i);
+      const inner = boldSegments[idx];
+      return typeof inner === "string" ? `**${inner}**` : "";
+    });
 
     const stars = (l.match(/\*\*/g) || []).length;
     if (stars % 2 === 1) l = l.replace(/\*\*/g, "");
