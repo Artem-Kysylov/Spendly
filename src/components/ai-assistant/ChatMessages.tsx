@@ -29,6 +29,8 @@ const cleanContent = (text: string) => {
   if (!text) return "";
   let cleaned = text;
 
+  cleaned = cleaned.replace(/\\([*_])/g, "$1");
+
   cleaned = cleaned.replace(/\|\|/g, "|\n|");
 
   const insightTerms =

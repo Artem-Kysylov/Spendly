@@ -32,6 +32,8 @@ const cleanContent = (text: string) => {
   if (!text) return "";
   let cleaned = text;
 
+  cleaned = cleaned.replace(/\\([*_])/g, "$1");
+
   const insightTerms =
     "Insight|Tip|Advice|Совет|Порада|सुझाव|Wawasan|インサイト|인사이트";
 
