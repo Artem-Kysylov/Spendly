@@ -232,13 +232,16 @@ export default function ChatOnboarding() {
     }
 
     try {
-      // Save locale settings
-      await saveUserLocaleSettings({
-        userId: session.user.id,
-        country: "US",
-        currency,
-        locale: language,
-      });
+      try {
+        await saveUserLocaleSettings({
+          userId: session.user.id,
+          country: "US",
+          currency,
+          locale: language,
+        });
+      } catch (e) {
+        console.warn("Failed to save locale settings:", e);
+      }
 
       // Save currency to localStorage for formatCurrency
       if (typeof window !== 'undefined') {
@@ -263,7 +266,8 @@ export default function ChatOnboarding() {
         .upsert(
           { user_id: session.user.id, amount: budgetAmount },
           { onConflict: "user_id" },
-        );
+        )
+        .select();
 
       if (error) {
         console.error("Budget save error:", error);
