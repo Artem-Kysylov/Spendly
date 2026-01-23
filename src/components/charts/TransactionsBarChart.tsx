@@ -265,7 +265,7 @@ const ExpensesBarChartComponent = forwardRef<
                 margin={{
                   top: 20,
                   right: 8,
-                  left: 0,
+                  left: 16,
                   bottom: 5,
                 }}
               >
