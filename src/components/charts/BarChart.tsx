@@ -209,9 +209,10 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(
               >
                 {showGrid && (
                   <CartesianGrid
-                    strokeDasharray="2 4"
-                    stroke="hsl(var(--muted-foreground))"
-                    opacity={0.3} // сетка заметна, но мягкая
+                    strokeDasharray="3 3"
+                    stroke="rgba(128, 128, 128, 0.1)"
+                    horizontal={orientation === "horizontal"}
+                    vertical={orientation === "vertical"}
                   />
                 )}
                 {orientation === "horizontal" ? (
