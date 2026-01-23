@@ -37,10 +37,40 @@ export async function POST(req: NextRequest) {
         : undefined;
     const validLocale = requestedLocale;
 
+    let existingCountry: string | undefined;
+    let existingCurrency: string | undefined;
+    let existingLocale: string | undefined;
+
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("country,currency,locale")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!error && data) {
+        existingCountry = typeof (data as any).country === "string" ? (data as any).country : undefined;
+        existingCurrency = typeof (data as any).currency === "string" ? (data as any).currency : undefined;
+        existingLocale = typeof (data as any).locale === "string" ? (data as any).locale : undefined;
+      }
+    } catch {
+      // ignore
+    }
+
+    const meta = (user as any)?.user_metadata as Record<string, unknown> | undefined;
+    const metaCountry = typeof meta?.country === "string" ? (meta.country as string) : undefined;
+    const metaCurrency =
+      typeof meta?.currency === "string"
+        ? (meta.currency as string)
+        : typeof meta?.currency_preference === "string"
+          ? (meta.currency_preference as string)
+          : undefined;
+    const metaLocale = typeof meta?.locale === "string" ? (meta.locale as string) : undefined;
+
     const normalized = normalizeLocaleSettings({
-      country: validCountry,
-      currency: validCurrency,
-      locale: validLocale,
+      country: validCountry || existingCountry || metaCountry,
+      currency: validCurrency || existingCurrency || metaCurrency,
+      locale: validLocale || existingLocale || metaLocale,
     });
 
     // Пытаемся upsert в public.users (если таблица есть)
@@ -75,6 +105,7 @@ export async function POST(req: NextRequest) {
       data: {
         country: normalized.country,
         currency: normalized.currency,
+        currency_preference: normalized.currency,
         locale: normalized.locale,
       },
     });

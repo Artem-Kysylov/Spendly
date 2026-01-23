@@ -82,6 +82,17 @@ const cleanContent = (text: string) => {
 
     let l = line;
 
+    l = l.replace(/\*\*\s+/g, "**");
+    l = l.replace(/\s+\*\*/g, "**");
+
+    l = l.replace(/([.:])\s*(\d+\.)/g, "$1\n\n$2");
+
+    l = l.replace(/([\p{L}])\*\*/gu, "$1 **");
+
+    l = l.replace(/([.:])\s*(\*\*)/g, "$1\n\n$2");
+
+    l = l.replace(/([.!?])(?=\p{L})/gu, "$1\n\n");
+
     l = l.replace(/: (?=\p{L})/gu, ":\n");
     l = l.replace(/:(?=\p{L})/gu, ":\n");
 
@@ -94,12 +105,14 @@ const cleanContent = (text: string) => {
 
     l = l.replace(/([.!?])\s+(?=\p{L})/gu, "$1\n");
 
+    l = l.replace(/([0-9])(?=\p{L})/gu, "$1 ");
+
     l = l.replace(insightPattern, "$1**💡 $2** ");
 
     l = l.replace(/(\*\*[^*]+\*\*)(?=[^\s\n.,:;!?])/g, "$1 ");
 
     const stars = (l.match(/\*\*/g) || []).length;
-    if (stars % 2 === 1) l = `${l}**`;
+    if (stars % 2 === 1) l = l.replace(/\*\*/g, "");
 
     out.push(l);
   }
@@ -107,6 +120,16 @@ const cleanContent = (text: string) => {
   cleaned = out.join("\n");
 
   return cleaned;
+};
+
+const sanitizeSuggestion = (input: string) => {
+  let out = String(input || "").trim();
+  out = out.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1");
+  out = out.replace(/^\[([\s\S]*)\]$/, "$1");
+  out = out.replace(/\*\*/g, "");
+  out = out.replace(/`/g, "");
+  out = out.replace(/\s+/g, " ").trim();
+  return out;
 };
 
 function normalizeCurrencyInText(input: string, currency?: string): string {
@@ -180,7 +203,7 @@ export const ChatMessages = ({
             const text = followUpsRaw.replace(/\n+/g, ' ').trim();
             const matches = Array.from(text.matchAll(/-\s+([^\-]+?)(?=\s*-\s+|$)/g)).map((m) => m[1].trim());
             suggestions = matches
-              .map((q) => q.replace(/^\[(.*)\]$/, '$1').trim())
+              .map((q) => sanitizeSuggestion(q))
               .filter((q) => q.length > 0);
           }
         }
