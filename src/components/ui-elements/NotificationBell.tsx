@@ -188,14 +188,14 @@ function NotificationBell({
                 {!hasDbError && unreadCount > 0 && (
                   <button
                     onClick={markAllAsRead}
-                    className="text-sm text-primary hover:text-primary/80"
+                    className="text-sm text-primary supports-[hover:hover]:hover:text-primary/80"
                   >
                     {tNotifications("bell.markAllRead")}
                   </button>
                 )}
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1 hover:bg-gray-100 rounded"
+                  className="p-1 rounded transition-colors supports-[hover:hover]:hover:bg-accent"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -247,7 +247,7 @@ function NotificationBell({
                       key={notification.id}
                       onClick={() => handleNotificationClick(notification)}
                       className={`
-                                          p-4 cursor-pointer hover:bg-gray-50 transition-colors
+                                          p-4 cursor-pointer transition-colors supports-[hover:hover]:hover:bg-accent
                                       `}
                     >
                       <div className="flex gap-3">
@@ -288,7 +288,7 @@ function NotificationBell({
                                       e.stopPropagation();
                                       openBudget(notification);
                                     }}
-                                    className="text-xs px-2 py-1 rounded bg-primary/10 text-primary hover:bg-primary/20"
+                                    className="text-xs px-2 py-1 rounded bg-primary/10 text-primary supports-[hover:hover]:hover:bg-primary/20"
                                   >
                                     {tNotifications("bell.actions.openBudget")}
                                   </button>
@@ -297,7 +297,7 @@ function NotificationBell({
                                       e.stopPropagation();
                                       openReport(notification);
                                     }}
-                                    className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                    className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 supports-[hover:hover]:hover:bg-blue-200"
                                   >
                                     {tNotifications("bell.actions.openReport")}
                                   </button>
@@ -309,7 +309,7 @@ function NotificationBell({
                                   e.stopPropagation();
                                   openReport(notification);
                                 }}
-                                className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200"
+                                className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 supports-[hover:hover]:hover:bg-blue-200"
                               >
                                 {tNotifications("bell.actions.openReport")}
                               </button>
@@ -329,14 +329,14 @@ function NotificationBell({
                 <button
                   onClick={handlePrevPage}
                   disabled={pageOffset === 0}
-                  className="text-sm text-primary disabled:text-gray-400 hover:text-primary/80"
+                  className="text-sm text-primary disabled:text-gray-400 supports-[hover:hover]:hover:text-primary/80"
                 >
                   {tNotifications("bell.pagination.prev")}
                 </button>
                 <button
                   onClick={handleNextPage}
                   disabled={notifications.length < PAGE_SIZE}
-                  className="text-sm text-primary disabled:text-gray-400 hover:text-primary/80"
+                  className="text-sm text-primary disabled:text-gray-400 supports-[hover:hover]:hover:text-primary/80"
                 >
                   {tNotifications("bell.pagination.next")}
                 </button>

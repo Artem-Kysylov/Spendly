@@ -335,7 +335,8 @@
       "filtered": "選択したフィルターで取引が見つかりません"
     },
     "modal": {
-      "addTitle": "取引を追加"
+      "addTitle": "取引を追加",
+      "editTitle": "取引を編集"
     },
     "toast": {
       "deleteFailed": "取引の削除に失敗しました。もう一度お試しください。",

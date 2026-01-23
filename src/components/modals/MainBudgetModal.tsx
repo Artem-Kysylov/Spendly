@@ -146,18 +146,18 @@ const TotalBudgetModal = ({
               min="0"
               step="0.01"
             />
-            <DialogFooter className="justify-center sm:justify-center">
+            <DialogFooter className="flex-row justify-between gap-3">
               <Button
                 text={tCommon("cancel")}
                 variant="ghost"
-                className="text-primary w-[218px]"
+                className="text-primary flex-1"
                 onClick={onClose}
               />
               <Button
                 type="submit"
                 text={tCommon("save")}
                 variant="default"
-                className="w-[218px]"
+                className="flex-1"
                 disabled={isLoading || !amount}
                 isLoading={isLoading}
               />

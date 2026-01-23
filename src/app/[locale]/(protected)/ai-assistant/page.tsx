@@ -11,6 +11,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { UserAuth } from "@/context/AuthContext";
 import { useChat } from "@/hooks/useChat";
 import useDeviceType from "@/hooks/useDeviceType";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/lib/supabaseClient";
 import { useUIStore } from "@/store/ui-store";
 import LimitReachedModal from "@/components/modals/LimitReachedModal";
@@ -38,6 +39,8 @@ export default function AIAssistantPage() {
   const tAI = useTranslations("assistant");
   const tChat = useTranslations("chat");
   const { isDesktop } = useDeviceType();
+  const { subscriptionPlan } = useSubscription();
+  const isFree = subscriptionPlan === "free";
   const { session } = UserAuth();
   const [budgets, setBudgets] = useState<
     Array<{ id: string; name: string; emoji?: string; type: "expense" | "income" }>
@@ -209,9 +212,12 @@ export default function AIAssistantPage() {
             <ChevronLeft className="h-6 w-6 text-primary" />
           </button>
           <ToneSelect
-            value={assistantTone}
-            onChange={(tone) => setAssistantTone(tone)}
-            disabled={isTyping}
+            value={isFree ? "neutral" : assistantTone}
+            onChange={(tone) => {
+              if (isFree) return;
+              void setAssistantTone(tone);
+            }}
+            disabled={isTyping || isFree}
             aria-label={tAI("tone.label")}
             className="w-[180px] text-[16px]"
           />

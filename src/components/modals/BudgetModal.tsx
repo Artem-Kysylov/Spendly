@@ -93,9 +93,13 @@ const BudgetModal = ({
           <div className="mx-auto mt-2 mb-2 h-1.5 w-12 rounded-full bg-muted" />
 
           <SheetHeader>
-            <SheetTitle className="text-center w-full text-xl font-semibold">
-              {title}
-            </SheetTitle>
+            <div className="flex items-center justify-between gap-2 w-full">
+              <div className="w-10" />
+              <SheetTitle className="text-center text-xl font-semibold flex-1">
+                {title}
+              </SheetTitle>
+              <div className="w-10" />
+            </div>
           </SheetHeader>
 
           <div className="mt-4 px-4 flex-1 h-full">
@@ -127,10 +131,13 @@ const BudgetModal = ({
     >
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-center">{title}</DialogTitle>
-          <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground">
-            <X size={22} />
-          </DialogClose>
+          <div className="flex items-center justify-between gap-2">
+            <div className="w-10" />
+            <DialogTitle className="text-center flex-1">{title}</DialogTitle>
+            <DialogClose className="inline-flex items-center justify-center h-10 w-10 text-muted-foreground hover:text-foreground">
+              <X size={22} />
+            </DialogClose>
+          </div>
         </DialogHeader>
 
         <div className="mt-4">

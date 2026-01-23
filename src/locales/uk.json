@@ -335,7 +335,8 @@
       "filtered": "No transactions found for the selected filters"
     },
     "modal": {
-      "addTitle": "Add Transaction"
+      "addTitle": "Add Transaction",
+      "editTitle": "Редагувати транзакцію"
     },
     "toast": {
       "deleteFailed": "Не вдалося видалити транзакцію",

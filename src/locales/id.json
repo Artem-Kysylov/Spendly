@@ -335,7 +335,8 @@
       "filtered": "No transactions found for the selected filters"
     },
     "modal": {
-      "addTitle": "Add Transaction"
+      "addTitle": "Add Transaction",
+      "editTitle": "Edit transaksi"
     },
     "toast": {
       "deleteFailed": "Failed to delete transaction. Please try again.",

@@ -137,6 +137,7 @@ export type NamespaceKeys = {
     | "empty.description"
     | "empty.filtered"
     | "modal.addTitle"
+    | "modal.editTitle"
     | "toast.deleteFailed"
     | "toast.deleteSuccess"
     | "toast.updateFailed"

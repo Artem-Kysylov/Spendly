@@ -40,7 +40,7 @@ export default function AiInsightTeaser({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.5 }}
-      className={`rounded-lg border p-4 cursor-pointer flex items-center gap-3 min-w-0 w-full overflow-hidden ${getStyles()}`}
+      className={`rounded-[32px] border p-4 cursor-pointer flex items-center gap-3 min-w-0 w-full overflow-hidden ${getStyles()}`}
       onClick={() => router.push("/ai-assistant")}
     >
       <div className="p-2 bg-white/50 dark:bg-black/20 rounded-full">
