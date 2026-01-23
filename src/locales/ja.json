@@ -375,6 +375,12 @@
       "financialTipTitle": "ファイナンシャルヒント",
       "footer": "最近の取引に基づいてAIが生成しました。",
       "empty": "ボタンを押してインサイトを生成",
+      "paywall": {
+        "trialUsedLabel": "無料トライアルは1回のみ",
+        "trialUsedMessage": "FreeプランではAIインサイトは1回のみ利用できます。Proにアップグレードして無制限に利用しましょう。",
+        "dailyLimitReachedMessage": "本日のAI利用上限に達しました。Proにアップグレードして無制限に利用できます。",
+        "upgradeButton": "Proにアップグレード"
+      },
       "errors": {
         "generateFailed": "インサイトの生成に失敗しました。後でもう一度お試しください。"
       },

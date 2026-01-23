@@ -29,11 +29,171 @@ const insightsSchema = z.object({
 
 export type SpendingInsights = z.infer<typeof insightsSchema>;
 
+const FREE_DAILY_REQUESTS_LIMIT = 10;
+const PRO_DAILY_REQUESTS_LIMIT = 2147483647;
+
 interface GenerateInsightsParams {
     userId: string;
     startDate: Date;
     endDate: Date;
     locale: string;
+}
+
+function getUtcDayStartIso(date: Date): string {
+    const d = new Date(date);
+    d.setUTCHours(0, 0, 0, 0);
+    return d.toISOString();
+}
+
+async function getIsProUser(opts: {
+    userId: string;
+}): Promise<boolean> {
+    const supabase = getServerSupabaseClient();
+    const { data, error } = await supabase
+        .from("users")
+        .select("is_pro")
+        .eq("id", opts.userId)
+        .maybeSingle();
+
+    if (error) return false;
+    return (data as { is_pro?: unknown } | null)?.is_pro === true;
+}
+
+async function getUsageCountSince(opts: {
+    userId: string;
+    startIso: string;
+}): Promise<number> {
+    const supabase = getServerSupabaseClient();
+    const { count, error } = await supabase
+        .from("ai_usage_logs")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", opts.userId)
+        .gte("created_at", opts.startIso);
+
+    if (error) return 0;
+    return count ?? 0;
+}
+
+async function getInsightUsageCount(opts: {
+    userId: string;
+}): Promise<number> {
+    const supabase = getServerSupabaseClient();
+    const { count, error } = await supabase
+        .from("ai_usage_logs")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", opts.userId)
+        .eq("request_type", "insight");
+
+    if (error) return 0;
+    return count ?? 0;
+}
+
+async function ensureDailyRateLimitRow(opts: {
+    userId: string;
+    isPro: boolean;
+    todayStartIso: string;
+}): Promise<{ dailyLimit: number; used: number }> {
+    const supabase = getServerSupabaseClient();
+    const dailyLimit = opts.isPro ? PRO_DAILY_REQUESTS_LIMIT : FREE_DAILY_REQUESTS_LIMIT;
+
+    const { data: current, error: readErr } = await supabase
+        .from("ai_rate_limits")
+        .select("user_id, daily_requests_limit, daily_requests_count, window_reset_at")
+        .eq("user_id", opts.userId)
+        .maybeSingle();
+
+    if (readErr) {
+        const usedFromLogs = await getUsageCountSince({
+            userId: opts.userId,
+            startIso: opts.todayStartIso,
+        });
+        return { dailyLimit, used: usedFromLogs };
+    }
+
+    const currentResetIso = current?.window_reset_at
+        ? new Date(current.window_reset_at).toISOString()
+        : null;
+    const needsReset = !currentResetIso || currentResetIso < opts.todayStartIso;
+
+    if (!current) {
+        await supabase.from("ai_rate_limits").insert({
+            user_id: opts.userId,
+            daily_requests_limit: dailyLimit,
+            daily_requests_count: 0,
+            window_reset_at: opts.todayStartIso,
+        });
+    } else if (needsReset) {
+        await supabase
+            .from("ai_rate_limits")
+            .update({
+                daily_requests_limit: dailyLimit,
+                daily_requests_count: 0,
+                window_reset_at: opts.todayStartIso,
+            })
+            .eq("user_id", opts.userId);
+    } else if ((current.daily_requests_limit ?? dailyLimit) !== dailyLimit) {
+        await supabase
+            .from("ai_rate_limits")
+            .update({ daily_requests_limit: dailyLimit })
+            .eq("user_id", opts.userId);
+    }
+
+    const usedRow =
+        typeof current?.daily_requests_count === "number" && !needsReset
+            ? current.daily_requests_count
+            : 0;
+    const usedFromLogs = await getUsageCountSince({
+        userId: opts.userId,
+        startIso: opts.todayStartIso,
+    });
+    const used = Math.max(usedRow, usedFromLogs);
+
+    if (used !== usedRow) {
+        await supabase
+            .from("ai_rate_limits")
+            .update({ daily_requests_count: used })
+            .eq("user_id", opts.userId);
+    }
+
+    return { dailyLimit, used };
+}
+
+async function incrementDailyUsage(opts: {
+    userId: string;
+    usedBefore: number;
+    dailyLimit: number;
+    todayStartIso: string;
+}) {
+    const supabase = getServerSupabaseClient();
+    await supabase
+        .from("ai_rate_limits")
+        .update({
+            daily_requests_limit: opts.dailyLimit,
+            daily_requests_count: opts.usedBefore + 1,
+            window_reset_at: opts.todayStartIso,
+        })
+        .eq("user_id", opts.userId);
+}
+
+async function insertUsageLog(opts: {
+    userId: string;
+    model: string;
+    promptChars: number;
+    completionChars: number;
+    success: boolean;
+    errorMessage?: string | null;
+}) {
+    const supabase = getServerSupabaseClient();
+    await supabase.from("ai_usage_logs").insert({
+        user_id: opts.userId,
+        provider: "google",
+        model: opts.model,
+        request_type: "insight",
+        prompt_chars: opts.promptChars,
+        completion_chars: opts.completionChars,
+        success: opts.success,
+        error_message: opts.errorMessage ?? null,
+    });
 }
 
 // Simple in-memory cache with TTL
@@ -81,15 +241,6 @@ export async function generateSpendingInsights({
     endDate,
     locale,
 }: GenerateInsightsParams): Promise<SpendingInsights> {
-    // Check cache first
-    const cacheKey = getCacheKey(userId, startDate, endDate, locale);
-    const cached = insightsCache.get(cacheKey);
-
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
-        console.log('[AI Insights] Returning cached data');
-        return cached.data;
-    }
-
     let fallbackCurrentExpenses = 0;
     let fallbackPreviousExpenses = 0;
     let fallbackTrendPercentage = 0;
@@ -101,6 +252,51 @@ export async function generateSpendingInsights({
 
     try {
         const supabase = getServerSupabaseClient();
+
+        const isPro = await getIsProUser({ userId });
+        if (!isPro) {
+            const usedInsights = await getInsightUsageCount({ userId });
+            if (usedInsights >= 1) {
+                throw new Error("ai_insights:trial_used");
+            }
+        }
+
+        const todayStartIso = getUtcDayStartIso(new Date());
+        const limits = await ensureDailyRateLimitRow({ userId, isPro, todayStartIso });
+        if (!isPro && limits.used >= limits.dailyLimit) {
+            throw new Error("ai_insights:daily_limit_reached");
+        }
+
+        // Cache check (after paywall/limits)
+        const cacheKey = getCacheKey(userId, startDate, endDate, locale);
+        const cached = insightsCache.get(cacheKey);
+
+        if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+            console.log('[AI Insights] Returning cached data');
+
+            await incrementDailyUsage({
+                userId,
+                usedBefore: limits.used,
+                dailyLimit: limits.dailyLimit,
+                todayStartIso,
+            });
+
+            try {
+                const completionChars = JSON.stringify(cached.data).length;
+                await insertUsageLog({
+                    userId,
+                    model: "gemini-2.5-flash",
+                    promptChars: 0,
+                    completionChars,
+                    success: true,
+                    errorMessage: null,
+                });
+            } catch {
+                // no-op
+            }
+
+            return cached.data;
+        }
 
         console.log('[AI Insights] Starting generation for user:', userId);
         console.log('[AI Insights] Date range:', { startDate: startDate.toISOString(), endDate: endDate.toISOString() });
@@ -165,7 +361,7 @@ export async function generateSpendingInsights({
         (currentTransactions || [])
             .filter((t) => t.type === "expense" && t.budget_folders)
             .forEach((t) => {
-                const category = (t.budget_folders as any)?.name || "Uncategorized";
+                const category = (t.budget_folders as any)?.name || tFallback("uncategorized");
                 const emoji = (t.budget_folders as any)?.emoji || "📁";
 
                 if (!categoryTotals[category]) {
@@ -260,6 +456,27 @@ Be conversational but concise. Use emojis sparingly. Make the advice actionable.
             timestamp: Date.now(),
         });
 
+        await incrementDailyUsage({
+            userId,
+            usedBefore: limits.used,
+            dailyLimit: limits.dailyLimit,
+            todayStartIso,
+        });
+
+        try {
+            const completionChars = JSON.stringify(object).length;
+            await insertUsageLog({
+                userId,
+                model: "gemini-2.5-flash",
+                promptChars: systemPrompt.length,
+                completionChars,
+                success: true,
+                errorMessage: null,
+            });
+        } catch {
+            // no-op
+        }
+
         // Clean up old cache entries (simple cleanup on each request)
         for (const [key, entry] of insightsCache.entries()) {
             if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
@@ -269,6 +486,9 @@ Be conversational but concise. Use emojis sparingly. Make the advice actionable.
 
         return object;
     } catch (error) {
+        if (error instanceof Error && error.message.startsWith("ai_insights:")) {
+            throw error;
+        }
         console.error('[AI Insights] ERROR:', error);
         console.error('[AI Insights] Error stack:', error instanceof Error ? error.stack : 'No stack trace');
 

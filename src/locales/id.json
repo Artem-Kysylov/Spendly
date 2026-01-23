@@ -375,6 +375,12 @@
       "financialTipTitle": "Tips Keuangan",
       "footer": "Dihasilkan AI berdasarkan transaksi terbaru Anda.",
       "empty": "Klik tombol untuk membuat insight",
+      "paywall": {
+        "trialUsedLabel": "Trial satu kali sudah digunakan",
+        "trialUsedMessage": "Di paket Gratis, AI Insight hanya bisa digunakan sekali. Upgrade ke Pro untuk insight tanpa batas.",
+        "dailyLimitReachedMessage": "Batas harian AI tercapai. Upgrade ke Pro untuk akses tanpa batas.",
+        "upgradeButton": "Upgrade ke Pro"
+      },
       "errors": {
         "generateFailed": "Gagal membuat insight. Silakan coba lagi nanti."
       },

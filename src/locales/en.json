@@ -375,6 +375,12 @@
       "financialTipTitle": "Financial Tip",
       "footer": "AI-generated based on your recent transactions.",
       "empty": "Click the button to generate insights",
+      "paywall": {
+        "trialUsedLabel": "One-time trial used",
+        "trialUsedMessage": "AI Insight is available once for Free users. Upgrade to Pro to unlock unlimited insights.",
+        "dailyLimitReachedMessage": "Daily AI limit reached. Upgrade to Pro for unlimited access.",
+        "upgradeButton": "Upgrade to Pro"
+      },
       "errors": {
         "generateFailed": "Failed to generate insights. Please try again later."
       },

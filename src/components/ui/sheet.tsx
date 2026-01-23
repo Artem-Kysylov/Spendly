@@ -48,6 +48,7 @@ export function SheetTrigger({ children }: { children: React.ReactElement }) {
     onClick: (e: React.MouseEvent<HTMLElement>) => {
       lastFocusRef.current = e.currentTarget as HTMLElement;
       children.props.onClick?.(e);
+      if (e.defaultPrevented) return;
       onOpenChange?.(true);
     },
     "aria-haspopup": "dialog",

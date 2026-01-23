@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Plus,
@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ChevronUp,
   Sparkles,
+  Lock,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -42,6 +43,8 @@ import TransactionsTable from "@/components/chunks/TransactionsTable";
 import TransactionModal from "@/components/modals/TransactionModal";
 import { ExpensesBarChart } from "@/components/charts/TransactionsBarChart";
 import { useToast } from "@/components/ui/use-toast";
+import LimitReachedModal from "@/components/modals/LimitReachedModal";
+import { useSubscription } from "@/hooks/useSubscription";
 
 import type { Transaction, ToastMessageProps } from "@/types/types";
 import { ToastMessage } from "@/components/ui-elements";
@@ -53,6 +56,8 @@ export default function TransactionsClient() {
   const tCommon = useTranslations("common");
   const { isMobile } = useDeviceType();
   const { toast } = useToast();
+  const { subscriptionPlan } = useSubscription();
+  const isPro = subscriptionPlan === "pro";
 
   // Modal & Toast
   const { isModalOpen, openModal, closeModal } = useModal();
@@ -95,6 +100,58 @@ export default function TransactionsClient() {
   );
   const [isInsightsLoading, setIsInsightsLoading] = useState(false);
   const [insightsError, setInsightsError] = useState<string | null>(null);
+  const [insightsUsageCount, setInsightsUsageCount] = useState<number>(0);
+  const [insightsUnlockedThisSession, setInsightsUnlockedThisSession] =
+    useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [upgradeModalMessage, setUpgradeModalMessage] = useState<string | null>(
+    null,
+  );
+
+  const isInsightTrialUsed = !isPro && insightsUsageCount >= 1;
+
+  const openUpgradeModal = (message?: string) => {
+    setUpgradeModalMessage(
+      message ?? t("aiInsights.paywall.trialUsedMessage"),
+    );
+    setIsUpgradeModalOpen(true);
+  };
+
+  const closeUpgradeModal = () => {
+    setIsUpgradeModalOpen(false);
+    setUpgradeModalMessage(null);
+  };
+
+  const refreshInsightsUsage = useCallback(async () => {
+    if (!session?.user?.id) return;
+
+    try {
+      const { count, error } = await supabase
+        .from("ai_usage_logs")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", session.user.id)
+        .eq("request_type", "insight");
+
+      if (error) {
+        console.warn("[AI Insights] Failed to load usage count:", error);
+        return;
+      }
+
+      setInsightsUsageCount(typeof count === "number" ? count : 0);
+    } catch (e) {
+      console.warn("[AI Insights] Failed to load usage count:", e);
+    }
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    refreshInsightsUsage();
+  }, [refreshInsightsUsage, subscriptionPlan]);
+
+  useEffect(() => {
+    if (!isAiSheetOpen) {
+      setInsightsUnlockedThisSession(false);
+    }
+  }, [isAiSheetOpen]);
 
   // Intersection Observer
   const observerTarget = useRef<HTMLDivElement | null>(null);
@@ -186,6 +243,12 @@ export default function TransactionsClient() {
   const handleAiSheetOpen = async () => {
     if (!session?.user?.id) return;
 
+    if (isInsightTrialUsed) {
+      setIsAiSheetOpen(true);
+      openUpgradeModal(t("aiInsights.paywall.trialUsedMessage"));
+      return;
+    }
+
     setIsAiSheetOpen(true);
     setIsInsightsLoading(true);
     setInsightsError(null);
@@ -203,11 +266,31 @@ export default function TransactionsClient() {
       });
 
       setInsightsData(data);
+      setInsightsUsageCount((prev) => (prev < 1 && !isPro ? 1 : prev));
+      setInsightsUnlockedThisSession(true);
+      try {
+        window.localStorage.setItem(
+          "spendly:ai_insights_last",
+          JSON.stringify(data),
+        );
+      } catch {
+        // no-op
+      }
+      refreshInsightsUsage();
     } catch (error) {
       console.error("Failed to fetch AI insights:", error);
-      setInsightsError(
-        t("aiInsights.errors.generateFailed"),
-      );
+      if (error instanceof Error && error.message === "ai_insights:trial_used") {
+        openUpgradeModal(t("aiInsights.paywall.trialUsedMessage"));
+        setInsightsError(null);
+      } else if (
+        error instanceof Error &&
+        error.message === "ai_insights:daily_limit_reached"
+      ) {
+        openUpgradeModal(t("aiInsights.paywall.dailyLimitReachedMessage"));
+        setInsightsError(null);
+      } else {
+        setInsightsError(t("aiInsights.errors.generateFailed"));
+      }
     } finally {
       setIsInsightsLoading(false);
     }
@@ -298,16 +381,40 @@ export default function TransactionsClient() {
               <SheetTrigger>
                 <Button
                   variant="ghost"
-                  className="h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1.5 text-xs"
+                  className={`relative h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1.5 text-xs ${isInsightTrialUsed ? "opacity-50" : ""}`}
                   aria-label={t("aiInsights.title")}
                   onClick={(e) => {
                     e.stopPropagation();
+                    if (isInsightTrialUsed) {
+                      e.preventDefault();
+                      if (!insightsData) {
+                        try {
+                          const raw = window.localStorage.getItem(
+                            "spendly:ai_insights_last",
+                          );
+                          if (raw) {
+                            setInsightsData(JSON.parse(raw) as SpendingInsights);
+                          }
+                        } catch {
+                          // no-op
+                        }
+                      }
+                      setIsAiSheetOpen(true);
+                      openUpgradeModal(t("aiInsights.paywall.trialUsedMessage"));
+                      return;
+                    }
+
                     handleAiSheetOpen();
                   }}
                   text={
                     <>
                       <Sparkles size={14} />
                       <span className="font-medium">{t("aiInsights.trigger")}</span>
+                      {isInsightTrialUsed ? (
+                        <span className="ml-1 inline-flex">
+                          <Lock size={12} />
+                        </span>
+                      ) : null}
                     </>
                   }
                 />
@@ -352,53 +459,125 @@ export default function TransactionsClient() {
                         </div>
                       </div>
 
-                      {/* Top Category Card */}
-                      <div className="p-4 bg-card border border-border rounded-lg shadow-sm">
-                        <div className="flex items-start gap-3">
-                          <div className="text-2xl">
-                            {insightsData.topCategory.emoji}
+                      {isInsightTrialUsed && !insightsUnlockedThisSession ? (
+                        <div className="relative overflow-hidden rounded-lg">
+                          <div className="space-y-3 blur-sm select-none pointer-events-none">
+                            {/* Top Category Card */}
+                            <div className="p-4 bg-card border border-border rounded-lg shadow-sm">
+                              <div className="flex items-start gap-3">
+                                <div className="text-2xl">
+                                  {insightsData.topCategory.emoji}
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-foreground">
+                                    {t("aiInsights.topCategoryTitle", {
+                                      category: insightsData.topCategory.name,
+                                    })}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    $
+                                    {insightsData.topCategory.amount.toLocaleString(
+                                      locale,
+                                      {
+                                        minimumFractionDigits: 2,
+                                        maximumFractionDigits: 2,
+                                      },
+                                    )}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground mt-2">
+                                    {insightsData.topCategory.advice}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Financial Tip Card */}
+                            <div className="p-4 bg-card border border-border rounded-lg shadow-sm">
+                              <div className="flex items-start gap-3">
+                                <div className="text-2xl">💡</div>
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium text-foreground mb-2">
+                                    {t("aiInsights.financialTipTitle")}
+                                  </p>
+                                  <p className="text-sm text-muted-foreground leading-relaxed">
+                                    {insightsData.generalTip}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="text-xs text-muted-foreground text-center pt-2">
+                              {t("aiInsights.footer")}
+                            </div>
                           </div>
-                          <div className="flex-1">
+
+                          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/30 dark:bg-black/30 backdrop-blur-md p-4 text-center">
                             <p className="text-sm font-medium text-foreground">
-                              {t("aiInsights.topCategoryTitle", {
-                                category: insightsData.topCategory.name,
-                              })}
+                              {t("aiInsights.paywall.trialUsedLabel")}
                             </p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              $
-                              {insightsData.topCategory.amount.toLocaleString(
-                                locale,
-                                {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                },
-                              )}
-                            </p>
-                            <p className="text-sm text-muted-foreground mt-2">
-                              {insightsData.topCategory.advice}
-                            </p>
+                            <Button
+                              variant="default"
+                              onClick={() =>
+                                openUpgradeModal(
+                                  t("aiInsights.paywall.trialUsedMessage"),
+                                )
+                              }
+                              className="w-full"
+                              text={t("aiInsights.paywall.upgradeButton")}
+                            />
                           </div>
                         </div>
-                      </div>
-
-                      {/* Financial Tip Card */}
-                      <div className="p-4 bg-card border border-border rounded-lg shadow-sm">
-                        <div className="flex items-start gap-3">
-                          <div className="text-2xl">💡</div>
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-foreground mb-2">
-                              {t("aiInsights.financialTipTitle")}
-                            </p>
-                            <p className="text-sm text-muted-foreground leading-relaxed">
-                              {insightsData.generalTip}
-                            </p>
+                      ) : (
+                        <>
+                          {/* Top Category Card */}
+                          <div className="p-4 bg-card border border-border rounded-lg shadow-sm">
+                            <div className="flex items-start gap-3">
+                              <div className="text-2xl">
+                                {insightsData.topCategory.emoji}
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-foreground">
+                                  {t("aiInsights.topCategoryTitle", {
+                                    category: insightsData.topCategory.name,
+                                  })}
+                                </p>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  $
+                                  {insightsData.topCategory.amount.toLocaleString(
+                                    locale,
+                                    {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    },
+                                  )}
+                                </p>
+                                <p className="text-sm text-muted-foreground mt-2">
+                                  {insightsData.topCategory.advice}
+                                </p>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </div>
 
-                      <div className="text-xs text-muted-foreground text-center pt-2">
-                        {t("aiInsights.footer")}
-                      </div>
+                          {/* Financial Tip Card */}
+                          <div className="p-4 bg-card border border-border rounded-lg shadow-sm">
+                            <div className="flex items-start gap-3">
+                              <div className="text-2xl">💡</div>
+                              <div className="flex-1">
+                                <p className="text-sm font-medium text-foreground mb-2">
+                                  {t("aiInsights.financialTipTitle")}
+                                </p>
+                                <p className="text-sm text-muted-foreground leading-relaxed">
+                                  {insightsData.generalTip}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="text-xs text-muted-foreground text-center pt-2">
+                            {t("aiInsights.footer")}
+                          </div>
+                        </>
+                      )}
                     </div>
                   ) : (
                     <div className="p-4 bg-muted/50 rounded-lg text-sm text-center text-muted-foreground">
@@ -418,7 +597,7 @@ export default function TransactionsClient() {
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                <div className="p-4 pt-0 border-t border-border">
+                <div className="border-t border-border">
                   <ExpensesBarChart
                     data={chartData}
                     filters={chartFilters}
@@ -426,7 +605,7 @@ export default function TransactionsClient() {
                     currency="USD"
                     height={300}
                     showGrid={true}
-                    className="w-full shadow-none border-0"
+                    className="w-full shadow-none border-0 rounded-none"
                     layout={isMobile ? "vertical" : "horizontal"}
                   />
                 </div>
@@ -548,6 +727,13 @@ export default function TransactionsClient() {
           }}
         />
       )}
+
+      <LimitReachedModal
+        isOpen={isUpgradeModalOpen}
+        onClose={closeUpgradeModal}
+        limitType="custom"
+        customMessage={upgradeModalMessage ?? undefined}
+      />
     </div>
   );
 }
