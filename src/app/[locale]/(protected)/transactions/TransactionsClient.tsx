@@ -123,25 +123,32 @@ export default function TransactionsClient() {
   };
 
   const refreshInsightsUsage = useCallback(async () => {
-    if (!session?.user?.id) return;
+    if (!session?.access_token) return;
 
     try {
-      const { count, error } = await supabase
-        .from("ai_usage_logs")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", session.user.id)
-        .eq("request_type", "insight");
+      const res = await fetch("/api/ai/insights-status", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
 
-      if (error) {
-        console.warn("[AI Insights] Failed to load usage count:", error);
+      if (!res.ok) {
+        console.warn("[AI Insights] Failed to load insights status:", res.status);
         return;
       }
 
-      setInsightsUsageCount(typeof count === "number" ? count : 0);
+      const json = (await res.json().catch(() => null)) as
+        | { insight_count?: number; is_pro?: boolean }
+        | null;
+
+      const count =
+        typeof json?.insight_count === "number" ? json.insight_count : 0;
+      setInsightsUsageCount(count);
     } catch (e) {
-      console.warn("[AI Insights] Failed to load usage count:", e);
+      console.warn("[AI Insights] Failed to load insights status:", e);
     }
-  }, [session?.user?.id]);
+  }, [session?.access_token]);
 
   useEffect(() => {
     refreshInsightsUsage();
@@ -266,7 +273,9 @@ export default function TransactionsClient() {
       });
 
       setInsightsData(data);
-      setInsightsUsageCount((prev) => (prev < 1 && !isPro ? 1 : prev));
+      if (!isPro) {
+        setInsightsUsageCount(1);
+      }
       setInsightsUnlockedThisSession(true);
       try {
         window.localStorage.setItem(
@@ -387,6 +396,7 @@ export default function TransactionsClient() {
                     e.stopPropagation();
                     if (isInsightTrialUsed) {
                       e.preventDefault();
+                      e.stopPropagation();
                       if (!insightsData) {
                         try {
                           const raw = window.localStorage.getItem(

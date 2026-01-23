@@ -255,7 +255,7 @@ const ExpensesBarChartComponent = forwardRef<
 
     return (
       <Card className={className} ref={ref}>
-        <CardContent className="pt-6">
+        <CardContent className="p-0 pt-6">
           {showUpgrade && <UpgradeCornerPanel />}
           <div style={{ width: "100%", height }}>
             <ResponsiveContainer width="100%" height="100%">
@@ -264,8 +264,8 @@ const ExpensesBarChartComponent = forwardRef<
                 layout={layout}
                 margin={{
                   top: 20,
-                  right: 30,
-                  left: 20,
+                  right: 0,
+                  left: 0,
                   bottom: 5,
                 }}
               >
@@ -309,7 +309,7 @@ const ExpensesBarChartComponent = forwardRef<
                       tick={{ fontSize: 12 }}
                       axisLine={false}
                       tickLine={false}
-                      width={100}
+                      width={88}
                     />
                   </>
                 )}
