@@ -433,8 +433,8 @@ export default function TransactionsClient() {
                 side="left"
                 className="w-[300px] sm:w-[400px] bg-background border-r border-border flex flex-col overflow-hidden"
               >
-                <SheetHeader>
-                  <SheetTitle className="flex items-center gap-2">
+                <SheetHeader className="text-center">
+                  <SheetTitle className="flex items-center justify-center gap-2">
                     <Sparkles className="w-5 h-5 text-primary" />
                     {t("aiInsights.title")}
                   </SheetTitle>

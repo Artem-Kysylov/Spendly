@@ -107,15 +107,15 @@ export function TransactionChatWindow({
   return (
     <div className="bg-background text-foreground flex flex-col relative h-full">
       {/* Header */}
-      <SheetHeader>
-        <div className="flex items-center gap-2">
+      <SheetHeader className="text-center">
+        <div className="flex items-center justify-center gap-2">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           <SheetTitle id="transaction-chat-title">
             💰 {tTx("addTransaction")}
           </SheetTitle>
         </div>
         <SheetClose
-          className="block p-1.5 hover:bg-muted rounded-full transition-colors duration-200 touch-manipulation"
+          className="absolute top-2 right-2 block p-1.5 hover:bg-muted rounded-full transition-colors duration-200 touch-manipulation"
           aria-label={tAI("buttons.close")}
           onClick={onClose}
         >
