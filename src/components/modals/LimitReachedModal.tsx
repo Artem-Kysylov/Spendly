@@ -75,11 +75,11 @@ export default function LimitReachedModal({
                     overlayClassName="bg-foreground/50"
                 >
                     <div className="mx-auto mt-2 mb-4 h-1.5 w-12 rounded-full bg-muted" />
-                    <SheetHeader className="text-center">
+                    <SheetHeader className="text-center relative">
                         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
                             <Rocket className="h-8 w-8 text-primary" />
                         </div>
-                        <SheetTitle className="text-xl">
+                        <SheetTitle className="text-xl px-4">
                             {tLimitReached("title")}
                         </SheetTitle>
                     </SheetHeader>
@@ -115,11 +115,11 @@ export default function LimitReachedModal({
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-md">
-                <DialogHeader>
+                <DialogHeader className="relative">
                     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
                         <Rocket className="h-8 w-8 text-primary" />
                     </div>
-                    <DialogTitle className="text-center text-xl">
+                    <DialogTitle className="text-center text-xl px-4">
                         {tLimitReached("title")}
                     </DialogTitle>
                     <button
