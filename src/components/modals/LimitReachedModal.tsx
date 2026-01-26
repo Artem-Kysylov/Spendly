@@ -76,7 +76,7 @@ export default function LimitReachedModal({
                 >
                     <div className="mx-auto mt-2 mb-4 h-1.5 w-12 rounded-full bg-muted" />
                     <SheetHeader className="text-center relative">
-                        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+                        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
                             <Rocket className="h-8 w-8 text-primary" />
                         </div>
                         <SheetTitle className="text-xl px-4">
