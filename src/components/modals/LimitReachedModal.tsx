@@ -75,11 +75,11 @@ export default function LimitReachedModal({
                     overlayClassName="bg-foreground/50"
                 >
                     <div className="mx-auto mt-2 mb-4 h-1.5 w-12 rounded-full bg-muted" />
-                    <SheetHeader className="text-center relative">
+                    <SheetHeader className="flex items-center justify-center text-center gap-2 relative">
                         <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
                             <Rocket className="h-8 w-8 text-primary" />
                         </div>
-                        <SheetTitle className="text-xl px-4">
+                        <SheetTitle className="text-xl">
                             {tLimitReached("title")}
                         </SheetTitle>
                     </SheetHeader>
