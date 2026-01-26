@@ -434,9 +434,9 @@ export default function TransactionsClient() {
                 className="w-[300px] sm:w-[400px] bg-background border-r border-border flex flex-col overflow-hidden"
               >
                 <SheetHeader className="text-center">
-                  <SheetTitle className="flex items-center justify-center gap-2">
-                    <Sparkles className="w-5 h-5 text-primary" />
-                    {t("aiInsights.title")}
+                  <SheetTitle className="flex items-center justify-center gap-2 text-center">
+                    <Sparkles className="w-5 h-5 text-primary flex-shrink-0" />
+                    <span>{t("aiInsights.title")}</span>
                   </SheetTitle>
                 </SheetHeader>
                 <div className="flex-1 min-h-0 overflow-y-auto mt-6 px-1 pb-6">
