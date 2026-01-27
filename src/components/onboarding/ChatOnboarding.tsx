@@ -232,16 +232,12 @@ export default function ChatOnboarding() {
     }
 
     try {
-      try {
-        await saveUserLocaleSettings({
-          userId: session.user.id,
-          country: "US",
-          currency,
-          locale: language,
-        });
-      } catch (e) {
-        console.warn("Failed to save locale settings:", e);
-      }
+      await saveUserLocaleSettings({
+        userId: session.user.id,
+        country: "US",
+        currency,
+        locale: language,
+      });
 
       // Save currency to localStorage for formatCurrency
       if (typeof window !== 'undefined') {

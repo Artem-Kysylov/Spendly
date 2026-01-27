@@ -34,92 +34,116 @@ export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
     locale: validLocale,
   });
 
-  let supabase: ReturnType<typeof getServerSupabaseClient> | null = null;
-  try {
-    supabase = getServerSupabaseClient();
-  } catch (e) {
-    console.error("[saveUserLocaleSettings] Failed to init server Supabase client", {
+  const supabaseAdmin = getServerSupabaseClient();
+
+  const isMissingColumnError = (err: unknown) => {
+    const code = (err as { code?: string } | null)?.code;
+    const message = (err as { message?: string } | null)?.message;
+    return (
+      code === "42703" ||
+      (typeof message === "string" && message.toLowerCase().includes("column") && message.toLowerCase().includes("does not exist"))
+    );
+  };
+
+  const profilesUpsertFull = await supabaseAdmin
+    .from("profiles")
+    .upsert(
+      [
+        {
+          id: userId,
+          country: normalized.country,
+          currency: normalized.currency,
+          locale: normalized.locale,
+        },
+      ],
+      { onConflict: "id" },
+    )
+    .select("id");
+
+  if (profilesUpsertFull.error) {
+    if (isMissingColumnError(profilesUpsertFull.error)) {
+      const profilesUpsertMinimal = await supabaseAdmin
+        .from("profiles")
+        .upsert([{ id: userId }], { onConflict: "id" })
+        .select("id");
+
+      if (profilesUpsertMinimal.error) {
+        console.error("[saveUserLocaleSettings] profiles upsert failed", {
+          userId,
+          code: (profilesUpsertMinimal.error as any)?.code,
+          message: (profilesUpsertMinimal.error as any)?.message,
+        });
+        throw new Error(profilesUpsertMinimal.error.message);
+      }
+    } else {
+      console.error("[saveUserLocaleSettings] profiles upsert failed", {
+        userId,
+        code: (profilesUpsertFull.error as any)?.code,
+        message: (profilesUpsertFull.error as any)?.message,
+      });
+      throw new Error(profilesUpsertFull.error.message);
+    }
+  }
+
+  const settingsUpsert = await supabaseAdmin
+    .from("user_settings")
+    .upsert(
+      [
+        {
+          user_id: userId,
+          locale: normalized.locale,
+        },
+      ],
+      { onConflict: "user_id" },
+    );
+
+  if (settingsUpsert.error) {
+    console.error("[saveUserLocaleSettings] user_settings upsert failed", {
       userId,
-      hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-      hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
-      error: e instanceof Error ? { message: e.message, stack: e.stack } : String(e),
+      code: (settingsUpsert.error as any)?.code,
+      message: (settingsUpsert.error as any)?.message,
     });
+    throw new Error(settingsUpsert.error.message);
   }
 
-  try {
-    if (supabase) {
-      const { error } = await supabase
+  const usersUpsertFull = await supabaseAdmin
+    .from("users")
+    .upsert(
+      [
+        {
+          id: userId,
+          country: normalized.country,
+          currency: normalized.currency,
+          locale: normalized.locale,
+        },
+      ],
+      { onConflict: "id" },
+    )
+    .select("id");
+
+  if (usersUpsertFull.error) {
+    if (isMissingColumnError(usersUpsertFull.error)) {
+      const usersUpsertMinimal = await supabaseAdmin
         .from("users")
-        .upsert(
-          [
-            {
-              id: userId,
-              country: normalized.country,
-              currency: normalized.currency,
-              locale: normalized.locale,
-            },
-          ],
-          { onConflict: "id" },
-        );
+        .upsert([{ id: userId }], { onConflict: "id" })
+        .select("id");
 
-      if (error) {
-        const code = (error as any).code || "";
-        const message = (error as any).message || "";
-        const relationMissing =
-          code === "42P01" || message.includes('relation "users" does not exist');
-        if (!relationMissing) {
-          console.error("[saveUserLocaleSettings] users upsert failed", {
-            userId,
-            code,
-            message,
-          });
-          throw new Error(error.message);
-        }
-        console.warn("users table missing, skipping DB save; using cookies only");
+      if (usersUpsertMinimal.error) {
+        console.error("[saveUserLocaleSettings] users upsert failed", {
+          userId,
+          code: (usersUpsertMinimal.error as any)?.code,
+          message: (usersUpsertMinimal.error as any)?.message,
+        });
+        throw new Error(usersUpsertMinimal.error.message);
       }
+    } else {
+      console.error("[saveUserLocaleSettings] users upsert failed", {
+        userId,
+        code: (usersUpsertFull.error as any)?.code,
+        message: (usersUpsertFull.error as any)?.message,
+      });
+      throw new Error(usersUpsertFull.error.message);
     }
-  } catch (e: any) {
-    const msg = e?.message || String(e);
-    if (!msg.includes('relation "users" does not exist')) throw e;
-    console.warn("users table missing, skipping DB save; using cookies only");
-  }
-
-  try {
-    if (supabase) {
-      const { error } = await supabase
-        .from("user_settings")
-        .upsert(
-          [
-            {
-              user_id: userId,
-              locale: normalized.locale,
-            },
-          ],
-          { onConflict: "user_id" },
-        );
-
-      if (error) {
-        const code = (error as any).code || "";
-        const message = (error as any).message || "";
-        const relationMissing =
-          code === "42P01" || message.includes('relation "user_settings" does not exist');
-        if (!relationMissing) {
-          console.error("[saveUserLocaleSettings] user_settings upsert failed", {
-            userId,
-            code,
-            message,
-          });
-          throw new Error(error.message);
-        }
-        console.warn(
-          "user_settings table missing, skipping DB save; using cookies only",
-        );
-      }
-    }
-  } catch (e: any) {
-    const msg = e?.message || String(e);
-    if (!msg.includes('relation "user_settings" does not exist')) throw e;
-    console.warn("user_settings table missing, skipping DB save; using cookies only");
   }
 
   // Set cookies for client/provider sync

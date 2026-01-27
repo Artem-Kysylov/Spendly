@@ -15,9 +15,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const supabase = getServerSupabaseClient();
+    const supabaseAdmin = getServerSupabaseClient();
 
-    const { data: profile, error: profileError } = await supabase
+    console.log("[WelcomeEmail] request", {
+      userId,
+      hasUserId: typeof userId === "string" && userId.length > 0,
+    });
+
+    const { data: profile, error: profileError } = await supabaseAdmin
       .from("profiles")
       .select("email, first_name")
       .eq("id", userId)
@@ -45,12 +50,21 @@ export async function POST(request: NextRequest) {
     }
 
     if (profileError || !profile) {
-      console.error("[WelcomeEmail] Profile not found:", profileError);
+      console.error("[WelcomeEmail] Profile not found", {
+        userId,
+        error: profileError?.message,
+      });
       return NextResponse.json(
         { error: "Profile not found" },
         { status: 404 }
       );
     }
+
+    console.log("[WelcomeEmail] Profile loaded", {
+      userId,
+      hasEmail: typeof profile.email === "string" && profile.email.length > 0,
+      hasFirstName: typeof profile.first_name === "string" && profile.first_name.length > 0,
+    });
 
     const firstName = profile.first_name || "Friend";
     const result = await sendWelcomeEmail(profile.email, firstName);
