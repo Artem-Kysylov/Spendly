@@ -13,7 +13,21 @@ type SaveUserLocalePayload = {
   locale?: string;
 };
 
-export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
+type SaveUserLocaleStage = "supabase_admin" | "profiles" | "user_settings" | "users";
+
+type SaveUserLocaleResult =
+  | { success: true; settings: ReturnType<typeof normalizeLocaleSettings> }
+  | {
+      success: false;
+      settings: ReturnType<typeof normalizeLocaleSettings>;
+      stage: SaveUserLocaleStage;
+      code?: string;
+      message: string;
+    };
+
+export async function saveUserLocaleSettings(
+  payload: SaveUserLocalePayload,
+): Promise<SaveUserLocaleResult> {
   const { userId, country, currency, locale } = payload;
   if (!userId) throw new Error("Missing userId");
 
@@ -34,7 +48,39 @@ export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
     locale: validLocale,
   });
 
-  const supabaseAdmin = getServerSupabaseClient();
+  const fail = (opts: {
+    stage: SaveUserLocaleStage;
+    code?: string;
+    message: string;
+  }): SaveUserLocaleResult => {
+    console.error("[saveUserLocaleSettings] failed", {
+      userId,
+      stage: opts.stage,
+      code: opts.code,
+      message: opts.message,
+    });
+    return { success: false, settings: normalized, ...opts };
+  };
+
+  let supabaseAdmin: ReturnType<typeof getServerSupabaseClient>;
+  try {
+    supabaseAdmin = getServerSupabaseClient();
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    // Set cookies even if DB fails
+    const cookieStore = cookies();
+    cookieStore.set("spendly_locale", normalized.locale, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
+    cookieStore.set("NEXT_LOCALE", normalized.locale, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
+    return fail({ stage: "supabase_admin", message });
+  }
 
   const isMissingColumnError = (err: unknown) => {
     const code = (err as { code?: string } | null)?.code;
@@ -68,20 +114,40 @@ export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
         .select("id");
 
       if (profilesUpsertMinimal.error) {
-        console.error("[saveUserLocaleSettings] profiles upsert failed", {
-          userId,
-          code: (profilesUpsertMinimal.error as any)?.code,
-          message: (profilesUpsertMinimal.error as any)?.message,
+        const code = (profilesUpsertMinimal.error as any)?.code;
+        const message = (profilesUpsertMinimal.error as any)?.message || profilesUpsertMinimal.error.message;
+        const result = fail({ stage: "profiles", code, message });
+
+        const cookieStore = cookies();
+        cookieStore.set("spendly_locale", normalized.locale, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 365,
+          sameSite: "lax",
         });
-        throw new Error(profilesUpsertMinimal.error.message);
+        cookieStore.set("NEXT_LOCALE", normalized.locale, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 365,
+          sameSite: "lax",
+        });
+        return result;
       }
     } else {
-      console.error("[saveUserLocaleSettings] profiles upsert failed", {
-        userId,
-        code: (profilesUpsertFull.error as any)?.code,
-        message: (profilesUpsertFull.error as any)?.message,
+      const code = (profilesUpsertFull.error as any)?.code;
+      const message = (profilesUpsertFull.error as any)?.message || profilesUpsertFull.error.message;
+      const result = fail({ stage: "profiles", code, message });
+
+      const cookieStore = cookies();
+      cookieStore.set("spendly_locale", normalized.locale, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: "lax",
       });
-      throw new Error(profilesUpsertFull.error.message);
+      cookieStore.set("NEXT_LOCALE", normalized.locale, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: "lax",
+      });
+      return result;
     }
   }
 
@@ -98,12 +164,22 @@ export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
     );
 
   if (settingsUpsert.error) {
-    console.error("[saveUserLocaleSettings] user_settings upsert failed", {
-      userId,
-      code: (settingsUpsert.error as any)?.code,
-      message: (settingsUpsert.error as any)?.message,
+    const code = (settingsUpsert.error as any)?.code;
+    const message = (settingsUpsert.error as any)?.message || settingsUpsert.error.message;
+    const result = fail({ stage: "user_settings", code, message });
+
+    const cookieStore = cookies();
+    cookieStore.set("spendly_locale", normalized.locale, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
     });
-    throw new Error(settingsUpsert.error.message);
+    cookieStore.set("NEXT_LOCALE", normalized.locale, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
+    return result;
   }
 
   const usersUpsertFull = await supabaseAdmin
@@ -129,20 +205,40 @@ export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
         .select("id");
 
       if (usersUpsertMinimal.error) {
-        console.error("[saveUserLocaleSettings] users upsert failed", {
-          userId,
-          code: (usersUpsertMinimal.error as any)?.code,
-          message: (usersUpsertMinimal.error as any)?.message,
+        const code = (usersUpsertMinimal.error as any)?.code;
+        const message = (usersUpsertMinimal.error as any)?.message || usersUpsertMinimal.error.message;
+        const result = fail({ stage: "users", code, message });
+
+        const cookieStore = cookies();
+        cookieStore.set("spendly_locale", normalized.locale, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 365,
+          sameSite: "lax",
         });
-        throw new Error(usersUpsertMinimal.error.message);
+        cookieStore.set("NEXT_LOCALE", normalized.locale, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 365,
+          sameSite: "lax",
+        });
+        return result;
       }
     } else {
-      console.error("[saveUserLocaleSettings] users upsert failed", {
-        userId,
-        code: (usersUpsertFull.error as any)?.code,
-        message: (usersUpsertFull.error as any)?.message,
+      const code = (usersUpsertFull.error as any)?.code;
+      const message = (usersUpsertFull.error as any)?.message || usersUpsertFull.error.message;
+      const result = fail({ stage: "users", code, message });
+
+      const cookieStore = cookies();
+      cookieStore.set("spendly_locale", normalized.locale, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: "lax",
       });
-      throw new Error(usersUpsertFull.error.message);
+      cookieStore.set("NEXT_LOCALE", normalized.locale, {
+        path: "/",
+        maxAge: 60 * 60 * 24 * 365,
+        sameSite: "lax",
+      });
+      return result;
     }
   }
 

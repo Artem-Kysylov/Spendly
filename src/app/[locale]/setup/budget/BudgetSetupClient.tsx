@@ -42,12 +42,21 @@ export default function BudgetSetupClient() {
       // Persist user locale settings (country, currency, locale)
       try {
         if (settings) {
-          await saveUserLocaleSettings({
+          const res = await saveUserLocaleSettings({
             userId: session.user.id,
             country: settings.country,
             currency: settings.currency,
             locale: settings.locale,
           });
+
+          if (!res.success) {
+            console.warn("Failed to save locale settings:", {
+              userId: session.user.id,
+              stage: res.stage,
+              code: res.code,
+              message: res.message,
+            });
+          }
 
           if (typeof window !== "undefined" && settings.currency) {
             localStorage.setItem("user-currency", settings.currency);
