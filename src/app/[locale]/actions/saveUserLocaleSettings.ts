@@ -85,9 +85,12 @@ export async function saveUserLocaleSettings(
   const isMissingColumnError = (err: unknown) => {
     const code = (err as { code?: string } | null)?.code;
     const message = (err as { message?: string } | null)?.message;
+    const msg = typeof message === "string" ? message.toLowerCase() : "";
     return (
       code === "42703" ||
-      (typeof message === "string" && message.toLowerCase().includes("column") && message.toLowerCase().includes("does not exist"))
+      code === "PGRST204" ||
+      (msg.includes("column") && msg.includes("does not exist")) ||
+      (msg.includes("could not find") && msg.includes("column") && msg.includes("schema cache"))
     );
   };
 
