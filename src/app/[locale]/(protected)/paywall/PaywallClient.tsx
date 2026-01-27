@@ -54,16 +54,22 @@ export default function PaywallClient() {
         // trackEvent("paywall_cta_clicked", { plan, from: "paywall" });
 
         try {
+            const fallback = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "").trim();
             const priceId = (
                 plan === "monthly"
-                    ? "pri_01kf3g78sjap8307ctf6p6e0xm"
+                    ? (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID_MONTHLY || "").trim()
                     : plan === "yearly"
-                        ? "pri_01kf3g8fzd9gy4j08sw69rcey8"
-                        : "pri_01kf3g9jqpwq3xr25shbk7x8pq"
-            ).trim();
+                        ? (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID_YEARLY || "").trim()
+                        : (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID_LIFETIME || "").trim()
+            ) || fallback;
+
+            if (!priceId) {
+                setToast({ text: "Checkout is unavailable. Please try again.", type: "error" });
+                setTimeout(() => setToast(null), 3000);
+                return;
+            }
 
             const userId = session?.user?.id;
-            const email = session?.user?.email?.trim();
             const customData: Record<string, string> = { plan };
             if (typeof userId === "string" && userId.length > 0) customData.user_id = userId;
 
@@ -93,7 +99,6 @@ export default function PaywallClient() {
                 },
                 items: [{ priceId, quantity: 1 }],
                 customData,
-                customer: email ? { email } : undefined,
             });
         } catch (e) {
             console.warn("[Paywall] Paddle checkout failed:", e);

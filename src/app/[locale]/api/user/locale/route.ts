@@ -43,9 +43,9 @@ export async function POST(req: NextRequest) {
 
     try {
       const { data, error } = await supabase
-        .from("users")
+        .from("user_settings")
         .select("country,currency,locale")
-        .eq("id", user.id)
+        .eq("user_id", user.id)
         .maybeSingle();
 
       if (!error && data) {
@@ -73,31 +73,25 @@ export async function POST(req: NextRequest) {
       locale: validLocale || existingLocale || metaLocale,
     });
 
-    // Пытаемся upsert в public.users (если таблица есть)
+    // Пытаемся upsert в public.user_settings
     const upsertRes = await supabase
-      .from("users")
+      .from("user_settings")
       .upsert(
         [
           {
-            id: user.id,
+            user_id: user.id,
             country: normalized.country,
             currency: normalized.currency,
             locale: normalized.locale,
           },
         ],
-        { onConflict: "id" },
+        { onConflict: "user_id" },
       );
 
     if (upsertRes.error) {
-      // Если таблицы нет — мягко игнорируем, продолжаем с метаданными и куками
       const code = (upsertRes.error as any).code || "";
       const message = (upsertRes.error as any).message || "";
-      const relationMissing =
-        code === "42P01" || message.includes('relation "users" does not exist');
-      if (!relationMissing) {
-        console.warn("Upsert users failed:", upsertRes.error);
-        // Не прерываем — продолжаем с метаданными и куками
-      }
+      console.warn("Upsert user_settings failed:", { code, message });
     }
 
     // Обновляем метаданные auth пользователя (совместимость)

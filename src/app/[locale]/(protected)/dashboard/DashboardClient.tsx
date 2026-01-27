@@ -101,13 +101,13 @@ function DashboardClient() {
         typeof window !== "undefined" ? localStorage.getItem("user-currency") : null;
       let resolved = metaCurrency || localCurrency || guessCurrencyFromLocale(locale) || "USD";
 
-      // Try to read currency from public.users (if exists) as the most authoritative
+      // Try to read currency from public.user_settings as the most authoritative
       try {
         const { data: userSettings } = await supabase
-          .from("users")
+          .from("user_settings")
           .select("currency")
-          .eq("id", session.user.id)
-          .single();
+          .eq("user_id", session.user.id)
+          .maybeSingle();
         if (userSettings?.currency) {
           resolved = userSettings.currency;
         }

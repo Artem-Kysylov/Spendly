@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const admin = getServerSupabaseClient();
 
     const { data: userRow, error: userErr } = await admin
-      .from("users")
+      .from("profiles")
       .select("is_pro")
       .eq("id", user.id)
       .maybeSingle();

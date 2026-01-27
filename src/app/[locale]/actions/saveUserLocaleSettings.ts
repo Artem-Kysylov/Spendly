@@ -100,9 +100,6 @@ export async function saveUserLocaleSettings(
       [
         {
           id: userId,
-          country: normalized.country,
-          currency: normalized.currency,
-          locale: normalized.locale,
         },
       ],
       { onConflict: "id" },
@@ -154,12 +151,49 @@ export async function saveUserLocaleSettings(
     }
   }
 
+  try {
+    const { data, error } = await supabaseAdmin.auth.admin.getUserById(userId);
+    if (!error && data?.user) {
+      const email = typeof data.user.email === "string" ? data.user.email : null;
+      const meta = (data.user.user_metadata as any) || {};
+      const firstName = typeof meta.first_name === "string" ? meta.first_name : typeof meta.firstName === "string" ? meta.firstName : null;
+      const lastName = typeof meta.last_name === "string" ? meta.last_name : typeof meta.lastName === "string" ? meta.lastName : null;
+
+      const patch: Record<string, string> = {};
+      if (email) patch.email = email;
+      if (firstName) patch.first_name = firstName;
+      if (lastName) patch.last_name = lastName;
+
+      if (Object.keys(patch).length > 0) {
+        const upd = await supabaseAdmin
+          .from("profiles")
+          .update(patch)
+          .eq("id", userId);
+
+        if (upd.error) {
+          console.warn("[saveUserLocaleSettings] profiles update (email/name) failed", {
+            userId,
+            code: (upd.error as any)?.code,
+            message: (upd.error as any)?.message,
+          });
+        }
+      }
+    }
+  } catch (e) {
+    console.warn("[saveUserLocaleSettings] auth admin getUserById failed", {
+      userId,
+      error: e instanceof Error ? e.message : String(e),
+    });
+  }
+
   const settingsUpsert = await supabaseAdmin
     .from("user_settings")
     .upsert(
       [
         {
           user_id: userId,
+          country: normalized.country,
+          currency: normalized.currency,
           locale: normalized.locale,
         },
       ],
@@ -185,64 +219,33 @@ export async function saveUserLocaleSettings(
     return result;
   }
 
-  const usersUpsertFull = await supabaseAdmin
-    .from("users")
-    .upsert(
-      [
-        {
-          id: userId,
-          country: normalized.country,
-          currency: normalized.currency,
-          locale: normalized.locale,
-        },
-      ],
-      { onConflict: "id" },
-    )
-    .select("id");
+  try {
+    const usersUpsertFull = await supabaseAdmin
+      .from("users")
+      .upsert(
+        [
+          {
+            id: userId,
+            country: normalized.country,
+            currency: normalized.currency,
+            locale: normalized.locale,
+          },
+        ],
+        { onConflict: "id" },
+      )
+      .select("id");
 
-  if (usersUpsertFull.error) {
-    if (isMissingColumnError(usersUpsertFull.error)) {
-      const usersUpsertMinimal = await supabaseAdmin
+    if (usersUpsertFull.error && isMissingColumnError(usersUpsertFull.error)) {
+      await supabaseAdmin
         .from("users")
         .upsert([{ id: userId }], { onConflict: "id" })
         .select("id");
-
-      if (usersUpsertMinimal.error) {
-        const code = (usersUpsertMinimal.error as any)?.code;
-        const message = (usersUpsertMinimal.error as any)?.message || usersUpsertMinimal.error.message;
-        const result = fail({ stage: "users", code, message });
-
-        const cookieStore = cookies();
-        cookieStore.set("spendly_locale", normalized.locale, {
-          path: "/",
-          maxAge: 60 * 60 * 24 * 365,
-          sameSite: "lax",
-        });
-        cookieStore.set("NEXT_LOCALE", normalized.locale, {
-          path: "/",
-          maxAge: 60 * 60 * 24 * 365,
-          sameSite: "lax",
-        });
-        return result;
-      }
-    } else {
-      const code = (usersUpsertFull.error as any)?.code;
-      const message = (usersUpsertFull.error as any)?.message || usersUpsertFull.error.message;
-      const result = fail({ stage: "users", code, message });
-
-      const cookieStore = cookies();
-      cookieStore.set("spendly_locale", normalized.locale, {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 365,
-        sameSite: "lax",
-      });
-      cookieStore.set("NEXT_LOCALE", normalized.locale, {
-        path: "/",
-        maxAge: 60 * 60 * 24 * 365,
-        sameSite: "lax",
-      });
-      return result;
     }
+  } catch (e) {
+    console.warn("[saveUserLocaleSettings] users upsert skipped", {
+      userId,
+      error: e instanceof Error ? e.message : String(e),
+    });
   }
 
   // Set cookies for client/provider sync

@@ -50,7 +50,7 @@ async function getIsProUser(opts: {
 }): Promise<boolean> {
     const supabase = getServerSupabaseClient();
     const { data, error } = await supabase
-        .from("users")
+        .from("profiles")
         .select("is_pro")
         .eq("id", opts.userId)
         .maybeSingle();

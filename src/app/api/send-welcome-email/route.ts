@@ -49,25 +49,71 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    if (profileError || !profile) {
-      console.error("[WelcomeEmail] Profile not found", {
-        userId,
-        error: profileError?.message,
-      });
-      return NextResponse.json(
-        { error: "Profile not found" },
-        { status: 404 }
-      );
+    const profileNotFound =
+      !!profileError &&
+      ((profileError as any)?.code === "PGRST116" ||
+        (typeof (profileError as any)?.message === "string" &&
+          (profileError as any).message.toLowerCase().includes("0 rows")));
+
+    const profileEmail =
+      typeof profile?.email === "string" ? profile.email.trim() : "";
+    const profileFirstName =
+      typeof profile?.first_name === "string" ? profile.first_name.trim() : "";
+
+    let email = profileEmail;
+    let firstName = profileFirstName;
+
+    if (!email) {
+      const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.getUserById(userId);
+      const authEmail = typeof authData?.user?.email === "string" ? authData.user.email.trim() : "";
+      const meta = (authData?.user?.user_metadata as any) || {};
+      const metaFirst =
+        typeof meta?.first_name === "string"
+          ? meta.first_name
+          : typeof meta?.firstName === "string"
+            ? meta.firstName
+            : "";
+
+      if (authErr) {
+        console.error("[WelcomeEmail] Failed to load auth user", {
+          userId,
+          error: authErr.message,
+        });
+      }
+
+      if (!email && authEmail) email = authEmail;
+      if (!firstName && typeof metaFirst === "string" && metaFirst.trim()) {
+        firstName = metaFirst.trim();
+      }
+
+      if (email && (profileNotFound || !profileEmail)) {
+        const patch: Record<string, string> = { email };
+        if (firstName) patch.first_name = firstName;
+        const upd = await supabaseAdmin
+          .from("profiles")
+          .upsert([{ id: userId, ...patch }], { onConflict: "id" });
+        if (upd.error) {
+          console.warn("[WelcomeEmail] Failed to upsert profile email", {
+            userId,
+            error: upd.error.message,
+          });
+        }
+      }
     }
 
-    console.log("[WelcomeEmail] Profile loaded", {
+    if (!email) {
+      console.error("[WelcomeEmail] Email not found for user", { userId });
+      return NextResponse.json({ error: "Email not found" }, { status: 404 });
+    }
+
+    console.log("[WelcomeEmail] Resolved recipient", {
       userId,
-      hasEmail: typeof profile.email === "string" && profile.email.length > 0,
-      hasFirstName: typeof profile.first_name === "string" && profile.first_name.length > 0,
+      hasEmail: email.length > 0,
+      hasFirstName: firstName.length > 0,
+      usedProfile: !!profileEmail,
     });
 
-    const firstName = profile.first_name || "Friend";
-    const result = await sendWelcomeEmail(profile.email, firstName);
+    const result = await sendWelcomeEmail(email, firstName || "Friend");
 
     if (!result.success) {
       return NextResponse.json(

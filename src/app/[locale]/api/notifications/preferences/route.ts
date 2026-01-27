@@ -17,6 +17,24 @@ export async function GET(req: NextRequest) {
     let data: any = null;
     let error: any = null;
 
+    const defaultSettings = () => {
+      const now = new Date().toISOString();
+      return {
+        id: null,
+        user_id: user.id,
+        locale,
+        frequency: "gentle" as const,
+        push_enabled: false,
+        email_enabled: true,
+        quiet_hours_enabled: false,
+        quiet_hours_start: null,
+        quiet_hours_end: null,
+        quiet_hours_timezone: null,
+        created_at: now,
+        updated_at: now,
+      };
+    };
+
     const first = await supabase
       .from("notification_preferences")
       .select(selectWithLocale)
@@ -29,7 +47,7 @@ export async function GET(req: NextRequest) {
     const errMsg = String((error as any)?.message || "");
     const errCode = String((error as any)?.code || "");
     const missingLocaleColumn =
-      (errCode === "42703" || errMsg.toLowerCase().includes("does not exist")) &&
+      (errCode === "42703" || errCode === "PGRST204" || errMsg.toLowerCase().includes("does not exist")) &&
       errMsg.toLowerCase().includes("locale");
 
     if (error && missingLocaleColumn) {
@@ -45,8 +63,11 @@ export async function GET(req: NextRequest) {
     if (error && error.code !== "PGRST116") {
       console.error("Error fetching notification preferences:", error);
       return NextResponse.json(
-        { error: tErrors("notifications.fetchFailed") },
-        { status: 500 },
+        {
+          settings: defaultSettings(),
+          error: tErrors("notifications.fetchFailed"),
+        },
+        { status: 200 },
       );
     }
 
@@ -114,7 +135,7 @@ export async function GET(req: NextRequest) {
       const createMsg = String((createError as any)?.message || "");
       const createCode = String((createError as any)?.code || "");
       const createMissingLocale =
-        (createCode === "42703" || createMsg.toLowerCase().includes("does not exist")) &&
+        (createCode === "42703" || createCode === "PGRST204" || createMsg.toLowerCase().includes("does not exist")) &&
         createMsg.toLowerCase().includes("locale");
 
       if (createError && createMissingLocale) {
@@ -130,8 +151,8 @@ export async function GET(req: NextRequest) {
       if (createError) {
         console.error("Error creating default preferences:", createError);
         return NextResponse.json(
-          { error: createError.message },
-          { status: 500 },
+          { settings: defaultSettings(), error: createError.message },
+          { status: 200 },
         );
       }
 

@@ -312,7 +312,7 @@ export async function POST(req: NextRequest) {
 
     // Получаем план пользователя (free/pro)
     const { data: userRow } = await supabase
-      .from("users")
+      .from("profiles")
       .select("is_pro")
       .eq("id", userId)
       .maybeSingle();

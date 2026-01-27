@@ -39,20 +39,5 @@ export async function getUserPreferredLanguage(
     // ignore
   }
 
-  // Fallback to checking the users table if user_settings fails or is empty
-  try {
-    const { data, error } = await supabase
-      .from("users")
-      .select("locale")
-      .eq("id", userId)
-      .maybeSingle();
-
-    if (!error && data?.locale) {
-      return normalize(data.locale);
-    }
-  } catch {
-    // ignore
-  }
-
   return DEFAULT_LOCALE;
 }

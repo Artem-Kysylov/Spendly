@@ -27,7 +27,7 @@ function getUtcDayStartIso(date: Date): string {
 async function getIsProUser(userId: string): Promise<boolean> {
   const supabase = getServerSupabaseClient();
   const { data, error } = await supabase
-    .from("users")
+    .from("profiles")
     .select("is_pro")
     .eq("id", userId)
     .maybeSingle();
