@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLocale } from "next-intl";
 import { UserAuth } from "@/context/AuthContext";
+import { useRouter } from "@/i18n/routing";
 // import { trackEvent } from "@/lib/telemetry";
 
 export default function UpgradeSidebarBanner() {
@@ -10,32 +11,13 @@ export default function UpgradeSidebarBanner() {
   const locale = useLocale();
   const { session } = UserAuth();
   const { subscriptionPlan } = useSubscription();
+  const router = useRouter();
 
   if (subscriptionPlan === "pro") return null;
 
   const handleUpgradeClick = () => {
     // trackEvent("upgrade_cta_clicked", { from: "sidebar_banner" });
-
-    const priceId = process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "pri_01kfxkp0jxyc9vb43fenkbejxv";
-    const paddle = (window as any)?.Paddle;
-    if (!paddle?.Checkout?.open) {
-      console.warn("[SidebarBanner] Paddle is not available on window yet");
-      return;
-    }
-
-    paddle.Checkout.open({
-      settings: {
-        displayMode: "overlay",
-        locale,
-        theme: "light",
-      },
-      items: [{ priceId, quantity: 1 }],
-      customData: {
-        user_id: session?.user?.id,
-        plan: "monthly",
-      },
-      customer: session?.user?.email ? { email: session.user.email } : undefined,
-    });
+    router.push("/paywall");
   };
 
   return (
