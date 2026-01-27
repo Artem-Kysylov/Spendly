@@ -4,8 +4,6 @@ import { cookies } from "next/headers";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
 import { normalizeLocaleSettings } from "@/i18n/detect";
 import { isSupportedLanguage } from "@/i18n/config";
-import fs from "fs";
-import path from "path";
 
 type SaveUserLocalePayload = {
   userId: string;
@@ -21,6 +19,8 @@ export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
   let whitelist: Array<{ code: string; currency: string; language: string }> = [];
   
   try {
+    const fs = await import("node:fs");
+    const path = await import("node:path");
     const datasetPath = path.join(
       process.cwd(),
       "public",
@@ -30,7 +30,11 @@ export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
     const raw = fs.readFileSync(datasetPath, "utf8");
     whitelist = JSON.parse(raw);
   } catch (e) {
-    console.warn("Failed to load countries dataset:", e);
+    console.error("[saveUserLocaleSettings] Failed to load countries dataset", {
+      userId,
+      cwd: process.cwd(),
+      error: e instanceof Error ? { message: e.message, stack: e.stack } : String(e),
+    });
     // Continue without validation if file not found
   }
 
@@ -49,33 +53,49 @@ export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
     locale: validLocale,
   });
 
-  const supabase = getServerSupabaseClient();
+  let supabase: ReturnType<typeof getServerSupabaseClient> | null = null;
+  try {
+    supabase = getServerSupabaseClient();
+  } catch (e) {
+    console.error("[saveUserLocaleSettings] Failed to init server Supabase client", {
+      userId,
+      hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasServiceRoleKey: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+      error: e instanceof Error ? { message: e.message, stack: e.stack } : String(e),
+    });
+  }
 
   try {
-    const { error } = await supabase
-      .from("users")
-      .upsert(
-        [
-          {
-            id: userId,
-            country: normalized.country,
-            currency: normalized.currency,
-            locale: normalized.locale,
-          },
-        ],
-        { onConflict: "id" },
-      );
+    if (supabase) {
+      const { error } = await supabase
+        .from("users")
+        .upsert(
+          [
+            {
+              id: userId,
+              country: normalized.country,
+              currency: normalized.currency,
+              locale: normalized.locale,
+            },
+          ],
+          { onConflict: "id" },
+        );
 
-    if (error) {
-      const code = (error as any).code || "";
-      const message = (error as any).message || "";
-      const relationMissing =
-        code === "42P01" || message.includes('relation "users" does not exist');
-      if (!relationMissing) {
-        throw new Error(error.message);
+      if (error) {
+        const code = (error as any).code || "";
+        const message = (error as any).message || "";
+        const relationMissing =
+          code === "42P01" || message.includes('relation "users" does not exist');
+        if (!relationMissing) {
+          console.error("[saveUserLocaleSettings] users upsert failed", {
+            userId,
+            code,
+            message,
+          });
+          throw new Error(error.message);
+        }
+        console.warn("users table missing, skipping DB save; using cookies only");
       }
-      // Таблицы нет — игнорируем, перейдём на куки
-      console.warn("users table missing, skipping DB save; using cookies only");
     }
   } catch (e: any) {
     const msg = e?.message || String(e);
@@ -84,29 +104,36 @@ export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
   }
 
   try {
-    const { error } = await supabase
-      .from("user_settings")
-      .upsert(
-        [
-          {
-            user_id: userId,
-            locale: normalized.locale,
-          },
-        ],
-        { onConflict: "user_id" },
-      );
+    if (supabase) {
+      const { error } = await supabase
+        .from("user_settings")
+        .upsert(
+          [
+            {
+              user_id: userId,
+              locale: normalized.locale,
+            },
+          ],
+          { onConflict: "user_id" },
+        );
 
-    if (error) {
-      const code = (error as any).code || "";
-      const message = (error as any).message || "";
-      const relationMissing =
-        code === "42P01" || message.includes('relation "user_settings" does not exist');
-      if (!relationMissing) {
-        throw new Error(error.message);
+      if (error) {
+        const code = (error as any).code || "";
+        const message = (error as any).message || "";
+        const relationMissing =
+          code === "42P01" || message.includes('relation "user_settings" does not exist');
+        if (!relationMissing) {
+          console.error("[saveUserLocaleSettings] user_settings upsert failed", {
+            userId,
+            code,
+            message,
+          });
+          throw new Error(error.message);
+        }
+        console.warn(
+          "user_settings table missing, skipping DB save; using cookies only",
+        );
       }
-      console.warn(
-        "user_settings table missing, skipping DB save; using cookies only",
-      );
     }
   } catch (e: any) {
     const msg = e?.message || String(e);

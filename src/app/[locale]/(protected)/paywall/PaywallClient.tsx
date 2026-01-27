@@ -54,12 +54,18 @@ export default function PaywallClient() {
         // trackEvent("paywall_cta_clicked", { plan, from: "paywall" });
 
         try {
-            const priceId =
+            const priceId = (
                 plan === "monthly"
                     ? "pri_01kf3g78sjap8307ctf6p6e0xm"
                     : plan === "yearly"
                         ? "pri_01kf3g8fzd9gy4j08sw69rcey8"
-                        : "pri_01kf3g9jqpwq3xr25shbk7x8pq";
+                        : "pri_01kf3g9jqpwq3xr25shbk7x8pq"
+            ).trim();
+
+            const userId = session?.user?.id;
+            const email = session?.user?.email?.trim();
+            const customData: Record<string, string> = { plan };
+            if (typeof userId === "string" && userId.length > 0) customData.user_id = userId;
 
             const paddle = (window as any)?.Paddle;
             if (!paddle?.Checkout?.open) {
@@ -76,11 +82,8 @@ export default function PaywallClient() {
                     theme: "light",
                 },
                 items: [{ priceId, quantity: 1 }],
-                customData: {
-                    user_id: session?.user?.id,
-                    plan,
-                },
-                customer: session?.user?.email ? { email: session.user.email } : undefined,
+                customData,
+                customer: email ? { email } : undefined,
             });
         } catch (e) {
             console.warn("[Paywall] Paddle checkout failed:", e);

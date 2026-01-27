@@ -10,12 +10,19 @@ export function TopbarRocketButton() {
   const { session } = UserAuth();
 
   const handleUpgradeClick = () => {
-    const priceId = process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "pri_01kfxkp0jxyc9vb43fenkbejxv";
+    const priceId = (
+      process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "pri_01kfxkp0jxyc9vb43fenkbejxv"
+    ).trim();
     const paddle = (window as any)?.Paddle;
     if (!paddle?.Checkout?.open) {
       console.warn("[TopbarRocketButton] Paddle is not available on window yet");
       return;
     }
+
+    const userId = session?.user?.id;
+    const email = session?.user?.email?.trim();
+    const customData: Record<string, string> = { plan: "monthly" };
+    if (typeof userId === "string" && userId.length > 0) customData.user_id = userId;
 
     paddle.Checkout.open({
       settings: {
@@ -24,11 +31,8 @@ export function TopbarRocketButton() {
         theme: "light",
       },
       items: [{ priceId, quantity: 1 }],
-      customData: {
-        user_id: session?.user?.id,
-        plan: "monthly",
-      },
-      customer: session?.user?.email ? { email: session.user.email } : undefined,
+      customData,
+      customer: email ? { email } : undefined,
     });
   };
 

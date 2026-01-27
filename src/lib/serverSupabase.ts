@@ -7,6 +7,12 @@ export const getServerSupabaseClient = () => {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !serviceKey) {
+    console.error("[getServerSupabaseClient] Supabase server credentials are missing", {
+      hasSupabaseUrl: !!url,
+      hasServiceRoleKey: !!serviceKey,
+      nodeEnv: process.env.NODE_ENV,
+      vercelEnv: process.env.VERCEL_ENV,
+    });
     throw new Error("Supabase server credentials are missing");
   }
 

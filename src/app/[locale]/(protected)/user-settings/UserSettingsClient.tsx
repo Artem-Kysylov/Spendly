@@ -137,18 +137,24 @@ export default function UserSettingsClient() {
     if (isUpgradeLoading) return;
     setIsUpgradeLoading(true);
     try {
-      const priceId =
+      const priceId = (
         plan === "monthly"
           ? "pri_01kf3g78sjap8307ctf6p6e0xm"
           : plan === "yearly"
             ? "pri_01kf3g8fzd9gy4j08sw69rcey8"
-            : "pri_01kf3g9jqpwq3xr25shbk7x8pq";
+            : "pri_01kf3g9jqpwq3xr25shbk7x8pq"
+      ).trim();
 
       const paddle = (window as any)?.Paddle;
       if (!paddle?.Checkout?.open) {
         console.warn("[Settings] Paddle is not available on window yet");
         return;
       }
+
+      const userId = session?.user?.id;
+      const email = session?.user?.email?.trim();
+      const customData: Record<string, string> = { plan };
+      if (typeof userId === "string" && userId.length > 0) customData.user_id = userId;
 
       paddle.Checkout.open({
         settings: {
@@ -157,11 +163,8 @@ export default function UserSettingsClient() {
           theme: "light",
         },
         items: [{ priceId, quantity: 1 }],
-        customData: {
-          user_id: session?.user?.id,
-          plan,
-        },
-        customer: session?.user?.email ? { email: session.user.email } : undefined,
+        customData,
+        customer: email ? { email } : undefined,
       });
     } catch (e) {
       console.warn("[Settings] No checkout URL available:", e);
