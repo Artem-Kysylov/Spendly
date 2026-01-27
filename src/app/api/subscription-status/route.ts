@@ -10,8 +10,8 @@ export async function GET(req: NextRequest) {
     const admin = getServerSupabaseClient();
 
     const { data, error } = await admin
-      .from("users")
-      .select("is_pro")
+      .from("profiles")
+      .select("is_pro, subscription_status")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -23,11 +23,18 @@ export async function GET(req: NextRequest) {
     }
 
     const isPro = (data as any)?.is_pro === true;
+    const statusRaw = (data as any)?.subscription_status;
+    const subscriptionStatus =
+      typeof statusRaw === "string" && statusRaw.length > 0
+        ? statusRaw
+        : isPro
+          ? "pro"
+          : "free";
 
     return NextResponse.json(
       {
         is_pro: isPro,
-        subscription_status: isPro ? "pro" : "free",
+        subscription_status: subscriptionStatus,
       },
       { status: 200 },
     );

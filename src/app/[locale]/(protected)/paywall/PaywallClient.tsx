@@ -75,6 +75,16 @@ export default function PaywallClient() {
                 return;
             }
 
+            const nakedCheckout =
+                (process.env.NEXT_PUBLIC_PADDLE_NAKED_CHECKOUT || "").trim() === "true";
+
+            if (nakedCheckout) {
+                paddle.Checkout.open({
+                    items: [{ priceId, quantity: 1 }],
+                });
+                return;
+            }
+
             paddle.Checkout.open({
                 settings: {
                     displayMode: "overlay",

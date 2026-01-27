@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
 import { normalizeLocaleSettings } from "@/i18n/detect";
 import { isSupportedLanguage } from "@/i18n/config";
+import countryData from "../../../../public/data/countries-currencies-languages.json";
 
 type SaveUserLocalePayload = {
   userId: string;
@@ -16,27 +17,7 @@ export async function saveUserLocaleSettings(payload: SaveUserLocalePayload) {
   const { userId, country, currency, locale } = payload;
   if (!userId) throw new Error("Missing userId");
 
-  let whitelist: Array<{ code: string; currency: string; language: string }> = [];
-  
-  try {
-    const fs = await import("node:fs");
-    const path = await import("node:path");
-    const datasetPath = path.join(
-      process.cwd(),
-      "public",
-      "data",
-      "countries-currencies-languages.json",
-    );
-    const raw = fs.readFileSync(datasetPath, "utf8");
-    whitelist = JSON.parse(raw);
-  } catch (e) {
-    console.error("[saveUserLocaleSettings] Failed to load countries dataset", {
-      userId,
-      cwd: process.cwd(),
-      error: e instanceof Error ? { message: e.message, stack: e.stack } : String(e),
-    });
-    // Continue without validation if file not found
-  }
+  const whitelist = countryData as Array<{ code: string; currency: string; language: string }>;
 
   const validCountry =
     country && (whitelist.length === 0 || whitelist.some((c) => c.code === country)) ? country : undefined;
