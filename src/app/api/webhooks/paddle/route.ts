@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
+import { sendProSuccessEmail } from "@/lib/brevo";
 
 export const runtime = "nodejs";
 
@@ -241,19 +242,39 @@ async function updateSubscriptionState(opts: {
   customerId?: string | null;
 }) {
   const { userId, isPro, customerId } = opts;
-  const usersRes = await updateUserInTable({
-    table: "users",
+  const profilesRes = await updateUserInTable({
+    table: "profiles",
     userId,
     isPro,
     customerId,
   });
-  return { anyUpdated: usersRes.updated, results: [usersRes] };
+
+  if (profilesRes.updated && isPro) {
+    const supabase = getServerSupabaseClient();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("email, first_name")
+      .eq("id", userId)
+      .single();
+
+    if (profile) {
+      const firstName = profile.first_name || "Friend";
+      try {
+        await sendProSuccessEmail(profile.email, firstName);
+        console.log("[Paddle webhook] Pro success email sent to", profile.email);
+      } catch (emailError) {
+        console.warn("[Paddle webhook] Failed to send Pro email:", emailError);
+      }
+    }
+  }
+
+  return { anyUpdated: profilesRes.updated, results: [profilesRes] };
 }
 
 export async function POST(request: NextRequest) {
-  const secret = process.env.PADDLE_WEBHOOK_SECRET;
+  const secret = process.env.PADDLE_API_SECRET;
   if (!secret) {
-    return NextResponse.json({ error: "Missing PADDLE_WEBHOOK_SECRET" }, { status: 500 });
+    return NextResponse.json({ error: "Missing PADDLE_API_SECRET" }, { status: 500 });
   }
 
   const rawBody = await request.text();

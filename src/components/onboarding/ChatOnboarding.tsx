@@ -349,6 +349,16 @@ export default function ChatOnboarding() {
         await supabase.auth.updateUser({
           data: { onboarding_completed: true },
         });
+
+        try {
+          await fetch("/api/send-welcome-email", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId: session.user.id }),
+          });
+        } catch (emailError) {
+          console.warn("Failed to send welcome email:", emailError);
+        }
       }
     } catch {}
     router.push("/dashboard");

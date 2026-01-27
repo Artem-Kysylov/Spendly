@@ -10,7 +10,7 @@ export function TopbarRocketButton() {
   const { session } = UserAuth();
 
   const handleUpgradeClick = () => {
-    const priceId = "pri_01kf3g78sjap8307ctf6p6e0xm";
+    const priceId = process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "pri_01kfxkp0jxyc9vb43fenkbejxv";
     const paddle = (window as any)?.Paddle;
     if (!paddle?.Checkout?.open) {
       console.warn("[TopbarRocketButton] Paddle is not available on window yet");
