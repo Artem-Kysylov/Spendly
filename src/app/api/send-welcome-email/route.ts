@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendWelcomeEmail } from "@/lib/brevo";
-import { supabase } from "@/lib/supabaseClient";
+import { getServerSupabaseClient } from "@/lib/serverSupabase";
+
+export const runtime = "nodejs";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,6 +14,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const supabase = getServerSupabaseClient();
 
     const { data: profile, error: profileError } = await supabase
       .from("profiles")
