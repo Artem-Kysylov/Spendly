@@ -26,6 +26,7 @@ export default function PaywallClient() {
     const { session } = UserAuth();
     const { subscriptionPlan } = useSubscription();
     const [toast, setToast] = useState<ToastMessageProps | null>(null);
+    const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 
     type Plan = "monthly" | "yearly" | "lifetime";
 
@@ -131,12 +132,14 @@ export default function PaywallClient() {
                 return;
             }
 
+            setIsCheckoutLoading(true);
             let initialized = await waitForPaddleInitialized();
             if (!initialized) {
                 initialized = await ensurePaddleInitialized();
             }
             if (!initialized) {
                 console.warn("[Paywall] Paddle is not initialized yet");
+                setIsCheckoutLoading(false);
                 setToast({ text: "Checkout is unavailable. Please try again.", type: "error" });
                 setTimeout(() => setToast(null), 3000);
                 return;
@@ -148,6 +151,7 @@ export default function PaywallClient() {
             if (nakedCheckout) {
                 const nakedPayload = { items: [{ priceId, quantity: 1 }] };
                 console.log("[Paywall] Opening naked checkout:", nakedPayload);
+                setIsCheckoutLoading(false);
                 paddle.Checkout.open(nakedPayload);
                 return;
             }
@@ -163,9 +167,11 @@ export default function PaywallClient() {
                 customData,
             };
             console.log("[Paywall] Opening checkout:", checkoutPayload);
+            setIsCheckoutLoading(false);
             paddle.Checkout.open(checkoutPayload);
         } catch (e) {
             console.warn("[Paywall] Paddle checkout failed:", e);
+            setIsCheckoutLoading(false);
             setToast({ text: "Checkout failed. Please try again.", type: "error" });
             setTimeout(() => setToast(null), 3000);
         }
@@ -186,6 +192,12 @@ export default function PaywallClient() {
     return (
         <div className="container mx-auto px-4 py-10 max-w-[1280px]">
             {toast && <ToastMessage text={toast.text} type={toast.type} />}
+
+            {isCheckoutLoading ? (
+                <div className="fixed inset-0 z-[1000] bg-black/30 backdrop-blur-[2px] flex items-center justify-center">
+                    <span className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
+                </div>
+            ) : null}
 
             {/* Hero Section */}
             <motion.div

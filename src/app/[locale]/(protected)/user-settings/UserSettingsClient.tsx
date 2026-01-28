@@ -238,6 +238,12 @@ export default function UserSettingsClient() {
 
   return (
     <>
+      {isUpgradeLoading ? (
+        <div className="fixed inset-0 z-[1000] bg-black/30 backdrop-blur-[2px] flex items-center justify-center">
+          <span className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-6 px-4 md:px-6 pb-8 w-full">
         {/* Page Header */}
         <motion.div
@@ -293,137 +299,134 @@ export default function UserSettingsClient() {
               </span>
             </div>
 
-            {/* 4-Tier Pricing Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Free Plan */}
-              <div className={`rounded-lg border-2 p-4 flex flex-col ${subscriptionPlan === "free" ? "border-gray-400 dark:border-gray-500 ring-2 ring-gray-300" : "border-gray-300 dark:border-gray-600"} bg-white dark:bg-card`}>
-                <h3 className="font-semibold text-secondary-black dark:text-white mb-1">
-                  {tPaywall("free.label")}
-                </h3>
-                <div className="mb-3">
-                  <div className="text-2xl font-bold text-secondary-black dark:text-white">
-                    $0
+            {subscriptionPlan === "free" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className={`rounded-lg border-2 p-4 flex flex-col ${subscriptionPlan === "free" ? "border-gray-400 dark:border-gray-500 ring-2 ring-gray-300" : "border-gray-300 dark:border-gray-600"} bg-white dark:bg-card`}>
+                  <h3 className="font-semibold text-secondary-black dark:text-white mb-1">
+                    {tPaywall("free.label")}
+                  </h3>
+                  <div className="mb-3">
+                    <div className="text-2xl font-bold text-secondary-black dark:text-white">
+                      $0
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {tPaywall("free.period")}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {tPaywall("free.period")}
-                  </div>
+                  <ul className="space-y-1.5 text-xs text-gray-700 dark:text-gray-300 mb-4 flex-1">
+                    <li>• {tPaywall("free.feature1")}</li>
+                    <li>• {tPaywall("free.feature3")}</li>
+                    <li>• {tPaywall("free.feature4")}</li>
+                  </ul>
+                  <Button
+                    text={tPaywall("free.cta")}
+                    variant="outline"
+                    className="w-full text-xs h-9"
+                    disabled={subscriptionPlan === "free"}
+                  />
                 </div>
-                <ul className="space-y-1.5 text-xs text-gray-700 dark:text-gray-300 mb-4 flex-1">
-                  <li>• {tPaywall("free.feature1")}</li>
-                  <li>• {tPaywall("free.feature3")}</li>
-                  <li>• {tPaywall("free.feature4")}</li>
-                </ul>
-                <Button
-                  text={tPaywall("free.cta")}
-                  variant="outline"
-                  className="w-full text-xs h-9"
-                  disabled={subscriptionPlan === "free"}
-                />
-              </div>
 
-              {/* Monthly Plan */}
-              <div className="rounded-lg border-2 border-gray-200 dark:border-border p-4 bg-white dark:bg-card flex flex-col">
-                <h3 className="font-semibold text-secondary-black dark:text-white mb-1">
-                  {tPaywall("monthly.label")}
-                </h3>
-                <div className="mb-3">
-                  <div className="text-2xl font-bold text-secondary-black dark:text-white">
-                    {tPaywall("monthly.price")}
+                <div className="rounded-lg border-2 border-gray-200 dark:border-border p-4 bg-white dark:bg-card flex flex-col">
+                  <h3 className="font-semibold text-secondary-black dark:text-white mb-1">
+                    {tPaywall("monthly.label")}
+                  </h3>
+                  <div className="mb-3">
+                    <div className="text-2xl font-bold text-secondary-black dark:text-white">
+                      {tPaywall("monthly.price")}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {tPaywall("monthly.period")}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {tPaywall("monthly.period")}
-                  </div>
+                  <ul className="space-y-1.5 text-xs text-gray-800 dark:text-white mb-4 flex-1">
+                    <li>• {tPaywall("monthly.feature1")}</li>
+                    <li>• {tPaywall("monthly.feature2")}</li>
+                    <li>• {tPaywall("monthly.feature3")}</li>
+                    <li>• {tPaywall("monthly.feature4")}</li>
+                  </ul>
+                  <Button
+                    text={tPaywall("monthly.cta")}
+                    variant="primary"
+                    className="w-full text-xs h-9"
+                    onClick={() => handleUpgradeClick("monthly")}
+                    isLoading={isUpgradeLoading}
+                    disabled={isUpgradeLoading}
+                  />
                 </div>
-                <ul className="space-y-1.5 text-xs text-gray-800 dark:text-white mb-4 flex-1">
-                  <li>• {tPaywall("monthly.feature1")}</li>
-                  <li>• {tPaywall("monthly.feature2")}</li>
-                  <li>• {tPaywall("monthly.feature3")}</li>
-                  <li>• {tPaywall("monthly.feature4")}</li>
-                </ul>
-                <Button
-                  text={tPaywall("monthly.cta")}
-                  variant="primary"
-                  className="w-full text-xs h-9"
-                  onClick={() => handleUpgradeClick("monthly")}
-                  isLoading={isUpgradeLoading}
-                  disabled={isUpgradeLoading}
-                />
-              </div>
 
-              {/* Yearly Plan */}
-              <div className="rounded-lg border-2 border-primary dark:border-primary p-4 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 relative">
-                <div className="absolute top-2 right-2">
-                  <div className="px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-semibold">
-                    {tPaywall("bestValue")}
+                <div className="rounded-lg border-2 border-primary dark:border-primary p-4 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/15 relative">
+                  <div className="absolute top-2 right-2">
+                    <div className="px-2 py-0.5 rounded-full bg-primary text-white text-[10px] font-semibold">
+                      {tPaywall("bestValue")}
+                    </div>
                   </div>
+                  <h3 className="font-semibold text-secondary-black dark:text-white mb-1 pt-6">
+                    {tPaywall("yearly.label")}
+                  </h3>
+                  <div className="mb-3">
+                    <div className="text-2xl font-bold text-secondary-black dark:text-white">
+                      {tPaywall("yearly.price")}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">
+                      {tPaywall("yearly.period")}
+                    </div>
+                    <div className="text-[10px] text-primary">
+                      {tPaywall("yearly.priceNote")}
+                    </div>
+                  </div>
+                  <ul className="space-y-1.5 text-xs text-gray-800 dark:text-white mb-4">
+                    <li>• {tPaywall("yearly.feature1")}</li>
+                    <li>• {tPaywall("yearly.feature2")}</li>
+                    <li>• {tPaywall("yearly.feature3")}</li>
+                    <li>• {tPaywall("yearly.feature4")}</li>
+                  </ul>
+                  <Button
+                    text={tPaywall("yearly.cta")}
+                    variant="primary"
+                    className="w-full text-xs h-9"
+                    onClick={() => handleUpgradeClick("yearly")}
+                    isLoading={isUpgradeLoading}
+                    disabled={isUpgradeLoading}
+                  />
                 </div>
-                <h3 className="font-semibold text-secondary-black dark:text-white mb-1 pt-6">
-                  {tPaywall("yearly.label")}
-                </h3>
-                <div className="mb-3">
-                  <div className="text-2xl font-bold text-secondary-black dark:text-white">
-                    {tPaywall("yearly.price")}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    {tPaywall("yearly.period")}
-                  </div>
-                  <div className="text-[10px] text-primary">
-                    {tPaywall("yearly.priceNote")}
-                  </div>
-                </div>
-                <ul className="space-y-1.5 text-xs text-gray-800 dark:text-white mb-4">
-                  <li>• {tPaywall("yearly.feature1")}</li>
-                  <li>• {tPaywall("yearly.feature2")}</li>
-                  <li>• {tPaywall("yearly.feature3")}</li>
-                  <li>• {tPaywall("yearly.feature4")}</li>
-                </ul>
-                <Button
-                  text={tPaywall("yearly.cta")}
-                  variant="primary"
-                  className="w-full text-xs h-9"
-                  onClick={() => handleUpgradeClick("yearly")}
-                  isLoading={isUpgradeLoading}
-                  disabled={isUpgradeLoading}
-                />
-              </div>
 
-              {/* Lifetime Plan */}
-              <div className="rounded-lg border-2 border-amber-500 dark:border-amber-400 p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 relative">
-                <div className="absolute top-2 right-2">
-                  <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-[10px] font-semibold">
-                    {tPaywall("foundersEdition")}
+                <div className="rounded-lg border-2 border-amber-500 dark:border-amber-400 p-4 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 relative">
+                  <div className="absolute top-2 right-2">
+                    <div className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-[10px] font-semibold">
+                      {tPaywall("foundersEdition")}
+                    </div>
                   </div>
+                  <h3 className="font-semibold text-secondary-black dark:text-white mb-1 pt-6">
+                    {tPaywall("lifetime.label")}
+                  </h3>
+                  <div className="mb-3">
+                    <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                      {tPaywall("lifetime.price")}
+                    </div>
+                    <div className="text-xs text-gray-600 dark:text-gray-300">
+                      {tPaywall("lifetime.period")}
+                    </div>
+                  </div>
+                  <ul className="space-y-1.5 text-xs text-gray-800 dark:text-white mb-3">
+                    <li>• {tPaywall("lifetime.feature1")}</li>
+                    <li>• {tPaywall("lifetime.feature2")}</li>
+                    <li>• {tPaywall("lifetime.feature3")}</li>
+                    <li>• {tPaywall("lifetime.feature4")}</li>
+                  </ul>
+                  <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-3 text-center">
+                    {tPaywall("lifetime.fairUsage")}
+                  </p>
+                  <Button
+                    text={tPaywall("lifetime.cta")}
+                    variant="primary"
+                    className="w-full text-xs h-9 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0"
+                    onClick={() => handleUpgradeClick("lifetime")}
+                    isLoading={isUpgradeLoading}
+                    disabled={isUpgradeLoading}
+                  />
                 </div>
-                <h3 className="font-semibold text-secondary-black dark:text-white mb-1 pt-6">
-                  {tPaywall("lifetime.label")}
-                </h3>
-                <div className="mb-3">
-                  <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
-                    {tPaywall("lifetime.price")}
-                  </div>
-                  <div className="text-xs text-gray-600 dark:text-gray-300">
-                    {tPaywall("lifetime.period")}
-                  </div>
-                </div>
-                <ul className="space-y-1.5 text-xs text-gray-800 dark:text-white mb-3">
-                  <li>• {tPaywall("lifetime.feature1")}</li>
-                  <li>• {tPaywall("lifetime.feature2")}</li>
-                  <li>• {tPaywall("lifetime.feature3")}</li>
-                  <li>• {tPaywall("lifetime.feature4")}</li>
-                </ul>
-                <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-3 text-center">
-                  {tPaywall("lifetime.fairUsage")}
-                </p>
-                <Button
-                  text={tPaywall("lifetime.cta")}
-                  variant="primary"
-                  className="w-full text-xs h-9 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0"
-                  onClick={() => handleUpgradeClick("lifetime")}
-                  isLoading={isUpgradeLoading}
-                  disabled={isUpgradeLoading}
-                />
               </div>
-            </div>
+            ) : null}
           </div>
 
           {/* Language Section — мобильный паддинг 12px */}
