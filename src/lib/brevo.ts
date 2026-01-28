@@ -34,11 +34,27 @@ export async function sendBrevoEmail({
     });
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error("[Brevo] Email send failed:", errorData);
+      const contentType = response.headers.get("content-type") || "";
+      const rawBody = await response.text().catch(() => "");
+      let parsed: unknown = null;
+      if (contentType.includes("application/json") && rawBody) {
+        try {
+          parsed = JSON.parse(rawBody);
+        } catch {
+          parsed = rawBody;
+        }
+      } else {
+        parsed = rawBody;
+      }
+
+      console.error("[Brevo] Email send failed", {
+        status: response.status,
+        statusText: response.statusText,
+        body: parsed,
+      });
       return {
         success: false,
-        error: `Brevo API error: ${response.status}`,
+        error: `Brevo API error: ${response.status} ${response.statusText}`,
       };
     }
 

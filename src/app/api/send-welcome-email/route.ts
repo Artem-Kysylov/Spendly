@@ -116,6 +116,11 @@ export async function POST(request: NextRequest) {
     const result = await sendWelcomeEmail(email, firstName || "Friend");
 
     if (!result.success) {
+      console.error("[WelcomeEmail] Brevo send failed", {
+        userId,
+        email,
+        error: result.error,
+      });
       return NextResponse.json(
         { error: result.error || "Failed to send email" },
         { status: 500 }
