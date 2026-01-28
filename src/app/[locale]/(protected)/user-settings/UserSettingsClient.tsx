@@ -161,9 +161,9 @@ export default function UserSettingsClient() {
         (process.env.NEXT_PUBLIC_PADDLE_NAKED_CHECKOUT || "").trim() === "true";
 
       if (nakedCheckout) {
-        paddle.Checkout.open({
-          items: [{ priceId, quantity: 1 }],
-        });
+        const nakedPayload = { items: [{ priceId, quantity: 1 }] };
+        console.log("[Settings] Opening naked checkout:", nakedPayload);
+        paddle.Checkout.open(nakedPayload);
         return;
       }
 
@@ -171,7 +171,7 @@ export default function UserSettingsClient() {
       const customData: Record<string, string> = { plan };
       if (typeof userId === "string" && userId.length > 0) customData.user_id = userId;
 
-      paddle.Checkout.open({
+      const checkoutPayload = {
         settings: {
           displayMode: "overlay",
           locale,
@@ -179,7 +179,9 @@ export default function UserSettingsClient() {
         },
         items: [{ priceId, quantity: 1 }],
         customData,
-      });
+      };
+      console.log("[Settings] Opening checkout:", checkoutPayload);
+      paddle.Checkout.open(checkoutPayload);
     } catch (e) {
       console.warn("[Settings] No checkout URL available:", e);
     } finally {

@@ -85,13 +85,13 @@ export default function PaywallClient() {
                 (process.env.NEXT_PUBLIC_PADDLE_NAKED_CHECKOUT || "").trim() === "true";
 
             if (nakedCheckout) {
-                paddle.Checkout.open({
-                    items: [{ priceId, quantity: 1 }],
-                });
+                const nakedPayload = { items: [{ priceId, quantity: 1 }] };
+                console.log("[Paywall] Opening naked checkout:", nakedPayload);
+                paddle.Checkout.open(nakedPayload);
                 return;
             }
 
-            paddle.Checkout.open({
+            const checkoutPayload = {
                 settings: {
                     displayMode: "overlay",
                     locale,
@@ -99,7 +99,9 @@ export default function PaywallClient() {
                 },
                 items: [{ priceId, quantity: 1 }],
                 customData,
-            });
+            };
+            console.log("[Paywall] Opening checkout:", checkoutPayload);
+            paddle.Checkout.open(checkoutPayload);
         } catch (e) {
             console.warn("[Paywall] Paddle checkout failed:", e);
             setToast({ text: "Checkout failed. Please try again.", type: "error" });
