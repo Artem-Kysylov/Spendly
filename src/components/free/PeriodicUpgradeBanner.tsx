@@ -45,9 +45,13 @@ export default function PeriodicUpgradeBanner() {
   const handleUpgradeClick = () => {
     // trackEvent("upgrade_cta_clicked", { from: "periodic_banner" });
 
-    const priceId = (
-      process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "pri_01kfxkp0jxyc9vb43fenkbejxv"
-    ).trim();
+    const fallback = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "").trim();
+    const priceId = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID_MONTHLY || "").trim() ||
+      fallback;
+    if (!priceId) {
+      console.warn("[PeriodicBanner] Missing Paddle priceId");
+      return;
+    }
     const paddle = (window as any)?.Paddle;
     if (!paddle?.Checkout?.open) {
       console.warn("[PeriodicBanner] Paddle is not available on window yet");
@@ -55,7 +59,6 @@ export default function PeriodicUpgradeBanner() {
     }
 
     const userId = session?.user?.id;
-    const email = session?.user?.email?.trim();
     const customData: Record<string, string> = { plan: "monthly" };
     if (typeof userId === "string" && userId.length > 0) customData.user_id = userId;
 
@@ -67,7 +70,6 @@ export default function PeriodicUpgradeBanner() {
       },
       items: [{ priceId, quantity: 1 }],
       customData,
-      customer: email ? { email } : undefined,
     });
   };
 

@@ -26,9 +26,13 @@ export default function UpgradeCornerPanel() {
   if (!visible) return null;
 
   const handleUpgradeClick = () => {
-    const priceId = (
-      process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "pri_01kfxkp0jxyc9vb43fenkbejxv"
-    ).trim();
+    const fallback = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "").trim();
+    const priceId = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID_MONTHLY || "").trim() ||
+      fallback;
+    if (!priceId) {
+      console.warn("[UpgradeCornerPanel] Missing Paddle priceId");
+      return;
+    }
     const paddle = (window as any)?.Paddle;
     if (!paddle?.Checkout?.open) {
       console.warn("[UpgradeCornerPanel] Paddle is not available on window yet");
@@ -36,7 +40,6 @@ export default function UpgradeCornerPanel() {
     }
 
     const userId = session?.user?.id;
-    const email = session?.user?.email?.trim();
     const customData: Record<string, string> = { plan: "monthly" };
     if (typeof userId === "string" && userId.length > 0) customData.user_id = userId;
 
@@ -48,7 +51,6 @@ export default function UpgradeCornerPanel() {
       },
       items: [{ priceId, quantity: 1 }],
       customData,
-      customer: email ? { email } : undefined,
     });
   };
 

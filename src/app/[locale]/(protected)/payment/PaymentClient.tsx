@@ -18,9 +18,16 @@ export default function PaymentClient() {
 
   const handleUpgradeClick = async () => {
     try {
-      const priceId = (
-        process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "pri_01kfxkp0jxyc9vb43fenkbejxv"
-      ).trim();
+      const fallback = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "").trim();
+      const priceId = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID_MONTHLY || "").trim() ||
+        fallback;
+
+      if (!priceId) {
+        console.warn("[Payment] Missing Paddle priceId");
+        setToast({ text: "Checkout is unavailable. Please try again.", type: "error" });
+        setTimeout(() => setToast(null), 3000);
+        return;
+      }
 
       const paddle = (window as any)?.Paddle;
       if (!paddle?.Checkout?.open) {
@@ -41,7 +48,6 @@ export default function PaymentClient() {
       }
 
       const userId = session?.user?.id;
-      const email = session?.user?.email?.trim();
       const customData: Record<string, string> = { plan: "monthly" };
       if (typeof userId === "string" && userId.length > 0) customData.user_id = userId;
 
@@ -53,7 +59,6 @@ export default function PaymentClient() {
         },
         items: [{ priceId, quantity: 1 }],
         customData,
-        customer: email ? { email } : undefined,
       });
     } catch (e) {
       console.warn("[Payment] Paddle checkout failed:", e);
