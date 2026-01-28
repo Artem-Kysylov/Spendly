@@ -117,7 +117,8 @@
     "subscription": {
       "title": "Подписка",
       "description": "Сравните планы и обновите в любое время",
-      "currentPlan": "Текущий план"
+      "currentPlan": "Текущий план",
+      "manageSubscription": "Управление подпиской"
     },
     "language": {
       "title": "Язык",

@@ -117,7 +117,8 @@
     "subscription": {
       "title": "Підписка",
       "description": "Порівнюйте плани та оновлюйтеся будь-коли",
-      "currentPlan": "Поточний план"
+      "currentPlan": "Поточний план",
+      "manageSubscription": "Керувати підпискою"
     },
     "language": {
       "title": "Мова",

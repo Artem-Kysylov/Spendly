@@ -117,7 +117,8 @@
     "subscription": {
       "title": "Langganan",
       "description": "Bandingkan paket dan upgrade kapan saja",
-      "currentPlan": "Paket saat ini"
+      "currentPlan": "Paket saat ini",
+      "manageSubscription": "Kelola langganan"
     },
     "language": {
       "title": "Bahasa",

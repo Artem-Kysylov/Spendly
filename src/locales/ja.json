@@ -117,7 +117,8 @@
     "subscription": {
       "title": "購読",
       "description": "プランを比較していつでもアップグレード",
-      "currentPlan": "現在のプラン"
+      "currentPlan": "現在のプラン",
+      "manageSubscription": "サブスクリプションを管理"
     },
     "language": {
       "title": "言語",

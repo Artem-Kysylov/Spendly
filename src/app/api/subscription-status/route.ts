@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 
     const { data, error } = await admin
       .from("profiles")
-      .select("is_pro, subscription_status")
+      .select("is_pro, subscription_status, paddle_customer_id")
       .eq("id", user.id)
       .maybeSingle();
 
@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
       {
         is_pro: isPro,
         subscription_status: subscriptionStatus,
+        paddle_customer_id: (data as any)?.paddle_customer_id ?? null,
       },
       { status: 200 },
     );

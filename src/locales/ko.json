@@ -117,7 +117,8 @@
     "subscription": {
       "title": "구독",
       "description": "구독 플랜 및 청구 내역 보기",
-      "currentPlan": "현재 플랜"
+      "currentPlan": "현재 플랜",
+      "manageSubscription": "구독 관리"
     },
     "language": {
       "title": "언어",

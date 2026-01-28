@@ -117,7 +117,8 @@
     "subscription": {
       "title": "सदस्यता",
       "description": "प्लान तुलना करें और कभी भी अपग्रेड करें",
-      "currentPlan": "वर्तमान प्लान"
+      "currentPlan": "वर्तमान प्लान",
+      "manageSubscription": "सदस्यता प्रबंधित करें"
     },
     "language": {
       "title": "भाषा",

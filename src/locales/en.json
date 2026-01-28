@@ -117,7 +117,8 @@
     "subscription": {
       "title": "Subscription",
       "description": "Compare plans and upgrade anytime",
-      "currentPlan": "Current plan"
+      "currentPlan": "Current plan",
+      "manageSubscription": "Manage subscription"
     },
     "language": {
       "title": "Language",

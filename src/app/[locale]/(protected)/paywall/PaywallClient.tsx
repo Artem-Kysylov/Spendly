@@ -24,7 +24,7 @@ export default function PaywallClient() {
     const locale = useLocale();
     const searchParams = useSearchParams();
     const { session } = UserAuth();
-    const { subscriptionPlan } = useSubscription();
+    const { subscriptionPlan, isLoading: isSubscriptionLoading } = useSubscription();
     const [toast, setToast] = useState<ToastMessageProps | null>(null);
     const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
 
@@ -193,40 +193,56 @@ export default function PaywallClient() {
         <div className="container mx-auto px-4 py-10 max-w-[1280px]">
             {toast && <ToastMessage text={toast.text} type={toast.type} />}
 
+            {isSubscriptionLoading ? (
+                <div className="mb-10">
+                    <div className="h-6 w-40 mx-auto rounded bg-gray-100 dark:bg-muted animate-pulse" />
+                    <div className="h-10 w-[min(520px,100%)] mx-auto mt-4 rounded bg-gray-100 dark:bg-muted animate-pulse" />
+                    <div className="h-5 w-[min(640px,100%)] mx-auto mt-3 rounded bg-gray-100 dark:bg-muted animate-pulse" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+                        <div className="h-[420px] rounded-2xl border bg-gray-50 dark:bg-muted animate-pulse" />
+                        <div className="h-[420px] rounded-2xl border bg-gray-50 dark:bg-muted animate-pulse" />
+                        <div className="h-[420px] rounded-2xl border bg-gray-50 dark:bg-muted animate-pulse" />
+                        <div className="h-[420px] rounded-2xl border bg-gray-50 dark:bg-muted animate-pulse" />
+                    </div>
+                </div>
+            ) : null}
+
             {isCheckoutLoading ? (
                 <div className="fixed inset-0 z-[1000] bg-black/30 backdrop-blur-[2px] flex items-center justify-center">
                     <span className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
                 </div>
             ) : null}
 
-            {/* Hero Section */}
-            <motion.div
-                className="text-center mb-12"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut" }}
-            >
-                <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium text-primary">
-                        {tPaywall("hero.badge")}
-                    </span>
-                </div>
-                <h1 className="text-[32px] md:text-[42px] font-bold text-secondary-black dark:text-white mb-4">
-                    {tPaywall("hero.title")}
-                </h1>
-                <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                    {tPaywall("hero.subtitle")}
-                </p>
-            </motion.div>
+            {isSubscriptionLoading ? null : (
+                <>
+                    {/* Hero Section */}
+                    <motion.div
+                        className="text-center mb-12"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                    >
+                        <div className="inline-flex items-center gap-2 mb-4 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                            <Sparkles className="h-4 w-4 text-primary" />
+                            <span className="text-sm font-medium text-primary">
+                                {tPaywall("hero.badge")}
+                            </span>
+                        </div>
+                        <h1 className="text-[32px] md:text-[42px] font-bold text-secondary-black dark:text-white mb-4">
+                            {tPaywall("hero.title")}
+                        </h1>
+                        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                            {tPaywall("hero.subtitle")}
+                        </p>
+                    </motion.div>
 
-            {/* 4-Tier Pricing Grid */}
-            <motion.div
-                className="mb-16"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-            >
+                    {/* 4-Tier Pricing Grid */}
+                    <motion.div
+                        className="mb-16"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+                    >
                 <h2 className="text-2xl font-semibold text-center mb-8 text-secondary-black dark:text-white">
                     {tPaywall("comparison.title")}
                 </h2>
@@ -513,7 +529,9 @@ export default function PaywallClient() {
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
-            </motion.div>
+                    </motion.div>
+                </>
+            )}
         </div>
     );
 }

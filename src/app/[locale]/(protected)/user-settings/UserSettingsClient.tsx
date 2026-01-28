@@ -53,11 +53,12 @@ export default function UserSettingsClient() {
   const tCommon = useTranslations("common");
   const tAI = useTranslations("assistant");
   const locale = useLocale();
-  const { subscriptionPlan } = useSubscription();
+  const { subscriptionPlan, isLoading: isSubscriptionLoading, paddleCustomerId } = useSubscription();
 
   // Appearance & App Controls
   const isPWAInstalled = useIsPWAInstalled();
   const [isUpgradeLoading, setIsUpgradeLoading] = useState(false);
+  const [isManageSubscriptionLoading, setIsManageSubscriptionLoading] = useState(false);
 
   // Language state
   const [language, setLanguage] = useState<
@@ -238,7 +239,7 @@ export default function UserSettingsClient() {
 
   return (
     <>
-      {isUpgradeLoading ? (
+      {isUpgradeLoading || isManageSubscriptionLoading ? (
         <div className="fixed inset-0 z-[1000] bg-black/30 backdrop-blur-[2px] flex items-center justify-center">
           <span className="inline-block h-10 w-10 animate-spin rounded-full border-4 border-primary/30 border-t-primary" />
         </div>
@@ -286,20 +287,67 @@ export default function UserSettingsClient() {
                   {tSettings("subscription.description")}
                 </p>
               </div>
-              <span
-                className={`text-xs px-2 py-1 rounded border ${subscriptionPlan === "pro"
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-900"
-                  : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-900"
-                  }`}
-              >
-                {tSettings("subscription.currentPlan")}:{" "}
-                {subscriptionPlan === "pro"
-                  ? tPricing("pro.label")
-                  : tPricing("free.label")}
-              </span>
+              <div className="flex items-center gap-2">
+                {isSubscriptionLoading ? (
+                  <span className="h-6 w-[140px] rounded border bg-gray-100 dark:bg-muted animate-pulse" />
+                ) : (
+                  <span
+                    className={`text-xs px-2 py-1 rounded border ${subscriptionPlan === "pro"
+                      ? "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-900"
+                      : "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-900"
+                      }`}
+                  >
+                    {tSettings("subscription.currentPlan")}: {" "}
+                    {subscriptionPlan === "pro"
+                      ? tPricing("pro.label")
+                      : tPricing("free.label")}
+                  </span>
+                )}
+                {!isSubscriptionLoading && subscriptionPlan === "pro" && typeof paddleCustomerId === "string" && paddleCustomerId.length > 0 ? (
+                  <Button
+                    text={tSettings("subscription.manageSubscription")}
+                    variant="default"
+                    className="h-8 px-3 text-xs"
+                    disabled={isManageSubscriptionLoading}
+                    isLoading={isManageSubscriptionLoading}
+                    onClick={async () => {
+                      if (isManageSubscriptionLoading) return;
+                      setIsManageSubscriptionLoading(true);
+                      try {
+                        const { data: { session: current } } = await supabase.auth.getSession();
+                        const token = current?.access_token;
+                        if (!token) return;
+                        const resp = await fetch("/api/paddle/customer-portal", {
+                          method: "POST",
+                          headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                          },
+                          body: JSON.stringify({}),
+                        });
+                        if (!resp.ok) return;
+                        const json = (await resp.json().catch(() => null)) as { url?: string } | null;
+                        const url = typeof json?.url === "string" ? json.url : "";
+                        if (!url) return;
+                        const w = window.open(url, "_blank", "noopener,noreferrer");
+                        if (!w) window.location.href = url;
+                      } finally {
+                        setIsManageSubscriptionLoading(false);
+                      }
+                    }}
+                  />
+                ) : null}
+              </div>
             </div>
 
-            {subscriptionPlan === "free" ? (
+            {isSubscriptionLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="h-[220px] rounded-lg border bg-gray-50 dark:bg-muted animate-pulse" />
+                <div className="h-[220px] rounded-lg border bg-gray-50 dark:bg-muted animate-pulse" />
+                <div className="h-[220px] rounded-lg border bg-gray-50 dark:bg-muted animate-pulse" />
+                <div className="h-[220px] rounded-lg border bg-gray-50 dark:bg-muted animate-pulse" />
+              </div>
+            ) : subscriptionPlan === "free" ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className={`rounded-lg border-2 p-4 flex flex-col ${subscriptionPlan === "free" ? "border-gray-400 dark:border-gray-500 ring-2 ring-gray-300" : "border-gray-300 dark:border-gray-600"} bg-white dark:bg-card`}>
                   <h3 className="font-semibold text-secondary-black dark:text-white mb-1">
