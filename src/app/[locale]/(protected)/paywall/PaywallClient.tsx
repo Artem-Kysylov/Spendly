@@ -54,13 +54,55 @@ export default function PaywallClient() {
         // trackEvent("paywall_cta_clicked", { plan, from: "paywall" });
 
         try {
-            const waitForPaddleInitialized = async (timeoutMs = 2000) => {
+            const waitForPaddleInitialized = async (timeoutMs = 8000) => {
                 const start = Date.now();
                 while (Date.now() - start < timeoutMs) {
                     if ((window as any)?.__SPENDLY_PADDLE_INITIALIZED === true) return true;
                     await new Promise((r) => setTimeout(r, 50));
                 }
                 return (window as any)?.__SPENDLY_PADDLE_INITIALIZED === true;
+            };
+
+            const ensurePaddleInitialized = async () => {
+                const win = window as any;
+                if (win?.__SPENDLY_PADDLE_INITIALIZED === true) return true;
+
+                const paddle = (window as any)?.Paddle;
+                if (!paddle || typeof paddle.Initialize !== "function") return false;
+
+                const token = (
+                    process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN ||
+                    process.env.NEXT_PUBLIC_PADDLE_TOKEN ||
+                    ""
+                ).trim();
+
+                if (!token) return false;
+
+                const normalizedEnv = token.startsWith("test_")
+                    ? "sandbox"
+                    : token.startsWith("live_")
+                        ? "production"
+                        : "";
+
+                try {
+                    if (normalizedEnv === "sandbox" && paddle.Environment && typeof paddle.Environment.set === "function") {
+                        try {
+                            paddle.Environment.set("sandbox");
+                        } catch {
+                            // ignore
+                        }
+                    }
+
+                    const initArgs: Record<string, string> = { token };
+                    if (normalizedEnv) initArgs.environment = normalizedEnv;
+                    paddle.Initialize(initArgs);
+                    win.__SPENDLY_PADDLE_INITIALIZED = true;
+                    await new Promise((r) => setTimeout(r, 500));
+                    return true;
+                } catch (e) {
+                    console.warn("[Paywall] Paddle.Initialize failed", e);
+                    return false;
+                }
             };
 
             const fallback = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "").trim();
@@ -90,7 +132,10 @@ export default function PaywallClient() {
                 return;
             }
 
-            const initialized = await waitForPaddleInitialized();
+            let initialized = await waitForPaddleInitialized();
+            if (!initialized) {
+                initialized = await ensurePaddleInitialized();
+            }
             if (!initialized) {
                 console.warn("[Paywall] Paddle is not initialized yet");
                 setToast({ text: "Checkout is unavailable. Please try again.", type: "error" });
