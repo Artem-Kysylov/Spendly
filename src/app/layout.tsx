@@ -52,7 +52,7 @@ export default async function RootLayout({
               paddleEnv +
               '"; const __paddleToken = "' +
               paddleToken +
-              '"; const __tokenMasked = __paddleToken ? (__paddleToken.slice(0, 6) + "…" + __paddleToken.slice(-4)) : ""; console.log("Paddle Init:", { env: __paddleEnv, token: __tokenMasked }); if (!__paddleToken) { console.warn("Missing Paddle client token"); } else if (typeof Paddle !== "undefined" && Paddle && typeof Paddle.Initialize === "function") { const initArgs = { token: (__paddleToken || "").trim() }; const __env = String(__paddleEnv || "").trim().toLowerCase(); if (__env === "sandbox") initArgs.environment = "sandbox"; else if (__env === "production" || __env === "live" || __env === "prod") initArgs.environment = "production"; Paddle.Initialize(initArgs); } } catch (e) {}',
+              '"; const __tokenMasked = __paddleToken ? (__paddleToken.slice(0, 6) + "…" + __paddleToken.slice(-4)) : ""; const __tokenTrimmed = String(__paddleToken || "").trim(); const __looksLikeJwt = __tokenTrimmed.split(".").length === 3; console.log("Paddle Init:", { env: __paddleEnv, token: __tokenMasked, looksLikeJwt: __looksLikeJwt }); if (!__paddleToken) { console.warn("Missing Paddle client token"); } else if (typeof Paddle !== "undefined" && Paddle && typeof Paddle.Initialize === "function") { const initArgs = { token: (__paddleToken || "").trim() }; const __env = String(__paddleEnv || "").trim().toLowerCase(); if (__env === "sandbox") initArgs.environment = "sandbox"; else if (__env === "production" || __env === "live" || __env === "prod") initArgs.environment = "production"; Paddle.Initialize(initArgs); } } catch (e) {}',
           }}
         />
       </head>
