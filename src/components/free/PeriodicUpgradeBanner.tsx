@@ -42,7 +42,16 @@ export default function PeriodicUpgradeBanner() {
 
   if (!visible || subscriptionPlan === "pro") return null;
 
-  const handleUpgradeClick = () => {
+  const handleUpgradeClick = async () => {
+    const waitForPaddleInitialized = async (timeoutMs = 2000) => {
+      const start = Date.now();
+      while (Date.now() - start < timeoutMs) {
+        if ((window as any)?.__SPENDLY_PADDLE_INITIALIZED === true) return true;
+        await new Promise((r) => setTimeout(r, 50));
+      }
+      return (window as any)?.__SPENDLY_PADDLE_INITIALIZED === true;
+    };
+
     // trackEvent("upgrade_cta_clicked", { from: "periodic_banner" });
 
     const fallback = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "").trim();
@@ -55,6 +64,12 @@ export default function PeriodicUpgradeBanner() {
     const paddle = (window as any)?.Paddle;
     if (!paddle?.Checkout?.open) {
       console.warn("[PeriodicBanner] Paddle is not available on window yet");
+      return;
+    }
+
+    const initialized = await waitForPaddleInitialized();
+    if (!initialized) {
+      console.warn("[PeriodicBanner] Paddle is not initialized yet");
       return;
     }
 

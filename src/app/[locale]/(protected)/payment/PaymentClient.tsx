@@ -18,6 +18,15 @@ export default function PaymentClient() {
 
   const handleUpgradeClick = async () => {
     try {
+      const waitForPaddleInitialized = async (timeoutMs = 2000) => {
+        const start = Date.now();
+        while (Date.now() - start < timeoutMs) {
+          if ((window as any)?.__SPENDLY_PADDLE_INITIALIZED === true) return true;
+          await new Promise((r) => setTimeout(r, 50));
+        }
+        return (window as any)?.__SPENDLY_PADDLE_INITIALIZED === true;
+      };
+
       const fallback = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "").trim();
       const priceId = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID_MONTHLY || "").trim() ||
         fallback;
@@ -32,6 +41,14 @@ export default function PaymentClient() {
       const paddle = (window as any)?.Paddle;
       if (!paddle?.Checkout?.open) {
         console.warn("[Payment] Paddle is not available on window yet");
+        setToast({ text: "Checkout is unavailable. Please try again.", type: "error" });
+        setTimeout(() => setToast(null), 3000);
+        return;
+      }
+
+      const initialized = await waitForPaddleInitialized();
+      if (!initialized) {
+        console.warn("[Payment] Paddle is not initialized yet");
         setToast({ text: "Checkout is unavailable. Please try again.", type: "error" });
         setTimeout(() => setToast(null), 3000);
         return;

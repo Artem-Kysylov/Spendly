@@ -25,7 +25,16 @@ export default function UpgradeCornerPanel() {
 
   if (!visible) return null;
 
-  const handleUpgradeClick = () => {
+  const handleUpgradeClick = async () => {
+    const waitForPaddleInitialized = async (timeoutMs = 2000) => {
+      const start = Date.now();
+      while (Date.now() - start < timeoutMs) {
+        if ((window as any)?.__SPENDLY_PADDLE_INITIALIZED === true) return true;
+        await new Promise((r) => setTimeout(r, 50));
+      }
+      return (window as any)?.__SPENDLY_PADDLE_INITIALIZED === true;
+    };
+
     const fallback = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "").trim();
     const priceId = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID_MONTHLY || "").trim() ||
       fallback;
@@ -36,6 +45,12 @@ export default function UpgradeCornerPanel() {
     const paddle = (window as any)?.Paddle;
     if (!paddle?.Checkout?.open) {
       console.warn("[UpgradeCornerPanel] Paddle is not available on window yet");
+      return;
+    }
+
+    const initialized = await waitForPaddleInitialized();
+    if (!initialized) {
+      console.warn("[UpgradeCornerPanel] Paddle is not initialized yet");
       return;
     }
 
