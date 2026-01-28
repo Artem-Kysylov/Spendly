@@ -1,9 +1,11 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
 import Button from "@/components/ui-elements/Button";
+import { UserAuth } from "@/context/AuthContext";
 
 export default function CheckoutSuccessPage({
   params,
@@ -13,6 +15,52 @@ export default function CheckoutSuccessPage({
   const router = useRouter();
   const { locale } = params;
   const tPayment = useTranslations("payment");
+  const { session, isReady } = UserAuth();
+
+  useEffect(() => {
+    if (!isReady) return;
+
+    const token = session?.access_token;
+    if (!token) return;
+
+    let cancelled = false;
+    const start = Date.now();
+
+    const check = async () => {
+      try {
+        const res = await fetch("/api/subscription-status", {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) return;
+        const json = (await res.json().catch(() => null)) as
+          | { is_pro?: boolean; subscription_status?: string }
+          | null;
+
+        if (cancelled) return;
+        if (json?.is_pro === true) {
+          router.replace(`/${locale}/dashboard`);
+        }
+      } catch {
+      }
+    };
+
+    void check();
+    const interval = window.setInterval(() => {
+      if (cancelled) return;
+      if (Date.now() - start > 90_000) {
+        window.clearInterval(interval);
+        return;
+      }
+      void check();
+    }, 2000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [isReady, locale, router, session?.access_token]);
 
   const handleGoDashboard = () => {
     router.push(`/${locale}/dashboard`);

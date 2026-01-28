@@ -272,9 +272,9 @@ async function updateSubscriptionState(opts: {
 }
 
 export async function POST(request: NextRequest) {
-  const secret = process.env.PADDLE_API_SECRET;
+  const secret = process.env.PADDLE_WEBHOOK_SECRET || process.env.PADDLE_API_SECRET;
   if (!secret) {
-    return NextResponse.json({ error: "Missing PADDLE_API_SECRET" }, { status: 500 });
+    return NextResponse.json({ error: "Missing PADDLE_WEBHOOK_SECRET" }, { status: 500 });
   }
 
   const rawBody = await request.text();
@@ -283,6 +283,10 @@ export async function POST(request: NextRequest) {
 
   const ok = isSignatureValid({ rawBody, signatureHeader, secret });
   if (!ok) {
+    console.warn("[Paddle webhook] Invalid signature", {
+      hasSignatureHeader: typeof signatureHeader === "string" && signatureHeader.length > 0,
+      bodyLength: rawBody.length,
+    });
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 

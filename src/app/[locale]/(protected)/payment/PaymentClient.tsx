@@ -73,6 +73,7 @@ export default function PaymentClient() {
           displayMode: "overlay",
           locale,
           theme: "light",
+          successUrl: `${window.location.origin}/${locale}/checkout/success`,
         },
         items: [{ priceId, quantity: 1 }],
         customData,
