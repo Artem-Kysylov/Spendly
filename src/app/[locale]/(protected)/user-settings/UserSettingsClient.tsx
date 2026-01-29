@@ -337,8 +337,7 @@ export default function UserSettingsClient() {
                           const json = (await resp.json().catch(() => null)) as { url?: string } | null;
                           const url = typeof json?.url === "string" ? json.url : "";
                           if (!url) return;
-                          const w = window.open(url, "_blank", "noopener,noreferrer");
-                          if (!w) window.location.href = url;
+                          window.open(url, "_blank", "noopener,noreferrer");
                         } finally {
                           setIsManageSubscriptionLoading(false);
                         }
