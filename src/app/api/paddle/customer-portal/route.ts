@@ -66,6 +66,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const apiKeyPrefix = apiKey.startsWith("test_")
+      ? "test"
+      : apiKey.startsWith("live_")
+        ? "live"
+        : "";
+
     const env = (
       process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT ||
       process.env.PADDLE_ENVIRONMENT ||
@@ -73,11 +79,15 @@ export async function POST(req: NextRequest) {
     ).trim().toLowerCase();
 
     const normalizedEnv =
-      env === "production" || env === "live" || env === "prod"
-        ? "production"
-        : env === "sandbox" || env === "test"
-          ? "sandbox"
-          : "";
+      apiKeyPrefix === "test"
+        ? "sandbox"
+        : apiKeyPrefix === "live"
+          ? "production"
+          : env === "production" || env === "live" || env === "prod"
+            ? "production"
+            : env === "sandbox" || env === "test"
+              ? "sandbox"
+              : "";
 
     const baseUrl = normalizedEnv === "sandbox" ? "https://sandbox-api.paddle.com" : "https://api.paddle.com";
 
@@ -122,7 +132,7 @@ export async function POST(req: NextRequest) {
       });
       return NextResponse.json(
         { error: "Failed to create portal session", details: text },
-        { status: 502 },
+        { status: res.status },
       );
     }
 

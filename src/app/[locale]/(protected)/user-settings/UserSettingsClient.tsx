@@ -303,6 +303,49 @@ export default function UserSettingsClient() {
                       : tPricing("free.label")}
                   </span>
                 )}
+                {!isSubscriptionLoading && subscriptionPlan === "pro" && typeof paddleCustomerId === "string" && paddleCustomerId.length > 0 ? (
+                  <div className="hidden md:block">
+                    <Button
+                      text={tSettings("subscription.manageSubscription")}
+                      variant="default"
+                      className="h-8 px-3 text-xs"
+                      disabled={isManageSubscriptionLoading}
+                      isLoading={isManageSubscriptionLoading}
+                      onClick={async () => {
+                        if (isManageSubscriptionLoading) return;
+                        setIsManageSubscriptionLoading(true);
+                        try {
+                          const { data: { session: current } } = await supabase.auth.getSession();
+                          const token = current?.access_token;
+                          if (!token) return;
+                          const resp = await fetch("/api/paddle/customer-portal", {
+                            method: "POST",
+                            headers: {
+                              Authorization: `Bearer ${token}`,
+                              "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({}),
+                          });
+                          if (!resp.ok) {
+                            const errText = await resp.text().catch(() => "");
+                            console.error("[Settings] Failed to open customer portal", {
+                              status: resp.status,
+                              body: errText,
+                            });
+                            return;
+                          }
+                          const json = (await resp.json().catch(() => null)) as { url?: string } | null;
+                          const url = typeof json?.url === "string" ? json.url : "";
+                          if (!url) return;
+                          const w = window.open(url, "_blank", "noopener,noreferrer");
+                          if (!w) window.location.href = url;
+                        } finally {
+                          setIsManageSubscriptionLoading(false);
+                        }
+                      }}
+                    />
+                  </div>
+                ) : null}
               </div>
             </div>
 
