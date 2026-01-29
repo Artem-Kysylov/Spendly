@@ -269,6 +269,12 @@ export default function PaywallClient() {
                             <li className="flex items-start gap-3">
                                 <Check className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
                                 <span className="text-sm text-gray-700 dark:text-gray-300">
+                                    {tPaywall("comparison.free.feature2")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-700 dark:text-gray-300">
                                     {tPaywall("comparison.free.feature3")}
                                 </span>
                             </li>
@@ -276,6 +282,12 @@ export default function PaywallClient() {
                                 <Check className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
                                 <span className="text-sm text-gray-700 dark:text-gray-300">
                                     {tPaywall("comparison.free.feature4")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-700 dark:text-gray-300">
+                                    {tPaywall("comparison.free.feature5")}
                                 </span>
                             </li>
                         </ul>
@@ -329,6 +341,12 @@ export default function PaywallClient() {
                                 <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                                 <span className="text-sm text-gray-800 dark:text-white">
                                     {tPaywall("comparison.monthly.feature4")}
+                                </span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white">
+                                    {tPaywall("comparison.monthly.feature5")}
                                 </span>
                             </li>
                         </ul>
@@ -394,6 +412,12 @@ export default function PaywallClient() {
                                     {tPaywall("comparison.yearly.feature4")}
                                 </span>
                             </li>
+                            <li className="flex items-start gap-3">
+                                <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span className="text-sm text-gray-800 dark:text-white font-medium">
+                                    {tPaywall("comparison.yearly.feature5")}
+                                </span>
+                            </li>
                         </ul>
                         <Button
                             onClick={() => handleUpgradeClick("yearly")}
@@ -453,9 +477,6 @@ export default function PaywallClient() {
                                 </span>
                             </li>
                         </ul>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-4 text-center">
-                            {tPaywall("comparison.lifetime.fairUsage")}
-                        </p>
                         <Button
                             onClick={() => handleUpgradeClick("lifetime")}
                             className="w-full h-11 text-sm font-semibold bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white border-0"

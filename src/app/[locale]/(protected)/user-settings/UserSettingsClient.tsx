@@ -408,8 +408,10 @@ export default function UserSettingsClient() {
                   </div>
                   <ul className="space-y-1.5 text-xs text-gray-700 dark:text-gray-300 mb-4 flex-1">
                     <li>• {tPaywall("free.feature1")}</li>
+                    <li>• {tPaywall("free.feature2")}</li>
                     <li>• {tPaywall("free.feature3")}</li>
                     <li>• {tPaywall("free.feature4")}</li>
+                    <li>• {tPaywall("free.feature5")}</li>
                   </ul>
                   <Button
                     text={tPaywall("free.cta")}
@@ -436,6 +438,7 @@ export default function UserSettingsClient() {
                     <li>• {tPaywall("monthly.feature2")}</li>
                     <li>• {tPaywall("monthly.feature3")}</li>
                     <li>• {tPaywall("monthly.feature4")}</li>
+                    <li>• {tPaywall("monthly.feature5")}</li>
                   </ul>
                   <Button
                     text={tPaywall("monthly.cta")}
@@ -472,6 +475,7 @@ export default function UserSettingsClient() {
                     <li>• {tPaywall("yearly.feature2")}</li>
                     <li>• {tPaywall("yearly.feature3")}</li>
                     <li>• {tPaywall("yearly.feature4")}</li>
+                    <li>• {tPaywall("yearly.feature5")}</li>
                   </ul>
                   <Button
                     text={tPaywall("yearly.cta")}
@@ -506,9 +510,6 @@ export default function UserSettingsClient() {
                     <li>• {tPaywall("lifetime.feature3")}</li>
                     <li>• {tPaywall("lifetime.feature4")}</li>
                   </ul>
-                  <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-3 text-center">
-                    {tPaywall("lifetime.fairUsage")}
-                  </p>
                   <Button
                     text={tPaywall("lifetime.cta")}
                     variant="primary"

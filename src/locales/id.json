@@ -259,9 +259,11 @@
       "free": {
         "label": "Gratis",
         "period": "/selamanya",
-        "feature1": "3 anggaran",
-        "feature3": "10 pesan AI/hari",
-        "feature4": "Grafik dasar",
+        "feature1": "Pencatatan pengeluaran manual tanpa batas",
+        "feature2": "Kategori dasar",
+        "feature3": "Tema terang & gelap",
+        "feature4": "Analitik dasar",
+        "feature5": "7 bahasa",
         "cta": "Paket Saat Ini"
       },
       "monthly": {
@@ -269,9 +271,10 @@
         "price": "$7",
         "period": "/bulan",
         "feature1": "Anggaran tak terbatas",
-        "feature2": "Dompet tak terbatas",
-        "feature3": "Dukungan AI dasar",
-        "feature4": "Semua fitur gratis",
+        "feature2": "Nada AI kustom",
+        "feature3": "Tanpa banner",
+        "feature4": "Analitik lanjutan",
+        "feature5": "Semua fitur Gratis",
         "cta": "Upgrade ke Bulanan"
       },
       "yearly": {
@@ -279,10 +282,11 @@
         "price": "$49",
         "period": "/tahun",
         "priceNote": "~$4.08/bulan",
-        "feature1": "Semua di Bulanan",
-        "feature2": "Dukungan prioritas",
-        "feature3": "Akses awal ke fitur",
-        "feature4": "Nilai terbaik",
+        "feature1": "Hemat 42% vs Bulanan",
+        "feature2": "Anggaran tak terbatas",
+        "feature3": "Nada AI kustom",
+        "feature4": "Tanpa banner",
+        "feature5": "Analitik lanjutan",
         "cta": "Upgrade ke Tahunan"
       },
       "lifetime": {
@@ -290,9 +294,9 @@
         "price": "$99",
         "period": "sekali bayar",
         "feature1": "Semua di Tahunan",
-        "feature2": "Badge Early Adopter",
-        "feature3": "Pembaruan seumur hidup",
-        "feature4": "Edisi Pendiri",
+        "feature2": "Pembaruan seumur hidup",
+        "feature3": "Edisi Pendiri",
+        "feature4": "Bayar sekali, milik selamanya",
         "fairUsage": "Kebijakan Penggunaan Wajar berlaku untuk batas AI",
         "cta": "Dapatkan Akses Seumur Hidup"
       }

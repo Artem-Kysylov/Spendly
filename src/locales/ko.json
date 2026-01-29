@@ -259,9 +259,11 @@
       "free": {
         "label": "무료",
         "period": "/평생 무료",
-        "feature1": "예산 3개",
-        "feature3": "일일 AI 메시지 10개",
-        "feature4": "기본 차트",
+        "feature1": "수동 지출 입력 무제한",
+        "feature2": "기본 카테고리",
+        "feature3": "라이트 & 다크 테마",
+        "feature4": "기본 분석",
+        "feature5": "7개 언어",
         "cta": "현재 플랜"
       },
       "monthly": {
@@ -269,9 +271,10 @@
         "price": "$7",
         "period": "/월",
         "feature1": "무제한 예산",
-        "feature2": "무제한 지갑",
-        "feature3": "기본 AI 지원",
-        "feature4": "모든 무료 기능 포함",
+        "feature2": "맞춤 AI 톤",
+        "feature3": "배너 없음",
+        "feature4": "고급 분석",
+        "feature5": "무료 플랜의 모든 기능",
         "cta": "월간 플랜으로 업그레이드"
       },
       "yearly": {
@@ -279,10 +282,11 @@
         "price": "$49",
         "period": "/년",
         "priceNote": "약 $4.08/월",
-        "feature1": "월간 플랜의 모든 기능",
-        "feature2": "우선 지원 서비스",
-        "feature3": "신기능 우선 체험",
-        "feature4": "가장 합리적인 선택",
+        "feature1": "월간 대비 42% 절약",
+        "feature2": "무제한 예산",
+        "feature3": "맞춤 AI 톤",
+        "feature4": "배너 없음",
+        "feature5": "고급 분석",
         "cta": "연간 플랜으로 업그레이드"
       },
       "lifetime": {
@@ -290,9 +294,9 @@
         "price": "$99",
         "period": "1회 결제",
         "feature1": "연간 플랜의 모든 기능",
-        "feature2": "초기 사용자 배지",
-        "feature3": "평생 업데이트",
-        "feature4": "파운더스 에디션",
+        "feature2": "평생 업데이트",
+        "feature3": "파운더스 에디션",
+        "feature4": "한 번 결제로 영구 소유",
         "fairUsage": "AI 사용량에는 공정 사용 정책이 적용됩니다",
         "cta": "평생 액세스 권한 획득"
       }

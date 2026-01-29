@@ -259,19 +259,22 @@
       "free": {
         "label": "Free",
         "period": "/forever",
-        "feature1": "3 budgets",
-        "feature3": "10 AI messages/day",
-        "feature4": "Basic charts",
+        "feature1": "Unlimited manual expenses",
+        "feature2": "Basic categories",
+        "feature3": "Light & dark themes",
+        "feature4": "Basic analytics",
+        "feature5": "7 languages",
         "cta": "Current Plan"
       },
       "monthly": {
         "label": "Monthly",
         "price": "$7",
         "period": "/month",
-        "feature1": "Unlimited budgets",
-        "feature2": "Unlimited wallets",
-        "feature3": "Basic AI support",
-        "feature4": "All free features",
+        "feature1": "Unlimited Budgets",
+        "feature2": "Custom AI Tones",
+        "feature3": "No Banners",
+        "feature4": "Advanced Analytics",
+        "feature5": "Everything in Free",
         "cta": "Upgrade to Monthly"
       },
       "yearly": {
@@ -279,10 +282,11 @@
         "price": "$49",
         "period": "/year",
         "priceNote": "~$4.08/month",
-        "feature1": "Everything in Monthly",
-        "feature2": "Priority support",
-        "feature3": "Early access to features",
-        "feature4": "Best value",
+        "feature1": "Save 42% vs Monthly",
+        "feature2": "Unlimited Budgets",
+        "feature3": "Custom AI Tones",
+        "feature4": "No Banners",
+        "feature5": "Advanced Analytics",
         "cta": "Upgrade to Yearly"
       },
       "lifetime": {
@@ -290,9 +294,9 @@
         "price": "$99",
         "period": "one-time",
         "feature1": "Everything in Yearly",
-        "feature2": "Early Adopter Badge",
-        "feature3": "Lifetime updates",
-        "feature4": "Founder's Edition",
+        "feature2": "Lifetime updates",
+        "feature3": "Founder's Edition",
+        "feature4": "Pay once, own forever",
         "fairUsage": "Fair Usage Policy applies to AI limits",
         "cta": "Get Lifetime Access"
       }
