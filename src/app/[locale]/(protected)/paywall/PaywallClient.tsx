@@ -79,20 +79,17 @@ export default function PaywallClient() {
 
                 if (!token) return false;
 
-                const normalizedEnv = token.startsWith("test_")
-                    ? "sandbox"
-                    : token.startsWith("live_")
+                const rawEnv = (process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || "")
+                    .trim()
+                    .toLowerCase();
+                const normalizedEnv =
+                    rawEnv === "production" || rawEnv === "live" || rawEnv === "prod"
                         ? "production"
-                        : "";
+                        : rawEnv === "sandbox" || rawEnv === "test"
+                            ? "sandbox"
+                            : "";
 
                 try {
-                    if (normalizedEnv === "sandbox" && paddle.Environment && typeof paddle.Environment.set === "function") {
-                        try {
-                            paddle.Environment.set("sandbox");
-                        } catch {
-                        }
-                    }
-
                     const initArgs: Record<string, string> = { token };
                     if (normalizedEnv) initArgs.environment = normalizedEnv;
                     paddle.Initialize(initArgs);
@@ -118,6 +115,11 @@ export default function PaywallClient() {
                 setToast({ text: "Checkout is unavailable. Please try again.", type: "error" });
                 setTimeout(() => setToast(null), 3000);
                 return;
+            }
+
+            console.log("[Paywall] priceId:", priceId);
+            if (!String(priceId).startsWith("pri_")) {
+                console.warn("[Paywall] priceId does not look like a production pri_ id", { priceId });
             }
 
             const userId = session?.user?.id;
@@ -157,17 +159,8 @@ export default function PaywallClient() {
             }
 
             const checkoutPayload = {
-                settings: {
-                    displayMode: "overlay",
-                    locale,
-                    theme: "light",
-                    successUrl: `${window.location.origin}/${locale}/checkout/success`,
-                    allowDiscount: true,
-                },
                 items: [{ priceId, quantity: 1 }],
-                customData,
             };
-            console.log("Checkout opened with support for coupons");
             console.log("[Paywall] Opening checkout:", checkoutPayload);
             setIsCheckoutLoading(false);
             paddle.Checkout.open(checkoutPayload);
