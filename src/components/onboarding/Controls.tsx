@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@/components/ui-elements/Button";
+import { useRouter } from "@/i18n/routing";
 
 type Props = {
   isFirst: boolean;
@@ -17,6 +18,11 @@ export default function Controls({
   onNext,
   onSkip,
 }: Props) {
+  const router = useRouter();
+
+  const handleUpgradeClick = () => {
+    router.push("/paywall");
+  };
   return (
     <div className="mt-8 flex items-center justify-between">
       {/* Левая часть: Back всегда в одном месте (кроме первого шага) */}
@@ -45,7 +51,7 @@ export default function Controls({
         {!isLast ? (
           <Button variant="default" text="Next" onClick={onNext} />
         ) : (
-          <Button variant="default" text="Upgrade to Pro" onClick={onNext} />
+          <Button variant="default" text="Upgrade to Pro" onClick={handleUpgradeClick} />
         )}
       </div>
     </div>

@@ -466,7 +466,14 @@ export default function UserSettingsClient() {
                         },
                         body: JSON.stringify({}),
                       });
-                      if (!resp.ok) return;
+                      if (!resp.ok) {
+                        const errText = await resp.text().catch(() => "");
+                        console.error("[Settings] Failed to open customer portal", {
+                          status: resp.status,
+                          body: errText,
+                        });
+                        return;
+                      }
                       const json = (await resp.json().catch(() => null)) as { url?: string } | null;
                       const url = typeof json?.url === "string" ? json.url : "";
                       if (!url) return;

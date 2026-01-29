@@ -67,12 +67,10 @@ export async function POST(req: NextRequest) {
     }
 
     const env = (
-      process.env.PADDLE_ENVIRONMENT ||
       process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT ||
+      process.env.PADDLE_ENVIRONMENT ||
       ""
-    )
-      .trim()
-      .toLowerCase();
+    ).trim().toLowerCase();
 
     const normalizedEnv =
       env === "production" || env === "live" || env === "prod"
@@ -86,6 +84,7 @@ export async function POST(req: NextRequest) {
     let res: Response;
     let text = "";
     try {
+      const returnUrl = `${req.nextUrl.origin}/`;
       res = await fetch(
         `${baseUrl}/customers/${encodeURIComponent(customerId)}/portal-sessions`,
         {
@@ -94,9 +93,8 @@ export async function POST(req: NextRequest) {
             Authorization: `Bearer ${apiKey}`,
             "Content-Type": "application/json",
             "Paddle-Version": "1",
-            "Paddle-Seller-Id": sellerId,
           },
-          body: JSON.stringify({}),
+          body: JSON.stringify({ return_url: returnUrl }),
         },
       );
       text = await res.text().catch(() => "");
@@ -105,6 +103,7 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         customerId,
         env: normalizedEnv || env || "(unknown)",
+        sellerId,
         error: e,
       });
       return NextResponse.json(
@@ -118,6 +117,7 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         customerId,
         env: normalizedEnv || env || "(unknown)",
+        sellerId,
         status: res.status,
         body: text,
       });
@@ -128,7 +128,9 @@ export async function POST(req: NextRequest) {
     }
 
     const json = (text ? (JSON.parse(text) as PaddlePortalResponse) : null) as PaddlePortalResponse | null;
-    const url = json?.data?.urls?.general?.overview;
+    const url =
+      json?.data?.urls?.general?.overview ||
+      (json as any)?.data?.url;
 
     if (typeof url !== "string" || url.length === 0) {
       return NextResponse.json(

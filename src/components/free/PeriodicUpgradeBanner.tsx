@@ -3,13 +3,13 @@ import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useLocale } from "next-intl";
-import { UserAuth } from "@/context/AuthContext";
+import { useRouter } from "@/i18n/routing";
 // import { trackEvent } from "@/lib/telemetry";
 
 export default function PeriodicUpgradeBanner() {
   const t = useTranslations("layout");
   const locale = useLocale();
-  const { session } = UserAuth();
+  const router = useRouter();
   const { subscriptionPlan } = useSubscription();
   const [visible, setVisible] = useState(false);
 
@@ -42,51 +42,8 @@ export default function PeriodicUpgradeBanner() {
 
   if (!visible || subscriptionPlan === "pro") return null;
 
-  const handleUpgradeClick = async () => {
-    const waitForPaddleInitialized = async (timeoutMs = 2000) => {
-      const start = Date.now();
-      while (Date.now() - start < timeoutMs) {
-        if ((window as any)?.__SPENDLY_PADDLE_INITIALIZED === true) return true;
-        await new Promise((r) => setTimeout(r, 50));
-      }
-      return (window as any)?.__SPENDLY_PADDLE_INITIALIZED === true;
-    };
-
-    // trackEvent("upgrade_cta_clicked", { from: "periodic_banner" });
-
-    const fallback = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID || "").trim();
-    const priceId = (process.env.NEXT_PUBLIC_PADDLE_PRICE_ID_MONTHLY || "").trim() ||
-      fallback;
-    if (!priceId) {
-      console.warn("[PeriodicBanner] Missing Paddle priceId");
-      return;
-    }
-    const paddle = (window as any)?.Paddle;
-    if (!paddle?.Checkout?.open) {
-      console.warn("[PeriodicBanner] Paddle is not available on window yet");
-      return;
-    }
-
-    const initialized = await waitForPaddleInitialized();
-    if (!initialized) {
-      console.warn("[PeriodicBanner] Paddle is not initialized yet");
-      return;
-    }
-
-    const userId = session?.user?.id;
-    const customData: Record<string, string> = { plan: "monthly" };
-    if (typeof userId === "string" && userId.length > 0) customData.user_id = userId;
-
-    paddle.Checkout.open({
-      settings: {
-        displayMode: "overlay",
-        locale,
-        theme: "light",
-        successUrl: `${window.location.origin}/${locale}/checkout/success`,
-      },
-      items: [{ priceId, quantity: 1 }],
-      customData,
-    });
+  const handleUpgradeClick = () => {
+    router.push("/paywall");
   };
 
   const handleDismiss = () => {
