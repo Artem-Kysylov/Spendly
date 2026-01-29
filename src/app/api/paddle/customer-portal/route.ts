@@ -130,6 +130,27 @@ export async function POST(req: NextRequest) {
         status: res.status,
         body: text,
       });
+
+      if (res.status === 403) {
+        const parsed = (() => {
+          try {
+            return JSON.parse(text) as any;
+          } catch {
+            return null;
+          }
+        })();
+
+        const detail = typeof parsed?.error?.detail === "string" ? parsed.error.detail : "";
+        if (detail.toLowerCase().includes("customer-portal-session")) {
+          return NextResponse.json(
+            {
+              error: "Paddle API key is missing permission: customer_portal_session.write",
+              details: text,
+            },
+            { status: 403 },
+          );
+        }
+      }
       return NextResponse.json(
         { error: "Failed to create portal session", details: text },
         { status: res.status },
