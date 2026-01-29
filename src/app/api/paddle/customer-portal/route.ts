@@ -84,7 +84,6 @@ export async function POST(req: NextRequest) {
     let res: Response;
     let text = "";
     try {
-      const returnUrl = `${req.nextUrl.origin}/`;
       res = await fetch(
         `${baseUrl}/customers/${encodeURIComponent(customerId)}/portal-sessions`,
         {
@@ -94,7 +93,7 @@ export async function POST(req: NextRequest) {
             "Content-Type": "application/json",
             "Paddle-Version": "1",
           },
-          body: JSON.stringify({ return_url: returnUrl }),
+          body: JSON.stringify({}),
         },
       );
       text = await res.text().catch(() => "");

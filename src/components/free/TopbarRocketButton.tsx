@@ -1,12 +1,11 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { RocketIcon } from "lucide-react";
-import { useTranslations, useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 
 export function TopbarRocketButton() {
   const t = useTranslations("layout.upgradeBanner");
-  const locale = useLocale();
   const router = useRouter();
 
   const handleUpgradeClick = () => {

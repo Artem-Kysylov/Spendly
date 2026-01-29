@@ -1,12 +1,10 @@
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
-import { useLocale } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 
 export default function UpgradeCornerPanel() {
   const t = useTranslations("layout");
-  const locale = useLocale();
   const router = useRouter();
   const [visible, setVisible] = useState(false);
 

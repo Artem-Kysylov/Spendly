@@ -2,13 +2,11 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useSubscription } from "@/hooks/useSubscription";
-import { useLocale } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 // import { trackEvent } from "@/lib/telemetry";
 
 export default function PeriodicUpgradeBanner() {
   const t = useTranslations("layout");
-  const locale = useLocale();
   const router = useRouter();
   const { subscriptionPlan } = useSubscription();
   const [visible, setVisible] = useState(false);
