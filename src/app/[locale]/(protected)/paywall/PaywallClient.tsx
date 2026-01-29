@@ -153,7 +153,14 @@ export default function PaywallClient() {
                 return;
             }
 
+            const htmlLang =
+                typeof document !== "undefined" ? (document.documentElement.lang || "").trim() : "";
             const checkoutPayload = {
+                settings: {
+                    displayMode: "overlay",
+                    theme: "light",
+                    locale: htmlLang || "en",
+                },
                 items: [{ priceId, quantity: 1 }],
             };
             console.log("[Paywall] Opening checkout:", checkoutPayload);
