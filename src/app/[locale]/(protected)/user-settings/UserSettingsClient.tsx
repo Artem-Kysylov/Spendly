@@ -135,6 +135,7 @@ export default function UserSettingsClient() {
   }
 
   function handleUpgradeClick(plan: "monthly" | "yearly" | "lifetime" = "monthly") {
+    console.log("Settings: Upgrade button clicked");
     if (isUpgradeLoading) return;
     setIsUpgradeLoading(true);
     try {
@@ -158,8 +159,53 @@ export default function UserSettingsClient() {
         return;
       }
 
-      const initialized = (window as any)?.__SPENDLY_PADDLE_INITIALIZED === true;
-      if (!initialized) {
+      const wasInitialized = (window as any)?.__SPENDLY_PADDLE_INITIALIZED === true;
+      const token = (
+        process.env.NEXT_PUBLIC_PADDLE_CLIENT_TOKEN ||
+        process.env.NEXT_PUBLIC_PADDLE_TOKEN ||
+        ""
+      ).trim();
+
+      if (!wasInitialized && !token) {
+        console.warn("[Settings] Missing Paddle client token");
+        return;
+      }
+
+      if (token) {
+        const rawEnv = (process.env.NEXT_PUBLIC_PADDLE_ENVIRONMENT || "").trim().toLowerCase();
+        const normalizedEnv =
+          rawEnv === "production" || rawEnv === "live" || rawEnv === "prod"
+            ? "production"
+            : rawEnv === "sandbox" || rawEnv === "test"
+              ? "sandbox"
+              : "";
+
+        const htmlLang =
+          typeof document !== "undefined" ? (document.documentElement.lang || "").trim() : "";
+
+        try {
+          const initArgs: Record<string, unknown> = {
+            token,
+            checkout: {
+              settings: {
+                displayMode: "overlay",
+                theme: "light",
+                locale: htmlLang || "en",
+              },
+            },
+          };
+          if (normalizedEnv) initArgs.environment = normalizedEnv;
+          paddle.Initialize?.(initArgs);
+          (window as any).__SPENDLY_PADDLE_INITIALIZED = true;
+        } catch (e) {
+          console.warn("[Settings] Paddle.Initialize failed", e);
+          if (!wasInitialized) {
+            return;
+          }
+        }
+      }
+
+      if ((window as any)?.__SPENDLY_PADDLE_INITIALIZED !== true) {
         console.warn("[Settings] Paddle is not initialized yet");
         return;
       }
