@@ -162,10 +162,12 @@ export default function PaywallClient() {
                     locale,
                     theme: "light",
                     successUrl: `${window.location.origin}/${locale}/checkout/success`,
+                    allowDiscount: true,
                 },
                 items: [{ priceId, quantity: 1 }],
                 customData,
             };
+            console.log("Checkout opened with support for coupons");
             console.log("[Paywall] Opening checkout:", checkoutPayload);
             setIsCheckoutLoading(false);
             paddle.Checkout.open(checkoutPayload);
