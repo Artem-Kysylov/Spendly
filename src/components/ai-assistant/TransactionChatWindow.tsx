@@ -119,7 +119,7 @@ export function TransactionChatWindow({
           aria-label={tAI("buttons.close")}
           onClick={onClose}
         >
-          <X className="w-4 h-4 text-muted-foreground" />
+          <X className="w-5 h-5 text-muted-foreground" />
         </SheetClose>
       </SheetHeader>
 
@@ -184,7 +184,7 @@ export function TransactionChatWindow({
                 type="button"
                 variant="outline"
                 size="icon"
-                className="h-10 w-10 rounded-lg"
+                className="h-10 w-10 rounded-full"
                 onClick={stop}
               >
                 <X className="w-4 h-4" />
@@ -193,7 +193,7 @@ export function TransactionChatWindow({
               <Button
                 type="submit"
                 size="icon"
-                className="h-10 w-10 rounded-lg"
+                className="h-10 w-10 rounded-full"
                 disabled={!input.trim() || isRateLimited}
               >
                 <Send className="w-4 h-4" />

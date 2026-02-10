@@ -150,7 +150,7 @@ export const ChatInput = ({
               isThinking 
                 ? "bg-gray-200 text-gray-500 hover:bg-gray-300 dark:bg-gray-800 dark:text-gray-400" 
                 : "bg-primary hover:bg-primary/90 text-primary-foreground"
-            } rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center flex-shrink-0`}
+            } rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center flex-shrink-0`}
             aria-label={isThinking ? tAI("actions.abort") : tAI("actions.send")}
             title={isThinking ? tAI("actions.abort") : tAI("actions.send")}
           >

@@ -72,13 +72,11 @@ function TransactionModal({
             {/* Drawer handle */}
             <div className="mx-auto mt-2 mb-2 h-1.5 w-12 rounded-full bg-muted" />
             <SheetHeader>
-              <div className="flex items-center justify-between gap-2">
-                <div className="w-10" />
-                <SheetTitle className="text-center text-xl font-semibold w-full">
-                  {title} 📉
-                </SheetTitle>
-                <div className="w-10" />
-              </div>
+              <div className="w-10" />
+              <SheetTitle className="flex-1 text-center text-xl font-semibold">
+                {title} 📉
+              </SheetTitle>
+              <div className="w-10" />
             </SheetHeader>
 
             <div className="mt-[10px] px-4 flex-1">
