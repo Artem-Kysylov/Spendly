@@ -1,8 +1,11 @@
 // Imports
-import { useState } from "react";
-import { Trash, Pencil } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
+
+// Import components
+import { Button } from "@/components/ui/button";
 
 // Import shadcn components
 import {
@@ -11,20 +14,18 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
 } from "@/components/ui/table";
-
-// Import components
-import { Button } from "@/components/ui/button";
-import DeleteModal from "../modals/DeleteModal";
-import EditTransactionModal from "../modals/EditTransactionModal";
+import { UserAuth } from "../../context/AuthContext";
+import { supabase } from "../../lib/supabaseClient";
 
 // Import types
-import { TransactionsTableProps } from "../../types/types";
-import type { Transaction, EditTransactionPayload } from "../../types/types";
-import { supabase } from "../../lib/supabaseClient";
-import { UserAuth } from "../../context/AuthContext";
-import { Pagination } from "@/components/ui/pagination";
+import type {
+  EditTransactionPayload,
+  Transaction,
+  TransactionsTableProps,
+} from "../../types/types";
+import DeleteModal from "../modals/DeleteModal";
+import EditTransactionModal from "../modals/EditTransactionModal";
 
 // Расширенный интерфейс для поддержки фильтрации
 interface EnhancedTransactionsTableProps extends TransactionsTableProps {
@@ -45,7 +46,7 @@ function TransactionsTable({
   allowTypeChange = true,
   sortBy = "date",
   sortOrder = "desc",
-  showFilters = false,
+  showFilters: _showFilters = false,
   emptyStateMessage,
   onTransactionUpdate,
   onEditClick,
@@ -67,8 +68,8 @@ function TransactionsTable({
   const tTransactions = useTranslations("transactions");
 
   // Пагинация
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const pageSize = 10;
+  const [_currentPage, _setCurrentPage] = useState<number>(1);
+  const _pageSize = 10;
 
   // Улучшенная сортировка транзакций
   const sortedTransactions = [...transactions].sort((a, b) => {
@@ -96,7 +97,7 @@ function TransactionsTable({
     return sortOrder === "desc" ? -comparison : comparison;
   });
 
-  const handleOpenModal = (id: string) => {
+  const _handleOpenModal = (id: string) => {
     setSelectedTransactionId(id);
     setIsModalOpen(true);
   };
@@ -106,7 +107,7 @@ function TransactionsTable({
     setSelectedTransactionId(null);
   };
 
-  const handleConfirmDelete = async () => {
+  const _handleConfirmDelete = async () => {
     if (selectedTransactionId) {
       await onDeleteTransaction(selectedTransactionId);
       handleCloseModal();
@@ -119,7 +120,12 @@ function TransactionsTable({
     if (!session?.user?.id) throw new Error("No session user id");
     console.log("[TransactionsTable] Fallback update:", payload);
 
-    const updateData: any = {
+    const updateData: {
+      title: string;
+      amount: number;
+      type: EditTransactionPayload["type"];
+      created_at?: string;
+    } = {
       title: payload.title,
       amount: payload.amount,
       type: payload.type,
@@ -147,7 +153,7 @@ function TransactionsTable({
     emptyStateMessage ?? tTransactions("table.empty.default");
   if (transactions.length === 0) {
     return (
-      <div className="text-center py-8 mb-24">
+      <div className="text-center py-8 mb-2 md:mb-24">
         <p className="text-muted-foreground">{effectiveEmptyMessage}</p>
       </div>
     );
@@ -155,7 +161,7 @@ function TransactionsTable({
 
   return (
     <motion.div
-      className="relative mb-24"
+      className="relative mb-2 md:mb-24"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
@@ -255,7 +261,7 @@ function TransactionsTable({
             {sortedTransactions.map((transaction, index) => (
               <motion.tr
                 key={transaction.id}
-                className="border-b border-border hover:bg-muted/30"
+                className="border-b border-border md:hover:bg-muted/30"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{
@@ -306,7 +312,7 @@ function TransactionsTable({
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-primary hover:bg-blue-50"
+                      className="h-8 w-8 text-primary md:hover:bg-blue-50"
                       onClick={() => {
                         if (onEditClick) {
                           onEditClick(transaction);
@@ -321,7 +327,7 @@ function TransactionsTable({
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-error hover:bg-red-50"
+                      className="h-8 w-8 text-error md:hover:bg-red-50"
                       onClick={() => {
                         setSelectedTransactionId(transaction.id);
                         setIsModalOpen(true);

@@ -1,22 +1,22 @@
 "use client";
 
+import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { cva, type VariantProps } from "class-variance-authority";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center whitespace-nowrap rounded-md text-base md:text-sm font-semibold md:font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive: "bg-error text-error-foreground hover:bg-error/90",
+        default: "bg-primary text-primary-foreground md:hover:bg-primary/90",
+        destructive: "bg-error text-error-foreground md:hover:bg-error/90",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "border border-input bg-background md:hover:bg-accent md:hover:text-accent-foreground",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+          "bg-secondary text-secondary-foreground md:hover:bg-secondary/80",
+        ghost: "md:hover:bg-accent md:hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 md:hover:underline",
       },
       size: {
         default: "h-[60px] md:h-10 px-4 py-2",

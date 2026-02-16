@@ -81,7 +81,7 @@ const EditTransactionModal = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-center">{title}</DialogTitle>
-          <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground">
+          <DialogClose className="absolute right-4 top-4 text-muted-foreground md:hover:text-foreground">
             <X size={22} />
           </DialogClose>
         </DialogHeader>

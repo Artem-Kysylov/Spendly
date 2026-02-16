@@ -1,33 +1,42 @@
 // ProtectedLayout component
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
-import TopBar from "@/components/layout/TopBar";
-import Sidebar from "@/components/layout/Sidebar";
-import ProtectedRoute from "@/components/guards/ProtectedRoute";
-import { AIAssistantProvider, TransactionChatProvider } from "@/components/ai-assistant";
-import MobileTabBar from "@/components/layout/MobileTabBar";
-import AddTransactionProvider from "@/components/layout/AddTransactionProvider";
-import useDeviceType from "@/hooks/useDeviceType";
-import { usePathname, useSearchParams, useRouter as useNextRouter } from "next/navigation";
 import {
   AnimatePresence,
   motion,
   useReducedMotion,
-  Variants,
+  type Variants,
 } from "framer-motion";
-import PeriodicUpgradeBanner from "@/components/free/PeriodicUpgradeBanner";
-import { useSubscription } from "@/hooks/useSubscription";
-import { UserAuth } from "@/context/AuthContext";
 import Image from "next/image";
+import {
+  useRouter as useNextRouter,
+  usePathname,
+  useSearchParams,
+} from "next/navigation";
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
 
-export default function ProtectedLayout({ children }: { children: React.ReactNode; }) {
-  const { isDesktop, isMobile, isTablet } = useDeviceType();
+import { TransactionChatProvider } from "@/components/ai-assistant";
+
+import PeriodicUpgradeBanner from "@/components/free/PeriodicUpgradeBanner";
+import ProtectedRoute from "@/components/guards/ProtectedRoute";
+import AddTransactionProvider from "@/components/layout/AddTransactionProvider";
+import MobileTabBar from "@/components/layout/MobileTabBar";
+import Sidebar from "@/components/layout/Sidebar";
+import TopBar from "@/components/layout/TopBar";
+import { UserAuth } from "@/context/AuthContext";
+import useDeviceType from "@/hooks/useDeviceType";
+
+export default function ProtectedLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  useDeviceType();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useNextRouter();
   const prefersReduced = useReducedMotion();
-  const { subscriptionPlan } = useSubscription();
   const { isReady, session } = UserAuth();
 
   const isPaywallRoute = useMemo(() => {
@@ -40,12 +49,15 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
     return qs ? `${pathname}?${qs}` : pathname;
   }, [pathname, searchParams]);
 
+  const localePrefix = useMemo(() => {
+    return pathname?.split("/")?.[1];
+  }, [pathname]);
+
   useEffect(() => {
     if (!isPaywallRoute) return;
     if (!isReady) return;
     if (session) return;
 
-    const localePrefix = pathname?.split("/")?.[1];
     const authBase = localePrefix ? `/${localePrefix}/auth` : "/auth";
     const fallbackRedirectTo = localePrefix
       ? `/${localePrefix}/paywall`
@@ -62,19 +74,32 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
       safeRedirectTo,
     )}`;
     router.replace(authUrl);
-  }, [currentPathWithSearch, isPaywallRoute, isReady, router, session]);
+  }, [
+    currentPathWithSearch,
+    isPaywallRoute,
+    isReady,
+    localePrefix,
+    router,
+    session,
+  ]);
 
   const [isStandalone, setIsStandalone] = useState(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const checkStandalone = () => {
-      const mq = window.matchMedia ? window.matchMedia("(display-mode: standalone)") : null;
+      const mq = window.matchMedia
+        ? window.matchMedia("(display-mode: standalone)")
+        : null;
       const isStandaloneMatch = mq?.matches ?? false;
-      const isNavigatorStandalone = (window.navigator as any).standalone === true;
+      const isNavigatorStandalone =
+        (window.navigator as Navigator & { standalone?: boolean })
+          .standalone === true;
       setIsStandalone(isStandaloneMatch || isNavigatorStandalone);
     };
     checkStandalone();
-    const mq = window.matchMedia ? window.matchMedia("(display-mode: standalone)") : null;
+    const mq = window.matchMedia
+      ? window.matchMedia("(display-mode: standalone)")
+      : null;
     mq?.addEventListener("change", checkStandalone);
     return () => {
       mq?.removeEventListener("change", checkStandalone);
@@ -102,7 +127,12 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
       <div className="min-h-[100dvh] bg-background text-foreground transition-colors duration-300">
         <header className="sticky top-0 z-50 border-b border-border/60 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-center px-4">
-            <Image src="/Spendly-logo.svg" alt="Spendly" width={110} height={30} />
+            <Image
+              src="/Spendly-logo.svg"
+              alt="Spendly"
+              width={110}
+              height={30}
+            />
           </div>
         </header>
         <main className="mx-auto w-full max-w-[1280px] px-4 py-10">
@@ -134,7 +164,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           <AnimatePresence mode="wait">
             <motion.main
               key={pathname}
-              className={`${pathname?.includes("/ai-assistant") ? "flex-1 flex flex-col overflow-hidden min-w-0 min-h-0 transition-colors duration-300 overscroll-none" : `flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 ${isStandalone ? "pb-[calc(env(safe-area-inset-bottom)+96px)]" : "pb-[96px]"} lg:pb-0 transition-colors duration-300`}`}
+              className={`${pathname?.includes("/ai-assistant") ? "flex-1 flex flex-col overflow-hidden min-w-0 min-h-0 transition-colors duration-300 overscroll-none" : `flex-1 overflow-y-auto overflow-x-hidden min-w-0 min-h-0 ${isStandalone ? "pb-[calc(env(safe-area-inset-bottom)+84px)]" : "pb-[84px]"} lg:pb-0 transition-colors duration-300`}`}
               initial={pageVariants ? "initial" : false}
               animate={pageVariants ? "animate" : { opacity: 1 }}
               exit={pageVariants ? "exit" : undefined}
@@ -142,10 +172,9 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
               transition={transition}
               style={{
                 willChange: "opacity, transform",
-                touchAction:
-                  pathname?.includes("/ai-assistant")
-                    ? "pan-y"
-                    : undefined,
+                touchAction: pathname?.includes("/ai-assistant")
+                  ? "pan-y"
+                  : undefined,
               }}
             >
               {children}

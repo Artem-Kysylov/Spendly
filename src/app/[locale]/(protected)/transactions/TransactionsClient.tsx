@@ -1,34 +1,27 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
-  Plus,
-  Search,
-  Filter,
   ChevronDown,
   ChevronUp,
-  Sparkles,
+  Filter,
   Lock,
+  Plus,
+  Search,
+  Sparkles,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useLocale, useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import useModal from "@/hooks/useModal";
-import useDeviceType from "@/hooks/useDeviceType";
-import {
-  useTransactionsInfinite,
-  TransactionFilterType,
-} from "@/hooks/useTransactionsInfinite";
-import { useTransactionsData } from "@/hooks/useTransactionsData";
-import { UserAuth } from "@/context/AuthContext";
-import { supabase } from "@/lib/supabaseClient";
 import {
   generateSpendingInsights,
   type SpendingInsights,
 } from "@/app/[locale]/actions/get-insights";
-
-import { Button } from "@/components/ui-elements";
-import { AIInsightPreloader } from "@/components/ui-elements";
+import { ExpensesBarChart } from "@/components/charts/TransactionsBarChart";
+import MobileTransactionCard from "@/components/chunks/MobileTransactionCard";
+import TransactionsTable from "@/components/chunks/TransactionsTable";
+import LimitReachedModal from "@/components/modals/LimitReachedModal";
+import TransactionModal from "@/components/modals/TransactionModal";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -38,16 +31,19 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import MobileTransactionCard from "@/components/chunks/MobileTransactionCard";
-import TransactionsTable from "@/components/chunks/TransactionsTable";
-import TransactionModal from "@/components/modals/TransactionModal";
-import { ExpensesBarChart } from "@/components/charts/TransactionsBarChart";
 import { useToast } from "@/components/ui/use-toast";
-import LimitReachedModal from "@/components/modals/LimitReachedModal";
+import { AIInsightPreloader, Button } from "@/components/ui-elements";
+import { UserAuth } from "@/context/AuthContext";
+import useDeviceType from "@/hooks/useDeviceType";
+import useModal from "@/hooks/useModal";
 import { useSubscription } from "@/hooks/useSubscription";
-
-import type { Transaction, ToastMessageProps } from "@/types/types";
-import { ToastMessage } from "@/components/ui-elements";
+import { useTransactionsData } from "@/hooks/useTransactionsData";
+import {
+  type TransactionFilterType,
+  useTransactionsInfinite,
+} from "@/hooks/useTransactionsInfinite";
+import { supabase } from "@/lib/supabaseClient";
+import type { ToastMessageProps, Transaction } from "@/types/types";
 
 export default function TransactionsClient() {
   const { session } = UserAuth();
@@ -61,9 +57,6 @@ export default function TransactionsClient() {
 
   // Modal & Toast
   const { isModalOpen, openModal, closeModal } = useModal();
-  const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(
-    null,
-  );
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
 
@@ -111,9 +104,7 @@ export default function TransactionsClient() {
   const isInsightTrialUsed = !isPro && insightsUsageCount >= 1;
 
   const openUpgradeModal = (message?: string) => {
-    setUpgradeModalMessage(
-      message ?? t("aiInsights.paywall.trialUsedMessage"),
-    );
+    setUpgradeModalMessage(message ?? t("aiInsights.paywall.trialUsedMessage"));
     setIsUpgradeModalOpen(true);
   };
 
@@ -134,13 +125,17 @@ export default function TransactionsClient() {
       });
 
       if (!res.ok) {
-        console.warn("[AI Insights] Failed to load insights status:", res.status);
+        console.warn(
+          "[AI Insights] Failed to load insights status:",
+          res.status,
+        );
         return;
       }
 
-      const json = (await res.json().catch(() => null)) as
-        | { insight_count?: number; is_pro?: boolean }
-        | null;
+      const json = (await res.json().catch(() => null)) as {
+        insight_count?: number;
+        is_pro?: boolean;
+      } | null;
 
       const count =
         typeof json?.insight_count === "number" ? json.insight_count : 0;
@@ -152,7 +147,7 @@ export default function TransactionsClient() {
 
   useEffect(() => {
     refreshInsightsUsage();
-  }, [refreshInsightsUsage, subscriptionPlan]);
+  }, [refreshInsightsUsage]);
 
   useEffect(() => {
     if (!isAiSheetOpen) {
@@ -190,13 +185,11 @@ export default function TransactionsClient() {
     text: string,
     type: ToastMessageProps["type"],
   ) => {
-    setToastMessage({ text, type });
     toast({
       variant: type === "success" ? "success" : "destructive",
       description: text,
       duration: 3000,
     });
-    setTimeout(() => setToastMessage(null), 3000);
   };
 
   const handleTransactionSubmit = (
@@ -288,7 +281,10 @@ export default function TransactionsClient() {
       refreshInsightsUsage();
     } catch (error) {
       console.error("Failed to fetch AI insights:", error);
-      if (error instanceof Error && error.message === "ai_insights:trial_used") {
+      if (
+        error instanceof Error &&
+        error.message === "ai_insights:trial_used"
+      ) {
         openUpgradeModal(t("aiInsights.paywall.trialUsedMessage"));
         setInsightsError(null);
       } else if (
@@ -310,12 +306,14 @@ export default function TransactionsClient() {
     setIsAnalyticsOpen(!isMobile);
   }, [isMobile]);
 
+  const SKELETON_KEYS = ["s1", "s2", "s3", "s4", "s5"] as const;
+
+  const toggleAnalytics = () => {
+    setIsAnalyticsOpen((prev) => !prev);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      {toastMessage && (
-        <ToastMessage text={toastMessage.text} type={toastMessage.type} />
-      )}
-
       {/* 1. Page Header */}
       <div className="px-4 md:px-6 pt-6 pb-4 flex items-center justify-between">
         <h1 className="text-2xl md:text-3xl font-bold text-foreground">
@@ -368,9 +366,18 @@ export default function TransactionsClient() {
       {/* 3. Collapsible Analytics */}
       <div className="px-4 md:px-6 mb-4">
         <div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
-          <div
-            className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50 transition-colors md:cursor-default md:hover:bg-card"
-            onClick={() => setIsAnalyticsOpen(!isAnalyticsOpen)}
+          <button
+            type="button"
+            className={`flex w-full items-center justify-between p-4 transition-colors md:cursor-default ${
+              isMobile
+                ? "cursor-pointer md:hover:bg-muted/50"
+                : "cursor-default"
+            }`}
+            onClick={() => {
+              if (isMobile) toggleAnalytics();
+            }}
+            disabled={!isMobile}
+            aria-expanded={isMobile ? isAnalyticsOpen : undefined}
           >
             <div className="flex items-center gap-2">
               <span className="font-medium text-foreground">
@@ -390,7 +397,7 @@ export default function TransactionsClient() {
               <SheetTrigger>
                 <Button
                   variant="ghost"
-                  className={`relative h-8 px-2 text-primary hover:text-primary hover:bg-primary/10 gap-1.5 text-xs ${isInsightTrialUsed ? "opacity-50" : ""}`}
+                  className={`relative h-8 px-2 text-primary md:hover:text-primary md:hover:bg-primary/10 gap-1.5 text-xs ${isInsightTrialUsed ? "opacity-50" : ""}`}
                   aria-label={t("aiInsights.title")}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -403,14 +410,18 @@ export default function TransactionsClient() {
                             "spendly:ai_insights_last",
                           );
                           if (raw) {
-                            setInsightsData(JSON.parse(raw) as SpendingInsights);
+                            setInsightsData(
+                              JSON.parse(raw) as SpendingInsights,
+                            );
                           }
                         } catch {
                           // no-op
                         }
                       }
                       setIsAiSheetOpen(true);
-                      openUpgradeModal(t("aiInsights.paywall.trialUsedMessage"));
+                      openUpgradeModal(
+                        t("aiInsights.paywall.trialUsedMessage"),
+                      );
                       return;
                     }
 
@@ -419,7 +430,9 @@ export default function TransactionsClient() {
                   text={
                     <>
                       <Sparkles size={14} />
-                      <span className="font-medium">{t("aiInsights.trigger")}</span>
+                      <span className="font-medium">
+                        {t("aiInsights.trigger")}
+                      </span>
                       {isInsightTrialUsed ? (
                         <span className="ml-1 inline-flex">
                           <Lock size={12} />
@@ -597,7 +610,7 @@ export default function TransactionsClient() {
                 </div>
               </SheetContent>
             </Sheet>
-          </div>
+          </button>
 
           <AnimatePresence initial={false}>
             {(isAnalyticsOpen || !isMobile) && (
@@ -664,8 +677,8 @@ export default function TransactionsClient() {
       <div className="flex-1 px-4 md:px-6 py-4">
         {isListLoading && transactions.length === 0 ? (
           <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-20 w-full rounded-xl" />
+            {SKELETON_KEYS.map((k) => (
+              <Skeleton key={k} className="h-20 w-full rounded-xl" />
             ))}
           </div>
         ) : transactions.length === 0 ? (

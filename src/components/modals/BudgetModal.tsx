@@ -1,27 +1,27 @@
+import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
+
+import BudgetForm from "@/components/budgets/BudgetForm";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
 } from "@/components/ui/dialog";
-import { X } from "lucide-react";
-import useDeviceType from "@/hooks/useDeviceType";
 
 import {
   Sheet,
+  SheetClose,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
-  SheetClose,
 } from "@/components/ui/sheet";
-
-import { BudgetModalProps } from "../../types/types";
-import { useTranslations } from "next-intl";
+import useDeviceType from "@/hooks/useDeviceType";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
-import BudgetForm from "@/components/budgets/BudgetForm";
+import type { BudgetModalProps } from "../../types/types";
 
 const BudgetModal = ({
   title,
@@ -64,7 +64,7 @@ const BudgetModal = ({
         color_code,
         rolloverEnabled,
         rolloverMode,
-        rolloverCap
+        rolloverCap,
       );
       handleClose();
     } catch (error) {
@@ -89,33 +89,35 @@ const BudgetModal = ({
           className="fixed h-[95dvh] pb-[env(safe-area-inset-bottom)] overflow-y-auto z-[10000]"
           overlayClassName="bg-foreground/45"
         >
-          {/* Drawer handle */}
-          <div className="mx-auto mt-2 mb-2 h-1.5 w-12 rounded-full bg-muted" />
+          <div className="flex flex-col h-full">
+            {/* Drawer handle */}
+            <div className="mx-auto mt-2 mb-2 h-1.5 w-12 rounded-full bg-muted" />
 
-          <SheetHeader>
-            <div className="flex items-center justify-between gap-2 w-full">
-              <div className="w-10" />
-              <SheetTitle className="text-center text-xl font-semibold flex-1">
-                {title}
-              </SheetTitle>
-              <div className="w-10" />
+            <SheetHeader>
+              <div className="flex items-center justify-between gap-2 w-full">
+                <div className="w-10" />
+                <SheetTitle className="text-center text-xl font-semibold flex-1">
+                  {title}
+                </SheetTitle>
+                <div className="w-10" />
+              </div>
+            </SheetHeader>
+
+            <div className="mt-4 px-4 flex-1">
+              <BudgetForm
+                initialData={initialData}
+                onSubmit={handleFormSubmit}
+                isLoading={isLoading}
+                onCancel={handleClose}
+              />
             </div>
-          </SheetHeader>
 
-          <div className="mt-4 px-4 flex-1 h-full">
-            <BudgetForm
-              initialData={initialData}
-              onSubmit={handleFormSubmit}
-              isLoading={isLoading}
-              onCancel={handleClose}
-            />
+            <SheetFooter className="mt-4 px-4 pb-4">
+              <SheetClose className="h-[50px] md:h-10 px-4 w-full rounded-md border border-input bg-background text-sm text-center flex items-center justify-center">
+                {tCommon("close")}
+              </SheetClose>
+            </SheetFooter>
           </div>
-
-          <SheetFooter className="mt-4 px-4 pb-6">
-            <SheetClose className="h-[50px] md:h-10 px-4 w-full rounded-md border border-input bg-background text-sm text-center flex items-center justify-center">
-              {tCommon("close")}
-            </SheetClose>
-          </SheetFooter>
         </SheetContent>
       </Sheet>
     );
@@ -134,7 +136,7 @@ const BudgetModal = ({
           <div className="flex items-center justify-between gap-2">
             <div className="w-10" />
             <DialogTitle className="text-center flex-1">{title}</DialogTitle>
-            <DialogClose className="inline-flex items-center justify-center h-10 w-10 text-muted-foreground hover:text-foreground">
+            <DialogClose className="inline-flex items-center justify-center h-10 w-10 text-muted-foreground md:hover:text-foreground">
               <X size={22} />
             </DialogClose>
           </div>

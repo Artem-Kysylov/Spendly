@@ -1,28 +1,27 @@
-import { useState } from "react";
+import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 
+import TransactionForm from "@/components/transactions/TransactionForm";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogClose,
 } from "@/components/ui/dialog";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
-  SheetClose,
 } from "@/components/ui/sheet";
 import useDeviceType from "@/hooks/useDeviceType";
-import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-
-import type { TransactionModalProps } from "@/types/types";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
-import TransactionForm from "@/components/transactions/TransactionForm";
+import type { TransactionModalProps } from "@/types/types";
 
 function TransactionModal({
   title,
@@ -83,7 +82,7 @@ function TransactionModal({
               <Button
                 type="button"
                 variant="outline"
-                className="w-full h-[50px] py-0 justify-center border-primary hover:bg-primary/5 mb-4"
+                className="w-full h-[50px] py-0 justify-center border-primary md:hover:bg-primary/5 mb-4"
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("transactions:chat"));
                   handleClose();
@@ -142,7 +141,7 @@ function TransactionModal({
       <DialogContent className="transaction-modal sm:max-w-[500px]">
         <DialogHeader>
           <div className="flex items-center justify-between gap-2">
-            <DialogClose className="inline-flex items-center justify-center h-10 w-10 rounded-full border border-border bg-background text-muted-foreground hover:text-foreground">
+            <DialogClose className="inline-flex items-center justify-center h-10 w-10 rounded-full border border-border bg-background text-muted-foreground md:hover:text-foreground">
               <X size={18} />
             </DialogClose>
             <DialogTitle className="text-center flex-1">{title}</DialogTitle>
@@ -154,7 +153,7 @@ function TransactionModal({
           <Button
             type="button"
             variant="outline"
-            className="w-full h-auto py-3 justify-center border-primary hover:bg-primary/5 mb-4"
+            className="w-full h-auto py-3 justify-center border-primary md:hover:bg-primary/5 mb-4"
             onClick={() => {
               window.dispatchEvent(new CustomEvent("transactions:chat"));
               handleClose();

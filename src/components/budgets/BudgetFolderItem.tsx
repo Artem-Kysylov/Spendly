@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { supabase } from "../../lib/supabaseClient";
-import { UserAuth } from "../../context/AuthContext";
-import BudgetProgressBar from "../ui-elements/BudgetProgressBar";
-import type { BudgetFolderItemProps } from "../../types/types";
 import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useState } from "react";
+
 import { formatCurrency } from "@/lib/chartUtils";
+
+import { UserAuth } from "../../context/AuthContext";
+import { supabase } from "../../lib/supabaseClient";
+import type { BudgetFolderItemProps } from "../../types/types";
+import BudgetProgressBar from "../ui-elements/BudgetProgressBar";
 
 function BudgetFolderItem({
   id,
@@ -18,7 +20,7 @@ function BudgetFolderItem({
   const [spentAmount, setSpentAmount] = useState(0);
   const tBudgets = useTranslations("budgets");
 
-  const fetchSpentAmount = async () => {
+  const fetchSpentAmount = useCallback(async () => {
     if (!session?.user?.id || !id) return;
     try {
       const { data, error } = await supabase
@@ -44,7 +46,7 @@ function BudgetFolderItem({
     } catch (err) {
       console.error("Error:", err);
     }
-  };
+  }, [id, session?.user?.id, type]);
 
   useEffect(() => {
     fetchSpentAmount();
@@ -53,11 +55,11 @@ function BudgetFolderItem({
     return () => {
       window.removeEventListener("budgetTransactionAdded", handleBudgetUpdate);
     };
-  }, [id, session?.user?.id]);
+  }, [fetchSpentAmount]);
 
   return (
     <div
-      className="flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg w-full h-[200px] bg-card transition-opacity duration-300 hover:opacity-50 p-3 md:p-4"
+      className="flex flex-col items-center justify-center gap-[8px] border border-border rounded-lg w-full h-[200px] bg-card transition-opacity duration-300 md:hover:opacity-50 p-3 md:p-4"
       style={{ backgroundColor: color_code ? `#${color_code}` : undefined }}
     >
       <span className="text-[28px]">{emoji}</span>

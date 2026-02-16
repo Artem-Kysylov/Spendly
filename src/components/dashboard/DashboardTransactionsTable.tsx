@@ -1,7 +1,10 @@
-import { Trash, Pencil } from "lucide-react";
+import { Pencil, Trash } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
-import { formatCurrency } from "@/lib/chartUtils";
+
+import MobileTransactionCard from "@/components/chunks/MobileTransactionCard";
+
+// Import components
+import { Button } from "@/components/ui/button";
 
 // Import shadcn components
 import {
@@ -12,10 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-// Import components
-import { Button } from "@/components/ui/button";
-import MobileTransactionCard from "@/components/chunks/MobileTransactionCard";
+import { useRouter } from "@/i18n/routing";
+import { formatCurrency } from "@/lib/chartUtils";
 
 // Import types
 import type { Transaction } from "@/types/types";
@@ -51,7 +52,7 @@ export default function DashboardTransactionsTable({
   }
 
   return (
-    <div className="space-y-4 mb-24 min-w-0">
+    <div className="space-y-4 mb-2 md:mb-24 min-w-0">
       {/* Header with title and Show All button */}
       <div className="flex items-center justify-between min-w-0">
         <h3 className="font-semibold text-lg">
@@ -60,7 +61,7 @@ export default function DashboardTransactionsTable({
         <Button
           variant="ghost"
           onClick={() => router.push("/transactions")}
-          className="text-primary hover:text-primary/80"
+          className="text-primary md:hover:text-primary/80"
         >
           {tDashboard("showAll")}
         </Button>
@@ -140,7 +141,9 @@ export default function DashboardTransactionsTable({
                         : "border-green-200 text-green-700 bg-green-50 dark:border-green-900/30 dark:text-green-400 dark:bg-green-900/10"
                     }`}
                   >
-                    {transaction.type === "expense" ? tTransactions("types.expense") : tTransactions("types.income")}
+                    {transaction.type === "expense"
+                      ? tTransactions("types.expense")
+                      : tTransactions("types.income")}
                   </span>
                 </TableCell>
                 <TableCell className="text-muted-foreground whitespace-nowrap text-sm">
@@ -151,7 +154,7 @@ export default function DashboardTransactionsTable({
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-primary hover:bg-blue-50"
+                      className="h-8 w-8 text-primary md:hover:bg-blue-50"
                       onClick={() => onEdit(transaction)}
                     >
                       <Pencil size={16} />
@@ -159,7 +162,7 @@ export default function DashboardTransactionsTable({
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8 text-error hover:bg-red-50"
+                      className="h-8 w-8 text-error md:hover:bg-red-50"
                       onClick={() => onDelete(transaction.id)}
                     >
                       <Trash size={16} />

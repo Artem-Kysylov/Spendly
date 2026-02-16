@@ -1,26 +1,27 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { UserAuth } from "@/context/AuthContext";
-import { Link } from "@/i18n/routing";
-import { useBudgets } from "@/hooks/useBudgets";
+import { BarChart3 } from "lucide-react";
 import { motion } from "motion/react";
 import { useTranslations } from "next-intl";
-import useModal from "@/hooks/useModal";
+import { useEffect, useMemo, useState } from "react";
+
 import NewBudget from "@/components/budgets/AddNewBudget";
+import BudgetComparisonChart from "@/components/budgets/BudgetComparisonChart";
+import BudgetFolderItem from "@/components/budgets/BudgetFolderItem";
+import UpgradeCornerPanel from "@/components/free/UpgradeCornerPanel";
 import NewBudgetModal from "@/components/modals/BudgetModal";
 import ToastMessage from "@/components/ui-elements/ToastMessage";
-import BudgetFolderItem from "@/components/budgets/BudgetFolderItem";
-import { ToastMessageProps, BudgetFolderItemProps } from "@/types/types";
-import { useSubscription } from "@/hooks/useSubscription";
-import UpgradeCornerPanel from "@/components/free/UpgradeCornerPanel";
+import { UserAuth } from "@/context/AuthContext";
+import { useBudgets } from "@/hooks/useBudgets";
 import useDeviceType from "@/hooks/useDeviceType";
+import useModal from "@/hooks/useModal";
+import { useSubscription } from "@/hooks/useSubscription";
 import { useTransactionsData } from "@/hooks/useTransactionsData";
-import BudgetComparisonChart from "@/components/budgets/BudgetComparisonChart";
-import { BarChart3 } from "lucide-react";
-import { getPreviousMonthRange } from "@/lib/dateUtils";
+import { Link } from "@/i18n/routing";
 import { computeCarry } from "@/lib/budgetRollover";
+import { getPreviousMonthRange } from "@/lib/dateUtils";
+import { supabase } from "@/lib/supabaseClient";
+import type { BudgetFolderItemProps, ToastMessageProps } from "@/types/types";
 export default function BudgetsClient() {
   const { session } = UserAuth();
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(
@@ -58,7 +59,7 @@ export default function BudgetsClient() {
   }, [allTransactions]);
 
   // Синхронизация папок бюджета с хуком
-  const { budgets, isLoading: isBudgetsLoading, refetch } = useBudgets();
+  const { budgets, isLoading: _isBudgetsLoading, refetch } = useBudgets();
   useEffect(() => {
     setBudgetFolders(budgets);
   }, [budgets]);
@@ -212,9 +213,14 @@ export default function BudgetsClient() {
     for (const folder of budgetFolders) {
       if (folder.type === "expense") {
         const prev = prevSpentByBudget[folder.id] || 0;
-        const mode = (folder as any).rollover_mode ?? "positive-only";
-        const cap = (folder as any).rollover_cap ?? null;
-        const enabled = (folder as any).rollover_enabled ?? true;
+        const rollover = folder as unknown as {
+          rollover_mode?: "positive-only" | "allow-negative";
+          rollover_cap?: number | null;
+          rollover_enabled?: boolean;
+        };
+        const mode = rollover.rollover_mode ?? "positive-only";
+        const cap = rollover.rollover_cap ?? null;
+        const enabled = rollover.rollover_enabled ?? true;
         next[folder.id] = enabled
           ? computeCarry(folder.amount, prev, mode, cap)
           : 0;
@@ -223,7 +229,7 @@ export default function BudgetsClient() {
     setRolloverPreviewById(next);
   }, [budgetFolders, prevSpentByBudget]);
 
-  const rolloverTotals = useMemo(() => {
+  const _rolloverTotals = useMemo(() => {
     let positive = 0;
     let negative = 0;
     for (const folder of budgetFolders) {
@@ -236,7 +242,7 @@ export default function BudgetsClient() {
   }, [budgetFolders, rolloverPreviewById]);
 
   return (
-    <div className="mt-[30px] px-4 md:px-5 pb-20">
+    <div className="mt-[30px] px-4 md:px-5 pb-0 md:pb-20">
       {toastMessage && (
         <ToastMessage text={toastMessage.text} type={toastMessage.type} />
       )}
@@ -260,6 +266,7 @@ export default function BudgetsClient() {
         ) : (
           <div className="space-y-3">
             <button
+              type="button"
               className="h-[60px] w-full px-4 rounded-lg bg-card border border-border transition-colors flex items-center justify-between"
               onClick={() => setIsAnalyticsOpen((v) => !v)}
             >
@@ -273,6 +280,9 @@ export default function BudgetsClient() {
                 fill="currentColor"
                 className={`h-5 w-5 text-muted-foreground transition-transform ${isAnalyticsOpen ? "rotate-180" : "rotate-0"}`}
               >
+                <title>
+                  {isAnalyticsOpen ? "Hide Analytics" : "Show Analytics"}
+                </title>
                 <path d="M12 15.5a1 1 0 0 1-.71-.29l-5.5-5.5a1 1 0 1 1 1.42-1.42L12 12.38l4.79-4.79a1 1 0 0 1 1.42 1.42l-5.5 5.5a1 1 0 0 1-.71.29z" />
               </svg>
             </button>
