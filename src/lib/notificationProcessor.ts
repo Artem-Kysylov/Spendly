@@ -51,18 +51,24 @@ export async function processNotificationQueue(supabase: SupabaseClient) {
   let failed = 0;
 
   for (const task of tasks || []) {
-    // Получаем активные подписки пользователя
-    const { data: subs, error: subsErr } = await supabase
-      .from("notification_subscriptions")
-      .select("id, endpoint, p256dh_key, auth_key, is_active")
-      .eq("user_id", task.user_id)
-      .eq("is_active", true);
+    const shouldSendPush = (task as any)?.send_push !== false;
 
-    if (subsErr) {
-      console.warn("processor: subs error", subsErr);
+    let subs: any[] = [];
+    if (shouldSendPush) {
+      // Получаем активные подписки пользователя
+      const { data: subsData, error: subsErr } = await supabase
+        .from("notification_subscriptions")
+        .select("id, endpoint, p256dh_key, auth_key, is_active")
+        .eq("user_id", task.user_id)
+        .eq("is_active", true);
+
+      if (subsErr) {
+        console.warn("processor: subs error", subsErr);
+      }
+      subs = Array.isArray(subsData) ? subsData : [];
     }
 
-    let anySuccess = false;
+    let anySuccess = !shouldSendPush || subs.length === 0;
     const payload = JSON.stringify({
       title: task.title || "Spendly",
       body: task.message || "Notification",
@@ -74,32 +80,34 @@ export async function processNotificationQueue(supabase: SupabaseClient) {
       },
     });
 
-    for (const sub of subs || []) {
-      try {
-        await webpush.sendNotification(
-          {
-            endpoint: sub.endpoint,
-            keys: { p256dh: sub.p256dh_key, auth: sub.auth_key },
-          } as any,
-          payload,
-        );
-        anySuccess = true;
-      } catch (err: any) {
-        const code = Number(err?.statusCode || err?.status || 0);
-        const msg = String(err?.body || err?.message || "");
-        if ([410, 404, 403].includes(code)) {
-          // Деактивируем битую подписку
-          await supabase
-            .from("notification_subscriptions")
-            .update({ is_active: false })
-            .eq("id", sub.id);
-        }
-        // Не ретраим конкретную подписку, переходим к следующей
-        console.warn("webpush error", code, msg);
-        if (msg.toLowerCase().includes("failed via jose")) {
-          console.warn(
-            "webpush: possible VAPID mismatch. Ensure VAPID_PRIVATE_KEY matches NEXT_PUBLIC_VAPID_PUBLIC_KEY/VAPID_PUBLIC_KEY.",
+    if (shouldSendPush) {
+      for (const sub of subs || []) {
+        try {
+          await webpush.sendNotification(
+            {
+              endpoint: sub.endpoint,
+              keys: { p256dh: sub.p256dh_key, auth: sub.auth_key },
+            } as any,
+            payload,
           );
+          anySuccess = true;
+        } catch (err: any) {
+          const code = Number(err?.statusCode || err?.status || 0);
+          const msg = String(err?.body || err?.message || "");
+          if ([410, 404, 403].includes(code)) {
+            // Деактивируем битую подписку
+            await supabase
+              .from("notification_subscriptions")
+              .update({ is_active: false })
+              .eq("id", sub.id);
+          }
+          // Не ретраим конкретную подписку, переходим к следующей
+          console.warn("webpush error", code, msg);
+          if (msg.toLowerCase().includes("failed via jose")) {
+            console.warn(
+              "webpush: possible VAPID mismatch. Ensure VAPID_PRIVATE_KEY matches NEXT_PUBLIC_VAPID_PUBLIC_KEY/VAPID_PUBLIC_KEY.",
+            );
+          }
         }
       }
     }
