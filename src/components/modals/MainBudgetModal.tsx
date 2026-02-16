@@ -1,23 +1,22 @@
-import { useState, useEffect, useRef } from "react";
-import { supabase } from "../../lib/supabaseClient";
+import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useEffect, useRef, useState } from "react";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import { UserAuth } from "../../context/AuthContext";
-
+import { supabase } from "../../lib/supabaseClient";
+// Import types
+import type { MainBudgetModalProps } from "../../types/types";
 // Import components
 import Button from "../ui-elements/Button";
 import TextInput from "../ui-elements/TextInput";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
-
-// Import types
-import { MainBudgetModalProps } from "../../types/types";
-import { X } from "lucide-react";
-import { useTranslations } from "next-intl";
 
 // Component: TotalBudgetModal
 const TotalBudgetModal = ({
@@ -82,15 +81,17 @@ const TotalBudgetModal = ({
     e.preventDefault();
     if (!session?.user)
       return onSubmit("Please login to update budget", "error");
-    if (!amount || Number(amount) <= 0)
+    if (!amount || !isValidAmountInput(amount))
       return onSubmit("Please enter a valid amount", "error");
+
+    const parsedAmount = parseAmountInput(amount);
 
     try {
       setIsLoading(true);
 
       console.log("Saving budget:", {
         user_id: session.user.id,
-        amount: Number(amount),
+        amount: parsedAmount,
       });
 
       // Используем upsert для создания или обновления записи
@@ -99,7 +100,7 @@ const TotalBudgetModal = ({
         .upsert(
           {
             user_id: session.user.id,
-            amount: Number(amount),
+            amount: parsedAmount,
           },
           { onConflict: "user_id" },
         )
@@ -139,10 +140,16 @@ const TotalBudgetModal = ({
         <div className="mt-[30px]">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <TextInput
-              type="number"
+              type="text"
               placeholder={tModals("mainBudget.placeholder.amountUSD")}
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === "" || /^\d*[.,]?\d*$/.test(value)) {
+                  setAmount(value);
+                }
+              }}
+              inputMode="decimal"
               min="0"
               step="0.01"
             />

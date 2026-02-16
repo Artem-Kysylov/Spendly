@@ -1,15 +1,14 @@
-import React, { useState } from "react";
-import { motion } from "motion/react";
-import { supabase } from "../../lib/supabaseClient";
-import { UserAuth } from "../../context/AuthContext";
-import TextInput from "../ui-elements/TextInput";
-import Button from "../ui-elements/Button";
-import HybridDatePicker from "../ui-elements/HybridDatePicker";
-import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
+import { motion } from "motion/react";
+import { useTranslations } from "next-intl";
+import type React from "react";
+import { useState } from "react";
 
 // Import types
-import { BudgetDetailsFormProps } from "../../types/types";
+import type { BudgetDetailsFormProps } from "../../types/types";
+import Button from "../ui-elements/Button";
+import HybridDatePicker from "../ui-elements/HybridDatePicker";
+import TextInput from "../ui-elements/TextInput";
 
 const BudgetDetailsForm = ({
   onSubmit,
@@ -28,10 +27,6 @@ const BudgetDetailsForm = ({
     setTransactionTitle("");
     setAmount("");
     setSelectedDate(new Date());
-  };
-
-  const handleInput = (e: React.FormEvent<HTMLInputElement>) => {
-    e.currentTarget.value = e.currentTarget.value.replace(/[^A-Za-z\s]/g, "");
   };
 
   return (
@@ -73,10 +68,16 @@ const BudgetDetailsForm = ({
           transition={{ duration: 0.4, delay: 0.6 }}
         >
           <TextInput
-            type="number"
+            type="text"
+            inputMode="decimal"
             placeholder={tModals("transaction.placeholder.amountUSD")}
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "" || /^\d*[.,]?\d*$/.test(value)) {
+                setAmount(value);
+              }
+            }}
             disabled={isSubmitting}
           />
         </motion.div>

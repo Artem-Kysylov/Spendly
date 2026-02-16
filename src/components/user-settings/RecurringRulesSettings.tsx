@@ -1,25 +1,26 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/lib/supabaseClient";
-import { UserAuth } from "@/context/AuthContext";
-import type { RecurringRule } from "@/types/ai";
-import TextInput from "@/components/ui-elements/TextInput";
-import Button from "@/components/ui-elements/Button";
-import HybridDatePicker from "@/components/ui-elements/HybridDatePicker";
+import ProLockLabel from "@/components/free/ProLockLabel";
 import {
   Select,
-  SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { BudgetFolderItemProps } from "@/types/types";
-import { useTranslations } from "next-intl";
+import Button from "@/components/ui-elements/Button";
+import HybridDatePicker from "@/components/ui-elements/HybridDatePicker";
+import TextInput from "@/components/ui-elements/TextInput";
+import { UserAuth } from "@/context/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
-import ProLockLabel from "@/components/free/ProLockLabel";
+import { supabase } from "@/lib/supabaseClient";
+import { parseAmountInput } from "@/lib/utils";
+import type { RecurringRule } from "@/types/ai";
+import type { BudgetFolderItemProps } from "@/types/types";
 
-const MAX_FREE_RULES = 3;
+const _MAX_FREE_RULES = 3;
 
 type DraftRule = {
   title_pattern: string;
@@ -60,7 +61,7 @@ export default function RecurringRulesSettings() {
       title_pattern: draft.title_pattern.trim(),
       budget_folder_id:
         draft.budget_folder_id === "unbudgeted" ? null : draft.budget_folder_id,
-      avg_amount: Number(draft.avg_amount),
+      avg_amount: parseAmountInput(draft.avg_amount),
       cadence: draft.cadence,
       next_due_date: draft.next_due_date.toISOString().slice(0, 10),
     }),
@@ -82,13 +83,14 @@ export default function RecurringRulesSettings() {
           .order("created_at", { ascending: false });
         if (e) throw e;
         setRules((data || []) as RecurringRule[]);
-      } catch (e: any) {
-        setError(e?.message || tSettings("recurringRules.errors.loadFailed"));
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : null;
+        setError(message || tSettings("recurringRules.errors.loadFailed"));
       } finally {
         setLoading(false);
       }
     })();
-  }, [userId]);
+  }, [userId, tSettings]);
 
   useEffect(() => {
     if (!userId) return;
@@ -165,8 +167,9 @@ export default function RecurringRulesSettings() {
         cadence: "monthly",
         next_due_date: new Date(),
       });
-    } catch (e: any) {
-      setError(e?.message || tSettings("recurringRules.errors.saveFailed"));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : null;
+      setError(message || tSettings("recurringRules.errors.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -184,8 +187,9 @@ export default function RecurringRulesSettings() {
         .eq("user_id", userId);
       if (error) throw error;
       setRules((prev) => prev.filter((r) => r.id !== id));
-    } catch (e: any) {
-      setError(e?.message || tSettings("recurringRules.errors.deleteFailed"));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : null;
+      setError(message || tSettings("recurringRules.errors.deleteFailed"));
     } finally {
       setSaving(false);
     }
@@ -209,8 +213,9 @@ export default function RecurringRulesSettings() {
       const updated = (data || [])[0] as RecurringRule;
       setRules((prev) => prev.map((r) => (r.id === id ? updated : r)));
       setEditingId(null);
-    } catch (e: any) {
-      setError(e?.message || tSettings("recurringRules.errors.updateFailed"));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : null;
+      setError(message || tSettings("recurringRules.errors.updateFailed"));
     } finally {
       setSaving(false);
     }
@@ -221,9 +226,9 @@ export default function RecurringRulesSettings() {
       {/* Create form */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-secondary-black dark:text-white">
+          <div className="text-sm font-medium text-secondary-black dark:text-white">
             {tSettings("recurringRules.form.title.label")}
-          </label>
+          </div>
           <TextInput
             type="text"
             placeholder={tSettings("recurringRules.form.title.placeholder")}
@@ -236,25 +241,29 @@ export default function RecurringRulesSettings() {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-secondary-black dark:text-white">
+          <div className="text-sm font-medium text-secondary-black dark:text-white">
             {tSettings("recurringRules.form.avgAmount.label")}
-          </label>
+          </div>
           <TextInput
-            type="number"
+            type="text"
+            inputMode="decimal"
             placeholder={tSettings("recurringRules.form.avgAmount.placeholder")}
             value={draft.avg_amount}
-            onChange={(e) =>
-              setDraft((d) => ({ ...d, avg_amount: e.target.value }))
-            }
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "" || /^\d*[.,]?\d*$/.test(value)) {
+                setDraft((d) => ({ ...d, avg_amount: value }));
+              }
+            }}
             className="h-10 px-3"
           />
         </div>
 
         {/* Create form — cadence */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-secondary-black dark:text-white">
+          <div className="text-sm font-medium text-secondary-black dark:text-white">
             {tSettings("recurringRules.form.cadence.label")}
-          </label>
+          </div>
           <Select
             value={draft.cadence}
             onValueChange={(v) =>
@@ -277,9 +286,9 @@ export default function RecurringRulesSettings() {
 
         {/* Create form — budget */}
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-secondary-black dark:text-white">
+          <div className="text-sm font-medium text-secondary-black dark:text-white">
             {tSettings("recurringRules.form.budget.label")}
-          </label>
+          </div>
           <Select
             value={draft.budget_folder_id ?? "unbudgeted"}
             onValueChange={(v) =>
@@ -303,9 +312,9 @@ export default function RecurringRulesSettings() {
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-secondary-black dark:text-white">
+          <div className="text-sm font-medium text-secondary-black dark:text-white">
             {tSettings("recurringRules.form.nextDue.label")}
-          </label>
+          </div>
           <HybridDatePicker
             selectedDate={draft.next_due_date}
             onDateSelect={(d) =>
@@ -381,18 +390,28 @@ export default function RecurringRulesSettings() {
 
                 {/* avg amount */}
                 <TextInput
-                  type="number"
+                  type="text"
+                  inputMode="decimal"
                   placeholder={tSettings("recurringRules.form.avgAmount.label")}
                   value={String(rule.avg_amount)}
-                  onChange={(e) =>
-                    setRules((prev) =>
-                      prev.map((r) =>
-                        r.id === rule.id
-                          ? { ...r, avg_amount: Number(e.target.value) }
-                          : r,
-                      ),
-                    )
-                  }
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "" || /^\d*[.,]?\d*$/.test(value)) {
+                      const parsed = parseAmountInput(value);
+                      setRules((prev) =>
+                        prev.map((r) =>
+                          r.id === rule.id
+                            ? {
+                                ...r,
+                                avg_amount: Number.isFinite(parsed)
+                                  ? parsed
+                                  : 0,
+                              }
+                            : r,
+                        ),
+                      );
+                    }
+                  }}
                   className="h-10 px-3"
                 />
 

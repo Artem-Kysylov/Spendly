@@ -1,15 +1,18 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { Check, Edit2, Loader2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { saveProposedTransaction } from "@/app/[locale]/actions/transaction";
+import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardHeader,
-  CardTitle,
   CardContent,
   CardFooter,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -17,13 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Check, Edit2, Loader2 } from "lucide-react";
-import { saveProposedTransaction } from "@/app/[locale]/actions/transaction";
-import { UserAuth } from "@/context/AuthContext";
 import { useToast } from "@/components/ui/use-toast";
-import { HybridDatePicker } from "../ui-elements";
+import { UserAuth } from "@/context/AuthContext";
 import { formatMoney } from "@/lib/format/money";
+import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
+import { HybridDatePicker } from "../ui-elements";
 
 interface Budget {
   id: string;
@@ -75,25 +76,31 @@ export function TransactionProposalCard({
   // Парсим строку даты из предложения и нормализуем в Date
   const parseInitialDate = (s: string): Date => {
     const d1 = new Date(s);
-    if (!isNaN(d1.getTime())) return d1;
+    if (!Number.isNaN(d1.getTime())) return d1;
     // Поддержка формата DD.MM.YYYY
     const m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
     if (m) {
-      const dd = Number(m[1]), mm = Number(m[2]) - 1, yyyy = Number(m[3]);
+      const dd = Number(m[1]),
+        mm = Number(m[2]) - 1,
+        yyyy = Number(m[3]);
       const d = new Date(yyyy, mm, dd);
-      if (!isNaN(d.getTime())) return d;
+      if (!Number.isNaN(d.getTime())) return d;
     }
     // Поддержка YYYY-MM-DD
     const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (m2) {
-      const yyyy = Number(m2[1]), mm = Number(m2[2]) - 1, dd = Number(m2[3]);
+      const yyyy = Number(m2[1]),
+        mm = Number(m2[2]) - 1,
+        dd = Number(m2[3]);
       const d = new Date(yyyy, mm, dd);
-      if (!isNaN(d.getTime())) return d;
+      if (!Number.isNaN(d.getTime())) return d;
     }
     return new Date();
   };
 
-  const [selectedDate, setSelectedDate] = useState<Date>(() => parseInitialDate(proposal.date));
+  const [selectedDate, setSelectedDate] = useState<Date>(() =>
+    parseInitialDate(proposal.date),
+  );
 
   // Smart mapping: Find budget by category_name (case-insensitive)
   const mappedBudget = useMemo(() => {
@@ -122,13 +129,18 @@ export function TransactionProposalCard({
       return;
     }
 
+    if (!isValidAmountInput(amount)) {
+      onError?.("Failed to save transaction");
+      return;
+    }
+
     setIsSaving(true);
 
     try {
       const result = await saveProposedTransaction({
         user_id: userId,
         title,
-        amount: parseFloat(amount),
+        amount: parseAmountInput(amount),
         type: proposal.type,
         budget_folder_id: selectedBudgetId,
         created_at: selectedDate.toISOString(), // сохраняем ISO
@@ -155,7 +167,7 @@ export function TransactionProposalCard({
       } else {
         onError?.(result.error || "Failed to save transaction");
       }
-    } catch (error) {
+    } catch (_error) {
       onError?.("An unexpected error occurred");
     } finally {
       setIsSaving(false);
@@ -164,7 +176,8 @@ export function TransactionProposalCard({
 
   const formatCurrency = (value: number) => {
     const resolvedLocale =
-      locale || (typeof navigator !== "undefined" ? navigator.language : "en-US");
+      locale ||
+      (typeof navigator !== "undefined" ? navigator.language : "en-US");
     return formatMoney(value, currency || "USD", resolvedLocale);
   };
 
@@ -225,10 +238,15 @@ export function TransactionProposalCard({
               <Label htmlFor="amount">Amount</Label>
               <Input
                 id="amount"
-                type="number"
-                step="0.01"
+                type="text"
+                inputMode="decimal"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || /^\d*[.,]?\d*$/.test(value)) {
+                    setAmount(value);
+                  }
+                }}
                 placeholder="0.00"
               />
             </div>
@@ -271,10 +289,11 @@ export function TransactionProposalCard({
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Amount</span>
               <span
-                className={`text-lg font-semibold ${proposal.type === "expense"
-                  ? "text-red-600 dark:text-red-400"
-                  : "text-green-600 dark:text-green-400"
-                  }`}
+                className={`text-lg font-semibold ${
+                  proposal.type === "expense"
+                    ? "text-red-600 dark:text-red-400"
+                    : "text-green-600 dark:text-green-400"
+                }`}
               >
                 {proposal.type === "expense" ? "-" : "+"}
                 {formatCurrency(parseFloat(amount))}

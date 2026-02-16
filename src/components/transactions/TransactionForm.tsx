@@ -1,16 +1,19 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { supabase } from "@/lib/supabaseClient";
-import { UserAuth } from "@/context/AuthContext";
-import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-
-import Button from "@/components/ui-elements/Button";
-import TextInput from "@/components/ui-elements/TextInput";
+import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import * as z from "zod";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
   Select,
   SelectContent,
@@ -19,18 +22,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Command,
-  CommandList,
-  CommandInput,
-  CommandGroup,
-  CommandItem,
-  CommandEmpty,
-} from "@/components/ui/command";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/components/ui/use-toast";
+import Button from "@/components/ui-elements/Button";
 import HybridDatePicker from "@/components/ui-elements/HybridDatePicker";
-import { BudgetFolderItemProps, Transaction } from "@/types/types";
+import TextInput from "@/components/ui-elements/TextInput";
+import { UserAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
+import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
+import type { BudgetFolderItemProps, Transaction } from "@/types/types";
 
 // Schema definition
 const transactionSchema = z.object({
@@ -44,6 +43,14 @@ const transactionSchema = z.object({
 
 type TransactionFormValues = z.infer<typeof transactionSchema>;
 
+type TemplateRow = {
+  id: string;
+  title: string;
+  amount: number;
+  type: "expense" | "income";
+  budget_folder_id: string | null;
+};
+
 interface TransactionFormProps {
   initialData?: Partial<Transaction>;
   initialBudgetId?: string;
@@ -56,13 +63,12 @@ export default function TransactionForm({
   initialData,
   initialBudgetId,
   onSuccess,
-  onCancel,
+  onCancel: _onCancel,
   allowTypeChange = true,
 }: TransactionFormProps) {
   const { session } = UserAuth();
   const tModals = useTranslations("modals");
   const tCommon = useTranslations("common");
-  const tSettings = useTranslations("userSettings");
   const tTransactions = useTranslations("transactions");
   const { toast } = useToast();
   const router = useRouter();
@@ -71,10 +77,10 @@ export default function TransactionForm({
   const [budgetFolders, setBudgetFolders] = useState<BudgetFolderItemProps[]>(
     [],
   );
-  const [templates, setTemplates] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<TemplateRow[]>([]);
   const [recentTitles, setRecentTitles] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isBudgetsLoading, setIsBudgetsLoading] = useState(false);
+  const [_isBudgetsLoading, setIsBudgetsLoading] = useState(false);
   const [isTypeDisabled, setIsTypeDisabled] = useState(!allowTypeChange);
 
   const amountRef = useRef<HTMLInputElement | null>(null);
@@ -94,10 +100,9 @@ export default function TransactionForm({
     },
   });
 
-  const { control, handleSubmit, watch, setValue, reset } = form;
+  const { control, handleSubmit, watch, setValue } = form;
   const currentType = watch("type");
   const currentTitle = watch("title");
-  const currentBudgetId = watch("budget_folder_id");
 
   // Fetch Data
   useEffect(() => {
@@ -122,7 +127,7 @@ export default function TransactionForm({
           .eq("user_id", session.user.id)
           .order("updated_at", { ascending: false });
 
-        if (tpls) setTemplates(tpls);
+        if (tpls) setTemplates(tpls as TemplateRow[]);
 
         // Recent Titles
         const { data: recents } = await supabase
@@ -132,8 +137,11 @@ export default function TransactionForm({
           .order("created_at", { ascending: false })
           .limit(50);
 
+        const recentRows = (recents || []) as Array<{ title: string | null }>;
         const uniq = Array.from(
-          new Set((recents || []).map((r: any) => r.title).filter(Boolean)),
+          new Set(
+            recentRows.map((r) => r.title).filter((t): t is string => !!t),
+          ),
         );
         setRecentTitles(uniq as string[]);
       } catch (error) {
@@ -146,47 +154,53 @@ export default function TransactionForm({
     fetchData();
   }, [session?.user?.id]);
 
-  // Apply initial budget
-  useEffect(() => {
-    if (initialBudgetId && budgetFolders.length > 0) {
-      applyBudgetId(initialBudgetId);
-    }
-  }, [initialBudgetId, budgetFolders]);
-
   const normalizeTitle = (raw: string): string => {
     const s = (raw || "").toLowerCase();
     return s.replace(/[^\p{L}\p{N}\s]/gu, " ").trim();
   };
 
-  const applyBudgetId = (budgetId: string) => {
-    setValue("budget_folder_id", budgetId);
-    if (budgetId === "unbudgeted") {
-      setIsTypeDisabled(false);
-    } else {
-      const selectedBudget = budgetFolders.find((b) => b.id === budgetId);
-      if (selectedBudget) {
-        setValue("type", selectedBudget.type);
-        setIsTypeDisabled(true);
+  const applyBudgetId = useCallback(
+    (budgetId: string) => {
+      setValue("budget_folder_id", budgetId);
+      if (budgetId === "unbudgeted") {
+        setIsTypeDisabled(false);
+      } else {
+        const selectedBudget = budgetFolders.find((b) => b.id === budgetId);
+        if (selectedBudget) {
+          setValue("type", selectedBudget.type);
+          setIsTypeDisabled(true);
+        }
       }
+    },
+    [budgetFolders, setValue],
+  );
+
+  // Apply initial budget
+  useEffect(() => {
+    if (initialBudgetId && budgetFolders.length > 0) {
+      applyBudgetId(initialBudgetId);
     }
-  };
+  }, [initialBudgetId, budgetFolders, applyBudgetId]);
 
   const onSubmit = async (data: TransactionFormValues) => {
     if (!session?.user) return;
+
+    if (!isValidAmountInput(data.amount)) return;
+    const parsedAmount = parseAmountInput(data.amount);
 
     setIsLoading(true);
     try {
       const transactionData = {
         user_id: session.user.id,
         title: data.title,
-        amount: Number(data.amount),
+        amount: parsedAmount,
         type: data.type,
         budget_folder_id:
           data.budget_folder_id === "unbudgeted" ? null : data.budget_folder_id,
         created_at: data.created_at.toISOString(),
       };
 
-      let error;
+      let error: unknown = null;
       if (initialData?.id) {
         const { error: updateError } = await supabase
           .from("transactions")
@@ -214,7 +228,7 @@ export default function TransactionForm({
             await supabase.from("transaction_templates").insert({
               user_id: session.user.id,
               title: data.title,
-              amount: Number(data.amount),
+              amount: parsedAmount,
               type: data.type,
               budget_folder_id: transactionData.budget_folder_id,
             });
@@ -292,9 +306,15 @@ export default function TransactionForm({
               field.ref(e);
               amountRef.current = e;
             }}
-            type="number"
+            type="text"
             inputMode="decimal"
             placeholder={tTransactions("table.headers.amount")}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "" || /^\d*[.,]?\d*$/.test(value)) {
+                field.onChange(value);
+              }
+            }}
             className={`text-3xl font-medium ${currentType === "expense" ? "text-error" : "text-success"}`}
           />
         )}
@@ -310,7 +330,7 @@ export default function TransactionForm({
               {...field}
               type="text"
               placeholder={tModals("transaction.placeholder.title")}
-              onInput={(e) => {
+              onInput={(_e) => {
                 // Basic sanitization if needed, but react-hook-form handles value
               }}
             />
@@ -350,9 +370,9 @@ export default function TransactionForm({
                     normalizeTitle(tt).includes(normalizeTitle(currentTitle)),
                   )
                   .slice(0, 3)
-                  .map((tt, idx) => (
+                  .map((tt) => (
                     <CommandItem
-                      key={`hist-${idx}`}
+                      key={`hist-${tt}`}
                       onSelect={() => setValue("title", tt)}
                     >
                       <span className="font-medium">{tt}</span>
@@ -380,9 +400,9 @@ export default function TransactionForm({
 
       {/* Budget Selection */}
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-medium text-secondary-black dark:text-white">
+        <div className="text-sm font-medium text-secondary-black dark:text-white">
           {tModals("transaction.select.label")}
-        </label>
+        </div>
         <Controller
           name="budget_folder_id"
           control={control}
@@ -436,9 +456,7 @@ export default function TransactionForm({
             />
           )}
         />
-        <label className="text-sm">
-          {tModals("transaction.saveAsTemplate")}
-        </label>
+        <div className="text-sm">{tModals("transaction.saveAsTemplate")}</div>
       </div>
 
       {/* Submit Button */}

@@ -1,39 +1,41 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Plus } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useRouter } from "@/i18n/routing";
-import { supabase } from "@/lib/supabaseClient";
-import { UserAuth } from "@/context/AuthContext";
-import useModal from "@/hooks/useModal";
-import { useBudgetTransactionsInfinite } from "@/hooks/useBudgetTransactionsInfinite";
-import BudgetDetailsInfo from "@/components/budgets/BudgetDetailsInfo";
-import BudgetDetailsForm from "@/components/budgets/BudgetDetailsForm";
-import BudgetDetailsControls from "@/components/budgets/BudgetDetailsControls";
-import Spinner from "@/components/ui-elements/Spinner";
-import ToastMessage from "@/components/ui-elements/ToastMessage";
-import DeleteModal from "@/components/modals/DeleteModal";
-import BudgetModal from "@/components/modals/BudgetModal";
-import TransactionsTable from "@/components/chunks/TransactionsTable";
-import {
-  BudgetDetailsProps,
-  Transaction,
-  ToastMessageProps,
-} from "@/types/types";
-import type { EditTransactionPayload } from "@/types/types";
 import { useTranslations } from "next-intl";
+import { useCallback, useEffect, useRef, useState } from "react";
+import BudgetDetailsControls from "@/components/budgets/BudgetDetailsControls";
+import BudgetDetailsForm from "@/components/budgets/BudgetDetailsForm";
+import BudgetDetailsInfo from "@/components/budgets/BudgetDetailsInfo";
+import MobileTransactionCard from "@/components/chunks/MobileTransactionCard";
+import TransactionsTable from "@/components/chunks/TransactionsTable";
+import BudgetModal from "@/components/modals/BudgetModal";
+import DeleteModal from "@/components/modals/DeleteModal";
 import TransactionModal from "@/components/modals/TransactionModal";
 import Button from "@/components/ui-elements/Button";
-import { Plus } from "lucide-react";
-import MobileTransactionCard from "@/components/chunks/MobileTransactionCard";
-import { getPreviousMonthRange } from "@/lib/dateUtils";
+import Spinner from "@/components/ui-elements/Spinner";
+import ToastMessage from "@/components/ui-elements/ToastMessage";
+import { UserAuth } from "@/context/AuthContext";
+import { useBudgetTransactionsInfinite } from "@/hooks/useBudgetTransactionsInfinite";
+import useModal from "@/hooks/useModal";
+import { useRouter } from "@/i18n/routing";
 import { computeCarry } from "@/lib/budgetRollover";
+import { getPreviousMonthRange } from "@/lib/dateUtils";
+import { supabase } from "@/lib/supabaseClient";
+import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
+import type {
+  BudgetDetailsProps,
+  EditTransactionPayload,
+  ToastMessageProps,
+  Transaction,
+} from "@/types/types";
 
 export default function BudgetDetailsClient() {
   const { budgetId } = useParams<{ budgetId: string }>();
   const id = budgetId as string;
   const router = useRouter();
   const { session } = UserAuth();
+  const userId = session?.user?.id;
 
   const {
     isModalOpen: isDeleteModalOpen,
@@ -58,8 +60,24 @@ export default function BudgetDetailsClient() {
     type: "expense",
   });
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
-  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [editingTransaction, setEditingTransaction] =
+    useState<Transaction | null>(null);
   const [rolloverPreview, setRolloverPreview] = useState<number>(0);
+
+  type RolloverMode = "positive-only" | "allow-negative";
+  type BudgetRolloverFields = {
+    rollover_enabled?: boolean;
+    rollover_mode?: RolloverMode | null;
+    rollover_cap?: number | null;
+  };
+
+  const SKELETON_KEYS = [
+    "skeleton-0",
+    "skeleton-1",
+    "skeleton-2",
+    "skeleton-3",
+    "skeleton-4",
+  ];
 
   // Infinite scroll hook
   const {
@@ -109,15 +127,15 @@ export default function BudgetDetailsClient() {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
-  const fetchBudgetDetails = async () => {
-    if (!session?.user?.id || !id) return;
+  const fetchBudgetDetails = useCallback(async () => {
+    if (!userId || !id) return;
     try {
       setIsLoading(true);
       const { data, error } = await supabase
         .from("budget_folders")
         .select("*")
         .eq("id", id)
-        .eq("user_id", session.user.id)
+        .eq("user_id", userId)
         .single();
       if (error) {
         console.error("Error fetching budget details:", error);
@@ -129,56 +147,63 @@ export default function BudgetDetailsClient() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [id, userId]);
 
-  const fetchRolloverPreview = async () => {
-    if (!session?.user?.id || !id || budgetDetails.type !== "expense") return;
+  const fetchRolloverPreview = useCallback(
+    async (details: BudgetDetailsProps) => {
+      if (!userId || !id || details.type !== "expense") return;
 
-    try {
-      const { start, end } = getPreviousMonthRange();
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("amount, type")
-        .eq("budget_folder_id", id)
-        .eq("user_id", session.user.id)
-        .eq("type", "expense")
-        .gte("created_at", start.toISOString())
-        .lte("created_at", end.toISOString());
+      try {
+        const { start, end } = getPreviousMonthRange();
+        const { data, error } = await supabase
+          .from("transactions")
+          .select("amount, type")
+          .eq("budget_folder_id", id)
+          .eq("user_id", userId)
+          .eq("type", "expense")
+          .gte("created_at", start.toISOString())
+          .lte("created_at", end.toISOString());
 
-      if (error) {
-        console.error("Error fetching previous month transactions:", error);
-        return;
+        if (error) {
+          console.error("Error fetching previous month transactions:", error);
+          return;
+        }
+
+        const prevSpent = data?.reduce((sum, tx) => sum + tx.amount, 0) || 0;
+
+        // Get rollover settings from budgetDetails
+        const rollover = details as unknown as BudgetRolloverFields;
+        const rolloverEnabled = rollover.rollover_enabled ?? true;
+        const rolloverMode = rollover.rollover_mode ?? "positive-only";
+        const rolloverCap = rollover.rollover_cap ?? null;
+
+        const carry = rolloverEnabled
+          ? computeCarry(details.amount, prevSpent, rolloverMode, rolloverCap)
+          : 0;
+
+        setRolloverPreview(carry);
+      } catch (error) {
+        console.error("Error calculating rollover:", error);
       }
-
-      const prevSpent = data?.reduce((sum, tx) => sum + tx.amount, 0) || 0;
-
-      // Get rollover settings from budgetDetails
-      const rolloverEnabled = (budgetDetails as any).rollover_enabled ?? true;
-      const rolloverMode = (budgetDetails as any).rollover_mode ?? "positive-only";
-      const rolloverCap = (budgetDetails as any).rollover_cap ?? null;
-
-      const carry = rolloverEnabled
-        ? computeCarry(budgetDetails.amount, prevSpent, rolloverMode, rolloverCap)
-        : 0;
-
-      setRolloverPreview(carry);
-    } catch (error) {
-      console.error("Error calculating rollover:", error);
-    }
-  };
+    },
+    [id, userId],
+  );
 
   useEffect(() => {
     fetchBudgetDetails();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session?.user?.id, id]);
+  }, [fetchBudgetDetails]);
 
   useEffect(() => {
     // Fetch rollover preview after budget details are loaded
-    if (budgetDetails.name !== "Loading..." && budgetDetails.type === "expense") {
-      fetchRolloverPreview();
+    if (
+      budgetDetails.name !== "Loading..." &&
+      budgetDetails.type === "expense"
+    ) {
+      fetchRolloverPreview(budgetDetails);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [budgetDetails, session?.user?.id, id]);
+  }, [budgetDetails, fetchRolloverPreview]);
 
   const handleTransactionSubmit = async (
     title: string,
@@ -186,6 +211,11 @@ export default function BudgetDetailsClient() {
     date: Date,
   ) => {
     if (!session?.user?.id || !id) return;
+    if (!isValidAmountInput(amount)) {
+      handleToastMessage(tCommon("unexpectedError"), "error");
+      return;
+    }
+    const parsedAmount = parseAmountInput(amount);
     try {
       const { data: budgetData, error: budgetError } = await supabase
         .from("budget_folders")
@@ -206,7 +236,7 @@ export default function BudgetDetailsClient() {
           budget_folder_id: id,
           user_id: session.user.id,
           title,
-          amount: Number(amount),
+          amount: parsedAmount,
           type: budgetData.type,
           created_at: date.toISOString(),
         })
@@ -335,11 +365,11 @@ export default function BudgetDetailsClient() {
     if (!session?.user?.id || !payload?.id) return;
     try {
       const updates: Partial<EditTransactionPayload> & { created_at?: string } =
-      {
-        title: payload.title,
-        amount: payload.amount,
-        type: payload.type,
-      };
+        {
+          title: payload.title,
+          amount: payload.amount,
+          type: payload.type,
+        };
       if (payload.budget_folder_id !== undefined) {
         updates.budget_folder_id = payload.budget_folder_id;
       }
@@ -368,7 +398,7 @@ export default function BudgetDetailsClient() {
     }
   };
 
-  const handleTransactionUpdateSuccess = async () => {
+  const _handleTransactionUpdateSuccess = async () => {
     handleToastMessage("Transaction updated successfully!", "success");
     refetchTransactions();
     window.dispatchEvent(new CustomEvent("budgetTransactionAdded"));
@@ -413,8 +443,11 @@ export default function BudgetDetailsClient() {
           <div className="space-y-6">
             {isTransactionsLoading && transactions.length === 0 ? (
               <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-20 w-full rounded-xl bg-muted animate-pulse" />
+                {SKELETON_KEYS.map((k) => (
+                  <div
+                    key={k}
+                    className="h-20 w-full rounded-xl bg-muted animate-pulse"
+                  />
                 ))}
               </div>
             ) : transactions.length === 0 ? (
@@ -477,8 +510,11 @@ export default function BudgetDetailsClient() {
       <div className="hidden md:block space-y-4">
         {isTransactionsLoading && transactions.length === 0 ? (
           <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-20 w-full rounded-xl bg-muted animate-pulse" />
+            {SKELETON_KEYS.map((k) => (
+              <div
+                key={k}
+                className="h-20 w-full rounded-xl bg-muted animate-pulse"
+              />
             ))}
           </div>
         ) : transactions.length === 0 ? (
@@ -529,11 +565,13 @@ export default function BudgetDetailsClient() {
             color_code: budgetDetails.color_code ?? null,
             rolloverEnabled:
               budgetDetails.rolloverEnabled ??
-              (budgetDetails as any).rollover_enabled ??
+              (budgetDetails as unknown as BudgetRolloverFields)
+                .rollover_enabled ??
               true,
             rolloverMode:
               budgetDetails.rolloverMode ??
-              (budgetDetails as any).rollover_mode ??
+              (budgetDetails as unknown as BudgetRolloverFields)
+                .rollover_mode ??
               "positive-only",
           }}
           onClose={closeEditModal}

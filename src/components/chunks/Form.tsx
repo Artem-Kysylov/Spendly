@@ -1,9 +1,11 @@
 // Imports
-import { useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
-import { UserAuth } from "../../context/AuthContext";
-import { useToast } from "@/components/ui/use-toast";
+
 import { Plus } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
+import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
+import { UserAuth } from "../../context/AuthContext";
+import { supabase } from "../../lib/supabaseClient";
 
 // Import components
 import Button from "../ui-elements/Button";
@@ -33,6 +35,15 @@ function Form() {
     if (!session?.user)
       return handleToastMessage("Please login to add a transaction", "error");
 
+    if (!isValidAmountInput(amount)) {
+      return handleToastMessage(
+        "Failed to add transaction. Please try again.",
+        "error",
+      );
+    }
+
+    const parsedAmount = parseAmountInput(amount);
+
     try {
       setIsLoading(true);
       const { data, error } = await supabase
@@ -40,7 +51,7 @@ function Form() {
         .insert({
           user_id: session.user.id,
           title: title,
-          amount: Number(amount),
+          amount: parsedAmount,
           type,
           created_at: new Date().toISOString(),
         })
@@ -93,14 +104,18 @@ function Form() {
           onInput={handleInput}
         />
         <input
-          type="number"
+          type="text"
+          inputMode="decimal"
           placeholder="Amount(USD)"
           className="w-full px-4 py-3 rounded-lg border border-primary bg-background focus:border-primary focus:outline-none text-base"
           value={amount}
           required
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setAmount(e.target.value)
-          }
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            if (value === "" || /^\d*[.,]?\d*$/.test(value)) {
+              setAmount(value);
+            }
+          }}
         />
         <div className="flex gap-4 w-full">
           <label

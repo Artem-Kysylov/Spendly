@@ -1,13 +1,14 @@
 "use client";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { useRouter } from "@/i18n/routing";
-import { UserAuth } from "@/context/AuthContext";
-import { supabase } from "@/lib/supabaseClient";
 import CreateMainBudget from "@/components/budgets/CreateMainBudget";
 import ToastMessage from "@/components/ui-elements/ToastMessage";
-import { ToastMessageProps } from "@/types/types";
+import { UserAuth } from "@/context/AuthContext";
+import { useRouter } from "@/i18n/routing";
+import { supabase } from "@/lib/supabaseClient";
+import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import type { UserLocaleSettings } from "@/types/locale";
-import { useTranslations } from "next-intl";
+import type { ToastMessageProps } from "@/types/types";
 
 export default function AddNewBudgetClient() {
   const { session } = UserAuth();
@@ -31,6 +32,13 @@ export default function AddNewBudgetClient() {
   ) => {
     try {
       if (!session?.user?.id) throw new Error("User not authenticated");
+
+      if (!isValidAmountInput(budget)) {
+        handleToastMessage(tBudgets("list.toast.failedCreate"), "error");
+        return;
+      }
+
+      const parsedBudget = parseAmountInput(budget);
 
       if (locale) {
         const {
@@ -57,9 +65,9 @@ export default function AddNewBudgetClient() {
         }
       }
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("main_budget")
-        .upsert([{ user_id: session.user.id, amount: Number(budget) }], {
+        .upsert([{ user_id: session.user.id, amount: parsedBudget }], {
           onConflict: "user_id",
         })
         .select();
@@ -68,7 +76,7 @@ export default function AddNewBudgetClient() {
 
       handleToastMessage(tBudgets("list.toast.createSuccess"), "success");
       setTimeout(() => router.push("/dashboard"), 2000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error creating budget:", error);
       handleToastMessage(tBudgets("list.toast.failedCreate"), "error");
     }
