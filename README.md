@@ -1,45 +1,22 @@
-# Spendly App
+# Spendly — AI-Powered Personal Finance OS
 
-This is a [Next.js](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Spendly is a high-fidelity financial management system designed to turn raw transaction data into actionable intelligence. Unlike traditional trackers, Spendly leverages AI to provide proactive insights and a conversational interface for personal wealth management.
 
-## Getting Started
+## ⚙️ Core Tech Stack
+- **Frontend:** Next.js 14 (App Router), TypeScript, Tailwind CSS.
+- **Animations:** Framer Motion (for premium-feel interactions).
+- **Backend/Auth:** Supabase (PostgreSQL).
+- **AI Engine:** OpenAI API (GPT-4) for financial insights and proactive chat.
+- **State Management:** React Context + TanStack Query.
 
-First, run the development server:
+## 🚀 Key Features
+- **AI Financial Co-pilot:** A dedicated chat assistant that analyzes spending patterns and answers complex financial questions.
+- **Proactive Insights:** Automated detection of anomalies, subscription spikes, and saving opportunities.
+- **Modern Dashboard:** High-performance data visualization and interactive transaction management.
+- **Real-time Sync:** Secure data handling and instant updates via Supabase.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Recurring Rules
-
-- Create and manage recurring charge rules under Settings → Recurring Rules.
-- Rules include `title_pattern`, `cadence` (`weekly`/`monthly`), average amount, and next due date.
-- Client-side CRUD uses Supabase with RLS to ensure row ownership.
-- The AI assistant can propose candidates; confirm to save as a rule.
+## 🛠️ Local Development
+1. Clone the repo.
+2. Install dependencies: `npm install`.
+3. Set up environment variables (`NEXT_PUBLIC_SUPABASE_URL`, `OPENAI_API_KEY`, etc.).
+4. Run: `npm run dev`.
