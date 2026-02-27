@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useRef, useState } from "react";
 import { motion } from "motion/react";
+import { useLocale, useTranslations } from "next-intl";
+import { useRef, useState } from "react";
 import { ComparisonLineChart } from "@/components/charts";
-import { BarChart } from "./BarChart";
 import { TransactionsFilter } from "@/components/ui-elements";
 import {
   useAllChartsData,
@@ -11,11 +11,11 @@ import {
 } from "@/hooks/useChartData";
 import { formatCompactRange } from "@/lib/chartUtils";
 import type {
+  ChartDataType,
   ChartFilters as ChartFiltersType,
   ChartPeriod,
-  ChartDataType,
 } from "@/types/types";
-import { useTranslations, useLocale } from "next-intl";
+import { BarChart } from "./BarChart";
 
 type ChartVisibility = {
   bar: boolean;
@@ -46,8 +46,8 @@ const DEFAULT_FILTERS: ChartFiltersType = {
 export const ChartsContainer = ({
   initialFilters = DEFAULT_FILTERS,
   showFilters = true,
-  showToggleControls = true,
-  showExportControls = true,
+  showToggleControls: _showToggleControls = true,
+  showExportControls: _showExportControls = true,
   currency = "USD",
 }: ChartsContainerProps = {}) => {
   const [filters, setFilters] = useState<ChartFiltersType>(initialFilters);
@@ -76,7 +76,12 @@ export const ChartsContainer = ({
   const lineChartRef = useRef<HTMLDivElement>(null);
 
   // Получение данных для всех графиков
-  const { barChart, lineChart, isLoading, error } = useAllChartsData(filters);
+  const {
+    barChart,
+    lineChart: _lineChart,
+    isLoading: _isLoading,
+    error: _error,
+  } = useAllChartsData(filters);
 
   // Добавляем хук для сравнительного графика
   const comparisonChart = useComparisonLineChartData(filters);
@@ -92,6 +97,10 @@ export const ChartsContainer = ({
     let endDate = new Date();
 
     switch (period) {
+      case "Day":
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = now;
+        break;
       case "Week":
         // последние 7 дней
         startDate = new Date(

@@ -326,7 +326,7 @@ export interface BarChartData {
 }
 
 // Chart Configuration Types (обновленные для новых фильтров)
-export type ChartPeriod = "Week" | "Month"; // Убрали 'quarter', 'year', 'custom'
+export type ChartPeriod = "Day" | "Week" | "Month"; // Убрали 'quarter', 'year', 'custom'
 export type ChartDataType = "Expenses" | "Income"; // Убрали 'both', изменили на заглавные буквы
 
 // Chart Filters

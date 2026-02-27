@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { ChartFilters, ChartPeriod, ChartDataType } from "@/types/types";
+import { useCallback, useEffect, useState } from "react";
+import type { ChartDataType, ChartFilters, ChartPeriod } from "@/types/types";
 
 export interface UseTransactionsFiltersReturn {
   filters: ChartFilters;
@@ -125,7 +125,7 @@ export const useTransactionsFiltersWithURL = (
     const filters: Partial<ChartFilters> = {};
 
     const period = params.get("period");
-    if (period === "Week" || period === "Month") {
+    if (period === "Day" || period === "Week" || period === "Month") {
       filters.period = period as ChartPeriod;
     }
 

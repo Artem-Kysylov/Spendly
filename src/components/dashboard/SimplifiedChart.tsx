@@ -16,7 +16,7 @@ export default function SimplifiedChart() {
     // Default to current month for dashboard overview
     const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     return {
-      period: "Month",
+      period: "Day",
       startDate,
       endDate: now,
       dataType: "Expenses",

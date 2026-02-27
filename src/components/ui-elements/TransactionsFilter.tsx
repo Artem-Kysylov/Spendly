@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import { useTranslations } from "next-intl";
+import type React from "react";
 import {
   Select,
   SelectContent,
@@ -8,13 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useTranslations } from "next-intl";
+import type { ChartPeriod } from "@/types/types";
 
 export interface TransactionsFilterProps {
   transactionType: "Expenses" | "Income";
   onTransactionTypeChange: (type: "Expenses" | "Income") => void;
-  datePeriod: "Week" | "Month";
-  onDatePeriodChange: (period: "Week" | "Month") => void;
+  datePeriod: ChartPeriod;
+  onDatePeriodChange: (period: ChartPeriod) => void;
   className?: string;
 }
 
@@ -27,7 +28,7 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
 }) => {
   const tTransactions = useTranslations("transactions");
   const tCharts = useTranslations("charts");
-  const tModals = useTranslations("modals");
+  const _tModals = useTranslations("modals");
   const tFilters = useTranslations("filters");
   return (
     <div
@@ -35,9 +36,9 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
     >
       {/* Type Selector */}
       <div className="flex flex-col gap-1 w-full sm:w-auto">
-        <label className="text-sm font-medium text-secondary-black dark:text-white">
+        <span className="text-sm font-medium text-secondary-black dark:text-white">
           {tTransactions("table.headers.type")}
-        </label>
+        </span>
         <div className="relative">
           <Select
             value={transactionType}
@@ -60,13 +61,13 @@ const TransactionsFilter: React.FC<TransactionsFilterProps> = ({
 
       {/* Date Period Selector */}
       <div className="flex flex-col gap-1 w-full sm:w-auto">
-        <label className="text-sm font-medium text-secondary-black dark:text-white">
+        <span className="text-sm font-medium text-secondary-black dark:text-white">
           {tTransactions("table.headers.date")}
-        </label>
+        </span>
         <div className="relative">
           <Select
             value={datePeriod}
-            onValueChange={(v) => onDatePeriodChange(v as "Week" | "Month")}
+            onValueChange={(v) => onDatePeriodChange(v as ChartPeriod)}
           >
             <SelectTrigger className="w-full sm:min-w-[140px] bg-white dark:bg-background text-black dark:text-white pl-4 pr-[40px] h-[50px] rounded-md appearance-none border border-input">
               <SelectValue />

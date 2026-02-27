@@ -1,22 +1,22 @@
 "use client";
 
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useQuery, useQueries } from "@tanstack/react-query";
-import { UserAuth } from "../context/AuthContext";
 import {
-  LineChartData,
-  BarChartData,
-  ChartFilters,
-  UseChartDataReturn,
-} from "@/types/types";
-import {
-  fetchTransactions,
   aggregateDataByPeriod,
-  fetchPeriodStats,
   chartQueryKeys,
-  TransactionData,
+  fetchPeriodStats,
+  fetchTransactions,
+  type TransactionData,
 } from "@/lib/chartQueries";
 import { defaultChartColors } from "@/lib/chartUtils";
+import type {
+  BarChartData,
+  ChartFilters,
+  LineChartData,
+  UseChartDataReturn,
+} from "@/types/types";
+import { UserAuth } from "../context/AuthContext";
 
 // Оптимизированный хук для данных Line Chart с кэшированием
 export const useOptimizedLineChartData = (
@@ -31,7 +31,7 @@ export const useOptimizedLineChartData = (
     refetch,
   } = useQuery({
     queryKey: chartQueryKeys.transactions(filters),
-    queryFn: () => fetchTransactions(session!.user.id, filters),
+    queryFn: () => fetchTransactions(session?.user.id || "", filters),
     enabled: !!session?.user?.id,
     staleTime: 3 * 60 * 1000,
   });
@@ -89,7 +89,7 @@ export const useOptimizedBarChartData = (
     refetch,
   } = useQuery({
     queryKey: chartQueryKeys.transactions(filters),
-    queryFn: () => fetchTransactions(session!.user.id, filters),
+    queryFn: () => fetchTransactions(session?.user.id || "", filters),
     enabled: !!session?.user?.id,
     staleTime: 3 * 60 * 1000,
   });
@@ -168,13 +168,13 @@ export const useOptimizedAllChartsData = (filters: ChartFilters) => {
     queries: [
       {
         queryKey: chartQueryKeys.transactions(filters),
-        queryFn: () => fetchTransactions(session!.user.id, filters),
+        queryFn: () => fetchTransactions(session?.user.id || "", filters),
         enabled: !!session?.user?.id,
         staleTime: 3 * 60 * 1000,
       },
       {
         queryKey: [...chartQueryKeys.all, "stats", filters],
-        queryFn: () => fetchPeriodStats(session!.user.id, filters),
+        queryFn: () => fetchPeriodStats(session?.user.id || "", filters),
         enabled: !!session?.user?.id,
         staleTime: 5 * 60 * 1000,
       },
@@ -226,11 +226,14 @@ const formatPeriodLabel = (
       year: "numeric",
     });
   }
-  // Week: показываем день/месяц
+  if (periodType === "Week" || periodType === "Day") {
+    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }
+
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 
-const formatPeriodForDisplay = (
+const _formatPeriodForDisplay = (
   period: string,
   periodType: ChartFilters["period"],
 ): string => {

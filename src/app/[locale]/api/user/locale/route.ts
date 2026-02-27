@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getAuthenticatedClient } from "@/lib/serverSupabase";
-import { normalizeLocaleSettings } from "@/i18n/detect";
+import { type NextRequest, NextResponse } from "next/server";
 import { isSupportedLanguage } from "@/i18n/config";
+import { normalizeLocaleSettings } from "@/i18n/detect";
+import {
+  getAuthenticatedClient,
+  getServerSupabaseClient,
+} from "@/lib/serverSupabase";
 
 export async function POST(req: NextRequest) {
   try {
@@ -49,23 +52,36 @@ export async function POST(req: NextRequest) {
         .maybeSingle();
 
       if (!error && data) {
-        existingCountry = typeof (data as any).country === "string" ? (data as any).country : undefined;
-        existingCurrency = typeof (data as any).currency === "string" ? (data as any).currency : undefined;
-        existingLocale = typeof (data as any).locale === "string" ? (data as any).locale : undefined;
+        const row = data as unknown as Record<string, unknown>;
+        existingCountry =
+          typeof row.country === "string" ? (row.country as string) : undefined;
+        existingCurrency =
+          typeof row.currency === "string"
+            ? (row.currency as string)
+            : undefined;
+        existingLocale =
+          typeof row.locale === "string" ? (row.locale as string) : undefined;
       }
     } catch {
       // ignore
     }
 
-    const meta = (user as any)?.user_metadata as Record<string, unknown> | undefined;
-    const metaCountry = typeof meta?.country === "string" ? (meta.country as string) : undefined;
+    const u = user as unknown as { user_metadata?: unknown };
+    const metaRaw = u?.user_metadata;
+    const meta =
+      metaRaw && typeof metaRaw === "object"
+        ? (metaRaw as Record<string, unknown>)
+        : undefined;
+    const metaCountry =
+      typeof meta?.country === "string" ? (meta.country as string) : undefined;
     const metaCurrency =
       typeof meta?.currency === "string"
         ? (meta.currency as string)
         : typeof meta?.currency_preference === "string"
           ? (meta.currency_preference as string)
           : undefined;
-    const metaLocale = typeof meta?.locale === "string" ? (meta.locale as string) : undefined;
+    const metaLocale =
+      typeof meta?.locale === "string" ? (meta.locale as string) : undefined;
 
     const normalized = normalizeLocaleSettings({
       country: validCountry || existingCountry || metaCountry,
@@ -73,24 +89,26 @@ export async function POST(req: NextRequest) {
       locale: validLocale || existingLocale || metaLocale,
     });
 
-    // Пытаемся upsert в public.user_settings
-    const upsertRes = await supabase
-      .from("user_settings")
-      .upsert(
-        [
-          {
-            user_id: user.id,
-            country: normalized.country,
-            currency: normalized.currency,
-            locale: normalized.locale,
-          },
-        ],
-        { onConflict: "user_id" },
-      );
+    const adminSupabase = getServerSupabaseClient();
+    const upsertRes = await adminSupabase.from("user_settings").upsert(
+      [
+        {
+          user_id: user.id,
+          country: normalized.country,
+          currency: normalized.currency,
+          locale: normalized.locale,
+        },
+      ],
+      { onConflict: "user_id" },
+    );
 
     if (upsertRes.error) {
-      const code = (upsertRes.error as any).code || "";
-      const message = (upsertRes.error as any).message || "";
+      const e = upsertRes.error as unknown as {
+        code?: unknown;
+        message?: unknown;
+      };
+      const code = typeof e.code === "string" ? e.code : "";
+      const message = typeof e.message === "string" ? e.message : "";
       console.warn("Upsert user_settings failed:", { code, message });
     }
 

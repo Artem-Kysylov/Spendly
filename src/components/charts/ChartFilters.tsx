@@ -1,19 +1,19 @@
 // импорт и заголовок файла
-import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
+import { RefreshCw } from "lucide-react";
+import { useTranslations } from "next-intl";
+import type React from "react";
+import { Card, CardContent } from "@/components/ui/card";
 
 // Import types
-import {
+import type {
   ChartFilters as ChartFiltersType,
   ChartPeriod,
 } from "../../types/types";
 
 // Import components
 import { TransactionsFilter } from "../ui-elements";
-import { useTranslations } from "next-intl";
 
 interface ChartFiltersProps {
   filters: ChartFiltersType;
@@ -33,6 +33,10 @@ export const ChartFilters: React.FC<ChartFiltersProps> = ({
     let endDate = new Date();
 
     switch (period) {
+      case "Day":
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = now;
+        break;
       case "Week":
         // последние 7 дней
         startDate = new Date(
@@ -62,27 +66,27 @@ export const ChartFilters: React.FC<ChartFiltersProps> = ({
     });
   };
 
-  const handleMonthYearChange = (type: "month" | "year", value: string) => {
+  const _handleMonthYearChange = (type: "month" | "year", value: string) => {
     const updates: Partial<ChartFiltersType> = {};
 
     if (type === "month") {
-      updates.selectedMonth = parseInt(value);
+      updates.selectedMonth = parseInt(value, 10);
     } else {
-      updates.selectedYear = parseInt(value);
+      updates.selectedYear = parseInt(value, 10);
     }
 
     onFiltersChange({ ...filters, ...updates });
   };
 
   // Список месяцев
-  const monthOptions = Array.from({ length: 12 }, (_, i) => ({
+  const _monthOptions = Array.from({ length: 12 }, (_, i) => ({
     value: (i + 1).toString(),
     label: format(new Date(2024, i, 1), "LLLL", { locale: enUS }),
   }));
 
   // Список лет (последние 5 + текущий + следующий)
   const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from({ length: 7 }, (_, i) => {
+  const __yearOptions = Array.from({ length: 7 }, (_, i) => {
     const year = currentYear - 5 + i;
     return {
       value: year.toString(),

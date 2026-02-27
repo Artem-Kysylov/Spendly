@@ -1,6 +1,7 @@
 /* Prompt builders for AI suggestions based on component-specific data */
 
 import type { Language } from "@/types/locale";
+import type { ChartPeriod } from "@/types/types";
 
 export type Locale = Language;
 
@@ -70,7 +71,7 @@ export function buildCountersPrompt(params: {
 
 export function buildBarChartPrompt(params: {
   data: BarPoint[];
-  filters: { period: "Week" | "Month"; dataType: "Expenses" | "Income" };
+  filters: { period: ChartPeriod; dataType: "Expenses" | "Income" };
   currency?: string;
   locale?: Locale;
   windowSize?: number; // default based on filters.period
