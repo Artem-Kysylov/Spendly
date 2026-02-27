@@ -12,6 +12,19 @@ export const useSubscription = () => {
   useEffect(() => {
     const userId = session?.user?.id;
     const token = session?.access_token;
+
+    const meta = session?.user?.user_metadata as
+      | Record<string, unknown>
+      | undefined;
+    const metaIsPro =
+      meta?.isPro === true ||
+      meta?.is_pro === true ||
+      (typeof meta?.subscription_status === "string" &&
+        meta.subscription_status === "pro");
+    if (metaIsPro) {
+      setDbIsPro((prev) => (prev === null ? true : prev));
+    }
+
     if (!userId) {
       setDbIsPro(null);
       setPaddleCustomerId(null);
@@ -43,12 +56,15 @@ export const useSubscription = () => {
         return;
       }
 
-      const json = (await res.json().catch(() => null)) as
-        | { is_pro?: boolean; subscription_status?: string; paddle_customer_id?: string | null }
-        | null;
+      const json = (await res.json().catch(() => null)) as {
+        is_pro?: boolean;
+        subscription_status?: string;
+        paddle_customer_id?: string | null;
+      } | null;
       setDbIsPro(json?.is_pro === true);
       setPaddleCustomerId(
-        typeof json?.paddle_customer_id === "string" && json.paddle_customer_id.length > 0
+        typeof json?.paddle_customer_id === "string" &&
+          json.paddle_customer_id.length > 0
           ? json.paddle_customer_id
           : null,
       );
@@ -58,10 +74,9 @@ export const useSubscription = () => {
     return () => {
       cancelled = true;
     };
-  }, [session?.access_token, session?.user?.id]);
+  }, [session?.access_token, session?.user?.id, session?.user?.user_metadata]);
 
-  const subscriptionPlan: SubscriptionPlan =
-    dbIsPro === true ? "pro" : "free";
+  const subscriptionPlan: SubscriptionPlan = dbIsPro === true ? "pro" : "free";
 
   const isStatusUnknown =
     typeof session?.user?.id === "string" &&

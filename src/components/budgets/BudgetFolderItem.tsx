@@ -15,7 +15,8 @@ function BudgetFolderItem({
   amount,
   type,
   color_code,
-}: BudgetFolderItemProps) {
+  currency,
+}: BudgetFolderItemProps & { currency?: string }) {
   const { session } = UserAuth();
   const [spentAmount, setSpentAmount] = useState(0);
   const tBudgets = useTranslations("budgets");
@@ -73,7 +74,7 @@ function BudgetFolderItem({
       <p
         className={`${color_code ? "text-black dark:text-black" : "text-foreground"} text-[18px] font-semibold text-center leading-tight`}
       >
-        {formatCurrency(amount, "USD")}
+        {formatCurrency(amount, currency)}
       </p>
 
       {/* Прогрессбар */}
@@ -99,11 +100,11 @@ function BudgetFolderItem({
         className={`${color_code ? "text-black dark:text-black" : "text-foreground"} hidden md:grid grid-cols-2 text-xs w-full`}
       >
         <span className="text-left justify-self-start">
-          {formatCurrency(spentAmount, "USD")}{" "}
+          {formatCurrency(spentAmount, currency)}{" "}
           {tBudgets(type === "income" ? "labels.collected" : "labels.spent")}
         </span>
         <span className="text-right justify-self-end">
-          {formatCurrency(Math.max(amount - spentAmount, 0), "USD")}{" "}
+          {formatCurrency(Math.max(amount - spentAmount, 0), currency)}{" "}
           {tBudgets(type === "income" ? "labels.leftToGoal" : "labels.left")}
         </span>
       </div>
@@ -124,10 +125,10 @@ function BudgetFolderItem({
         className={`${color_code ? "text-black dark:text-black" : "text-foreground"} grid md:hidden grid-cols-2 text-xs w-full font-semibold`}
       >
         <span className="text-left justify-self-start">
-          {formatCurrency(spentAmount, "USD")}
+          {formatCurrency(spentAmount, currency)}
         </span>
         <span className="text-right justify-self-end">
-          {formatCurrency(Math.max(amount - spentAmount, 0), "USD")}
+          {formatCurrency(Math.max(amount - spentAmount, 0), currency)}
         </span>
       </div>
     </div>

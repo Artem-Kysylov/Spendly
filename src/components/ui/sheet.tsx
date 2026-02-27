@@ -1,8 +1,8 @@
 "use client";
 
+import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 type SheetContextValue = {
@@ -99,8 +99,7 @@ export function SheetContent({
 }) {
   const { open, onOpenChange } = useSheet();
   const contentRef = React.useRef<HTMLDivElement>(null);
-
-  if (typeof document === "undefined") return null;
+  const isBrowser = typeof document !== "undefined";
 
   const sideClasses =
     side === "right"
@@ -110,6 +109,8 @@ export function SheetContent({
         : side === "top"
           ? "inset-x-0 top-0 w-screen h-[85vh]"
           : "inset-x-0 bottom-0 w-screen h-[85vh]";
+
+  const swipeToCloseEnabled = side === "bottom";
 
   const enterAnim =
     side === "right"
@@ -124,7 +125,7 @@ export function SheetContent({
 
   // Focus trap + Escape
   React.useEffect(() => {
-    if (!open) return;
+    if (!isBrowser || !open) return;
     const node = contentRef.current;
     if (!node) return;
 
@@ -164,17 +165,19 @@ export function SheetContent({
 
     node.addEventListener("keydown", onKeyDown);
     return () => node.removeEventListener("keydown", onKeyDown);
-  }, [open, onOpenChange]);
+  }, [isBrowser, open, onOpenChange]);
 
   // Блокировка фонового скролла при открытой шторке
   React.useEffect(() => {
-    if (!open) return;
+    if (!isBrowser || !open) return;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prevOverflow;
     };
-  }, [open]);
+  }, [isBrowser, open]);
+
+  if (!isBrowser) return null;
 
   return createPortal(
     <AnimatePresence>
@@ -218,6 +221,17 @@ export function SheetContent({
               damping: 30,
             }}
             onClick={(e) => e.stopPropagation()}
+            drag={swipeToCloseEnabled ? "y" : undefined}
+            dragDirectionLock={swipeToCloseEnabled}
+            dragElastic={swipeToCloseEnabled ? 0.2 : undefined}
+            dragMomentum={false}
+            dragSnapToOrigin={swipeToCloseEnabled}
+            onDragEnd={(_, info) => {
+              if (!swipeToCloseEnabled) return;
+              if (info.offset.y > 120 || info.velocity.y > 500) {
+                onOpenChange?.(false);
+              }
+            }}
             {...rest}
           >
             {children}

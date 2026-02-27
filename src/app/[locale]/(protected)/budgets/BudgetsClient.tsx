@@ -2,7 +2,7 @@
 
 import { BarChart3 } from "lucide-react";
 import { motion } from "motion/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo, useState } from "react";
 
 import NewBudget from "@/components/budgets/AddNewBudget";
@@ -24,6 +24,7 @@ import { supabase } from "@/lib/supabaseClient";
 import type { BudgetFolderItemProps, ToastMessageProps } from "@/types/types";
 export default function BudgetsClient() {
   const { session } = UserAuth();
+  const locale = useLocale();
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(
     null,
   );
@@ -33,8 +34,55 @@ export default function BudgetsClient() {
   const { isModalOpen, openModal, closeModal } = useModal();
   const tBudgets = useTranslations("budgets");
   const tCommon = useTranslations("common");
-  const { subscriptionPlan } = useSubscription();
+  const { subscriptionPlan, isLoading: isSubscriptionLoading } =
+    useSubscription();
   const [showUpgrade, setShowUpgrade] = useState(false);
+
+  const [currency, setCurrency] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return window.localStorage.getItem("user-currency") || "USD";
+    }
+    const base = locale.split("-")[0];
+    if (base === "uk") return "UAH";
+    if (base === "ru") return "RUB";
+    if (base === "ja") return "JPY";
+    if (base === "ko") return "KRW";
+    if (base === "id") return "IDR";
+    if (base === "hi") return "INR";
+    return "USD";
+  });
+
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!userId) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: userSettings } = await supabase
+          .from("user_settings")
+          .select("currency")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        const next = userSettings?.currency;
+        if (!cancelled && typeof next === "string" && next.length > 0) {
+          setCurrency(next);
+          try {
+            window.localStorage.setItem("user-currency", next);
+          } catch {
+            // no-op
+          }
+        }
+      } catch {
+        // no-op
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.user?.id]);
 
   // Тип устройства и состояние ховера для графика
   const { isDesktop } = useDeviceType();
@@ -66,7 +114,9 @@ export default function BudgetsClient() {
 
   // Лимит для Free плана (например, 3 бюджета)
   const isLimitReached =
-    subscriptionPlan === "free" && budgetFolders.length >= 3;
+    !isSubscriptionLoading &&
+    subscriptionPlan === "free" &&
+    budgetFolders.length >= 3;
 
   // Тосты
   const handleToastMessage = (
@@ -260,6 +310,7 @@ export default function BudgetsClient() {
           <BudgetComparisonChart
             data={chartData}
             isLoading={isTransactionsLoading}
+            currency={currency}
             onBarHover={(idx) => setHoveredIndex(idx)}
             onBarLeave={() => setHoveredIndex(null)}
           />
@@ -290,6 +341,7 @@ export default function BudgetsClient() {
               <BudgetComparisonChart
                 data={chartData}
                 isLoading={isTransactionsLoading}
+                currency={currency}
                 onBarHover={(idx) => isDesktop && setHoveredIndex(idx)}
                 onBarLeave={() => setHoveredIndex(null)}
                 className="w-full"
@@ -310,6 +362,13 @@ export default function BudgetsClient() {
         >
           <NewBudget
             onClick={() => {
+              if (
+                subscriptionPlan !== "pro" &&
+                isSubscriptionLoading &&
+                budgetFolders.length >= 3
+              ) {
+                return;
+              }
               if (isLimitReached) {
                 handleToastMessage(
                   tBudgets("list.toast.limitReached"),
@@ -346,6 +405,13 @@ export default function BudgetsClient() {
           >
             <NewBudget
               onClick={() => {
+                if (
+                  subscriptionPlan !== "pro" &&
+                  isSubscriptionLoading &&
+                  budgetFolders.length >= 3
+                ) {
+                  return;
+                }
                 if (isLimitReached) {
                   handleToastMessage(
                     tBudgets("list.toast.limitReached"),
@@ -381,6 +447,7 @@ export default function BudgetsClient() {
                 amount={folder.amount}
                 type={folder.type}
                 color_code={folder.color_code}
+                currency={currency}
                 rolloverPreviewCarry={rolloverPreviewById[folder.id]}
               />
             </Link>

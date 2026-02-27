@@ -42,6 +42,7 @@ import {
   type TransactionFilterType,
   useTransactionsInfinite,
 } from "@/hooks/useTransactionsInfinite";
+import { formatCurrency } from "@/lib/chartUtils";
 import { supabase } from "@/lib/supabaseClient";
 import type { ToastMessageProps, Transaction } from "@/types/types";
 
@@ -54,6 +55,52 @@ export default function TransactionsClient() {
   const { toast } = useToast();
   const { subscriptionPlan } = useSubscription();
   const isPro = subscriptionPlan === "pro";
+
+  const [currency, setCurrency] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return window.localStorage.getItem("user-currency") || "USD";
+    }
+    const base = locale.split("-")[0];
+    if (base === "uk") return "UAH";
+    if (base === "ru") return "RUB";
+    if (base === "ja") return "JPY";
+    if (base === "ko") return "KRW";
+    if (base === "id") return "IDR";
+    if (base === "hi") return "INR";
+    return "USD";
+  });
+
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (!userId) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: userSettings } = await supabase
+          .from("user_settings")
+          .select("currency")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        const next = userSettings?.currency;
+        if (!cancelled && typeof next === "string" && next.length > 0) {
+          setCurrency(next);
+          try {
+            window.localStorage.setItem("user-currency", next);
+          } catch {
+            // no-op
+          }
+        }
+      } catch {
+        // no-op
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session?.user?.id]);
 
   // Modal & Toast
   const { isModalOpen, openModal, closeModal } = useModal();
@@ -84,7 +131,7 @@ export default function TransactionsClient() {
   } = useTransactionsData();
 
   // UI State
-  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(() => !isMobile);
   const [isAiSheetOpen, setIsAiSheetOpen] = useState(false);
 
   // AI Insights State
@@ -340,11 +387,7 @@ export default function TransactionsClient() {
               Total Spent
             </span>
             <span className="text-lg font-semibold text-foreground">
-              $
-              {stats.totalSpent.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              {formatCurrency(stats.totalSpent, currency)}
             </span>
           </div>
           <div className="w-px h-8 bg-border" />
@@ -353,11 +396,7 @@ export default function TransactionsClient() {
               Daily Avg
             </span>
             <span className="text-lg font-semibold text-foreground">
-              $
-              {stats.dailyAverage.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}
+              {formatCurrency(stats.dailyAverage, currency)}
             </span>
           </div>
         </div>
@@ -498,13 +537,9 @@ export default function TransactionsClient() {
                                     })}
                                   </p>
                                   <p className="text-xs text-muted-foreground mt-0.5">
-                                    $
-                                    {insightsData.topCategory.amount.toLocaleString(
-                                      locale,
-                                      {
-                                        minimumFractionDigits: 2,
-                                        maximumFractionDigits: 2,
-                                      },
+                                    {formatCurrency(
+                                      insightsData.topCategory.amount,
+                                      currency,
                                     )}
                                   </p>
                                   <p className="text-sm text-muted-foreground mt-2">
@@ -565,13 +600,9 @@ export default function TransactionsClient() {
                                   })}
                                 </p>
                                 <p className="text-xs text-muted-foreground mt-0.5">
-                                  $
-                                  {insightsData.topCategory.amount.toLocaleString(
-                                    locale,
-                                    {
-                                      minimumFractionDigits: 2,
-                                      maximumFractionDigits: 2,
-                                    },
+                                  {formatCurrency(
+                                    insightsData.topCategory.amount,
+                                    currency,
                                   )}
                                 </p>
                                 <p className="text-sm text-muted-foreground mt-2">
@@ -625,7 +656,7 @@ export default function TransactionsClient() {
                     data={chartData}
                     filters={chartFilters}
                     isLoading={isChartLoading}
-                    currency="USD"
+                    currency={currency}
                     height={300}
                     showGrid={true}
                     className="w-full shadow-none border-0 rounded-none"
