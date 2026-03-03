@@ -698,6 +698,9 @@
       }
     },
     "mainBudget": {
+      "budgetAmount": "Jumlah Anggaran",
+      "budgetResetDay": "Hari Reset Anggaran",
+      "resetDayHelper": "Hari dalam bulan ketika siklus anggaran dimulai (1-31)",
       "placeholder": {
         "amountUSD": "Amount(USD)"
       }

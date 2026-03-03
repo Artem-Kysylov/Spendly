@@ -698,6 +698,9 @@
       }
     },
     "mainBudget": {
+      "budgetAmount": "予算額",
+      "budgetResetDay": "予算リセット日",
+      "resetDayHelper": "予算サイクルが始まる日（1-31）",
       "placeholder": {
         "amountUSD": "金額（USD）"
       }

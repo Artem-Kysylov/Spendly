@@ -698,6 +698,9 @@
       }
     },
     "mainBudget": {
+      "budgetAmount": "Budget Amount",
+      "budgetResetDay": "Budget Reset Day",
+      "resetDayHelper": "Day of the month when your budget cycle resets (1-31)",
       "placeholder": {
         "amountUSD": "Amount(USD)"
       }

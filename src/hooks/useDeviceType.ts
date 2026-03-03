@@ -3,7 +3,21 @@ import { useEffect, useLayoutEffect, useState } from "react";
 export type DeviceType = "mobile" | "tablet" | "desktop";
 
 export default function useDeviceType() {
-  const [type, setType] = useState<DeviceType>("desktop");
+  const [type, setType] = useState<DeviceType>(() => {
+    if (typeof window === "undefined") return "desktop";
+
+    const mqMobile = window.matchMedia("(max-width: 767px)");
+    const mqTablet = window.matchMedia(
+      "(min-width: 768px) and (max-width: 1024px)",
+    );
+    const mqDesktop = window.matchMedia("(min-width: 1025px)");
+
+    if (mqMobile.matches) return "mobile";
+    if (mqTablet.matches) return "tablet";
+    if (mqDesktop.matches) return "desktop";
+
+    return "desktop";
+  });
 
   const useIsomorphicLayoutEffect =
     typeof window !== "undefined" ? useLayoutEffect : useEffect;

@@ -30,6 +30,7 @@ const TotalBudgetModal = ({
   const tCommon = useTranslations("common");
   // State
   const [amount, setAmount] = useState<string>("");
+  const [budgetResetDay, setBudgetResetDay] = useState<string>("1");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -37,31 +38,42 @@ const TotalBudgetModal = ({
       dialogRef.current.showModal();
     }
 
-    // Fetch current budget when modal opens
+    // Fetch current budget and budget_reset_day when modal opens
     const fetchCurrentBudget = async () => {
       if (!session?.user?.id) return;
 
       try {
         console.log("Fetching current budget for user:", session.user.id);
 
-        const { data, error } = await supabase
-          .from("main_budget")
-          .select("amount")
-          .eq("user_id", session.user.id)
-          .maybeSingle(); // Используем maybeSingle вместо single
+        const [budgetResult, profileResult] = await Promise.all([
+          supabase
+            .from("main_budget")
+            .select("amount")
+            .eq("user_id", session.user.id)
+            .maybeSingle(),
+          supabase
+            .from("profiles")
+            .select("budget_reset_day")
+            .eq("id", session.user.id)
+            .maybeSingle(),
+        ]);
 
-        if (error) {
-          console.error("Error fetching budget:", error);
+        if (budgetResult.error) {
+          console.error("Error fetching budget:", budgetResult.error);
           return;
         }
 
-        console.log("Current budget data:", data);
+        console.log("Current budget data:", budgetResult.data);
 
-        if (data) {
-          setAmount(data.amount.toString());
+        if (budgetResult.data) {
+          setAmount(budgetResult.data.amount.toString());
         } else {
           console.log("No existing budget found, starting with empty amount");
           setAmount("");
+        }
+
+        if (profileResult.data?.budget_reset_day) {
+          setBudgetResetDay(profileResult.data.budget_reset_day.toString());
         }
       } catch (error) {
         console.error("Error fetching budget:", error);
@@ -85,6 +97,7 @@ const TotalBudgetModal = ({
       return onSubmit("Please enter a valid amount", "error");
 
     const parsedAmount = parseAmountInput(amount);
+    const parsedResetDay = Math.min(31, Math.max(1, parseInt(budgetResetDay) || 1));
 
     try {
       setIsLoading(true);
@@ -92,25 +105,40 @@ const TotalBudgetModal = ({
       console.log("Saving budget:", {
         user_id: session.user.id,
         amount: parsedAmount,
+        budget_reset_day: parsedResetDay,
       });
 
-      // Используем upsert для создания или обновления записи
-      const { data, error } = await supabase
-        .from("main_budget")
-        .upsert(
-          {
-            user_id: session.user.id,
-            amount: parsedAmount,
-          },
-          { onConflict: "user_id" },
-        )
-        .select();
+      // Save budget and budget_reset_day in parallel
+      const [budgetResult, profileResult] = await Promise.all([
+        supabase
+          .from("main_budget")
+          .upsert(
+            {
+              user_id: session.user.id,
+              amount: parsedAmount,
+            },
+            { onConflict: "user_id" },
+          )
+          .select(),
+        supabase
+          .from("profiles")
+          .upsert(
+            {
+              id: session.user.id,
+              budget_reset_day: parsedResetDay,
+            },
+            { onConflict: "id" },
+          ),
+      ]);
 
-      if (error) {
-        console.error("Error saving budget:", error);
+      if (budgetResult.error) {
+        console.error("Error saving budget:", budgetResult.error);
         onSubmit("Failed to save budget. Please try again.", "error");
+      } else if (profileResult.error) {
+        console.error("Error saving budget reset day:", profileResult.error);
+        onSubmit("Budget saved but failed to save reset day.", "error");
       } else {
-        console.log("Budget saved successfully:", data);
+        console.log("Budget and reset day saved successfully");
         onClose();
         onSubmit("Budget saved successfully!", "success");
       }
@@ -133,26 +161,52 @@ const TotalBudgetModal = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="text-center">{title}</DialogTitle>
-          <DialogClose className="absolute right-4 top-4 text-muted-foreground hover:text-foreground">
-            <X size={22} />
-          </DialogClose>
         </DialogHeader>
         <div className="mt-[30px]">
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <TextInput
-              type="text"
-              placeholder={tModals("mainBudget.placeholder.amountUSD")}
-              value={amount}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === "" || /^\d*[.,]?\d*$/.test(value)) {
-                  setAmount(value);
-                }
-              }}
-              inputMode="decimal"
-              min="0"
-              step="0.01"
-            />
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-foreground">
+                {tModals("mainBudget.budgetAmount")}
+              </label>
+              <TextInput
+                type="text"
+                placeholder={tModals("mainBudget.placeholder.amountUSD")}
+                value={amount}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "" || /^\d*[.,]?\d*$/.test(value)) {
+                    setAmount(value);
+                  }
+                }}
+                inputMode="decimal"
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-foreground">
+                {tModals("mainBudget.budgetResetDay")}
+              </label>
+              <TextInput
+                type="number"
+                placeholder="1"
+                value={budgetResetDay}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const num = parseInt(value);
+                  if (value === "" || (num >= 1 && num <= 31)) {
+                    setBudgetResetDay(value);
+                  }
+                }}
+                inputMode="numeric"
+                min="1"
+              />
+              <p className="text-xs text-muted-foreground">
+                {tModals("mainBudget.resetDayHelper")}
+              </p>
+            </div>
+
             <DialogFooter className="flex-row justify-between gap-3">
               <Button
                 text={tCommon("cancel")}

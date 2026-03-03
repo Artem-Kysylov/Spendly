@@ -37,6 +37,7 @@ import {
 } from "@/lib/ai/tipUtils";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { useMainBudget } from "@/hooks/useMainBudget";
 
 // Component: TransactionsCounters
 function TransactionsCounters({
@@ -50,6 +51,8 @@ function TransactionsCounters({
   const tDashboard = useTranslations("dashboard");
   const tCharts = useTranslations("charts");
   const tBudgets = useTranslations("budgets");
+
+  const { availableToSpend, carryover } = useMainBudget();
 
   // State for transactions and budget data
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -144,11 +147,14 @@ function TransactionsCounters({
       .reduce((sum, transaction) => sum + transaction.amount, 0);
   }, [previousMonthData]);
 
-  // Calculate derived values
-  const budgetUsagePercentage = budget > 0 ? (totalExpenses / budget) * 100 : 0;
-  const remainingBudget = budget - totalExpenses;
+  // Calculate derived values using availableToSpend (includes carryover)
+  const effectiveBudget = Number.isFinite(availableToSpend) && availableToSpend !== 0
+    ? availableToSpend
+    : budget;
+  const budgetUsagePercentage = effectiveBudget > 0 ? (totalExpenses / effectiveBudget) * 100 : 0;
+  const remainingBudget = effectiveBudget - totalExpenses;
   const budgetStatus =
-    budget === 0
+    effectiveBudget === 0
       ? "not-set"
       : budgetUsagePercentage > 100
         ? "exceeded"
@@ -318,24 +324,35 @@ function TransactionsCounters({
                     )}
                   </div>
 
-                  <span
-                    className={`text-[30px] font-bold text-center ${
-                      budgetStatus === "exceeded"
-                        ? "text-red-600"
-                        : budgetStatus === "warning"
-                          ? "text-yellow-600"
-                          : "text-primary"
-                    }`}
-                  >
-                    {formatCurrency(budget)}
-                  </span>
+                  <div className="flex flex-col items-center gap-1">
+                    <span
+                      className={`text-[30px] font-bold text-center ${
+                        budgetStatus === "exceeded"
+                          ? "text-red-600"
+                          : budgetStatus === "warning"
+                            ? "text-yellow-600"
+                            : "text-primary"
+                      }`}
+                    >
+                      {formatCurrency(effectiveBudget)}
+                    </span>
+                    {/* Variant B: Show breakdown if carryover exists */}
+                    {carryover !== 0 && budget > 0 && (
+                      <div className="flex flex-col items-center gap-0.5 text-xs text-gray-600 dark:text-gray-400">
+                        <span>Budget: {formatCurrency(budget)}</span>
+                        <span className={carryover > 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
+                          Carryover: {carryover > 0 ? "+" : ""}{formatCurrency(carryover)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
                   {budget > 0 && (
                     <>
                       <div className="w-full max-w-[180px]">
                         <BudgetProgressBar
                           spentAmount={totalExpenses}
-                          totalAmount={budget}
+                          totalAmount={effectiveBudget}
                           type="expense"
                           className="text-xs"
                           spentLabel={tBudgets("labels.spent")}

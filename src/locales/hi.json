@@ -698,6 +698,9 @@
       }
     },
     "mainBudget": {
+      "budgetAmount": "बजट राशि",
+      "budgetResetDay": "बजट रीसेट दिन",
+      "resetDayHelper": "महीने का वह दिन जब बजट चक्र शुरू होता है (1-31)",
       "placeholder": {
         "amountUSD": "राशि (USD)"
       }

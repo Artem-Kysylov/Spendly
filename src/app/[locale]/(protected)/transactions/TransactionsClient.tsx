@@ -131,8 +131,13 @@ export default function TransactionsClient() {
   } = useTransactionsData();
 
   // UI State
-  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(() => !isMobile);
+  const [hasMounted, setHasMounted] = useState(false);
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [isAiSheetOpen, setIsAiSheetOpen] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   // AI Insights State
   const [insightsData, setInsightsData] = useState<SpendingInsights | null>(
@@ -349,9 +354,7 @@ export default function TransactionsClient() {
   };
 
   // Десктоп: открыто, Мобайл: закрыто
-  useEffect(() => {
-    setIsAnalyticsOpen(!isMobile);
-  }, [isMobile]);
+  const shouldShowAnalytics = hasMounted && (isMobile ? isAnalyticsOpen : true);
 
   const SKELETON_KEYS = ["s1", "s2", "s3", "s4", "s5"] as const;
 
@@ -644,7 +647,7 @@ export default function TransactionsClient() {
           </button>
 
           <AnimatePresence initial={false}>
-            {(isAnalyticsOpen || !isMobile) && (
+            {shouldShowAnalytics && (
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}

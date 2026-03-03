@@ -698,6 +698,9 @@
       }
     },
     "mainBudget": {
+      "budgetAmount": "예산 금액",
+      "budgetResetDay": "예산 리셋일",
+      "resetDayHelper": "예산 주기가 시작되는 날짜 (1-31)",
       "placeholder": {
         "amountUSD": "금액(USD)"
       }

@@ -4,6 +4,8 @@ import { Pencil } from "lucide-react";
 import { formatCurrency } from "@/lib/chartUtils";
 import TrendArrow from "@/components/ui-elements/TrendArrow";
 import BudgetProgressBar from "@/components/ui-elements/BudgetProgressBar";
+import { useMainBudget } from "@/hooks/useMainBudget";
+import { getFinancialMonthFullRange } from "@/lib/dateUtils";
 
 interface CompactKPICardProps {
   budget: number;
@@ -23,16 +25,27 @@ export default function CompactKPICard({
   const tDashboard = useTranslations("dashboard");
   const tBudgets = useTranslations("budgets");
 
+  const { availableToSpend, budgetResetDay } = useMainBudget();
+
   const { safeToSpend, daysLeft } = useMemo(() => {
     const today = new Date();
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-    const daysLeft = Math.max(1, endOfMonth.getDate() - today.getDate());
-    const remaining = budget - totalExpenses;
+    const { end } = getFinancialMonthFullRange(budgetResetDay || 1, today);
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const daysLeft = Math.max(
+      1,
+      Math.ceil((end.getTime() - today.getTime()) / msPerDay),
+    );
+    const effectiveBudget = Number.isFinite(availableToSpend) && availableToSpend !== 0
+      ? availableToSpend
+      : budget;
+    const remaining = effectiveBudget - totalExpenses;
     const safeToSpend = remaining / daysLeft;
     return { safeToSpend, daysLeft };
-  }, [budget, totalExpenses]);
+  }, [availableToSpend, budget, budgetResetDay, totalExpenses]);
 
-  const remainingBudget = budget - totalExpenses;
+  const remainingBudget =
+    (Number.isFinite(availableToSpend) && availableToSpend !== 0 ? availableToSpend : budget) -
+    totalExpenses;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 w-full min-w-0">

@@ -698,6 +698,9 @@
       }
     },
     "mainBudget": {
+      "budgetAmount": "Сума бюджету",
+      "budgetResetDay": "День оновлення бюджету",
+      "resetDayHelper": "День місяця, коли починається новий бюджетний цикл (1-31)",
       "placeholder": {
         "amountUSD": "Сума (USD)"
       }
