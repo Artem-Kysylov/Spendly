@@ -85,7 +85,6 @@ function TransactionModal({
                 className="w-full h-[50px] py-0 justify-center border-primary md:hover:bg-primary/5 mb-4"
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("transactions:chat"));
-                  handleClose();
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -156,7 +155,6 @@ function TransactionModal({
             className="w-full h-auto py-3 justify-center border-primary md:hover:bg-primary/5 mb-4"
             onClick={() => {
               window.dispatchEvent(new CustomEvent("transactions:chat"));
-              handleClose();
             }}
           >
             <div className="flex items-center gap-3">

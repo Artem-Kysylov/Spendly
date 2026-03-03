@@ -183,7 +183,7 @@ export function SheetContent({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[100]"
+          className="fixed inset-0 z-[10000]"
           role="dialog"
           aria-modal="true"
           onClick={() => onOpenChange?.(false)}

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { SheetClose, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useToast } from "@/components/ui/use-toast";
 import { UserAuth } from "@/context/AuthContext";
 import { useTransactionChat } from "@/hooks/useTransactionChat";
@@ -16,7 +16,7 @@ import LimitReachedModal from "@/components/modals/LimitReachedModal";
 
 export function TransactionChatWindow({
   isOpen,
-  onClose,
+  onClose: _onClose,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -108,13 +108,13 @@ export function TransactionChatWindow({
   return (
     <div className="bg-background text-foreground flex flex-col relative h-full">
       {/* Header */}
-      <SheetHeader className="text-center">
-        <div className="flex items-center justify-center gap-2">
-          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-          <SheetTitle id="transaction-chat-title" className="text-center">
-            💰 {tTx("addTransaction")}
-          </SheetTitle>
-        </div>
+      <SheetHeader className="px-4 py-4 border-b border-border justify-center">
+        <SheetTitle
+          id="transaction-chat-title"
+          className="text-[18px] sm:text-[20px] font-semibold text-center"
+        >
+          💰 {tTx("addTransaction")}
+        </SheetTitle>
       </SheetHeader>
 
       {/* Chat Content */}
