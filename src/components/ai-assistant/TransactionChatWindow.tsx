@@ -106,7 +106,7 @@ export function TransactionChatWindow({
   if (!isOpen) return null;
 
   return (
-    <div className="bg-background text-foreground flex flex-col relative">
+    <div className="bg-background text-foreground flex flex-col relative h-full">
       {/* Header */}
       <SheetHeader className="px-4 py-4 border-b border-border justify-center">
         <SheetTitle
