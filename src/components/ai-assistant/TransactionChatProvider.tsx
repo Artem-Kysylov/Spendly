@@ -36,8 +36,8 @@ export function TransactionChatProvider({
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent
-          side="right"
-          className="p-0 overflow-hidden w-full sm:max-w-md"
+          side="bottom"
+          className="p-0 overflow-hidden w-full"
           aria-labelledby="transaction-chat-title"
         >
           <TransactionChatWindow

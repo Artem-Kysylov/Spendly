@@ -1210,6 +1210,13 @@
     }
   },
   "chat": {
+    "shortcuts": {
+      "title": "Quick Add",
+      "coffee": "Coffee",
+      "lunch": "Lunch",
+      "taxi": "Taxi",
+      "groceries": "Groceries"
+    },
     "empty_state": {
       "quick_add_title": "Smart Add",
       "quick_add_desc": "Track expenses in seconds. Just type naturally.",

@@ -1210,6 +1210,13 @@
     }
   },
   "chat": {
+    "shortcuts": {
+      "title": "Tambah Cepat",
+      "coffee": "Kopi",
+      "lunch": "Makan Siang",
+      "taxi": "Taksi",
+      "groceries": "Belanja"
+    },
     "empty_state": {
       "quick_add_title": "Tambah Pintar",
       "quick_add_desc": "Catat pengeluaran dalam hitungan detik. Cukup ketik secara alami.",

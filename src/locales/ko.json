@@ -1210,6 +1210,13 @@
     }
   },
   "chat": {
+    "shortcuts": {
+      "title": "빠른 추가",
+      "coffee": "커피",
+      "lunch": "점심",
+      "taxi": "택시",
+      "groceries": "장보기"
+    },
     "empty_state": {
       "quick_add_title": "스마트 추가",
       "quick_add_desc": "몇 초 만에 지출을 기록하세요. 자연스럽게 입력만 하세요.",

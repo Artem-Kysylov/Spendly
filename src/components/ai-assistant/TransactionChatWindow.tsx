@@ -11,6 +11,7 @@ import { UserAuth } from "@/context/AuthContext";
 import { useTransactionChat } from "@/hooks/useTransactionChat";
 import { supabase } from "@/lib/supabaseClient";
 import { TransactionChatMessages } from "./TransactionChatMessages";
+import { TransactionShortcuts } from "./TransactionShortcuts";
 import LimitReachedModal from "@/components/modals/LimitReachedModal";
 
 export function TransactionChatWindow({
@@ -107,20 +108,13 @@ export function TransactionChatWindow({
   return (
     <div className="bg-background text-foreground flex flex-col relative h-full">
       {/* Header */}
-      <SheetHeader className="text-center relative">
+      <SheetHeader className="text-center">
         <div className="flex items-center justify-center gap-2">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           <SheetTitle id="transaction-chat-title" className="text-center">
             💰 {tTx("addTransaction")}
           </SheetTitle>
         </div>
-        <SheetClose
-          className="absolute top-0 right-0 block p-1.5 hover:bg-muted rounded-full transition-colors duration-200 touch-manipulation"
-          aria-label={tAI("buttons.close")}
-          onClick={onClose}
-        >
-          <X className="w-5 h-5 text-muted-foreground" />
-        </SheetClose>
       </SheetHeader>
 
       {/* Chat Content */}
@@ -132,29 +126,29 @@ export function TransactionChatWindow({
             </div>
           )}
           {messages.length === 0 ? (
-            <div className="px-4 py-6">
-              <div className="border border-dashed border-white/10 bg-white/5 rounded-xl p-4">
-                <div className="flex items-center gap-2 mb-2">
+            <div className="py-6">
+              <div className="px-4 mb-4">
+                <div className="flex items-center gap-2 mb-2 justify-center">
                   <span className="text-xl">⚡️</span>
                   <span className="font-semibold">
                     {tChat("empty_state.quick_add_title")}
                   </span>
                 </div>
-                <p className="text-sm text-muted-foreground mb-3">
+                <p className="text-sm text-muted-foreground text-center">
                   {tChat("empty_state.quick_add_desc")}
                 </p>
-                <div className="space-y-2">
-                  <div className="font-mono text-sm text-muted-foreground">
-                    {tChat("empty_state.quick_add_pattern")}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {tChat("empty_state.pattern_example")}
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                    {tChat("empty_state.quick_add_footer")}
-                  </div>
-                </div>
               </div>
+              <TransactionShortcuts
+                onSelectShortcut={(text) => {
+                  setInput(text);
+                  // Trigger form submission programmatically
+                  const form = document.querySelector('form');
+                  if (form) {
+                    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                  }
+                }}
+                currency={currency}
+              />
             </div>
           ) : (
             <TransactionChatMessages
@@ -178,6 +172,8 @@ export function TransactionChatWindow({
               placeholder={tAI("input.placeholder")}
               disabled={isLoading || isRateLimited}
               className="flex-1"
+              data-auto-focus="true"
+              autoFocus
             />
             {isLoading ? (
               <Button
