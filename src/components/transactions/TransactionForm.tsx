@@ -27,6 +27,7 @@ import Button from "@/components/ui-elements/Button";
 import HybridDatePicker from "@/components/ui-elements/HybridDatePicker";
 import TextInput from "@/components/ui-elements/TextInput";
 import { UserAuth } from "@/context/AuthContext";
+import { useSubscription } from "@/hooks/useSubscription";
 import { supabase } from "@/lib/supabaseClient";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import type { BudgetFolderItemProps, Transaction } from "@/types/types";
@@ -39,6 +40,8 @@ const transactionSchema = z.object({
   budget_folder_id: z.string().nullable(),
   created_at: z.date(),
   saveAsTemplate: z.boolean().optional(),
+  isRecurring: z.boolean().optional(),
+  recurrenceDay: z.number().min(1).max(31).nullable().optional(),
 });
 
 type TransactionFormValues = z.infer<typeof transactionSchema>;
@@ -85,6 +88,9 @@ export default function TransactionForm({
 
   const amountRef = useRef<HTMLInputElement | null>(null);
 
+  const { subscriptionPlan } = useSubscription();
+  const isPro = subscriptionPlan === "pro";
+
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
@@ -97,12 +103,16 @@ export default function TransactionForm({
         ? new Date(initialData.created_at)
         : new Date(),
       saveAsTemplate: false,
+      isRecurring: initialData?.is_recurring || false,
+      recurrenceDay: initialData?.recurrence_day || new Date().getDate(),
     },
   });
 
   const { control, handleSubmit, watch, setValue } = form;
   const currentType = watch("type");
   const currentTitle = watch("title");
+  const isRecurring = watch("isRecurring");
+  const [recurringCount, setRecurringCount] = useState(0);
 
   // Fetch Data
   useEffect(() => {
@@ -144,6 +154,15 @@ export default function TransactionForm({
           ),
         );
         setRecentTitles(uniq as string[]);
+
+        // Recurring transactions count (for free tier limits)
+        const { count } = await supabase
+          .from("transactions")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", session.user.id)
+          .eq("is_recurring", true);
+
+        setRecurringCount(count || 0);
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
@@ -198,6 +217,8 @@ export default function TransactionForm({
         budget_folder_id:
           data.budget_folder_id === "unbudgeted" ? null : data.budget_folder_id,
         created_at: data.created_at.toISOString(),
+        is_recurring: data.isRecurring || false,
+        recurrence_day: data.isRecurring ? data.recurrenceDay : null,
       };
 
       let error: unknown = null;
@@ -452,11 +473,85 @@ export default function TransactionForm({
             <Checkbox
               checked={field.value}
               onChange={field.onChange}
+              disabled={!isPro && templates.length >= 3}
               className="h-4 w-4 rounded border border-border bg-transparent dark:bg-transparent accent-primary"
             />
           )}
         />
-        <div className="text-sm">{tModals("transaction.saveAsTemplate")}</div>
+        <div className="text-sm">
+          {tModals("transaction.saveAsTemplate")}
+          {!isPro && templates.length >= 3 && (
+            <span className="ml-2 text-xs text-muted-foreground">
+              {tModals("transaction.templateLimitReached")}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Recurring Checkbox */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <Controller
+            name="isRecurring"
+            control={control}
+            render={({ field }) => (
+              <Checkbox
+                checked={field.value}
+                onChange={(checked) => {
+                  if (!isPro && recurringCount >= 3 && !initialData?.is_recurring) {
+                    toast({
+                      title: tModals("transaction.recurringLimitTitle"),
+                      description: tModals("transaction.recurringLimitMessage"),
+                      variant: "destructive",
+                    });
+                    return;
+                  }
+                  field.onChange(checked);
+                }}
+                className="h-4 w-4 rounded border border-border bg-transparent dark:bg-transparent accent-primary"
+              />
+            )}
+          />
+          <div className="text-sm">{tModals("transaction.recurring")}</div>
+        </div>
+
+        {/* Recurring Day Input - shown when checkbox is checked */}
+        {isRecurring && (
+          <div className="ml-6 flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              {tModals("transaction.recurringRepeatEvery")}
+            </span>
+            <Controller
+              name="recurrenceDay"
+              control={control}
+              render={({ field }) => (
+                <input
+                  type="number"
+                  min="1"
+                  max="31"
+                  value={field.value || new Date().getDate()}
+                  onChange={(e) => {
+                    const val = Number.parseInt(e.target.value, 10);
+                    if (val >= 1 && val <= 31) {
+                      field.onChange(val);
+                    }
+                  }}
+                  className="w-16 h-9 px-2 text-center rounded-md border border-primary bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              )}
+            />
+            <span className="text-sm text-muted-foreground">
+              {tModals("transaction.recurringDayOfMonth")}
+            </span>
+          </div>
+        )}
+
+        {/* Notification hint */}
+        {isRecurring && (
+          <div className="ml-6 text-xs text-muted-foreground">
+            {tModals("transaction.recurringNotificationHint")}
+          </div>
+        )}
       </div>
 
       {/* Submit Button */}

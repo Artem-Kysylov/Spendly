@@ -331,6 +331,15 @@
   "transactions": {
     "title": "Транзакції",
     "addTransaction": "Додати транзакцію",
+    "templates": {
+      "title": "Шаблони",
+      "empty": "Шаблонів поки немає"
+    },
+    "recurring": {
+      "title": "Регулярні платежі",
+      "empty": "Регулярних платежів немає",
+      "dayLabel": "{day} число місяця"
+    },
     "search": {
       "placeholder": "Пошук транзакцій..."
     },
@@ -728,10 +737,17 @@
         "income": "Дохід"
       },
       "saveAsTemplate": "Зберегти як шаблон",
+      "templateLimitReached": "Оновіться до Pro для більше ніж 3 шаблонів",
       "templates": {
         "limitTitle": "Ліміт шаблонів",
         "limitDescription": "У безкоштовному плані доступно до 3 шаблонів."
       },
+      "recurring": "Регулярна",
+      "recurringRepeatEvery": "Повторювати кожне",
+      "recurringDayOfMonth": "число місяця",
+      "recurringNotificationHint": "Увімкніть сповіщення, щоб бути в курсі автоматичних записів",
+      "recurringLimitTitle": "Досягнуто ліміт регулярних платежів",
+      "recurringLimitMessage": "Досягнуто безкоштовний ліміт (3/3). Отримайте Pro для необмежених підписок!",
       "autoTypeInfo": "Тип визначається бюджетом",
       "hintRecurring": "Порада: використовуйте послідовні назви, щоб легше ідентифікувати повторювані платежі.",
       "ruleBadge": {

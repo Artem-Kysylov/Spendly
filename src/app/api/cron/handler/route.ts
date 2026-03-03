@@ -42,6 +42,9 @@ export async function GET(req: NextRequest) {
     ? await proxy(req, "/en/api/notifications/digest")
     : { status: 204, headers: { "content-type": "application/json" }, body: "" };
 
+  // Process recurring transactions
+  const recurring = await proxy(req, "/en/api/cron/recurring");
+
   const processorRuns: Array<{ status: number; body: string }> = [];
   for (let i = 0; i < 10; i++) {
     const res = await proxy(req, "/en/api/notifications/processor");
@@ -62,6 +65,8 @@ export async function GET(req: NextRequest) {
   const ok =
     daily.status >= 200 &&
     daily.status < 300 &&
+    recurring.status >= 200 &&
+    recurring.status < 300 &&
     (!digestRun || (digest.status >= 200 && digest.status < 300)) &&
     processorRuns.every((r) => r.status >= 200 && r.status < 300);
 
@@ -72,6 +77,7 @@ export async function GET(req: NextRequest) {
       durationMs: Date.now() - startedAt,
       daily: { status: daily.status, body: daily.body },
       digest: { status: digest.status, body: digest.body },
+      recurring: { status: recurring.status, body: recurring.body },
       processorRuns,
     },
     { status: ok ? 200 : 500 },

@@ -331,6 +331,15 @@
   "transactions": {
     "title": "Транзакции",
     "addTransaction": "Добавить транзакцию",
+    "templates": {
+      "title": "Шаблоны",
+      "empty": "Шаблонов пока нет"
+    },
+    "recurring": {
+      "title": "Регулярные платежи",
+      "empty": "Регулярных платежей нет",
+      "dayLabel": "{day} число месяца"
+    },
     "search": {
       "placeholder": "Поиск транзакций..."
     },
@@ -728,10 +737,17 @@
         "income": "Доход"
       },
       "saveAsTemplate": "Сохранить как шаблон",
+      "templateLimitReached": "Обновитесь до Pro для более 3 шаблонов",
       "templates": {
         "limitTitle": "Лимит шаблонов",
         "limitDescription": "В бесплатной версии доступно 3 шаблона."
       },
+      "recurring": "Регулярная",
+      "recurringRepeatEvery": "Повторять каждое",
+      "recurringDayOfMonth": "число",
+      "recurringNotificationHint": "Включите уведомления, чтобы быть в курсе автоматических записей",
+      "recurringLimitTitle": "Достигнут лимит регулярных платежей",
+      "recurringLimitMessage": "Достигнут бесплатный лимит (3/3). Получите Pro для неограниченных подписок!",
       "autoTypeInfo": "Тип определяется бюджетом",
       "hintRecurring": "Совет: используйте одинаковые названия для распознавания регулярных платежей.",
       "ruleBadge": {

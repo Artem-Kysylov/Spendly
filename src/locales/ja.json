@@ -331,6 +331,15 @@
   "transactions": {
     "title": "取引📉",
     "addTransaction": "取引を追加",
+    "templates": {
+      "title": "テンプレート",
+      "empty": "テンプレートはまだありません"
+    },
+    "recurring": {
+      "title": "定期支払い",
+      "empty": "定期支払いはありません",
+      "dayLabel": "毎月{day}日"
+    },
     "search": {
       "placeholder": "Search transactions..."
     },
@@ -728,10 +737,17 @@
         "income": "収入"
       },
       "saveAsTemplate": "テンプレートとして保存",
+      "templateLimitReached": "3つ以上のテンプレートにはProにアップグレード",
       "templates": {
         "limitTitle": "テンプレートの上限",
         "limitDescription": "無料プランでは最大3つのテンプレートが利用できます。"
       },
+      "recurring": "定期的",
+      "recurringRepeatEvery": "毎月",
+      "recurringDayOfMonth": "日に繰り返す",
+      "recurringNotificationHint": "自動記録の通知を受け取るには通知を有効にしてください",
+      "recurringLimitTitle": "定期支払いの上限に達しました",
+      "recurringLimitMessage": "無料プランの上限に達しました（3/3）。無制限のサブスクリプションにはProを取得してください！",
       "autoTypeInfo": "Tip: using consistent names helps recognize recurring payments.",
       "hintRecurring": "ヒント: 定期的な支払いを識別しやすくするために、一貫した名前を使用してください。",
       "ruleBadge": {

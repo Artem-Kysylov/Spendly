@@ -64,6 +64,8 @@ export interface Transaction {
   budget_folder_id?: string | null;
   category_name?: string;
   category_emoji?: string;
+  is_recurring?: boolean;
+  recurrence_day?: number | null;
 }
 
 export interface TransactionTemplate {

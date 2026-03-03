@@ -331,6 +331,15 @@
   "transactions": {
     "title": "거래 내역 🧾",
     "addTransaction": "거래 추가",
+    "templates": {
+      "title": "템플릿",
+      "empty": "아직 템플릿이 없습니다"
+    },
+    "recurring": {
+      "title": "정기 결제",
+      "empty": "정기 결제가 없습니다",
+      "dayLabel": "매월 {day}일"
+    },
     "search": {
       "placeholder": "Search transactions..."
     },
@@ -728,10 +737,17 @@
         "income": "수입"
       },
       "saveAsTemplate": "템플릿으로 저장",
+      "templateLimitReached": "3개 이상의 템플릿을 사용하려면 Pro로 업그레이드하세요",
       "templates": {
         "limitTitle": "템플릿 제한",
         "limitDescription": "무료 요금제에서는 최대 3개의 템플릿을 사용할 수 있어요."
       },
+      "recurring": "정기 결제",
+      "recurringRepeatEvery": "매월",
+      "recurringDayOfMonth": "일에 반복",
+      "recurringNotificationHint": "자동 기록에 대한 알림을 받으려면 알림을 활성화하세요",
+      "recurringLimitTitle": "정기 결제 한도 도달",
+      "recurringLimitMessage": "무료 한도에 도달했습니다 (3/3). 무제한 구독을 위해 Pro를 이용하세요!",
       "autoTypeInfo": "금액에 따라 지출/수입이 자동으로 결정됩니다.",
       "hintRecurring": "팁: 동일한 이름을 사용하면 반복 결제를 인식하는 데 도움이 됩니다.",
       "ruleBadge": {

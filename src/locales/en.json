@@ -331,6 +331,15 @@
   "transactions": {
     "title": "Transactions📉",
     "addTransaction": "Add Transaction",
+    "templates": {
+      "title": "Templates",
+      "empty": "No templates yet"
+    },
+    "recurring": {
+      "title": "Recurring Payments",
+      "empty": "No recurring payments",
+      "dayLabel": "Day {day} of month"
+    },
     "search": {
       "placeholder": "Search transactions..."
     },
@@ -728,10 +737,17 @@
         "income": "Income"
       },
       "saveAsTemplate": "Save as template",
+      "templateLimitReached": "Upgrade to Pro for more than 3 templates",
       "templates": {
         "limitTitle": "Templates limit",
         "limitDescription": "On Free plan you can have up to 3 templates."
       },
+      "recurring": "Recurring",
+      "recurringRepeatEvery": "Repeat every",
+      "recurringDayOfMonth": "day of month",
+      "recurringNotificationHint": "Enable notifications to stay updated on automatic logs",
+      "recurringLimitTitle": "Recurring Limit Reached",
+      "recurringLimitMessage": "Free limit reached (3/3). Get Pro for unlimited subscriptions!",
       "autoTypeInfo": "Tip: using consistent names helps recognize recurring payments.",
       "hintRecurring": "Tip: using consistent names helps recognize recurring payments.",
       "ruleBadge": {

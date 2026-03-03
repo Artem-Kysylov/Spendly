@@ -331,6 +331,15 @@
   "transactions": {
     "title": "लेन-देन📉",
     "addTransaction": "लेन-देन जोड़ें",
+    "templates": {
+      "title": "टेम्पलेट",
+      "empty": "अभी कोई टेम्पलेट नहीं"
+    },
+    "recurring": {
+      "title": "आवर्ती भुगतान",
+      "empty": "कोई आवर्ती भुगतान नहीं",
+      "dayLabel": "हर महीने की {day} तारीख"
+    },
     "search": {
       "placeholder": "Search transactions..."
     },
@@ -727,11 +736,18 @@
         "expense": "खर्च",
         "income": "आय"
       },
-      "saveAsTemplate": "Save as template",
+      "saveAsTemplate": "टेम्पलेट के रूप में सहेजें",
+      "templateLimitReached": "3 से अधिक टेम्पलेट के लिए Pro में अपग्रेड करें",
       "templates": {
-        "limitTitle": "Templates limit",
-        "limitDescription": "On Free plan you can have up to 3 templates."
+        "limitTitle": "टेम्पलेट सीमा",
+        "limitDescription": "मुफ्त योजना में आप 3 टेम्पलेट तक रख सकते हैं।"
       },
+      "recurring": "आवर्ती",
+      "recurringRepeatEvery": "हर महीने की",
+      "recurringDayOfMonth": "तारीख को दोहराएं",
+      "recurringNotificationHint": "स्वचालित लॉग के बारे में अपडेट रहने के लिए सूचनाएं सक्षम करें",
+      "recurringLimitTitle": "आवर्ती भुगतान सीमा पहुंच गई",
+      "recurringLimitMessage": "मुफ्त सीमा पहुंच गई (3/3)। असीमित सदस्यता के लिए Pro प्राप्त करें!",
       "autoTypeInfo": "Tip: using consistent names helps recognize recurring payments.",
       "hintRecurring": "टिप: आवर्ती भुगतानों को पहचानने में मदद के लिए सुसंगत नामों का उपयोग करें।",
       "ruleBadge": {

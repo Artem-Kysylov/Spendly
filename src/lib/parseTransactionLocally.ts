@@ -40,6 +40,36 @@ const LOCALE_SPLITTER_WORDS: Record<string, string[]> = {
 
 const CURRENCY_SYMBOLS_REGEX = /[$€£¥₴₽]/g;
 
+// Recurring/subscription keywords (multilingual)
+const RECURRING_KEYWORDS = [
+  // English
+  'subscription', 'monthly', 'every month', 'recurring', 'netflix', 'spotify', 
+  'apple music', 'youtube premium', 'amazon prime', 'disney+', 'hbo', 'gym',
+  'rent', 'mortgage', 'insurance', 'phone bill', 'internet', 'electricity',
+  // Russian
+  'подписка', 'ежемесячно', 'каждый месяц', 'аренда', 'ипотека', 'страховка',
+  'интернет', 'электричество', 'телефон', 'спортзал',
+  // Ukrainian
+  'підписка', 'щомісяця', 'кожен місяць', 'оренда', 'іпотека', 'страховка',
+  'інтернет', 'електрика', 'телефон', 'спортзал',
+  // Japanese
+  'サブスクリプション', '毎月', '定期',
+  // Indonesian
+  'langganan', 'bulanan', 'setiap bulan',
+  // Hindi
+  'सदस्यता', 'मासिक', 'हर महीने',
+  // Korean
+  '구독', '월간', '매월',
+];
+
+/**
+ * Detect if transaction is likely recurring/subscription based on keywords
+ */
+function detectRecurring(title: string): boolean {
+  const lowerTitle = title.toLowerCase();
+  return RECURRING_KEYWORDS.some(keyword => lowerTitle.includes(keyword.toLowerCase()));
+}
+
 // Keyword-to-category mapping (multilingual)
 // Maps common expense keywords to category names
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
@@ -104,6 +134,8 @@ export interface LocalParsedTransaction {
   type: 'expense' | 'income';
   category_name: string;
   date: string; // ISO format YYYY-MM-DD
+  is_recurring?: boolean;
+  recurrence_day?: number;
 }
 
 export interface ParseResult {
@@ -259,6 +291,7 @@ function parseSegment(segment: string, globalDate?: string): LocalParsedTransact
 
   const capitalizedTitle = title.charAt(0).toUpperCase() + title.slice(1).toLowerCase();
   const detectedCategory = detectCategory(title);
+  const isRecurring = detectRecurring(title);
   const today = new Date().toISOString().split('T')[0];
 
   return {
@@ -267,6 +300,8 @@ function parseSegment(segment: string, globalDate?: string): LocalParsedTransact
     type: 'expense',
     category_name: detectedCategory,
     date: dateOverride ?? globalDate ?? today,
+    is_recurring: isRecurring,
+    recurrence_day: isRecurring ? new Date().getDate() : undefined,
   };
 }
 

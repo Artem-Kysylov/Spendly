@@ -331,6 +331,15 @@
   "transactions": {
     "title": "Transactions📉",
     "addTransaction": "Add Transaction",
+    "templates": {
+      "title": "Template",
+      "empty": "Belum ada template"
+    },
+    "recurring": {
+      "title": "Pembayaran Berulang",
+      "empty": "Tidak ada pembayaran berulang",
+      "dayLabel": "Tanggal {day} setiap bulan"
+    },
     "search": {
       "placeholder": "Search transactions..."
     },
@@ -728,10 +737,17 @@
         "income": "Pemasukan"
       },
       "saveAsTemplate": "Simpan sebagai template",
+      "templateLimitReached": "Upgrade ke Pro untuk lebih dari 3 template",
       "templates": {
         "limitTitle": "Batas template",
         "limitDescription": "Di paket Gratis tersedia hingga 3 template."
       },
+      "recurring": "Berulang",
+      "recurringRepeatEvery": "Ulangi setiap tanggal",
+      "recurringDayOfMonth": "setiap bulan",
+      "recurringNotificationHint": "Aktifkan notifikasi untuk tetap update tentang pencatatan otomatis",
+      "recurringLimitTitle": "Batas Pembayaran Berulang Tercapai",
+      "recurringLimitMessage": "Batas gratis tercapai (3/3). Dapatkan Pro untuk langganan tak terbatas!",
       "autoTypeInfo": "Tip: using consistent names helps recognize recurring payments.",
       "hintRecurring": "Tip: Gunakan nama yang konsisten untuk membantu mengidentifikasi pembayaran berulang.",
       "ruleBadge": {

@@ -22,6 +22,8 @@ import MobileTransactionCard from "@/components/chunks/MobileTransactionCard";
 import TransactionsTable from "@/components/chunks/TransactionsTable";
 import LimitReachedModal from "@/components/modals/LimitReachedModal";
 import TransactionModal from "@/components/modals/TransactionModal";
+import TemplatesAccordion from "@/components/transactions/TemplatesAccordion";
+import RecurringPaymentsAccordion from "@/components/transactions/RecurringPaymentsAccordion";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -672,7 +674,32 @@ export default function TransactionsClient() {
         </div>
       </div>
 
-      {/* 4. Sticky Toolbar */}
+      {/* 4. Templates & Recurring Payments Accordions */}
+      <div className="px-4 md:px-6 mb-4 space-y-3">
+        <TemplatesAccordion
+          onEdit={(template) => {
+            setEditingTransaction({
+              id: "",
+              title: template.title,
+              amount: template.amount,
+              type: template.type,
+              budget_folder_id: template.budget_folder_id,
+              created_at: new Date().toISOString(),
+            });
+            openModal();
+          }}
+          onRefresh={() => refetchList()}
+        />
+        <RecurringPaymentsAccordion
+          onEdit={(transaction) => {
+            setEditingTransaction(transaction);
+            openModal();
+          }}
+          onRefresh={() => refetchList()}
+        />
+      </div>
+
+      {/* 5. Sticky Toolbar */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border px-4 md:px-6 py-3">
         <div className="flex flex-col md:flex-row gap-3 md:items-center">
           <div className="relative flex-1">
