@@ -19,8 +19,6 @@ import { useParams, useSearchParams } from "next/navigation";
 import ToneSettings from "@/components/ai-assistant/ToneSettings";
 import { SupportSection } from "@/components/user-settings/SupportSection";
 import InstallPWA from "@/components/pwa/InstallPWA";
-
-import TransactionTemplatesSettings from "@/components/user-settings/TransactionTemplatesSettings";
 import { useSubscription } from "@/hooks/useSubscription";
 import UnsubscribeModal from "@/components/modals/UnsubscribeModal";
 import {
@@ -629,9 +627,7 @@ export default function UserSettingsClient() {
           </div>
 
           {/* Transaction Templates Section — мобильный паддинг 12px */}
-          <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">
-            <TransactionTemplatesSettings />
-          </div>
+          {null}
 
           {/* Assistant Tone Section — мобильный паддинг 12px */}
           <div className="bg-white dark:bg-card rounded-lg border border-gray-200 dark:border-border p-3 md:p-6">

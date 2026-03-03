@@ -218,7 +218,9 @@ export default function TransactionForm({
           data.budget_folder_id === "unbudgeted" ? null : data.budget_folder_id,
         created_at: data.created_at.toISOString(),
         is_recurring: data.isRecurring || false,
-        recurrence_day: data.isRecurring ? data.recurrenceDay : null,
+        recurrence_day: data.isRecurring
+          ? (data.recurrenceDay ?? new Date().getDate())
+          : null,
       };
 
       let error: unknown = null;
@@ -529,12 +531,18 @@ export default function TransactionForm({
                   type="number"
                   min="1"
                   max="31"
-                  value={field.value || new Date().getDate()}
+                  value={field.value ?? ""}
                   onChange={(e) => {
-                    const val = Number.parseInt(e.target.value, 10);
-                    if (val >= 1 && val <= 31) {
-                      field.onChange(val);
+                    const raw = e.target.value;
+                    if (raw === "") {
+                      field.onChange(null);
+                      return;
                     }
+
+                    const val = Number.parseInt(raw, 10);
+                    if (!Number.isFinite(val)) return;
+                    if (val < 1 || val > 31) return;
+                    field.onChange(val);
                   }}
                   className="w-16 h-9 px-2 text-center rounded-md border border-primary bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                 />
