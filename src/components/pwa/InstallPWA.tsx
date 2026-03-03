@@ -273,10 +273,6 @@ export default function InstallPWA({
   // Check if FAB was dismissed
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (forceShowButton) {
-      setFabDismissed(false);
-      return;
-    }
     const dismissed = localStorage.getItem("pwa_fab_dismissed");
     setFabDismissed(!!dismissed);
   }, [forceShowButton]);

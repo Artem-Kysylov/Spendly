@@ -172,8 +172,6 @@ export function TransactionChatWindow({
               placeholder={tAI("input.placeholder")}
               disabled={isLoading || isRateLimited}
               className="flex-1"
-              data-auto-focus="true"
-              autoFocus
             />
             {isLoading ? (
               <Button

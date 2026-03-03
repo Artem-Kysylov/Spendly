@@ -1,12 +1,14 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LineChart, Line, Tooltip } from "recharts";
 import { useLineChartData } from "@/hooks/useChartData";
 import { ChartFilters } from "@/types/types";
 import { useTranslations } from "next-intl";
 import { formatCurrency, generateDateRange } from "@/lib/chartUtils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { UserAuth } from "@/context/AuthContext";
+import { supabase } from "@/lib/supabaseClient";
 
 type CustomDotProps = {
   cx?: number;
@@ -17,7 +19,10 @@ type CustomDotProps = {
 export default function SimplifiedChart() {
   const t = useTranslations("charts");
 
-  const filters: ChartFilters = useMemo(() => {
+  const { session } = UserAuth();
+  const userId = session?.user?.id;
+
+  const [filters, setFilters] = useState<ChartFilters>(() => {
     const now = new Date();
     // Show multiple months (last 90 days) so the line doesn't reset on month boundaries
     const startDate = new Date(now);
@@ -30,7 +35,9 @@ export default function SimplifiedChart() {
       selectedMonth: now.getMonth() + 1,
       selectedYear: now.getFullYear(),
     };
-  }, []);
+  });
+
+  const [didFallbackToLastTx, setDidFallbackToLastTx] = useState(false);
 
   const { data, isLoading } = useLineChartData(filters);
 
@@ -51,16 +58,66 @@ export default function SimplifiedChart() {
       )
     : 0;
 
+  // If the last 90 days have no spend at all, shift the window back to the latest
+  // transaction period to avoid showing an empty chart.
+  useEffect(() => {
+    if (isLoading) return;
+    if (!userId) return;
+    if (didFallbackToLastTx) return;
+
+    const hasSpend = (data ?? []).some((d) => (d.amount ?? 0) > 0);
+    if (hasSpend) return;
+
+    (async () => {
+      try {
+        const { data: lastTx, error } = await supabase
+          .from("transactions")
+          .select("created_at")
+          .eq("user_id", userId)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (error) return;
+        const raw = (lastTx as { created_at?: string } | null)?.created_at;
+        if (!raw) return;
+
+        const endDate = new Date(raw);
+        const startDate = new Date(endDate);
+        startDate.setDate(endDate.getDate() - 89);
+
+        setFilters((prev) => ({
+          ...prev,
+          startDate,
+          endDate,
+          selectedMonth: endDate.getMonth() + 1,
+          selectedYear: endDate.getFullYear(),
+        }));
+        setDidFallbackToLastTx(true);
+      } finally {
+        setDidFallbackToLastTx(true);
+      }
+    })();
+  }, [isLoading, userId, didFallbackToLastTx, data]);
+
   const maxAmount = useMemo(() => {
     const max = filledData.reduce((m, item) => Math.max(m, item.amount ?? 0), 0);
     return Number.isFinite(max) ? max : 0;
   }, [filledData]);
 
+  const visibleData = useMemo(() => {
+    const firstNonZero = filledData.findIndex((d) => (d.amount ?? 0) > 0);
+    if (firstNonZero === -1) return filledData;
+    // Keep a little context before the first spending day so the line doesn't start abruptly.
+    const startIdx = Math.max(0, firstNonZero - 7);
+    return filledData.slice(startIdx);
+  }, [filledData]);
+
   const chartWidth = useMemo(() => {
     // Allocate width per day to enable horizontal scrolling over multiple months
     const pxPerDay = 14;
-    return Math.max(320, filledData.length * pxPerDay);
-  }, [filledData.length]);
+    return Math.max(320, visibleData.length * pxPerDay);
+  }, [visibleData.length]);
 
   const CustomDot = ({ cx, cy, payload }: CustomDotProps) => {
     const amount = Number((payload as { amount?: unknown } | null)?.amount ?? 0);
@@ -129,7 +186,7 @@ export default function SimplifiedChart() {
               <LineChart
                 width={chartWidth}
                 height={200}
-                data={filledData}
+                data={visibleData}
                 margin={{ top: 10, right: 8, left: 8, bottom: 0 }}
               >
                 <Tooltip
@@ -159,8 +216,8 @@ export default function SimplifiedChart() {
           </div>
 
           {/* Edge fade like a “mask” so the beginning/end look smooth while scrolling */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-background to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-background to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-card via-card/90 to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-card via-card/90 to-transparent" />
         </div>
       </CardContent>
     </Card>
