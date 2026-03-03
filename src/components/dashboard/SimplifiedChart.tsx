@@ -180,14 +180,14 @@ export default function SimplifiedChart() {
         </p>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="relative h-[200px] w-full px-4 pb-5 min-w-0">
-          <div className="h-full w-full overflow-x-auto overflow-y-hidden">
+        <div className="relative h-[200px] w-full px-4 min-w-0">
+          <div className="h-full w-full overflow-x-auto overflow-y-visible">
             <div style={{ width: chartWidth, height: "100%" }}>
               <LineChart
                 width={chartWidth}
                 height={200}
                 data={visibleData}
-                margin={{ top: 10, right: 8, left: 8, bottom: 0 }}
+                margin={{ top: 10, right: 8, left: 8, bottom: 12 }}
               >
                 <Tooltip
                   content={({ active, payload }) => {
