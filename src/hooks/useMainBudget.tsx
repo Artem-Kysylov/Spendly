@@ -109,6 +109,73 @@ export const useMainBudget = () => {
       const incomeConfirmed = state?.income_confirmed ?? false;
       const snoozeUntil = state?.snooze_until;
 
+      // First-time initialization: if there is no state row yet, do NOT compute carryover.
+      // Starting carryover should be 0, otherwise availableToSpend gets doubled (budget + budget).
+      if (!state) {
+        const { error: initError } = await supabase
+          .from("main_budget_state")
+          .upsert(
+            {
+              user_id: userId,
+              cycle_start_date: currentCycleStartISO,
+              carryover: 0,
+              last_base_budget: baseBudget,
+              income_confirmed: false,
+              snooze_until: null,
+            },
+            { onConflict: "user_id" },
+          );
+
+        if (initError) {
+          console.error("Error initializing budget state:", initError);
+        }
+
+        setCarryover(0);
+        setAvailableToSpend(baseBudget);
+
+        setNeedsIncomeConfirmation(enableConfirmation);
+        return;
+      }
+
+      // If changing budget_reset_day causes cycle_start_date to move backwards,
+      // do not treat it as a new cycle with rollover. Reset carryover to 0 to
+      // avoid "double budget" surprises.
+      const storedStartDate = storedCycleStart
+        ? new Date(`${storedCycleStart}T00:00:00`)
+        : null;
+      const currentStartDate = new Date(`${currentCycleStartISO}T00:00:00`);
+
+      if (
+        storedStartDate &&
+        Number.isFinite(storedStartDate.getTime()) &&
+        currentStartDate.getTime() < storedStartDate.getTime()
+      ) {
+        const { error: upsertError } = await supabase
+          .from("main_budget_state")
+          .upsert(
+            {
+              user_id: userId,
+              cycle_start_date: currentCycleStartISO,
+              carryover: 0,
+              last_base_budget: baseBudget,
+              income_confirmed: false,
+              snooze_until: null,
+            },
+            { onConflict: "user_id" },
+          );
+
+        if (upsertError) {
+          console.error("Error resetting budget state after reset day change:", upsertError);
+        }
+
+        setCarryover(0);
+        setAvailableToSpend(baseBudget);
+
+        const isSnoozed = snoozeUntil && new Date(snoozeUntil) > now;
+        setNeedsIncomeConfirmation(enableConfirmation && !isSnoozed);
+        return;
+      }
+
       // Check if we crossed into a new cycle
       if (storedCycleStart !== currentCycleStartISO) {
         // New cycle detected - calculate carryover from previous cycle

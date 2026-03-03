@@ -13,6 +13,11 @@ import CompactKPICard from "@/components/dashboard/CompactKPICard";
 import AiInsightTeaser from "@/components/dashboard/AiInsightTeaser";
 import SimplifiedChart from "@/components/dashboard/SimplifiedChart";
 import DashboardTransactionsTable from "@/components/dashboard/DashboardTransactionsTable";
+import { useMainBudget } from "@/hooks/useMainBudget";
+import {
+  getFinancialMonthToDateRange,
+  getPreviousFinancialMonthFullRange,
+} from "@/lib/dateUtils";
 import Spinner from "@/components/ui-elements/Spinner";
 import MainBudgetModal from "@/components/modals/MainBudgetModal";
 import ToastMessage from "@/components/ui-elements/ToastMessage";
@@ -25,11 +30,7 @@ import useCheckBudget from "@/hooks/useCheckBudget";
 
 import { ToastMessageProps, Transaction } from "@/types/types";
 import type { EditTransactionPayload } from "@/types/types";
-import {
-  calculatePercentageChange,
-  getPreviousMonthRange,
-  getCurrentMonthRange,
-} from "@/lib/chartUtils";
+import { calculatePercentageChange } from "@/lib/chartUtils";
 
 function DashboardClient() {
   const { session } = UserAuth();
@@ -228,28 +229,30 @@ function DashboardClient() {
   };
 
   // Calculations for KPI Cards
-  const currentMonthData = transactions.filter((transaction) => {
-    const { start, end } = getCurrentMonthRange();
+  const { budgetResetDay } = useMainBudget();
+
+  const currentCycleData = transactions.filter((transaction) => {
+    const { start, end } = getFinancialMonthToDateRange(budgetResetDay || 1);
     const transactionDate = new Date(transaction.created_at);
     return transactionDate >= start && transactionDate <= end;
   });
 
-  const previousMonthData = transactions.filter((transaction) => {
-    const { start, end } = getPreviousMonthRange();
+  const previousCycleData = transactions.filter((transaction) => {
+    const { start, end } = getPreviousFinancialMonthFullRange(budgetResetDay || 1);
     const transactionDate = new Date(transaction.created_at);
     return transactionDate >= start && transactionDate <= end;
   });
 
-  const totalExpenses = currentMonthData
+  const totalExpenses = currentCycleData
     .filter((transaction) => transaction.type === "expense")
     .reduce((sum, transaction) => sum + transaction.amount, 0);
 
-  const previousMonthExpenses = previousMonthData
+  const previousCycleExpenses = previousCycleData
     .filter((transaction) => transaction.type === "expense")
     .reduce((sum, transaction) => sum + transaction.amount, 0);
 
   const expensesTrend = calculatePercentageChange(
-    previousMonthExpenses,
+    previousCycleExpenses,
     totalExpenses,
   );
 

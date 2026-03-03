@@ -27,6 +27,11 @@ export default function CompactKPICard({
 
   const { availableToSpend, budgetResetDay } = useMainBudget();
 
+  const effectiveBudget =
+    Number.isFinite(availableToSpend) && availableToSpend !== 0
+      ? availableToSpend
+      : budget;
+
   const { safeToSpend, daysLeft } = useMemo(() => {
     const today = new Date();
     const { end } = getFinancialMonthFullRange(budgetResetDay || 1, today);
@@ -35,17 +40,12 @@ export default function CompactKPICard({
       1,
       Math.ceil((end.getTime() - today.getTime()) / msPerDay),
     );
-    const effectiveBudget = Number.isFinite(availableToSpend) && availableToSpend !== 0
-      ? availableToSpend
-      : budget;
     const remaining = effectiveBudget - totalExpenses;
     const safeToSpend = remaining / daysLeft;
     return { safeToSpend, daysLeft };
-  }, [availableToSpend, budget, budgetResetDay, totalExpenses]);
+  }, [budgetResetDay, effectiveBudget, totalExpenses]);
 
-  const remainingBudget =
-    (Number.isFinite(availableToSpend) && availableToSpend !== 0 ? availableToSpend : budget) -
-    totalExpenses;
+  const remainingBudget = effectiveBudget - totalExpenses;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 w-full min-w-0">
@@ -66,7 +66,7 @@ export default function CompactKPICard({
           </h3>
           <div className="mt-2 flex items-baseline gap-2">
             <span className="text-xl md:text-2xl font-bold text-foreground">
-              {formatCurrency(budget, currency)}
+              {formatCurrency(effectiveBudget, currency)}
             </span>
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function CompactKPICard({
         <div className="space-y-2">
           <BudgetProgressBar
             spentAmount={totalExpenses}
-            totalAmount={budget}
+            totalAmount={effectiveBudget}
             type="expense"
             currency={currency}
             className="h-2"
