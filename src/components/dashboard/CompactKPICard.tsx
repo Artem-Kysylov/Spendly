@@ -87,6 +87,8 @@ export default function CompactKPICard({
             currency={currency}
             className="h-2"
             calmOverBudget
+            baseAmount={incomeConfirmed && carryover !== 0 && budget > 0 ? budget : undefined}
+            rolloverAmount={incomeConfirmed && carryover !== 0 && budget > 0 ? carryover : undefined}
             showLabels={false}
           />
           <div className="flex justify-between text-[11px] md:text-xs text-muted-foreground">
