@@ -54,11 +54,11 @@ export default function CompactKPICard({
     return { safeToSpend, daysLeft, pacePercent };
   }, [budgetResetDay, effectiveBudget, totalExpenses]);
 
-  const remainingBudget = effectiveBudget - totalExpenses;
-  const isOverBudget = remainingBudget < 0;
-
   const displayBudget =
     Number.isFinite(budget) && budget > 0 ? budget : effectiveBudget;
+
+  const totalBudgetForProgress = incomeConfirmed ? effectiveBudget : displayBudget;
+  const remainingBudget = totalBudgetForProgress - totalExpenses;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 w-full min-w-0">
@@ -94,13 +94,13 @@ export default function CompactKPICard({
         <div className="space-y-2">
           <BudgetProgressBar
             spentAmount={totalExpenses}
-            totalAmount={effectiveBudget}
+            totalAmount={totalBudgetForProgress}
             type="expense"
             currency={currency}
             className="h-2"
             calmOverBudget
-            baseAmount={carryover !== 0 && budget > 0 ? budget : undefined}
-            rolloverAmount={carryover !== 0 && budget > 0 ? carryover : undefined}
+            baseAmount={incomeConfirmed && carryover !== 0 && budget > 0 ? budget : undefined}
+            rolloverAmount={incomeConfirmed && carryover !== 0 && budget > 0 ? carryover : undefined}
             pacePercent={pacePercent}
             showLabels={false}
           />
