@@ -109,8 +109,7 @@ export default function CompactKPICard({
               {formatCurrency(totalExpenses, currency)} {tBudgets("labels.spent")}
             </span>
             <span>
-              {formatCurrency(Math.abs(remainingBudget), currency)}{" "}
-              {isOverBudget ? tDashboard("counters.overBudget") : tBudgets("labels.left")}
+              {formatCurrency(remainingBudget, currency)} {tBudgets("labels.left")}
             </span>
           </div>
         </div>
