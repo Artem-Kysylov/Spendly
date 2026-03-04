@@ -654,7 +654,7 @@ export default function UserSettingsClient() {
                   </p>
                 </div>
                 <div className="flex-shrink-0">
-                  <InstallPWA />
+                  <InstallPWA forceShowButton />
                 </div>
               </div>
             </div>

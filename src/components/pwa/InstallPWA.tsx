@@ -273,9 +273,10 @@ export default function InstallPWA({
   // Check if FAB was dismissed
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (!floating) return;
     const dismissed = localStorage.getItem("pwa_fab_dismissed");
     setFabDismissed(!!dismissed);
-  }, [forceShowButton]);
+  }, [floating]);
 
   // Listen for external trigger event (from transaction success)
   useEffect(() => {
@@ -324,7 +325,10 @@ export default function InstallPWA({
   return (
     <>
       {isPrimaryInstance && <InAppBrowserGuard open={isBlockedInApp} />}
-      {canShowButtonUi && showButton && effectiveShowButton && !fabDismissed && (
+      {canShowButtonUi &&
+        showButton &&
+        effectiveShowButton &&
+        (!floating || !fabDismissed) && (
         <div
           className={
             floating
