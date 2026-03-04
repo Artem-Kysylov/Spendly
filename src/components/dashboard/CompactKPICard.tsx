@@ -81,7 +81,7 @@ export default function CompactKPICard({
             <span className="text-xl md:text-2xl font-bold text-foreground">
               {formatCurrency(displayBudget, currency)}
             </span>
-            {incomeConfirmed && carryover !== 0 && budget > 0 && (
+            {carryover !== 0 && budget > 0 && (
               <span className="text-[11px] md:text-xs text-muted-foreground">
                 {tDashboard("incomeConfirmation.rolloverBreakdown", {
                   amount: formatCurrency(carryover, currency),
@@ -99,8 +99,8 @@ export default function CompactKPICard({
             currency={currency}
             className="h-2"
             calmOverBudget
-            baseAmount={incomeConfirmed && carryover !== 0 && budget > 0 ? budget : undefined}
-            rolloverAmount={incomeConfirmed && carryover !== 0 && budget > 0 ? carryover : undefined}
+            baseAmount={carryover !== 0 && budget > 0 ? budget : undefined}
+            rolloverAmount={carryover !== 0 && budget > 0 ? carryover : undefined}
             pacePercent={pacePercent}
             showLabels={false}
           />

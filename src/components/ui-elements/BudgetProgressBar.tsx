@@ -47,10 +47,10 @@ function BudgetProgressBar({
   const percentage = totalAmount > 0 ? (spentAmount / totalAmount) * 100 : 0;
   
   const displayPercentage = (() => {
-    if (calmOverBudget && pace !== null && budgetType === "expense" && totalAmount > 0) {
+    if (calmOverBudget && pace !== null && budgetType === "expense" && totalAmount > 0 && percentage < 100) {
       const expectedSpent = (pace / 100) * totalAmount;
       const spendingRatio = expectedSpent > 0 ? spentAmount / expectedSpent : 0;
-      return Math.min(spendingRatio * pace, 100);
+      return spendingRatio * pace;
     }
     return percentage;
   })();
@@ -110,18 +110,11 @@ function BudgetProgressBar({
   const paceDelta = isPaceApplicable ? displayPercentage - pace : 0;
 
   const getProgressColor = () => {
-    if (calmOverBudget) {
-      if (isPaceApplicable && paceDelta > 10) {
-        return "bg-amber-500";
-      }
-      return isColoredCard ? "bg-primary" : "bg-primary";
-    }
-
     if (percentage >= 100) {
       return budgetType === "expense" ? "bg-red-500" : "bg-green-500";
     }
 
-    if (isPaceApplicable && paceDelta > 10) {
+    if (calmOverBudget && isPaceApplicable && paceDelta > 10) {
       return "bg-amber-500";
     }
 
@@ -130,7 +123,7 @@ function BudgetProgressBar({
 
   const getBackgroundColor = () => {
     if (isColoredCard) return "bg-white";
-    if (percentage >= 100 && !calmOverBudget) {
+    if (percentage >= 100) {
       return budgetType === "expense"
         ? "bg-red-100 dark:bg-red-900/20"
         : "bg-green-100 dark:bg-green-900/20";
@@ -139,7 +132,7 @@ function BudgetProgressBar({
   };
 
   const rolloverFillClass =
-    !calmOverBudget && percentage >= 100
+    percentage >= 100
       ? getProgressColor()
       : "bg-indigo-500/90 dark:bg-indigo-400/90";
 
@@ -190,7 +183,7 @@ function BudgetProgressBar({
                   style={{ left: `${pace}%` }}
                 />
               )}
-              {isOverBudget && !calmOverBudget && (
+              {isOverBudget && (
                 <div className="absolute right-0 top-0 h-full w-1.5 bg-red-500/80" />
               )}
             </>
@@ -209,7 +202,7 @@ function BudgetProgressBar({
                   style={{ left: `${pace}%` }}
                 />
               )}
-              {isOverBudget && !calmOverBudget && (
+              {isOverBudget && (
                 <div className="absolute right-0 top-0 h-full w-1.5 bg-red-500/80" />
               )}
             </>
