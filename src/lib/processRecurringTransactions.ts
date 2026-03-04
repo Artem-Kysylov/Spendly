@@ -3,7 +3,13 @@
  * Handles month-end edge cases (day 31 on 30-day months)
  */
 
-import { supabase } from "./supabaseClient";
+import { getTranslations } from "next-intl/server";
+
+import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
+import { getServerSupabaseClient } from "@/lib/serverSupabase";
+import { computeNextAllowedTime } from "@/lib/quietHours";
+import type { AssistantTone } from "@/types/ai";
+import type { Language } from "@/types/locale";
 
 interface RecurringTransaction {
   id: string;
@@ -20,6 +26,40 @@ interface UserSettings {
   user_id: string;
   timezone: string | null;
   locale?: string;
+}
+
+function normalizeLanguage(input: unknown): Language {
+  if (typeof input !== "string") return DEFAULT_LOCALE;
+  const trimmed = input.trim().toLowerCase();
+  const base = trimmed.split(/[-_]/)[0] || "";
+  if (!isSupportedLanguage(base)) return DEFAULT_LOCALE;
+  return base as Language;
+}
+
+function toIntlLocale(locale: Language): string {
+  const map: Record<Language, string> = {
+    en: "en-US",
+    ru: "ru-RU",
+    uk: "uk-UA",
+    hi: "hi-IN",
+    id: "id-ID",
+    ja: "ja-JP",
+    ko: "ko-KR",
+  };
+  return map[locale] ?? "en-US";
+}
+
+function formatCurrencyForPush(amount: number, currency: string, locale: Language): string {
+  try {
+    return new Intl.NumberFormat(toIntlLocale(locale), {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `${amount.toFixed(2)} ${currency}`;
+  }
 }
 
 /**
@@ -73,9 +113,27 @@ function is9amInTimezone(timezone: string): boolean {
  */
 async function createTransactionFromRecurring(
   recurring: RecurringTransaction,
-): Promise<boolean> {
+): Promise<string | null> {
   try {
-    const { error } = await supabase.from("transactions").insert({
+    const supabase = getServerSupabaseClient();
+
+    const sinceIso = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    const { data: existing } = await supabase
+      .from("transactions")
+      .select("id")
+      .eq("user_id", recurring.user_id)
+      .eq("is_recurring", false)
+      .eq("title", recurring.title)
+      .eq("amount", recurring.amount)
+      .eq("type", recurring.type)
+      .gte("created_at", sinceIso)
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      return null;
+    }
+
+    const { data, error } = await supabase.from("transactions").insert({
       user_id: recurring.user_id,
       title: recurring.title,
       amount: recurring.amount,
@@ -83,35 +141,88 @@ async function createTransactionFromRecurring(
       budget_folder_id: recurring.budget_folder_id,
       created_at: new Date().toISOString(),
       is_recurring: false, // The created transaction is not recurring itself
-    });
+    })
+    .select("id")
+    .single();
 
     if (error) {
       console.error("Error creating transaction from recurring:", error);
-      return false;
+      return null;
     }
 
-    return true;
+    return data?.id ?? null;
   } catch (error) {
     console.error("Error creating transaction from recurring:", error);
-    return false;
+    return null;
   }
 }
 
-/**
- * Send push notification for recurring transaction
- */
-async function sendPushNotification(
-  userId: string,
-  title: string,
-  amount: number,
-  currency: string,
-  locale: string,
-): Promise<void> {
-  // TODO: Implement push notification logic
-  // This will be implemented when push notification infrastructure is ready
-  console.log(
-    `[Push Notification] User ${userId}: ${title} for ${amount} ${currency} (locale: ${locale})`,
+async function enqueueRecurringCreatedNotification(params: {
+  userId: string;
+  locale: Language;
+  tone: AssistantTone;
+  title: string;
+  amount: number;
+  currency: string;
+  deepLink: string;
+  tag: string;
+}) {
+  const supabase = getServerSupabaseClient();
+  const now = new Date();
+
+  const { data: prefs } = await supabase
+    .from("notification_preferences")
+    .select(
+      "push_enabled, email_enabled, quiet_hours_enabled, quiet_hours_start, quiet_hours_end, quiet_hours_timezone",
+    )
+    .eq("user_id", params.userId)
+    .maybeSingle();
+
+  const tRecurring = await getTranslations({
+    locale: params.locale,
+    namespace: "recurring",
+  });
+
+  const amountText = formatCurrencyForPush(
+    params.amount,
+    params.currency,
+    params.locale,
   );
+
+  const title = tRecurring("push.createdTitle", { name: params.title });
+
+  const bodyKey =
+    params.tone === "formal"
+      ? "push.createdBodyFormal"
+      : params.tone === "playful"
+        ? "push.createdBodyPlayful"
+        : params.tone === "friendly"
+          ? "push.createdBodyFriendly"
+          : "push.createdBodyNeutral";
+
+  const message = tRecurring(bodyKey, {
+    name: params.title,
+    amount: amountText,
+  });
+
+  const scheduledFor = computeNextAllowedTime(now, prefs ?? undefined).toISOString();
+
+  await supabase.from("notification_queue").insert({
+    user_id: params.userId,
+    notification_type: "general",
+    title,
+    message,
+    status: "pending",
+    send_push: !!prefs?.push_enabled,
+    send_email: !!prefs?.email_enabled,
+    attempts: 0,
+    scheduled_for: scheduledFor,
+    data: {
+      source: "recurring_transaction",
+      tag: params.tag,
+      deepLink: params.deepLink,
+    },
+  });
 }
 
 /**
@@ -125,6 +236,8 @@ export async function processRecurringTransactions(): Promise<{
   let failed = 0;
 
   try {
+    const supabase = getServerSupabaseClient();
+
     // Get all users with timezone settings
     const { data: userSettings, error: settingsError } = await supabase
       .from("user_settings")
@@ -153,6 +266,26 @@ export async function processRecurringTransactions(): Promise<{
     // Process each user
     for (const userSetting of usersAt9am) {
       const { user_id, locale } = userSetting;
+      const resolvedLocale = normalizeLanguage(locale);
+
+      let tone: AssistantTone = "neutral";
+      try {
+        const { data } = await supabase.auth.admin.getUserById(user_id);
+        const raw = (data?.user?.user_metadata as unknown) as
+          | { assistant_tone?: unknown }
+          | undefined;
+        const t = raw?.assistant_tone;
+        if (
+          t === "neutral" ||
+          t === "friendly" ||
+          t === "formal" ||
+          t === "playful"
+        ) {
+          tone = t;
+        }
+      } catch {
+        // ignore
+      }
 
       // Get user's recurring transactions
       const { data: recurringTxs, error: txError } = await supabase
@@ -175,9 +308,9 @@ export async function processRecurringTransactions(): Promise<{
           continue;
         }
 
-        const success = await createTransactionFromRecurring(tx);
+        const createdId = await createTransactionFromRecurring(tx);
 
-        if (success) {
+        if (createdId) {
           processed++;
 
           // Get user's currency preference
@@ -185,20 +318,25 @@ export async function processRecurringTransactions(): Promise<{
             .from("user_settings")
             .select("currency")
             .eq("user_id", user_id)
-            .single();
+            .maybeSingle();
 
           const currency = settings?.currency || "USD";
 
-          // Send push notification
-          await sendPushNotification(
-            user_id,
-            tx.title,
-            tx.amount,
+          await enqueueRecurringCreatedNotification({
+            userId: user_id,
+            locale: resolvedLocale,
+            tone,
+            title: tx.title,
+            amount: tx.amount,
             currency,
-            locale || "en",
-          );
+            deepLink: "/transactions",
+            tag: `recurring:${user_id}:${createdId}`,
+          });
         } else {
-          failed++;
+          // Most likely duplicate protection (already created recently)
+          console.log(
+            `Skipping recurring transaction (duplicate safeguard): user=${user_id}, title=${tx.title}`,
+          );
         }
       }
     }

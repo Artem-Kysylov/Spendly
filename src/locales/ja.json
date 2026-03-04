@@ -447,7 +447,18 @@
       "default": "Analyze your finances with Spendly Pal"
     },
     "recentActivity": "Recent Activity",
-    "showAll": "Show all"
+    "showAll": "Show all",
+    "incomeConfirmation": {
+      "cardTitle": "収入を確認",
+      "cardMessage": "このサイクルに {amount} を収入として追加しますか？",
+      "confirm": "確認する",
+      "notYet": "後で",
+      "salaryTitle": "給料",
+      "toastSuccessNeutral": "収入を確認しました。",
+      "toastSuccessPlayful": "OK！収入を追加しました！",
+      "toastSnoozed": "わかりました。明日リマインドします。",
+      "rolloverBreakdown": "繰り越しを含む: {amount}"
+    }
   },
   "budgets": {
     "actions": {
@@ -1181,7 +1192,14 @@
   "recurring": {
     "dueTodayTitle": "定期的な支払い（今日）: {name}",
     "dueSoonTitle": "定期的な支払い（近日）: {name}",
-    "message": "支払い日 {date}。概算 {amount}."
+    "message": "支払い日 {date}。概算 {amount}.",
+    "push": {
+      "createdTitle": "追加しました: {name}",
+      "createdBodyNeutral": "{name}（{amount}）を記録しました。",
+      "createdBodyFriendly": "完了！{name}（{amount}）を記録しました。",
+      "createdBodyFormal": "取引を記録しました: {name}（{amount}）。",
+      "createdBodyPlayful": "チャリン！{name}（{amount}）を記録したよ。"
+    }
   },
   "errors": {
     "selectImageFile": "Please select an image file.",

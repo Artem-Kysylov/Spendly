@@ -1,15 +1,14 @@
-import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
+import { formatDateOnly, getFinancialMonthStart } from "@/lib/dateUtils";
 import { UserAuth } from "../../context/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
 // Import types
@@ -30,7 +29,9 @@ const TotalBudgetModal = ({
   const tCommon = useTranslations("common");
   // State
   const [amount, setAmount] = useState<string>("");
-  const [budgetResetDay, setBudgetResetDay] = useState<string>("1");
+  const [budgetResetDay, setBudgetResetDay] = useState<string>(() =>
+    String(new Date().getDate()),
+  );
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
@@ -74,6 +75,8 @@ const TotalBudgetModal = ({
 
         if (profileResult.data?.budget_reset_day) {
           setBudgetResetDay(profileResult.data.budget_reset_day.toString());
+        } else {
+          setBudgetResetDay(String(new Date().getDate()));
         }
       } catch (error) {
         console.error("Error fetching budget:", error);
@@ -138,7 +141,40 @@ const TotalBudgetModal = ({
         console.error("Error saving budget reset day:", profileResult.error);
         onSubmit("Budget saved but failed to save reset day.", "error");
       } else {
+        const now = new Date();
+        const currentCycleStart = getFinancialMonthStart(parsedResetDay, now);
+        const currentCycleStartISO = formatDateOnly(currentCycleStart);
+
+        const { data: currentState } = await supabase
+          .from("main_budget_state")
+          .select("carryover, income_confirmed, snooze_until")
+          .eq("user_id", session.user.id)
+          .maybeSingle();
+
+        const { error: stateError } = await supabase
+          .from("main_budget_state")
+          .upsert(
+            {
+              user_id: session.user.id,
+              cycle_start_date: currentCycleStartISO,
+              last_base_budget: parsedAmount,
+              carryover: Number(currentState?.carryover ?? 0),
+              income_confirmed: Boolean(currentState?.income_confirmed ?? false),
+              snooze_until: (currentState?.snooze_until ?? null) as string | null,
+            },
+            { onConflict: "user_id" },
+          );
+
+        if (stateError) {
+          console.error("Error resetting budget state after budget update:", stateError);
+          onSubmit("Budget saved but failed to refresh cycle state.", "error");
+          return;
+        }
+
         console.log("Budget and reset day saved successfully");
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("main_budget:updated"));
+        }
         onClose();
         onSubmit("Budget saved successfully!", "success");
       }
@@ -158,7 +194,7 @@ const TotalBudgetModal = ({
         if (!o) onClose();
       }}
     >
-      <DialogContent>
+      <DialogContent closeOnOverlayClick={false} closeOnEscape={false}>
         <DialogHeader>
           <DialogTitle className="text-center">{title}</DialogTitle>
         </DialogHeader>
@@ -188,19 +224,24 @@ const TotalBudgetModal = ({
               <label className="text-sm font-medium text-foreground">
                 {tModals("mainBudget.budgetResetDay")}
               </label>
-              <TextInput
+              <input
                 type="number"
-                placeholder="1"
+                min="1"
+                max="31"
                 value={budgetResetDay}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  const num = parseInt(value);
-                  if (value === "" || (num >= 1 && num <= 31)) {
-                    setBudgetResetDay(value);
+                  const raw = e.target.value;
+                  if (raw === "") {
+                    setBudgetResetDay("");
+                    return;
                   }
+
+                  const val = Number.parseInt(raw, 10);
+                  if (!Number.isFinite(val)) return;
+                  if (val < 1 || val > 31) return;
+                  setBudgetResetDay(String(val));
                 }}
-                inputMode="numeric"
-                min="1"
+                className="w-16 h-9 px-2 text-center rounded-md border border-primary bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               />
               <p className="text-xs text-muted-foreground">
                 {tModals("mainBudget.resetDayHelper")}

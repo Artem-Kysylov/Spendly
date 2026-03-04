@@ -35,8 +35,25 @@ export function DialogContent({
   className,
   children,
   overlayClassName,
-}: React.HTMLAttributes<HTMLDivElement> & { overlayClassName?: string }) {
+  closeOnOverlayClick = true,
+  closeOnEscape = true,
+}: React.HTMLAttributes<HTMLDivElement> & {
+  overlayClassName?: string;
+  closeOnOverlayClick?: boolean;
+  closeOnEscape?: boolean;
+}) {
   const { open, onOpenChange } = useDialog();
+
+  React.useEffect(() => {
+    if (!open) return;
+    if (!closeOnEscape) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      onOpenChange?.(false);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, closeOnEscape, onOpenChange]);
 
   if (typeof document === "undefined") return null;
 
@@ -47,7 +64,10 @@ export function DialogContent({
           className="fixed inset-0 z-[100] flex items-center justify-center"
           role="dialog"
           aria-modal="true"
-          onClick={() => onOpenChange?.(false)}
+          onClick={() => {
+            if (!closeOnOverlayClick) return;
+            onOpenChange?.(false);
+          }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

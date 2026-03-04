@@ -14,6 +14,7 @@ export type TranslationNamespace =
   | "modals"
   | "setup"
   | "notifications"
+  | "recurring"
   | "errors"
   | "profile"
   | "payment"
@@ -37,6 +38,7 @@ export type TranslationKeys =
   | "modals"
   | "setup"
   | "notifications"
+  | "recurring"
   | "errors"
   | "profile"
   | "payment"
@@ -170,7 +172,16 @@ export type NamespaceKeys = {
     | "counters.status.warning"
     | "counters.status.notSet"
     | "counters.ofBudget"
-    | "counters.coversExpenses";
+    | "counters.coversExpenses"
+    | "incomeConfirmation.cardTitle"
+    | "incomeConfirmation.cardMessage"
+    | "incomeConfirmation.confirm"
+    | "incomeConfirmation.notYet"
+    | "incomeConfirmation.salaryTitle"
+    | "incomeConfirmation.toastSuccessNeutral"
+    | "incomeConfirmation.toastSuccessPlayful"
+    | "incomeConfirmation.toastSnoozed"
+    | "incomeConfirmation.rolloverBreakdown";
   modals:
     | "appInstall.title"
     | "budget.pickEmojiOptional"
@@ -238,6 +249,15 @@ export type NamespaceKeys = {
     | "authRequired.description"
     | "authRequired.signIn"
     | "a11y.togglePush";
+  recurring:
+    | "dueTodayTitle"
+    | "dueSoonTitle"
+    | "message"
+    | "push.createdTitle"
+    | "push.createdBodyNeutral"
+    | "push.createdBodyFriendly"
+    | "push.createdBodyFormal"
+    | "push.createdBodyPlayful";
   errors:
     | "selectImageFile"
     | "fileTooLarge5mb"

@@ -25,7 +25,8 @@ export default function CompactKPICard({
   const tDashboard = useTranslations("dashboard");
   const tBudgets = useTranslations("budgets");
 
-  const { availableToSpend, budgetResetDay } = useMainBudget();
+  const { availableToSpend, budgetResetDay, carryover, incomeConfirmed } =
+    useMainBudget();
 
   const effectiveBudget =
     Number.isFinite(availableToSpend) && availableToSpend !== 0
@@ -69,6 +70,13 @@ export default function CompactKPICard({
               {formatCurrency(effectiveBudget, currency)}
             </span>
           </div>
+          {incomeConfirmed && carryover !== 0 && budget > 0 && (
+            <div className="mt-1 text-[11px] md:text-xs text-muted-foreground">
+              {tDashboard("incomeConfirmation.rolloverBreakdown", {
+                amount: formatCurrency(carryover, currency),
+              })}
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">

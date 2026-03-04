@@ -447,7 +447,18 @@
       "default": "Analyze your finances with Spendly Pal"
     },
     "recentActivity": "Recent Activity",
-    "showAll": "Show all"
+    "showAll": "Show all",
+    "incomeConfirmation": {
+      "cardTitle": "수입 확인",
+      "cardMessage": "이번 주기에 {amount}를 수입으로 추가할까요?",
+      "confirm": "확인",
+      "notYet": "나중에",
+      "salaryTitle": "급여",
+      "toastSuccessNeutral": "수입이 확인되었습니다.",
+      "toastSuccessPlayful": "완료! 수입을 추가했어요!",
+      "toastSnoozed": "좋아요. 내일 다시 알려드릴게요.",
+      "rolloverBreakdown": "이월 포함: {amount}"
+    }
   },
   "budgets": {
     "actions": {
@@ -1181,7 +1192,14 @@
   "recurring": {
     "dueTodayTitle": "오늘 예정된 정기결제: {name}",
     "dueSoonTitle": "곧 예정된 정기결제: {name}",
-    "message": "{date} 마감 {amount}."
+    "message": "{date} 마감 {amount}.",
+    "push": {
+      "createdTitle": "추가됨: {name}",
+      "createdBodyNeutral": "{name}({amount})를 기록했어요.",
+      "createdBodyFriendly": "완료! {name}({amount})를 기록했어요.",
+      "createdBodyFormal": "거래가 기록되었습니다: {name}({amount}).",
+      "createdBodyPlayful": "짤랑! {name}({amount}) 기록 완료."
+    }
   },
   "errors": {
     "selectImageFile": "이미지 파일을 선택해주세요.",

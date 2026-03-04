@@ -30,7 +30,8 @@ import useCheckBudget from "@/hooks/useCheckBudget";
 
 import { ToastMessageProps, Transaction } from "@/types/types";
 import type { EditTransactionPayload } from "@/types/types";
-import { calculatePercentageChange } from "@/lib/chartUtils";
+import { calculatePercentageChange, formatCurrency } from "@/lib/chartUtils";
+import type { AssistantTone } from "@/types/ai";
 
 function DashboardClient() {
   const { session } = UserAuth();
@@ -57,6 +58,9 @@ function DashboardClient() {
   } = useModal();
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
+
+  const [isConfirmingIncome, setIsConfirmingIncome] = useState(false);
+  const [isSnoozingIncome, setIsSnoozingIncome] = useState(false);
 
   const tDashboard = useTranslations("dashboard");
   const tTransactions = useTranslations("transactions");
@@ -229,7 +233,107 @@ function DashboardClient() {
   };
 
   // Calculations for KPI Cards
-  const { budgetResetDay } = useMainBudget();
+  const { budgetResetDay, needsIncomeConfirmation } = useMainBudget();
+
+  const handleConfirmIncome = async () => {
+    if (!session?.user?.id) return;
+    if (isConfirmingIncome) return;
+    try {
+      setIsConfirmingIncome(true);
+
+      const userId = session.user.id;
+      const salaryTitle = tDashboard("incomeConfirmation.salaryTitle");
+      const nowIso = new Date().toISOString();
+
+      const { error: txError } = await supabase.from("transactions").insert({
+        user_id: userId,
+        title: salaryTitle,
+        amount: budget,
+        type: "income",
+        budget_folder_id: null,
+        created_at: nowIso,
+        is_recurring: false,
+      });
+
+      if (txError) {
+        console.error("Error creating salary transaction:", txError);
+        handleToastMessage(tCommon("unexpectedError"), "error");
+        return;
+      }
+
+      const { error: stateError } = await supabase
+        .from("main_budget_state")
+        .update({ income_confirmed: true, snooze_until: null })
+        .eq("user_id", userId);
+
+      if (stateError) {
+        console.error("Error confirming income:", stateError);
+        handleToastMessage(tCommon("unexpectedError"), "error");
+        return;
+      }
+
+      const meta = session.user.user_metadata;
+      const toneRaw =
+        meta && typeof meta === "object"
+          ? (meta as { assistant_tone?: unknown }).assistant_tone
+          : undefined;
+      const tone: AssistantTone | undefined =
+        typeof toneRaw === "string" ? (toneRaw as AssistantTone) : undefined;
+
+      const isPlayful = tone === "friendly" || tone === "playful";
+      const toastText = isPlayful
+        ? tDashboard("incomeConfirmation.toastSuccessPlayful")
+        : tDashboard("incomeConfirmation.toastSuccessNeutral");
+
+      handleToastMessage(toastText, "success");
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("main_budget:updated"));
+      }
+
+      setRefreshCounters((prev) => prev + 1);
+      setTimeout(() => {
+        fetchTransactions();
+      }, 600);
+    } catch (e) {
+      console.error("Unexpected error confirming income:", e);
+      handleToastMessage(tCommon("unexpectedError"), "error");
+    } finally {
+      setIsConfirmingIncome(false);
+    }
+  };
+
+  const handleSnoozeIncome = async () => {
+    if (!session?.user?.id) return;
+    if (isSnoozingIncome) return;
+    try {
+      setIsSnoozingIncome(true);
+
+      const userId = session.user.id;
+      const snoozeUntil = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      const { error: stateError } = await supabase
+        .from("main_budget_state")
+        .update({ snooze_until: snoozeUntil })
+        .eq("user_id", userId);
+
+      if (stateError) {
+        console.error("Error snoozing income confirmation:", stateError);
+        handleToastMessage(tCommon("unexpectedError"), "error");
+        return;
+      }
+
+      handleToastMessage(tDashboard("incomeConfirmation.toastSnoozed"), "success");
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("main_budget:updated"));
+      }
+    } catch (e) {
+      console.error("Unexpected error snoozing income confirmation:", e);
+      handleToastMessage(tCommon("unexpectedError"), "error");
+    } finally {
+      setIsSnoozingIncome(false);
+    }
+  };
 
   const currentCycleData = transactions.filter((transaction) => {
     const { start, end } = getFinancialMonthToDateRange(budgetResetDay || 1);
@@ -299,6 +403,44 @@ function DashboardClient() {
               onBudgetClick={handleIconClick}
               currency={currency}
             />
+
+            {needsIncomeConfirmation && budget > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 }}
+                className="rounded-[32px] border border-border bg-card p-4 flex flex-col gap-3"
+              >
+                <div className="flex flex-col gap-1">
+                  <div className="text-sm font-semibold text-foreground">
+                    {tDashboard("incomeConfirmation.cardTitle")}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {tDashboard("incomeConfirmation.cardMessage", {
+                      amount: formatCurrency(budget, currency),
+                    })}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    text={tDashboard("incomeConfirmation.confirm")}
+                    variant="default"
+                    className="flex-1"
+                    onClick={handleConfirmIncome}
+                    disabled={isConfirmingIncome || isSnoozingIncome}
+                    isLoading={isConfirmingIncome}
+                  />
+                  <Button
+                    text={tDashboard("incomeConfirmation.notYet")}
+                    variant="ghost"
+                    className="flex-1"
+                    onClick={handleSnoozeIncome}
+                    disabled={isConfirmingIncome || isSnoozingIncome}
+                    isLoading={isSnoozingIncome}
+                  />
+                </div>
+              </motion.div>
+            )}
 
             <AiInsightTeaser
               budget={budget}

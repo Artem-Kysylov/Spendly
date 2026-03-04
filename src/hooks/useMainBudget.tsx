@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { UserAuth } from "../context/AuthContext";
 import {
@@ -37,10 +37,11 @@ export const useMainBudget = () => {
   const [budgetResetDay, setBudgetResetDay] = useState<number>(1);
   const [carryover, setCarryover] = useState<number>(0);
   const [needsIncomeConfirmation, setNeedsIncomeConfirmation] = useState<boolean>(false);
+  const [incomeConfirmed, setIncomeConfirmed] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchMainBudget = async () => {
+  const fetchMainBudget = useCallback(async () => {
     if (!session?.user?.id) return;
 
     try {
@@ -106,12 +107,11 @@ export const useMainBudget = () => {
       const storedCycleStart = state?.cycle_start_date;
       const storedCarryover = Number(state?.carryover ?? 0);
       const storedLastBase = Number(state?.last_base_budget ?? baseBudget);
-      const incomeConfirmed = state?.income_confirmed ?? false;
+      const storedIncomeConfirmed = state?.income_confirmed ?? false;
       const snoozeUntil = state?.snooze_until;
 
-      // First-time initialization: if there is no state row yet, do NOT compute carryover.
-      // Starting carryover should be 0, otherwise availableToSpend gets doubled (budget + budget).
       if (!state) {
+        const initialIncomeConfirmed = enableConfirmation ? false : true;
         const { error: initError } = await supabase
           .from("main_budget_state")
           .upsert(
@@ -120,7 +120,7 @@ export const useMainBudget = () => {
               cycle_start_date: currentCycleStartISO,
               carryover: 0,
               last_base_budget: baseBudget,
-              income_confirmed: false,
+              income_confirmed: initialIncomeConfirmed,
               snooze_until: null,
             },
             { onConflict: "user_id" },
@@ -131,15 +131,88 @@ export const useMainBudget = () => {
         }
 
         setCarryover(0);
-        setAvailableToSpend(baseBudget);
+        setAvailableToSpend(enableConfirmation ? 0 : baseBudget);
+        setIncomeConfirmed(initialIncomeConfirmed);
 
-        setNeedsIncomeConfirmation(enableConfirmation);
+        const isSnoozed = false;
+        setNeedsIncomeConfirmation(enableConfirmation && !initialIncomeConfirmed && !isSnoozed);
         return;
       }
 
-      // If changing budget_reset_day causes cycle_start_date to move backwards,
-      // do not treat it as a new cycle with rollover. Reset carryover to 0 to
-      // avoid "double budget" surprises.
+      if (storedCycleStart) {
+        const storedStartDate = new Date(`${storedCycleStart}T00:00:00`);
+        if (Number.isFinite(storedStartDate.getTime())) {
+          const probeDate = new Date(storedStartDate);
+          probeDate.setDate(probeDate.getDate() + 1);
+
+          const expectedStoredStart = getFinancialMonthStart(resetDay, probeDate);
+          const expectedStoredStartISO = formatDateOnly(expectedStoredStart);
+
+          if (expectedStoredStartISO !== storedCycleStart) {
+            const nextIncomeConfirmed = enableConfirmation ? false : true;
+            const { error: upsertError } = await supabase
+              .from("main_budget_state")
+              .upsert(
+                {
+                  user_id: userId,
+                  cycle_start_date: currentCycleStartISO,
+                  carryover: 0,
+                  last_base_budget: baseBudget,
+                  income_confirmed: nextIncomeConfirmed,
+                  snooze_until: null,
+                },
+                { onConflict: "user_id" },
+              );
+
+            if (upsertError) {
+              console.error(
+                "Error resetting budget state after reset day redefinition:",
+                upsertError,
+              );
+            }
+
+            setCarryover(0);
+            setAvailableToSpend(nextIncomeConfirmed ? baseBudget : 0);
+            setIncomeConfirmed(nextIncomeConfirmed);
+
+            const isSnoozed = false;
+            setNeedsIncomeConfirmation(enableConfirmation && !nextIncomeConfirmed && !isSnoozed);
+            return;
+          }
+        }
+      }
+
+      if (storedCycleStart === currentCycleStartISO && storedLastBase !== baseBudget) {
+        const { error: upsertError } = await supabase
+          .from("main_budget_state")
+          .upsert(
+            {
+              user_id: userId,
+              cycle_start_date: currentCycleStartISO,
+              last_base_budget: baseBudget,
+              carryover: storedCarryover,
+              income_confirmed: storedIncomeConfirmed,
+              snooze_until: snoozeUntil ?? null,
+            },
+            { onConflict: "user_id" },
+          );
+
+        if (upsertError) {
+          console.error("Error resetting carryover after budget change:", upsertError);
+        }
+
+        const isSnoozed = !!(snoozeUntil && new Date(snoozeUntil) > now);
+        const shouldConfirm = enableConfirmation && !storedIncomeConfirmed && !isSnoozed;
+
+        setCarryover(storedCarryover);
+        setIncomeConfirmed(storedIncomeConfirmed);
+        setAvailableToSpend(
+          storedIncomeConfirmed ? baseBudget + storedCarryover : storedCarryover,
+        );
+        setNeedsIncomeConfirmation(shouldConfirm);
+        return;
+      }
+
       const storedStartDate = storedCycleStart
         ? new Date(`${storedCycleStart}T00:00:00`)
         : null;
@@ -150,6 +223,7 @@ export const useMainBudget = () => {
         Number.isFinite(storedStartDate.getTime()) &&
         currentStartDate.getTime() < storedStartDate.getTime()
       ) {
+        const nextIncomeConfirmed = enableConfirmation ? false : true;
         const { error: upsertError } = await supabase
           .from("main_budget_state")
           .upsert(
@@ -158,7 +232,7 @@ export const useMainBudget = () => {
               cycle_start_date: currentCycleStartISO,
               carryover: 0,
               last_base_budget: baseBudget,
-              income_confirmed: false,
+              income_confirmed: nextIncomeConfirmed,
               snooze_until: null,
             },
             { onConflict: "user_id" },
@@ -169,18 +243,18 @@ export const useMainBudget = () => {
         }
 
         setCarryover(0);
-        setAvailableToSpend(baseBudget);
+        setAvailableToSpend(nextIncomeConfirmed ? baseBudget : 0);
+        setIncomeConfirmed(nextIncomeConfirmed);
 
-        const isSnoozed = snoozeUntil && new Date(snoozeUntil) > now;
-        setNeedsIncomeConfirmation(enableConfirmation && !isSnoozed);
+        const isSnoozed = false;
+        setNeedsIncomeConfirmation(enableConfirmation && !nextIncomeConfirmed && !isSnoozed);
         return;
       }
 
       // Check if we crossed into a new cycle
       if (storedCycleStart !== currentCycleStartISO) {
-        // New cycle detected - calculate carryover from previous cycle
         const prevRange = getPreviousFinancialMonthFullRange(resetDay, now);
-        
+
         const { data: prevExpenses, error: prevError } = await supabase
           .from("transactions")
           .select("amount")
@@ -198,8 +272,8 @@ export const useMainBudget = () => {
           0,
         );
 
-        // Carryover = last cycle's base budget - spent in last cycle
         const computedCarryover = storedLastBase - spentPrev;
+        const nextIncomeConfirmed = enableConfirmation ? false : true;
 
         // Upsert new cycle state
         const { error: upsertError } = await supabase
@@ -210,7 +284,7 @@ export const useMainBudget = () => {
               cycle_start_date: currentCycleStartISO,
               carryover: computedCarryover,
               last_base_budget: baseBudget,
-              income_confirmed: false,
+              income_confirmed: nextIncomeConfirmed,
               snooze_until: null,
             },
             { onConflict: "user_id" },
@@ -221,21 +295,26 @@ export const useMainBudget = () => {
         }
 
         setCarryover(computedCarryover);
-        setAvailableToSpend(baseBudget + computedCarryover);
+        setIncomeConfirmed(nextIncomeConfirmed);
 
-        // Check if income confirmation is needed
-        const isSnoozed = snoozeUntil && new Date(snoozeUntil) > now;
-        setNeedsIncomeConfirmation(enableConfirmation && !isSnoozed);
-      } else {
-        // Same cycle - use stored carryover
-        setCarryover(storedCarryover);
-        setAvailableToSpend(baseBudget + storedCarryover);
-
-        // Check if income confirmation is needed
-        const isSnoozed = snoozeUntil && new Date(snoozeUntil) > now;
-        setNeedsIncomeConfirmation(
-          enableConfirmation && !incomeConfirmed && !isSnoozed,
+        const isSnoozed = false;
+        const shouldConfirm = enableConfirmation && !nextIncomeConfirmed && !isSnoozed;
+        setAvailableToSpend(
+          nextIncomeConfirmed
+            ? baseBudget + computedCarryover
+            : computedCarryover,
         );
+        setNeedsIncomeConfirmation(shouldConfirm);
+      } else {
+        const isSnoozed = !!(snoozeUntil && new Date(snoozeUntil) > now);
+        const shouldConfirm = enableConfirmation && !storedIncomeConfirmed && !isSnoozed;
+
+        setCarryover(storedCarryover);
+        setIncomeConfirmed(storedIncomeConfirmed);
+        setAvailableToSpend(
+          storedIncomeConfirmed ? baseBudget + storedCarryover : storedCarryover,
+        );
+        setNeedsIncomeConfirmation(shouldConfirm);
       }
     } catch (err) {
       const errorMessage =
@@ -245,17 +324,25 @@ export const useMainBudget = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session?.user?.id]);
 
   useEffect(() => {
     fetchMainBudget();
-  }, [session?.user?.id]);
+  }, [fetchMainBudget]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = () => fetchMainBudget();
+    window.addEventListener("main_budget:updated", handler);
+    return () => window.removeEventListener("main_budget:updated", handler);
+  }, [fetchMainBudget]);
 
   return {
     mainBudget,
     availableToSpend,
     budgetResetDay,
     carryover,
+    incomeConfirmed,
     needsIncomeConfirmation,
     isLoading,
     error,

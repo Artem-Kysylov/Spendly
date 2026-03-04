@@ -447,7 +447,18 @@
       "default": "Analyze your finances with Spendly Pal"
     },
     "recentActivity": "Recent Activity",
-    "showAll": "Show all"
+    "showAll": "Show all",
+    "incomeConfirmation": {
+      "cardTitle": "Konfirmasi pemasukan",
+      "cardMessage": "Tambahkan {amount} sebagai pemasukan untuk siklus ini?",
+      "confirm": "Konfirmasi",
+      "notYet": "Belum",
+      "salaryTitle": "Gaji",
+      "toastSuccessNeutral": "Pemasukan dikonfirmasi.",
+      "toastSuccessPlayful": "Beres — pemasukan ditambahkan!",
+      "toastSnoozed": "Oke, aku ingatkan besok.",
+      "rolloverBreakdown": "Termasuk rollover: {amount}"
+    }
   },
   "budgets": {
     "actions": {
@@ -1181,7 +1192,14 @@
   "recurring": {
     "dueTodayTitle": "Pembayaran rutin jatuh tempo hari ini: {name}",
     "dueSoonTitle": "Pembayaran rutin segera jatuh tempo: {name}",
-    "message": "Jatuh tempo {date}. Perkiraan {amount}."
+    "message": "Jatuh tempo {date}. Perkiraan {amount}.",
+    "push": {
+      "createdTitle": "Ditambahkan: {name}",
+      "createdBodyNeutral": "Aku mencatat {name} ({amount}).",
+      "createdBodyFriendly": "Beres! Aku mencatat {name} ({amount}).",
+      "createdBodyFormal": "Transaksi dicatat: {name} ({amount}).",
+      "createdBodyPlayful": "Cing! Tercatat {name} ({amount})."
+    }
   },
   "errors": {
     "selectImageFile": "Please select an image file.",
