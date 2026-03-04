@@ -17,6 +17,7 @@ interface BudgetProgressBarProps {
   calmOverBudget?: boolean;
   baseAmount?: number;
   rolloverAmount?: number;
+  pacePercent?: number;
 }
 
 function BudgetProgressBar({
@@ -33,6 +34,7 @@ function BudgetProgressBar({
   calmOverBudget = false,
   baseAmount,
   rolloverAmount,
+  pacePercent,
 }: BudgetProgressBarProps) {
   const { isMobile } = useDeviceType();
   const percentage = totalAmount > 0 ? (spentAmount / totalAmount) * 100 : 0;
@@ -66,10 +68,29 @@ function BudgetProgressBar({
 
   const isColoredCard = Boolean(accentColorHex);
 
+  const pace =
+    typeof pacePercent === "number" && Number.isFinite(pacePercent)
+      ? Math.max(0, Math.min(100, pacePercent))
+      : null;
+  const isPaceApplicable =
+    pace !== null &&
+    budgetType === "expense" &&
+    totalAmount > 0 &&
+    percentage >= 0 &&
+    percentage < 100 &&
+    pace > 0 &&
+    pace < 100;
+  const paceDelta = isPaceApplicable ? percentage - pace : 0;
+
   const getProgressColor = () => {
     if (percentage >= 100 && !calmOverBudget) {
       return budgetType === "expense" ? "bg-red-500" : "bg-green-500";
     }
+
+    if (paceDelta > 10) {
+      return "bg-amber-500";
+    }
+
     return isColoredCard ? "bg-primary" : "bg-primary";
   };
 
@@ -129,6 +150,12 @@ function BudgetProgressBar({
                   style={{ left: `${basePct}%`, width: `${rolloverSpentPct}%` }}
                 />
               )}
+              {isPaceApplicable && (
+                <div
+                  className="absolute top-0 z-20 h-full w-[2px] -translate-x-1/2 bg-foreground/25 dark:bg-white/25"
+                  style={{ left: `${pace}%` }}
+                />
+              )}
               {isOverBudget && (
                 <div className="absolute right-0 top-0 h-full w-1.5 bg-red-500/80" />
               )}
@@ -142,6 +169,12 @@ function BudgetProgressBar({
                 )}
                 style={{ width: `${Math.min(percentage, 100)}%` }}
               />
+              {isPaceApplicable && (
+                <div
+                  className="absolute top-0 z-20 h-full w-[2px] -translate-x-1/2 bg-foreground/25 dark:bg-white/25"
+                  style={{ left: `${pace}%` }}
+                />
+              )}
               {isOverBudget && (
                 <div className="absolute right-0 top-0 h-full w-1.5 bg-red-500/80" />
               )}
@@ -185,6 +218,12 @@ function BudgetProgressBar({
                     style={{ left: `${basePct}%`, width: `${rolloverSpentPct}%` }}
                   />
                 )}
+                {isPaceApplicable && (
+                  <div
+                    className="absolute top-0 z-20 h-full w-[2px] -translate-x-1/2 bg-foreground/25 dark:bg-white/25"
+                    style={{ left: `${pace}%` }}
+                  />
+                )}
                 {isOverBudget && (
                   <div className="absolute right-0 top-0 h-full w-1.5 bg-red-500/80" />
                 )}
@@ -198,6 +237,12 @@ function BudgetProgressBar({
                   )}
                   style={{ width: `${Math.min(percentage, 100)}%` }}
                 />
+                {isPaceApplicable && (
+                  <div
+                    className="absolute top-0 z-20 h-full w-[2px] -translate-x-1/2 bg-foreground/25 dark:bg-white/25"
+                    style={{ left: `${pace}%` }}
+                  />
+                )}
                 {isOverBudget && (
                   <div className="absolute right-0 top-0 h-full w-1.5 bg-red-500/80" />
                 )}

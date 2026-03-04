@@ -349,11 +349,11 @@ function DashboardClient() {
 
   const totalExpenses = currentCycleData
     .filter((transaction) => transaction.type === "expense")
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
+    .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
 
   const previousCycleExpenses = previousCycleData
     .filter((transaction) => transaction.type === "expense")
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
+    .reduce((sum, transaction) => sum + Number(transaction.amount || 0), 0);
 
   const expensesTrend = calculatePercentageChange(
     previousCycleExpenses,
