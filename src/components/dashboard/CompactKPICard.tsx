@@ -86,6 +86,7 @@ export default function CompactKPICard({
             type="expense"
             currency={currency}
             className="h-2"
+            calmOverBudget
             showLabels={false}
           />
           <div className="flex justify-between text-[11px] md:text-xs text-muted-foreground">

@@ -14,6 +14,7 @@ interface BudgetProgressBarProps {
   accentColorHex?: string;
   compact?: boolean;
   showLabels?: boolean;
+  calmOverBudget?: boolean;
 }
 
 function BudgetProgressBar({
@@ -27,16 +28,19 @@ function BudgetProgressBar({
   accentColorHex,
   compact = false,
   showLabels = true,
+  calmOverBudget = false,
 }: BudgetProgressBarProps) {
   const { isMobile } = useDeviceType();
   const percentage = totalAmount > 0 ? (spentAmount / totalAmount) * 100 : 0;
   const remainingAmount = Math.max(totalAmount - spentAmount, 0);
   const budgetType: "expense" | "income" = type ?? "expense";
 
+  const isOverBudget = budgetType === "expense" && totalAmount > 0 && spentAmount > totalAmount;
+
   const isColoredCard = Boolean(accentColorHex);
 
   const getProgressColor = () => {
-    if (percentage >= 100) {
+    if (percentage >= 100 && !calmOverBudget) {
       return budgetType === "expense" ? "bg-red-500" : "bg-green-500";
     }
     return isColoredCard ? "bg-primary" : "bg-primary";
@@ -44,7 +48,7 @@ function BudgetProgressBar({
 
   const getBackgroundColor = () => {
     if (isColoredCard) return "bg-white";
-    if (percentage >= 100) {
+    if (percentage >= 100 && !calmOverBudget) {
       return budgetType === "expense"
         ? "bg-red-100 dark:bg-red-900/20"
         : "bg-green-100 dark:bg-green-900/20";
