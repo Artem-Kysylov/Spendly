@@ -86,7 +86,7 @@ const BudgetModal = ({
       >
         <SheetContent
           side="bottom"
-          className="fixed h-[95dvh] pb-[env(safe-area-inset-bottom)] overflow-y-auto z-[10000]"
+          className="fixed h-[95dvh] pb-[env(safe-area-inset-bottom)] overflow-hidden z-[10000]"
           overlayClassName="bg-foreground/45"
         >
           <div className="flex flex-col h-full">
@@ -103,7 +103,7 @@ const BudgetModal = ({
               </div>
             </SheetHeader>
 
-            <div className="mt-4 px-4 flex-1">
+            <div className="mt-4 px-4 flex-1 min-h-0 overflow-y-auto">
               <BudgetForm
                 initialData={initialData}
                 onSubmit={handleFormSubmit}
