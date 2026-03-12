@@ -5,6 +5,7 @@ import {
   getNotificationMessage,
   NotificationVariant,
 } from "@/lib/notificationStrings";
+import { getTranslations } from "next-intl/server";
 
 export async function checkBudgetThresholds(
   supabase: SupabaseClient,
@@ -90,17 +91,9 @@ export async function checkBudgetThresholds(
       variant
     );
 
-    // Title localized
-    const titleMap: Record<string, string> = {
-      en: "Budget Alert",
-      ru: "Уведомление о бюджете",
-      uk: "Сповіщення про бюджет",
-      hi: "बजट चेतावनी",
-      id: "Peringatan Anggaran",
-      ja: "予算アラート",
-      ko: "예산 알림",
-    };
-    const title = titleMap[locale] || titleMap["en"];
+    // Get localized title from translations
+    const t = await getTranslations({ locale, namespace: "notifications" });
+    const title = t("budgetAlertTitle");
 
     const queueType = threshold === "exceeded" ? "budget_overrun" : "budget_warning";
 

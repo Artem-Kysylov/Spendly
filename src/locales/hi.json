@@ -1140,9 +1140,10 @@
     },
     "push_subscribed": "Push subscribed",
     "push_failed": "Push subscription failed",
-    "permission_denied": "सूचना अनुमति अस्वीकृत",
-    "budget_80": "Budget usage reached 80%",
-    "budget_100": "Budget exceeded",
+    "permission_denied": "सूचना की अनुमति अस्वीकृत",
+    "budget_80": "बजट का 80% उपयोग हो चुका है",
+    "budget_100": "बजट पार हो गया",
+    "budgetAlertTitle": "बजट चेतावनी",
     "frequency": {
       "title": "सूचना आवृत्ति",
       "aria": "सूचना आवृत्ति",
