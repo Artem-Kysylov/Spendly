@@ -28,8 +28,10 @@ export default function CompactKPICard({
   const { availableToSpend, budgetResetDay, carryover, incomeConfirmed } =
     useMainBudget();
 
+  // When income is not confirmed, use base budget for daily safe-to-spend calculation
+  // to avoid negative values from carryover affecting the calculation
   const effectiveBudget =
-    Number.isFinite(availableToSpend) && availableToSpend !== 0
+    incomeConfirmed && Number.isFinite(availableToSpend) && availableToSpend !== 0
       ? availableToSpend
       : budget;
 
