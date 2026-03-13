@@ -88,6 +88,12 @@ export interface UserContext {
     next_due_date: string;
     count: number;
   }>;
+  // Профиль пользователя для контекста AI
+  userProfile: {
+    currency: string;
+    total_budget: number;
+    budget_reset_day: number;
+  };
 }
 
 // Новый тип: тон ассистента

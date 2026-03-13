@@ -11,18 +11,38 @@ export const prepareUserContext = async (
 ): Promise<UserContext> => {
   const supabase = getServerSupabaseClient();
 
-  const { data: budgets } = await supabase
-    .from("budget_folders")
-    .select("id, name, emoji, type, amount")
-    .eq("user_id", userId)
-    .order("name", { ascending: true });
+  // Fetch budgets, transactions, and user profile in parallel
+  const [budgetsResult, transactionsResult, userSettingsResult, mainBudgetResult, profileResult] = await Promise.all([
+    supabase
+      .from("budget_folders")
+      .select("id, name, emoji, type, amount")
+      .eq("user_id", userId)
+      .order("name", { ascending: true }),
+    supabase
+      .from("transactions")
+      .select("id, title, amount, type, budget_folder_id, created_at")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(200),
+    supabase
+      .from("user_settings")
+      .select("currency")
+      .eq("user_id", userId)
+      .maybeSingle(),
+    supabase
+      .from("main_budget")
+      .select("amount")
+      .eq("user_id", userId)
+      .maybeSingle(),
+    supabase
+      .from("profiles")
+      .select("budget_reset_day")
+      .eq("id", userId)
+      .maybeSingle(),
+  ]);
 
-  const { data: lastTransactions } = await supabase
-    .from("transactions")
-    .select("id, title, amount, type, budget_folder_id, created_at")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(200);
+  const budgets = budgetsResult.data;
+  const lastTransactions = transactionsResult.data;
 
   const { start, end } = getPreviousMonthRange();
   const lastMonthTxs = (lastTransactions || []).filter((tx: Transaction) => {
@@ -38,10 +58,18 @@ export const prepareUserContext = async (
     ? findRecurringCandidates((lastTransactions || []) as Transaction[], 120)
     : [];
 
+  // Build user profile
+  const userProfile = {
+    currency: userSettingsResult.data?.currency || "USD",
+    total_budget: mainBudgetResult.data?.amount || 0,
+    budget_reset_day: profileResult.data?.budget_reset_day || 1,
+  };
+
   return {
     budgets: (budgets || []) as BudgetFolder[],
     lastTransactions: (lastTransactions || []) as Transaction[],
     lastMonthTxs: lastMonthTxs as Transaction[],
     recurringCandidates,
+    userProfile,
   };
 };
