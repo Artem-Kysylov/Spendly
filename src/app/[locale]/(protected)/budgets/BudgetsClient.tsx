@@ -21,7 +21,7 @@ import { Link } from "@/i18n/routing";
 import { computeCarry } from "@/lib/budgetRollover";
 import { getPreviousMonthRange } from "@/lib/dateUtils";
 import { supabase } from "@/lib/supabaseClient";
-import type { BudgetFolderItemProps, ToastMessageProps } from "@/types/types";
+import type { BarChartData, BudgetFolderItemProps, ToastMessageProps } from "@/types/types";
 export default function BudgetsClient() {
   const { session } = UserAuth();
   const locale = useLocale();
@@ -219,7 +219,7 @@ export default function BudgetsClient() {
 
   // Данные для сравнительного графика
   const chartData = useMemo(() => {
-    const data = budgetFolders.map((folder) => ({
+    const data: BarChartData[] = budgetFolders.map((folder) => ({
       category: folder.emoji ? `${folder.emoji} ${folder.name}` : folder.name,
       amount: spentByBudget[folder.id] || 0,
       // цвет бара = цвет бюджета, иначе primary
@@ -234,12 +234,13 @@ export default function BudgetsClient() {
       return sum;
     }, 0);
 
-    data.push({
-      category: tModals("transaction.select.unbudgeted"),
-      amount: unbudgetedAmount,
-      fill: "hsl(var(--muted-foreground))",
-      emoji: undefined,
-    });
+    if (unbudgetedAmount > 0) {
+      data.push({
+        category: tModals("transaction.select.unbudgeted"),
+        amount: unbudgetedAmount,
+        fill: "hsl(var(--muted-foreground))",
+      });
+    }
 
     return data;
   }, [allTransactions, budgetFolders, spentByBudget, tModals]);
