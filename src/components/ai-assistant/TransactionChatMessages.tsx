@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { useEffect, useRef } from "react";
 import { TransactionProposalCard } from "./TransactionProposalCard";
+import { BudgetProposalCard, type ProposedBudget } from "./BudgetProposalCard";
 import { Loader2 } from "lucide-react";
 import { formatMoney } from "@/lib/format/money";
 
@@ -27,12 +28,32 @@ interface TransactionChatMessagesProps {
   currency?: string;
 }
 
+const formatHumanDate = (isoDate: string): string => {
+  const d = new Date(`${isoDate}T12:00:00.000Z`);
+  if (Number.isNaN(d.getTime())) return isoDate;
+  const locale = typeof navigator !== "undefined" ? navigator.language : "en-US";
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      month: "short",
+      day: "numeric",
+    }).format(d);
+  } catch {
+    return isoDate;
+  }
+};
+
 // Minimal cleaner to fix "AI laziness" with newlines
 const cleanContent = (text: string) => {
   if (!text) return "";
   let cleaned = text;
 
   cleaned = cleaned.replace(/\\([*_])/g, "$1");
+
+  cleaned = cleaned.replace(
+    /^(\s*(?:[-*]\s*)?)(\d{4}-\d{2}-\d{2})(\s+(?:—|-)\s+)/gm,
+    (_m, prefix: string, iso: string, sep: string) =>
+      `${prefix}${formatHumanDate(iso)}${sep}`,
+  );
 
   const insightTerms =
     "Insight|Tip|Advice|Совет|Порада|सुझाव|Wawasan|インサイト|인사이트";
@@ -239,7 +260,7 @@ export const TransactionChatMessages = ({
             )}
 
             {!isUser && suggestions.length > 0 && onSuggestionClick && (
-              <div className="mt-1 flex flex-wrap gap-5 md:gap-2">
+              <div className="mt-1 flex flex-wrap gap-5 md:gap-2 self-end justify-end">
                 {suggestions.map((s, idx) => (
                   <button
                     key={idx}
@@ -293,6 +314,26 @@ export const TransactionChatMessages = ({
                   </div>
                 );
               }
+
+              if (toolInvocation.toolName === "propose_budget") {
+                const candidate =
+                  toolInvocation?.args && typeof toolInvocation.args === "object"
+                    ? toolInvocation.args
+                    : toolInvocation?.result && typeof toolInvocation.result === "object"
+                      ? toolInvocation.result
+                      : null;
+
+                if (!candidate) return null;
+
+                return (
+                  <div key={toolInvocation.toolCallId} className="w-full mt-2">
+                    <BudgetProposalCard
+                      proposal={candidate as ProposedBudget}
+                    />
+                  </div>
+                );
+              }
+
               return null;
             })}
           </div>

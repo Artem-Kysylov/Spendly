@@ -110,6 +110,65 @@ export const detectIntentFromMessage = (userMessage: string): Intent => {
   return "unknown";
 };
 
+export const isBudgetLimitIntent = (userMessage: string): boolean => {
+  const text = (userMessage || "").toLowerCase();
+  if (!text.trim()) return false;
+
+  const hasDigit = /\d/.test(text);
+  const amountHints: string[] = [
+    "thousand",
+    "million",
+    "тысяч",
+    "тысяча",
+    "тыс",
+    "миллион",
+    "млн",
+    "тисяч",
+    "тисяча",
+    "тис",
+    "ribu",
+    "juta",
+    "千",
+    "万",
+    "천",
+    "만",
+    "हज़ार",
+    "हजार",
+    "लाख",
+  ];
+  const hasAmountHint = amountHints.some((h) => h && text.includes(h));
+  if (!hasDigit && !hasAmountHint) return false;
+
+  const patterns: string[] = [
+    // EN
+    "budget",
+    "limit",
+    "set limit",
+    // RU
+    "бюджет",
+    "лимит",
+    "установи лимит",
+    // UK
+    "бюджет",
+    "ліміт",
+    "встанови ліміт",
+    // HI
+    "बजट",
+    "सीमा",
+    // ID
+    "anggaran",
+    "batas",
+    // JA
+    "予算",
+    "限度額",
+    // KO
+    "예산",
+    "한도",
+  ];
+
+  return patterns.some((p) => p && text.includes(p));
+};
+
 export const detectPeriodFromMessage = (userMessage: string): Period => {
   const text = (userMessage || "").toLowerCase();
   // EN hints

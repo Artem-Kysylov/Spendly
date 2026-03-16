@@ -829,6 +829,11 @@
         "amount": "राशि"
       }
     },
+    "budgetConfirm": {
+      "title": "बजट सेट करें?",
+      "confirm": "पुष्टि करें",
+      "cancel": "रद्द करें"
+    },
     "headings": {
       "spendingAnalysis": "खर्च विश्लेषण",
       "weeklySummary": "साप्ताहिक सारांश",

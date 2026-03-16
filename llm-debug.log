@@ -430,3 +430,12 @@
 2026-03-13T17:47:09.659Z [LLM_DEBUG gemini pre] {"requestId":"3b13a323-13d4-4483-bb18-17d5bbcac023","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,3719]}
 2026-03-13T18:00:50.989Z [LLM_DEBUG gemini pre] {"requestId":"1e785061-7b78-4f44-a9da-0c0c5291ae0e","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,3364]}
 2026-03-13T18:00:51.127Z [LLM_DEBUG gemini pre] {"requestId":"6fa2f0b8-79ff-4f5d-9671-b9440192baca","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,3298]}
+2026-03-16T10:18:46.840Z [LLM_DEBUG gemini pre] {"requestId":"df5d0a43-0a4c-47db-96ac-238745b49edd","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,3296]}
+2026-03-16T10:18:46.874Z [LLM_DEBUG gemini pre] {"requestId":"fac8db19-4d78-4490-9c19-f145f757f8d5","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,3362]}
+2026-03-16T10:27:18.224Z [LLM_DEBUG gemini pre] {"requestId":"f79a188b-c991-4b30-8910-3548c2741177","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,5243]}
+2026-03-16T10:27:18.241Z [LLM_DEBUG gemini pre] {"requestId":"cbf8b949-0e7a-4f5d-bc65-aee727331e7f","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,5309]}
+2026-03-16T13:29:05.463Z [LLM_DEBUG gemini pre] {"requestId":"800d18ce-a22b-41b1-8976-6cab07b26c77","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,5290]}
+2026-03-16T13:29:05.864Z [LLM_DEBUG gemini pre] {"requestId":"budget-parse-1773667745864","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[770,22]}
+2026-03-16T13:29:41.090Z [LLM_DEBUG gemini pre] {"requestId":"budget-parse-1773667781090","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[770,22]}
+2026-03-16T13:30:20.854Z [LLM_DEBUG gemini pre] {"requestId":"budget-parse-1773667820854","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[770,22]}
+2026-03-16T13:30:56.524Z [LLM_DEBUG gemini pre] {"requestId":"94339c58-8689-4e94-aa58-2524fc153006","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,5292]}

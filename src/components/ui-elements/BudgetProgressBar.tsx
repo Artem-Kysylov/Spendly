@@ -114,8 +114,27 @@ function BudgetProgressBar({
       return budgetType === "expense" ? "bg-red-500" : "bg-green-500";
     }
 
-    if (calmOverBudget && isPaceApplicable && paceDelta > 10) {
-      return "bg-amber-500";
+    if (budgetType === "expense") {
+      if (percentage >= 90) return "bg-red-500";
+      if (percentage >= 80) return "bg-amber-500";
+
+      if (calmOverBudget && isPaceApplicable) {
+        if (paceDelta > 20) return "bg-red-500";
+        if (paceDelta > 10) return "bg-amber-500";
+      }
+
+      return "bg-primary";
+    }
+
+    if (calmOverBudget && isPaceApplicable) {
+      // Show red if overpacing by more than 20%
+      if (paceDelta > 20) {
+        return "bg-red-500";
+      }
+      // Show amber if overpacing by more than 10%
+      if (paceDelta > 10) {
+        return "bg-amber-500";
+      }
     }
 
     return isColoredCard ? "bg-primary" : "bg-primary";

@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { useEffect, useRef } from "react";
 import { TransactionProposalCard } from "./TransactionProposalCard";
+import { BudgetProposalCard, type ProposedBudget } from "./BudgetProposalCard";
 import { formatMoney } from "@/lib/format/money";
 
 interface ChatMessagesProps {
@@ -15,6 +16,20 @@ interface ChatMessagesProps {
   pendingAction?: unknown;
   budgets?: any[];
 }
+
+const formatHumanDate = (isoDate: string): string => {
+  const d = new Date(`${isoDate}T12:00:00.000Z`);
+  if (Number.isNaN(d.getTime())) return isoDate;
+  const locale = typeof navigator !== "undefined" ? navigator.language : "en-US";
+  try {
+    return new Intl.DateTimeFormat(locale, {
+      month: "short",
+      day: "numeric",
+    }).format(d);
+  } catch {
+    return isoDate;
+  }
+};
 
 function normalizeProposedTransactions(input: any): any[] {
   if (!input) return [];
@@ -87,7 +102,13 @@ const cleanContent = (text: string) => {
     let l = line;
 
     l = l.replace(
-      /(\S)(?=(?:Budget\s+breakdown|Top\s+expenses|Total\s+spending|Transactions)\b)/gi,
+      /^(\s*(?:[-*]\s*)?)(\d{4}-\d{2}-\d{2})(\s+(?:—|-)\s+)/,
+      (_m, prefix: string, iso: string, sep: string) =>
+        `${prefix}${formatHumanDate(iso)}${sep}`,
+    );
+
+    l = l.replace(
+      /([^\s\[])(?=(?:Budget\s+breakdown|Top\s+expenses|Total\s+spending|Transactions)\b)/gi,
       "$1\n\n",
     );
 
@@ -95,6 +116,8 @@ const cleanContent = (text: string) => {
 
     l = l.replace(/\*\*\s+/g, "**");
     l = l.replace(/\s+\*\*/g, "**");
+
+    l = l.replace(/([\p{L}0-9])\*\*/gu, "$1 **");
 
     l = l.replace(/([.:])\s*(\d+\.)/g, "$1\n\n$2");
 
@@ -285,7 +308,7 @@ export const ChatMessages = ({
             )}
 
             {!isUser && suggestions.length > 0 && onSuggestionClick && (
-              <div className="mt-2 flex flex-wrap gap-5 md:gap-2">
+              <div className="mt-2 flex flex-wrap gap-5 md:gap-2 self-end justify-end">
                 {suggestions.map((s, idx) => (
                   <button
                     key={idx}
@@ -323,6 +346,23 @@ export const ChatMessages = ({
                         />
                       </div>
                     ))}
+                  </div>
+                );
+              }
+              if (toolInvocation.toolName === "propose_budget") {
+                const proposal =
+                  toolInvocation?.args && typeof toolInvocation.args === "object"
+                    ? (toolInvocation.args as ProposedBudget)
+                    : toolInvocation?.result && typeof toolInvocation.result === "object"
+                      ? (toolInvocation.result as ProposedBudget)
+                      : null;
+                if (!proposal) return null;
+
+                return (
+                  <div key={toolInvocation.toolCallId} className="w-full mt-2">
+                    <BudgetProposalCard
+                      proposal={proposal}
+                    />
                   </div>
                 );
               }

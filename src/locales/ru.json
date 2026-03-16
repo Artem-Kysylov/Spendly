@@ -829,6 +829,11 @@
         "amount": "Сумма"
       }
     },
+    "budgetConfirm": {
+      "title": "Установить бюджет?",
+      "confirm": "Подтвердить",
+      "cancel": "Отмена"
+    },
     "headings": {
       "spendingAnalysis": "Анализ расходов",
       "weeklySummary": "Итоги недели",

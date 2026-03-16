@@ -145,6 +145,7 @@ export default function HybridDatePicker({
             className="bg-background text-foreground h-auto max-h-[95dvh] overflow-y-auto z-[10010] pb-[env(safe-area-inset-bottom)]"
             overlayClassName="bg-foreground/40"
           >
+            <div className="mx-auto mt-2 mb-2 h-1.5 w-12 rounded-full bg-muted" />
             <SheetHeader className="px-4 py-4 border-b border-border justify-center">
               <SheetTitle className="text-[18px] sm:text-[20px] font-semibold text-center">
                 Choose date

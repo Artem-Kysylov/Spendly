@@ -341,45 +341,66 @@ export function buildPrompt(params: {
   ].join("\n");
 
   if (params.maxChars && full.length > params.maxChars) {
+    const takeBlocks = (section: string, opts: { headers: string[]; maxLinesPerBlock: number }) => {
+      const lines = section.split("\n");
+      const headerStarts = opts.headers;
+      const headerSet = new Set(headerStarts);
+      const startsWithAnyHeader = (line: string) =>
+        headerStarts.some((h) => line.startsWith(h));
+
+      const out: string[] = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const matchedHeader = headerStarts.find((h) => line.startsWith(h));
+        if (!matchedHeader) continue;
+
+        if (!headerSet.has(matchedHeader)) continue;
+        out.push(line);
+
+        let added = 0;
+        for (let j = i + 1; j < lines.length; j++) {
+          const next = lines[j];
+          if (startsWithAnyHeader(next)) break;
+          if (next.trim().length === 0) continue;
+          out.push(next);
+          added++;
+          if (added >= opts.maxLinesPerBlock) break;
+        }
+      }
+      return out;
+    };
+
     // Compact variant
     const compact = [
       params.instructions,
       `Known budgets: ${budgetsSummary || "none"}.`,
+      params.userProfileSection ? params.userProfileSection : "",
       // Keep most useful lines in short output
-      ...params.weeklySection
-        .split("\n")
-        .filter(
-          (line) =>
-            line.startsWith("TotalThisWeek:") ||
-            line.startsWith("BudgetTotalsThisWeek:") ||
-            line.startsWith("TopExpensesThisWeek:"),
-        ),
-      ...params.monthlySection
-        .split("\n")
-        .filter(
-          (line) =>
-            line.startsWith("TotalThisMonth:") ||
-            line.startsWith("BudgetTotalsThisMonth:") ||
-            line.startsWith("TopExpensesThisMonth:"),
-        ),
-      // Also include last period totals to aid LLM
-      ...params.weeklySection
-        .split("\n")
-        .filter(
-          (line) =>
-            line.startsWith("TotalLastWeek:") ||
-            line.startsWith("BudgetTotalsLastWeek:"),
-        ),
-      ...params.monthlySection
-        .split("\n")
-        .filter(
-          (line) =>
-            line.startsWith("TotalLastMonth:") ||
-            line.startsWith("BudgetTotalsLastMonth:"),
-        ),
-      ...params.monthlySection
-        .split("\n")
-        .filter((line) => line.startsWith("CompareMonths:")),
+      ...takeBlocks(params.weeklySection, {
+        headers: [
+          "TotalThisWeek:",
+          "BudgetTotalsThisWeek:",
+          "TransactionsThisWeek:",
+          "TopExpensesThisWeek:",
+          "TotalLastWeek:",
+          "BudgetTotalsLastWeek:",
+          "TransactionsLastWeek:",
+          "TopExpensesLastWeek:",
+        ],
+        maxLinesPerBlock: 20,
+      }),
+      ...takeBlocks(params.monthlySection, {
+        headers: [
+          "TotalThisMonth:",
+          "BudgetTotalsThisMonth:",
+          "TopExpensesThisMonth:",
+          "TotalLastMonth:",
+          "BudgetTotalsLastMonth:",
+          "TopExpensesLastMonth:",
+          "CompareMonths:",
+        ],
+        maxLinesPerBlock: 10,
+      }),
       `User: ${params.userMessage}`,
     ].join("\n");
     return compact;

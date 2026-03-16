@@ -829,6 +829,11 @@
         "amount": "금액"
       }
     },
+    "budgetConfirm": {
+      "title": "예산을 설정할까요?",
+      "confirm": "확인",
+      "cancel": "취소"
+    },
     "headings": {
       "spendingAnalysis": "지출 분석",
       "weeklySummary": "주간 요약",

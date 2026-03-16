@@ -41,6 +41,7 @@ export function TransactionChatProvider({
           aria-labelledby="transaction-chat-title"
           overlayClassName="bg-foreground/40"
         >
+          <div className="mx-auto mt-2 mb-2 h-1.5 w-12 rounded-full bg-muted" />
           <TransactionChatWindow
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}

@@ -36,6 +36,7 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(
       error = null,
       barColor = "hsl(var(--primary))",
       orientation = "vertical",
+      barCategoryGap = "25%",
       className = "",
       onBarHover,
       onBarLeave,
@@ -198,7 +199,7 @@ const BarChartComponent = forwardRef<HTMLDivElement, BarChartProps>(
                 layout={
                   orientation === "horizontal" ? "vertical" : "horizontal"
                 }
-                barCategoryGap="25%"
+                barCategoryGap={barCategoryGap}
                 margin={{
                   top: 28,
                   right: 0,

@@ -829,6 +829,11 @@
         "amount": "Amount"
       }
     },
+    "budgetConfirm": {
+      "title": "Set budget?",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
     "headings": {
       "spendingAnalysis": "Spending Analysis",
       "weeklySummary": "Weekly Summary",

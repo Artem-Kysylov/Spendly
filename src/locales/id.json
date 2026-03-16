@@ -368,7 +368,7 @@
         "date": "Date",
         "actions": "Actions"
       },
-      "unbudgeted": "Unbudgeted",
+      "unbudgeted": "Tanpa Anggaran",
       "empty": {
         "default": "No transactions found"
       },
@@ -828,6 +828,11 @@
         "budget": "Anggaran",
         "amount": "Jumlah"
       }
+    },
+    "budgetConfirm": {
+      "title": "Atur anggaran?",
+      "confirm": "Konfirmasi",
+      "cancel": "Batal"
     },
     "headings": {
       "spendingAnalysis": "Analisis Pengeluaran",

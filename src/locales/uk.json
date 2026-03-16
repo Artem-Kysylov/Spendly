@@ -829,6 +829,11 @@
         "amount": "Сумма"
       }
     },
+    "budgetConfirm": {
+      "title": "Встановити бюджет?",
+      "confirm": "Підтвердити",
+      "cancel": "Скасувати"
+    },
     "headings": {
       "spendingAnalysis": "Аналіз витрат",
       "weeklySummary": "Тижнева зведення",

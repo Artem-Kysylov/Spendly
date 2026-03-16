@@ -25,8 +25,13 @@ export default function CompactKPICard({
   const tDashboard = useTranslations("dashboard");
   const tBudgets = useTranslations("budgets");
 
-  const { availableToSpend, budgetResetDay, carryover, incomeConfirmed } =
-    useMainBudget();
+  const {
+    availableToSpend,
+    budgetResetDay,
+    carryover,
+    incomeConfirmed,
+    isLoading: isMainBudgetLoading,
+  } = useMainBudget();
 
   // When income is not confirmed, use base budget for daily safe-to-spend calculation
   // to avoid negative values from carryover affecting the calculation
@@ -100,10 +105,10 @@ export default function CompactKPICard({
             type="expense"
             currency={currency}
             className="h-2"
-            calmOverBudget
+            calmOverBudget={!isMainBudgetLoading}
             baseAmount={incomeConfirmed && carryover !== 0 && budget > 0 ? budget : undefined}
             rolloverAmount={incomeConfirmed && carryover !== 0 && budget > 0 ? carryover : undefined}
-            pacePercent={pacePercent}
+            pacePercent={isMainBudgetLoading ? undefined : pacePercent}
             showLabels={false}
           />
           <div className="flex justify-between text-[11px] md:text-xs text-muted-foreground">

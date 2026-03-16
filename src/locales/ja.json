@@ -829,6 +829,11 @@
         "amount": "金額"
       }
     },
+    "budgetConfirm": {
+      "title": "予算を設定しますか？",
+      "confirm": "確認",
+      "cancel": "キャンセル"
+    },
     "headings": {
       "spendingAnalysis": "支出分析",
       "weeklySummary": "週間サマリー",
