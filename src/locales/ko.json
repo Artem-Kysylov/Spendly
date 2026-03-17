@@ -339,7 +339,16 @@
     "recurring": {
       "title": "정기 결제",
       "empty": "정기 결제가 없습니다",
-      "dayLabel": "매월 {day}일"
+      "dayLabel": "매월 {day}일",
+      "calendar": {
+        "title": "정기 거래",
+        "total": "합계",
+        "inDays": "{days}일 후",
+        "today": "오늘",
+        "tomorrow": "내일",
+        "monthly": "매월",
+        "noPayments": "예정된 정기 결제가 없습니다"
+      }
     },
     "search": {
       "placeholder": "Search transactions..."
@@ -1208,6 +1217,15 @@
       "createdBodyFriendly": "완료! {name}({amount})를 기록했어요.",
       "createdBodyFormal": "거래가 기록되었습니다: {name}({amount}).",
       "createdBodyPlayful": "짤랑! {name}({amount}) 기록 완료."
+    },
+    "calendar": {
+      "title": "정기 거래",
+      "total": "합계",
+      "inDays": "{days}일 후",
+      "today": "오늘",
+      "tomorrow": "내일",
+      "monthly": "매월",
+      "noPayments": "예정된 정기 결제가 없습니다"
     }
   },
   "errors": {

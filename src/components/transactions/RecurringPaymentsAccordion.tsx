@@ -12,6 +12,7 @@ import {
 import { UserAuth } from "@/context/AuthContext";
 import { supabase } from "@/lib/supabaseClient";
 import type { Transaction } from "@/types/types";
+import RecurringCalendar from "@/components/recurring/RecurringCalendar";
 
 interface RecurringPaymentsAccordionProps {
   onEdit: (transaction: Transaction) => void;
@@ -28,6 +29,12 @@ export default function RecurringPaymentsAccordion({
 
   const [recurringTransactions, setRecurringTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [currency, setCurrency] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return window.localStorage.getItem("user-currency") || "USD";
+    }
+    return "USD";
+  });
 
   const fetchRecurringTransactions = async () => {
     if (!session?.user?.id) return;
@@ -98,8 +105,15 @@ export default function RecurringPaymentsAccordion({
               {t("recurring.empty")}
             </div>
           ) : (
-            <div className="space-y-2">
-              {recurringTransactions.map((transaction) => (
+            <>
+              <RecurringCalendar
+                transactions={recurringTransactions}
+                variant="settings"
+                currency={currency}
+              />
+              <div className="my-4 border-t border-border" />
+              <div className="space-y-2">
+                {recurringTransactions.map((transaction) => (
                 <div
                   key={transaction.id}
                   className="flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors"
@@ -133,7 +147,8 @@ export default function RecurringPaymentsAccordion({
                   </div>
                 </div>
               ))}
-            </div>
+              </div>
+            </>
           )}
         </AccordionContent>
       </AccordionItem>

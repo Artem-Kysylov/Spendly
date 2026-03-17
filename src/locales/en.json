@@ -339,7 +339,16 @@
     "recurring": {
       "title": "Recurring Payments",
       "empty": "No recurring payments",
-      "dayLabel": "Day {day} of month"
+      "dayLabel": "Day {day} of month",
+      "calendar": {
+        "title": "Recurring transactions",
+        "total": "Total",
+        "inDays": "In {days} days",
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "monthly": "Monthly",
+        "noPayments": "No recurring payments scheduled"
+      }
     },
     "search": {
       "placeholder": "Search transactions..."
@@ -1208,6 +1217,15 @@
       "createdBodyFriendly": "Done! I logged {name} ({amount}).",
       "createdBodyFormal": "A transaction was logged: {name} ({amount}).",
       "createdBodyPlayful": "Cha-ching! Logged {name} ({amount})."
+    },
+    "calendar": {
+      "title": "Recurring transactions",
+      "total": "Total",
+      "inDays": "In {days} days",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "monthly": "Monthly",
+      "noPayments": "No recurring payments scheduled"
     }
   },
   "errors": {

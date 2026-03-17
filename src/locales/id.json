@@ -339,7 +339,16 @@
     "recurring": {
       "title": "Pembayaran Berulang",
       "empty": "Tidak ada pembayaran berulang",
-      "dayLabel": "Tanggal {day} setiap bulan"
+      "dayLabel": "Tanggal {day} setiap bulan",
+      "calendar": {
+        "title": "Transaksi berulang",
+        "total": "Total",
+        "inDays": "Dalam {days} hari",
+        "today": "Hari ini",
+        "tomorrow": "Besok",
+        "monthly": "Bulanan",
+        "noPayments": "Tidak ada pembayaran rutin yang dijadwalkan"
+      }
     },
     "search": {
       "placeholder": "Search transactions..."
@@ -1208,6 +1217,15 @@
       "createdBodyFriendly": "Beres! Aku mencatat {name} ({amount}).",
       "createdBodyFormal": "Transaksi dicatat: {name} ({amount}).",
       "createdBodyPlayful": "Cing! Tercatat {name} ({amount})."
+    },
+    "calendar": {
+      "title": "Transaksi berulang",
+      "total": "Total",
+      "inDays": "Dalam {days} hari",
+      "today": "Hari ini",
+      "tomorrow": "Besok",
+      "monthly": "Bulanan",
+      "noPayments": "Tidak ada pembayaran rutin yang dijadwalkan"
     }
   },
   "errors": {

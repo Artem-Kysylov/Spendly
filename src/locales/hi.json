@@ -339,7 +339,16 @@
     "recurring": {
       "title": "आवर्ती भुगतान",
       "empty": "कोई आवर्ती भुगतान नहीं",
-      "dayLabel": "हर महीने की {day} तारीख"
+      "dayLabel": "हर महीने की {day} तारीख",
+      "calendar": {
+        "title": "आवर्ती लेन-देन",
+        "total": "कुल",
+        "inDays": "{days} दिनों में",
+        "today": "आज",
+        "tomorrow": "कल",
+        "monthly": "मासिक",
+        "noPayments": "कोई नियमित भुगतान निर्धारित नहीं है"
+      }
     },
     "search": {
       "placeholder": "Search transactions..."
@@ -1208,6 +1217,15 @@
       "createdBodyFriendly": "हो गया! मैंने {name} ({amount}) लॉग कर दिया।",
       "createdBodyFormal": "एक लेन-देन लॉग किया गया: {name} ({amount}).",
       "createdBodyPlayful": "चिंग! {name} ({amount}) लॉग हो गया।"
+    },
+    "calendar": {
+      "title": "आवर्ती लेन-देन",
+      "total": "कुल",
+      "inDays": "{days} दिनों में",
+      "today": "आज",
+      "tomorrow": "कल",
+      "monthly": "मासिक",
+      "noPayments": "कोई नियमित भुगतान निर्धारित नहीं है"
     }
   },
   "errors": {

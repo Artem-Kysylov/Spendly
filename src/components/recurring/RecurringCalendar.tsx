@@ -1,0 +1,183 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { DayButton } from "react-day-picker";
+import { cn } from "@/lib/utils";
+import { getSubscriptionEmoji } from "@/lib/getSubscriptionEmoji";
+import {
+  getRecurringPaymentDates,
+  getDaysUntilPayment,
+} from "@/lib/calculateRecurringDates";
+import { formatCurrency } from "@/lib/chartUtils";
+import type { Transaction } from "@/types/types";
+import { useLocale, useTranslations } from "next-intl";
+import { enUS, ru, uk, id, ja, ko, hi } from "date-fns/locale";
+import type { Locale as DateFnsLocale } from "date-fns";
+
+interface RecurringCalendarProps {
+  transactions: Transaction[];
+  variant?: "dashboard" | "settings";
+  currency: string;
+}
+
+export default function RecurringCalendar({
+  transactions,
+  variant = "dashboard",
+  currency,
+}: RecurringCalendarProps) {
+  const t = useTranslations("recurring.calendar");
+  const localeCode = useLocale();
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const dfLocaleMap: Record<string, DateFnsLocale> = {
+    en: enUS,
+    "en-US": enUS,
+    ru,
+    "ru-RU": ru,
+    uk,
+    "uk-UA": uk,
+    id,
+    "id-ID": id,
+    ja,
+    "ja-JP": ja,
+    ko,
+    "ko-KR": ko,
+    hi,
+    "hi-IN": hi,
+  };
+  const dfLocale = dfLocaleMap[localeCode] ?? enUS;
+
+  // Calculate payment dates for current month
+  const paymentDatesMap = useMemo(() => {
+    const month = currentMonth.getMonth();
+    const year = currentMonth.getFullYear();
+    return getRecurringPaymentDates(transactions, month, year);
+  }, [transactions, currentMonth]);
+
+  // Get transactions for selected date
+  const selectedDateTransactions = useMemo(() => {
+    if (!selectedDate) return [];
+    const dateKey = selectedDate.toISOString().split("T")[0];
+    return paymentDatesMap.get(dateKey) || [];
+  }, [selectedDate, paymentDatesMap]);
+
+  // Custom day button with markers
+  const CustomDayButton = ({
+    className,
+    children,
+    ...props
+  }: React.ComponentProps<typeof DayButton>) => {
+    const day = props.day?.date;
+    const hasPayments = day
+      ? paymentDatesMap.has(day.toISOString().split("T")[0])
+      : false;
+
+    return (
+      <DayButton
+        className={cn(
+          "flex size-(--cell-size) w-full h-full items-center justify-center rounded-md relative",
+          "data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
+          "aria-selected:bg-primary aria-selected:text-primary-foreground",
+          "data-[disabled=true]:opacity-50",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+        {hasPayments && (
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+        )}
+      </DayButton>
+    );
+  };
+
+  const getDaysText = (days: number): string => {
+    if (days === 0) return t("today");
+    if (days === 1) return t("tomorrow");
+    return t("inDays", { days });
+  };
+
+  return (
+    <div className={cn("w-full", variant === "dashboard" ? "mb-4" : "mb-3")}>
+      <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+        <PopoverTrigger asChild>
+          <div className="flex justify-center">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={(date) => {
+                if (date) {
+                  const dateKey = date.toISOString().split("T")[0];
+                  if (paymentDatesMap.has(dateKey)) {
+                    setSelectedDate(date);
+                    setIsPopoverOpen(true);
+                  }
+                }
+              }}
+              month={currentMonth}
+              onMonthChange={setCurrentMonth}
+              locale={dfLocale}
+              showOutsideDays={false}
+              className="w-fit mx-auto"
+              components={{
+                DayButton: CustomDayButton,
+              }}
+            />
+          </div>
+        </PopoverTrigger>
+        <PopoverContent
+          className="w-auto p-0 bg-card/95 backdrop-blur-md border border-border shadow-lg"
+          align="center"
+          side="bottom"
+          sideOffset={8}
+        >
+          {selectedDateTransactions.length > 0 ? (
+            <div className="p-4 space-y-3 max-w-[280px]">
+              {selectedDateTransactions.map((transaction) => {
+                const emoji = getSubscriptionEmoji(transaction.title);
+                const daysUntil = selectedDate
+                  ? getDaysUntilPayment(selectedDate)
+                  : 0;
+
+                return (
+                  <div
+                    key={transaction.id}
+                    className="flex items-start gap-3 p-3 rounded-lg bg-background/50 border border-border/50"
+                  >
+                    <div className="text-2xl flex-shrink-0">{emoji}</div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm text-foreground truncate">
+                        {transaction.title}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {formatCurrency(transaction.amount, currency)}
+                        {transaction.recurrence_day && (
+                          <> • {t("monthly")}</>
+                        )}
+                      </div>
+                      <div className="text-xs text-primary font-medium mt-1">
+                        {getDaysText(daysUntil)}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-4 text-sm text-muted-foreground text-center">
+              {t("noPayments")}
+            </div>
+          )}
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
+}

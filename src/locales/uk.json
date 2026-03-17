@@ -339,7 +339,16 @@
     "recurring": {
       "title": "Регулярні платежі",
       "empty": "Регулярних платежів немає",
-      "dayLabel": "{day} число місяця"
+      "dayLabel": "{day} число місяця",
+      "calendar": {
+        "title": "Регулярні транзакції",
+        "total": "Всього",
+        "inDays": "Через {days} дн.",
+        "today": "Сьогодні",
+        "tomorrow": "Завтра",
+        "monthly": "Щомісяця",
+        "noPayments": "Немає запланованих регулярних платежів"
+      }
     },
     "search": {
       "placeholder": "Пошук транзакцій..."
@@ -1208,6 +1217,15 @@
       "createdBodyFriendly": "Готово! Я записав(ла) {name} ({amount}).",
       "createdBodyFormal": "Транзакцію записано: {name} ({amount}).",
       "createdBodyPlayful": "Є! Записав(ла) {name} ({amount})."
+    },
+    "calendar": {
+      "title": "Регулярні транзакції",
+      "total": "Всього",
+      "inDays": "Через {days} дн.",
+      "today": "Сьогодні",
+      "tomorrow": "Завтра",
+      "monthly": "Щомісяця",
+      "noPayments": "Немає запланованих регулярних платежів"
     }
   },
   "errors": {
