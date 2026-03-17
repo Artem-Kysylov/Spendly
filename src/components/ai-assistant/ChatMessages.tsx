@@ -258,8 +258,10 @@ export const ChatMessages = ({
           <div
             key={index}
             className={cn(
-              "flex flex-col max-w-[85%] md:max-w-xl",
-              isUser ? "self-end items-end" : "self-start items-start"
+              "flex flex-col md:max-w-xl",
+              isUser
+                ? "self-end items-end max-w-[85%]"
+                : "self-start items-start w-full"
             )}
           >
             {content && (

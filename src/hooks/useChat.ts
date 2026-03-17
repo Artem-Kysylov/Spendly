@@ -716,6 +716,8 @@ export const useChat = (): UseChatReturn => {
             },
           ],
         };
+        // Let the typing indicator show briefly before rendering the card
+        await new Promise((r) => setTimeout(r, 450));
         setMessages((prev) => [...prev, aiMessage]);
         setIsTyping(false);
         setAbortController(null);

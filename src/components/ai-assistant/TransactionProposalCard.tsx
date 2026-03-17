@@ -1,7 +1,8 @@
 "use client";
 
-import { Check, Edit2, Loader2 } from "lucide-react";
+import { Edit2, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { saveProposedTransaction } from "@/app/[locale]/actions/transaction";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/components/ui/use-toast";
 import { UserAuth } from "@/context/AuthContext";
 import { formatMoney } from "@/lib/format/money";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
@@ -62,11 +62,13 @@ export function TransactionProposalCard({
 }: TransactionProposalCardProps) {
   const { session } = UserAuth();
   const userId = session?.user?.id;
-  const { toast } = useToast();
+  const tModals = useTranslations("modals");
+  const tAssistant = useTranslations("assistant");
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   // Form state
   const [title, setTitle] = useState(proposal.title);
@@ -115,17 +117,17 @@ export function TransactionProposalCard({
   useEffect(() => {
     if (mappedBudget) {
       setSelectedBudgetId(mappedBudget.id);
-    } else if (budgets.length > 0) {
-      // Default to first budget if no match found
-      setSelectedBudgetId(budgets[0].id);
+    } else {
+      // Default to unbudgeted if no match found
+      setSelectedBudgetId("unbudgeted");
     }
   }, [mappedBudget, budgets]);
 
   const selectedBudget = budgets.find((b) => b.id === selectedBudgetId);
 
   const handleConfirm = async () => {
-    if (!userId || !selectedBudgetId) {
-      onError?.("Missing user or budget information");
+    if (!userId) {
+      onError?.("Missing user information");
       return;
     }
 
@@ -142,19 +144,12 @@ export function TransactionProposalCard({
         title,
         amount: parseAmountInput(amount),
         type: proposal.type,
-        budget_folder_id: selectedBudgetId,
+        budget_folder_id: selectedBudgetId === "unbudgeted" ? null : selectedBudgetId,
         created_at: selectedDate.toISOString(), // сохраняем ISO
       });
 
       if (result.success) {
         setIsSuccess(true);
-
-        // Show success toast notification
-        toast({
-          title: "Transaction saved!",
-          description: `${title} for $${amount} has been added successfully.`,
-          variant: "success",
-        });
 
         onSuccess?.();
 
@@ -189,22 +184,19 @@ export function TransactionProposalCard({
     });
   };
 
+  if (isDismissed) return null;
+
   // Success state
   if (isSuccess) {
     return (
-      <Card className="border-green-500 bg-green-50 dark:bg-green-950">
-        <CardContent className="pt-6">
-          <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
-            <Check className="w-5 h-5" />
-            <span className="font-medium">Transaction saved successfully!</span>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="rounded-2xl px-4 py-3 shadow-sm w-full bg-muted/50">
+        <div className="text-sm leading-relaxed whitespace-pre-line">{tAssistant("transactionSaved.message")}</div>
+      </div>
     );
   }
 
   return (
-    <Card className="border-blue-200 dark:border-blue-800">
+    <Card className="w-full md:max-w-xl rounded-xl border-border bg-card shadow-sm">
       <CardHeader>
         <CardTitle className="text-base flex items-center justify-between">
           <span>Proposed Transaction</span>
@@ -214,7 +206,7 @@ export function TransactionProposalCard({
               size="sm"
               onClick={() => setIsEditing(true)}
             >
-              <Edit2 className="w-4 h-4" />
+              <Edit2 className="w-4 h-4 text-muted-foreground" />
             </Button>
           )}
         </CardTitle>
@@ -261,6 +253,12 @@ export function TransactionProposalCard({
                   <SelectValue placeholder="Select budget" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="unbudgeted">
+                    <span className="flex items-center gap-2">
+                      <span>📋</span>
+                      <span>{tModals("transaction.select.unbudgeted")}</span>
+                    </span>
+                  </SelectItem>
                   {budgets.map((budget) => (
                     <SelectItem key={budget.id} value={budget.id}>
                       <span className="flex items-center gap-2">
@@ -274,7 +272,6 @@ export function TransactionProposalCard({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="date">Date</Label>
               <HybridDatePicker
                 selectedDate={selectedDate}
                 onDateSelect={setSelectedDate}
@@ -308,9 +305,9 @@ export function TransactionProposalCard({
             <div className="flex justify-between items-center">
               <span className="text-sm text-muted-foreground">Budget</span>
               <span className="flex items-center gap-1">
-                <span>{selectedBudget?.emoji || "📁"}</span>
+                <span>{selectedBudgetId === "unbudgeted" ? "📋" : selectedBudget?.emoji || "📁"}</span>
                 <span className="font-medium">
-                  {selectedBudget?.name || "Unknown"}
+                  {selectedBudgetId === "unbudgeted" ? tModals("transaction.select.unbudgeted") : selectedBudget?.name || "Unknown"}
                 </span>
               </span>
             </div>
@@ -349,20 +346,29 @@ export function TransactionProposalCard({
             </Button>
           </>
         ) : (
-          <Button
-            onClick={handleConfirm}
-            disabled={isSaving}
-            className="w-full"
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Confirming...
-              </>
-            ) : (
-              "Confirm"
-            )}
-          </Button>
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => setIsDismissed(true)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConfirm}
+              disabled={isSaving}
+              className="flex-1"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Confirming...
+                </>
+              ) : (
+                "Confirm"
+              )}
+            </Button>
+          </>
         )}
       </CardFooter>
     </Card>

@@ -807,10 +807,13 @@
     "title": "Spendly Pal",
     "welcomeTitle": "Temui Spendly Pal",
     "welcomeDesc": "Asisten keuangan bertenaga AI Anda. Ajukan pertanyaan seperti \"Berapa pengeluaran saya bulan ini?\" atau \"Tambahkan transaksi baru.\"",
-    "rateLimited": "Anda sudah mencapai batas permintaan AI. Coba lagi nanti atau upgrade ke Pro.",
-    "transactionFallback": "Aku belum bisa membaca itu sebagai transaksi. Coba: 'Makan siang 150', 'Taksi 200 kemarin', atau 'Pizza 150, Cola 50 kemarin'.",
+    "rateLimited": "Anda telah mencapai batas permintaan AI. Coba lagi nanti atau upgrade ke Pro.",
+    "transactionSaved": {
+      "message": "✅ Berhasil ditambahkan!\n\nMau tambah transaksi lagi atau perbarui anggaran?"
+    },
+    "transactionFallback": "Saya tidak bisa mem-parsing itu sebagai transaksi. Coba: 'Makan siang 150', 'Taksi 200 kemarin', atau 'Pizza 150, Cola 50 kemarin'.",
     "input": {
-      "placeholder": "Pesan Spendly Pal..."
+      "placeholder": "Kirim pesan ke Spendly Pal..."
     },
     "toasts": {
       "usedNOfDailyLimit": "Anda telah menggunakan {count} dari {limit} pesan AI hari ini."

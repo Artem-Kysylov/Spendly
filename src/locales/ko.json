@@ -807,10 +807,13 @@
     "title": "Spendly Pal",
     "welcomeTitle": "Spendly Pal을 만나보세요",
     "welcomeDesc": "AI 기반 금융 비서입니다. \"이번 달 지출이 얼마인가요?\" 또는 \"새 거래 추가\"와 같은 질문을 해보세요.",
-    "rateLimited": "AI 일일 한도에 도달했습니다. 나중에 다시 시도하거나 Pro로 업그레이드하세요.",
-    "transactionFallback": "거래로 해석하지 못했어요. 예: '점심 150', '택시 200 어제', 또는 '피자 150, 콜라 50 어제'.",
+    "rateLimited": "AI 요청 한도에 도달했습니다. 나중에 다시 시도하거나 Pro로 업그레이드하세요.",
+    "transactionSaved": {
+      "message": "✅ 추가했어요!\n\n거래를 하나 더 추가할까요, 아니면 예산을 업데이트할까요?"
+    },
+    "transactionFallback": "거래로 해석할 수 없었어요. 예: '점심 150', '택시 200 어제', 또는 '피자 150, 콜라 50 어제'.",
     "input": {
-      "placeholder": "Spendly Pal에게 메시지 보내기..."
+      "placeholder": "Spendly Pal에게 메시지..."
     },
     "toasts": {
       "usedNOfDailyLimit": "오늘 {limit}개의 AI 메시지 중 {count}개를 사용했습니다."

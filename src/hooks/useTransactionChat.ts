@@ -326,31 +326,35 @@ export function useTransactionChat(): UseTransactionChatReturn {
         if (transactions.length === 0) {
           setIsLoading(true);
         } else {
-        // Simple pattern detected! Skip LLM, create tool invocation directly
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: "", // No text content needed, just the tool card
-          toolInvocations: [
-            {
-              toolCallId: `local-${Date.now()}`,
-              toolName: "propose_transaction",
-              // UI expects a single proposal object shape (title/amount/category/date)
-              args: { transactions: finalTransactions },
-              state: "result",
-              result: {
-                success: true,
-                transactions: finalTransactions,
+          // Show typing indicator briefly before rendering the card
+          setIsLoading(true);
+          await new Promise((r) => setTimeout(r, 450));
+
+          // Simple pattern detected! Skip LLM, create tool invocation directly
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: "", // No text content needed, just the tool card
+            toolInvocations: [
+              {
+                toolCallId: `local-${Date.now()}`,
+                toolName: "propose_transaction",
+                // UI expects a single proposal object shape (title/amount/category/date)
+                args: { transactions: finalTransactions },
+                state: "result",
+                result: {
+                  success: true,
+                  transactions: finalTransactions,
+                },
               },
-            },
-          ],
-        };
-        
-        setMessages((prev) => [...prev, assistantMessage]);
-        console.log("Force Reset Loading State (local parse)");
-        setIsLoading(false);
-        setAbortController(null);
-        return; // Skip LLM call entirely!
+            ],
+          };
+
+          setMessages((prev) => [...prev, assistantMessage]);
+          console.log("Force Reset Loading State (local parse)");
+          setIsLoading(false);
+          setAbortController(null);
+          return; // Skip LLM call entirely!
         }
       }
 
@@ -587,6 +591,9 @@ export function useTransactionChat(): UseTransactionChatReturn {
               try {
                 const toolCall = JSON.parse(line.slice(2));
                 if (toolCall.toolName === "propose_transaction") {
+                  // Make UI feel more chat-like: briefly show typing indicator before rendering cards
+                  setIsLoading(true);
+                  await new Promise((r) => setTimeout(r, 450));
                   const toolInvocation: ToolInvocation = {
                     toolCallId: toolCall.toolCallId,
                     toolName: toolCall.toolName,
@@ -602,6 +609,7 @@ export function useTransactionChat(): UseTransactionChatReturn {
                       m.id === currentMessage.id ? { ...currentMessage } : m,
                     ),
                   );
+                  setIsLoading(false);
                 }
               } catch (e) {
                 console.error("Failed to parse tool call:", e);

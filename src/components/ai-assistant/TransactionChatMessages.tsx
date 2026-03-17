@@ -209,8 +209,10 @@ export const TransactionChatMessages = ({
           <div
             key={message.id}
             className={cn(
-              "flex flex-col max-w-[90%] md:max-w-xl",
-              isUser ? "self-end items-end" : "self-start items-start"
+              "flex flex-col md:max-w-xl",
+              isUser
+                ? "self-end items-end max-w-[90%]"
+                : "self-start items-start w-full"
             )}
           >
             {/* Render Text Bubble if there is content */}
@@ -340,7 +342,7 @@ export const TransactionChatMessages = ({
         );
       })}
 
-      {isLoading && messages[messages.length - 1]?.role === "user" && (
+      {isLoading && (
         <div className="self-start flex items-center gap-2 p-4 bg-muted/50 rounded-2xl w-16">
           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
           <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
