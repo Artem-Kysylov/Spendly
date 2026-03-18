@@ -5,6 +5,7 @@ import { formatCurrency } from "@/lib/chartUtils";
 import TrendArrow from "@/components/ui-elements/TrendArrow";
 import BudgetProgressBar from "@/components/ui-elements/BudgetProgressBar";
 import { useMainBudget } from "@/hooks/useMainBudget";
+import { useRecurringReserved } from "@/hooks/useRecurringReserved";
 import { getFinancialMonthFullRange, getFinancialMonthStart } from "@/lib/dateUtils";
 
 interface CompactKPICardProps {
@@ -33,6 +34,8 @@ export default function CompactKPICard({
     isLoading: isMainBudgetLoading,
   } = useMainBudget();
 
+  const { upcomingRecurringSum } = useRecurringReserved();
+
   // When income is not confirmed, use base budget for daily safe-to-spend calculation
   // to avoid negative values from carryover affecting the calculation
   const effectiveBudget =
@@ -40,7 +43,7 @@ export default function CompactKPICard({
       ? availableToSpend
       : budget;
 
-  const { safeToSpend, daysLeft, pacePercent } = useMemo(() => {
+  const { safeToSpend, daysLeft, pacePercent, safeSpendBalance } = useMemo(() => {
     const today = new Date();
     const resetDay = budgetResetDay || 1;
     const start = getFinancialMonthStart(resetDay, today);
@@ -51,15 +54,16 @@ export default function CompactKPICard({
       Math.ceil((end.getTime() - today.getTime()) / msPerDay),
     );
     const remaining = effectiveBudget - totalExpenses;
-    const safeToSpend = remaining / daysLeft;
+    const safeSpendBalance = remaining - upcomingRecurringSum;
+    const safeToSpend = safeSpendBalance / daysLeft;
     const totalMs = Math.max(1, end.getTime() - start.getTime());
     const elapsedMs = Math.min(
       totalMs,
       Math.max(0, today.getTime() - start.getTime()),
     );
     const pacePercent = (elapsedMs / totalMs) * 100;
-    return { safeToSpend, daysLeft, pacePercent };
-  }, [budgetResetDay, effectiveBudget, totalExpenses]);
+    return { safeToSpend, daysLeft, pacePercent, safeSpendBalance };
+  }, [budgetResetDay, effectiveBudget, totalExpenses, upcomingRecurringSum]);
 
   const displayBudget =
     Number.isFinite(budget) && budget > 0 ? budget : effectiveBudget;
@@ -109,15 +113,23 @@ export default function CompactKPICard({
             baseAmount={incomeConfirmed && carryover !== 0 && budget > 0 ? budget : undefined}
             rolloverAmount={incomeConfirmed && carryover !== 0 && budget > 0 ? carryover : undefined}
             pacePercent={isMainBudgetLoading ? undefined : pacePercent}
+            reservedAmount={upcomingRecurringSum}
             showLabels={false}
           />
           <div className="flex justify-between text-[11px] md:text-xs text-muted-foreground">
             <span>
               {formatCurrency(totalExpenses, currency)} {tBudgets("labels.spent")}
             </span>
-            <span>
-              {formatCurrency(remainingBudget, currency)} {tBudgets("labels.left")}
-            </span>
+            <div className="flex flex-col items-end">
+              <span>
+                {formatCurrency(remainingBudget, currency)} {tBudgets("labels.left")}
+              </span>
+              {upcomingRecurringSum > 0 && (
+                <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                  ({formatCurrency(Math.max(0, safeSpendBalance), currency)} {tDashboard("counters.safeToSpend")})
+                </span>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -147,9 +159,9 @@ export default function CompactKPICard({
           </h3>
           <div className="mt-2">
             <span
-              className={`text-xl md:text-2xl font-bold ${safeToSpend < 0 ? "text-red-500" : "text-foreground"}`}
+              className={`text-xl md:text-2xl font-bold ${safeSpendBalance <= 0 ? "text-orange-500" : "text-foreground"}`}
             >
-              {formatCurrency(safeToSpend, currency)}
+              {formatCurrency(Math.max(0, safeToSpend), currency)}
             </span>
           </div>
         </div>

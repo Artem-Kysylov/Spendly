@@ -42,10 +42,20 @@ function MobileDayButton({
   children,
   ...props
 }: React.ComponentProps<typeof DayButton>) {
+  const isToday =
+    !!props.modifiers?.today ||
+    (typeof props["aria-current"] !== "undefined" &&
+      props["aria-current"] === "date");
+  const isSelected =
+    !!props.modifiers?.selected ||
+    (typeof props["data-selected"] !== "undefined" &&
+      props["data-selected"] === "true");
+
   return (
     <DayButton
       className={cn(
         "flex size-(--cell-size) w-full h-full items-center justify-center rounded-md m-2",
+        isToday && !isSelected && "rounded-full bg-primary/30 text-primary",
         "data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
         "aria-selected:bg-primary aria-selected:text-primary-foreground",
         "data-[disabled=true]:opacity-50",

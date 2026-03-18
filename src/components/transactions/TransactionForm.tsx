@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
@@ -37,7 +37,9 @@ import { useSubscription } from "@/hooks/useSubscription";
 import useDeviceType from "@/hooks/useDeviceType";
 import { supabase } from "@/lib/supabaseClient";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
+import { checkBudgetThresholds } from "@/lib/budget/checkThresholds";
 import type { BudgetFolderItemProps, Transaction } from "@/types/types";
+import type { Language } from "@/types/locale";
 
 // Schema definition
 const transactionSchema = z.object({
@@ -77,6 +79,7 @@ export default function TransactionForm({
   allowTypeChange = true,
 }: TransactionFormProps) {
   const { session } = UserAuth();
+  const locale = useLocale() as Language;
   const tModals = useTranslations("modals");
   const tCommon = useTranslations("common");
   const tTransactions = useTranslations("transactions");
@@ -248,6 +251,21 @@ export default function TransactionForm({
       }
 
       if (error) throw error;
+
+      // Check budget thresholds for expense transactions
+      if (data.type === "expense" && transactionData.budget_folder_id) {
+        try {
+          await checkBudgetThresholds(
+            supabase,
+            session.user.id,
+            transactionData.budget_folder_id,
+            locale
+          );
+        } catch (budgetCheckError) {
+          console.error("Error checking budget thresholds:", budgetCheckError);
+          // Don't fail the transaction if budget check fails
+        }
+      }
 
       // Save Template if checked
       if (data.saveAsTemplate && !initialData?.id) {

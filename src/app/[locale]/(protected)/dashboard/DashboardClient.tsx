@@ -465,10 +465,10 @@ function DashboardClient() {
               className="mt-8 min-w-0 overflow-x-hidden"
             >
               {recurringTransactions.length > 0 ? (
-                <div className="grid gap-6 lg:grid-cols-2">
+                <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
                   <SimplifiedChart />
 
-                  <Card className="w-full overflow-hidden">
+                  <Card className="w-full overflow-hidden lg:min-h-[340px] flex flex-col">
                     <CardHeader className="px-4 pt-5 pb-3 sm:px-5">
                       <CardTitle>
                         {tTransactions("recurring.calendar.title")}
@@ -480,7 +480,7 @@ function DashboardClient() {
                         })
                       </p>
                     </CardHeader>
-                    <CardContent className="px-4 pb-4 sm:px-5">
+                    <CardContent className="px-4 pb-4 sm:px-5 lg:px-6 lg:pb-6 lg:flex-1 lg:flex lg:items-stretch">
                       <RecurringCalendar
                         transactions={recurringTransactions}
                         variant="dashboard"

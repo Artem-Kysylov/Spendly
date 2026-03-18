@@ -1,15 +1,16 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { getCurrentMonthRange } from "@/lib/dateUtils";
-import { getUserPreferredLanguage } from "@/lib/i18n/user-locale";
 import {
   getNotificationMessage,
   NotificationVariant,
 } from "@/lib/notificationStrings";
+import type { Language } from "@/types/locale";
 
 export async function checkBudgetThresholds(
   supabase: SupabaseClient,
   userId: string,
-  budgetFolderId: string
+  budgetFolderId: string,
+  locale: Language
 ) {
   try {
     // 1. Get budget info
@@ -82,7 +83,6 @@ export async function checkBudgetThresholds(
       .eq("user_id", userId)
       .maybeSingle();
 
-    const locale = await getUserPreferredLanguage(userId);
     const message = getNotificationMessage(
       "budget_alert",
       locale,

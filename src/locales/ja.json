@@ -442,6 +442,8 @@
       "usedPercent": "使用済み",
       "overBudget": "予算超過",
       "daysLeftInMonth": "{days} days left in month",
+      "safeToSpend": "安全に使える",
+      "reserved": "予約済み",
       "status": {
         "exceeded": "超過",
         "warning": "警告",

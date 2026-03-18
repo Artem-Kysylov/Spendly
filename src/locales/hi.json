@@ -442,6 +442,8 @@
       "usedPercent": "उपयोग",
       "overBudget": "बजट से अधिक",
       "daysLeftInMonth": "{days} days left in month",
+      "safeToSpend": "सुरक्षित खर्च",
+      "reserved": "आरक्षित",
       "status": {
         "exceeded": "अधिक",
         "warning": "चेतावनी",

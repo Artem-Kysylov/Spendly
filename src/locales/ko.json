@@ -442,6 +442,8 @@
       "usedPercent": "사용됨",
       "overBudget": "Over budget",
       "daysLeftInMonth": "{days} days left in month",
+      "safeToSpend": "안전하게 사용 가능",
+      "reserved": "예약됨",
       "status": {
         "exceeded": "Exceeded",
         "warning": "Warning",

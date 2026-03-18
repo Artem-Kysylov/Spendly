@@ -42,12 +42,12 @@ function Calendar({
         ...formatters,
       }}
       classNames={{
-        root: cn("w-fit", defaultClassNames.root),
+        root: cn("w-fit flex flex-col", defaultClassNames.root),
         months: cn(
           "flex gap-4 flex-col md:flex-row relative",
           defaultClassNames.months,
         ),
-        month: cn("flex flex-col w-full gap-4", defaultClassNames.month),
+        month: cn("flex flex-col w-full gap-4 flex-1", defaultClassNames.month),
         nav: cn(
           hideNav
             ? "hidden"
@@ -115,7 +115,7 @@ function Calendar({
         range_middle: cn("rounded-none", defaultClassNames.range_middle),
         range_end: cn("rounded-r-md bg-accent", defaultClassNames.range_end),
         today: cn(
-          "bg-accent text-accent-foreground rounded-md data-[selected=true]:rounded-none",
+          "text-primary [&_button:not([aria-selected=true]):not([data-selected=true])]:rounded-full [&_button:not([aria-selected=true]):not([data-selected=true])]:bg-primary/30 [&_button:not([aria-selected=true]):not([data-selected=true])]:text-primary",
           defaultClassNames.today,
         ),
         outside: cn(
@@ -182,11 +182,15 @@ function CalendarDayButton({
   children,
   ...props
 }: React.ComponentProps<typeof DayButton>) {
+  const isToday = !!props.modifiers?.today;
+  const isSelected = !!props.modifiers?.selected;
+
   return (
     <DayButton
       className={cn(
         // кнопка занимает всю ячейку календаря
         "flex size-(--cell-size) w-full h-full items-center justify-center rounded-md",
+        isToday && !isSelected && "rounded-full bg-primary/30 text-primary",
         // базовые состояния выбора/disabled (react-day-picker выставляет data-атрибуты)
         "data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
         "aria-selected:bg-primary aria-selected:text-primary-foreground",

@@ -442,6 +442,8 @@
       "usedPercent": "использовано",
       "overBudget": "Превышен",
       "daysLeftInMonth": "Осталось {days} дней в месяце",
+      "safeToSpend": "безопасно тратить",
+      "reserved": "зарезервировано",
       "status": {
         "exceeded": "Превышен",
         "warning": "Предупреждение",

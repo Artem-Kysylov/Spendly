@@ -442,6 +442,8 @@
       "usedPercent": "used",
       "overBudget": "Over budget",
       "daysLeftInMonth": "{days} days left in month",
+      "safeToSpend": "safe to spend",
+      "reserved": "reserved",
       "status": {
         "exceeded": "Exceeded",
         "warning": "Warning",

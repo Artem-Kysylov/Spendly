@@ -17,6 +17,7 @@ import {
 import { formatCurrency } from "@/lib/chartUtils";
 import type { Transaction } from "@/types/types";
 import { useLocale, useTranslations } from "next-intl";
+import useDeviceType from "@/hooks/useDeviceType";
 import { enUS, ru, uk, id, ja, ko, hi } from "date-fns/locale";
 import type { Locale as DateFnsLocale } from "date-fns";
 
@@ -33,6 +34,7 @@ export default function RecurringCalendar({
 }: RecurringCalendarProps) {
   const t = useTranslations("recurring.calendar");
   const localeCode = useLocale();
+  const { isMobile } = useDeviceType();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -80,12 +82,19 @@ export default function RecurringCalendar({
       ? paymentDatesMap.has(day.toISOString().split("T")[0])
       : false;
 
+    const isToday = !!props.modifiers?.today;
+    const isSelected = !!props.modifiers?.selected;
+
     return (
       <DayButton
         className={cn(
-          "flex size-(--cell-size) w-full h-full items-center justify-center rounded-md relative",
+          "flex items-center justify-center rounded-md relative",
+          isMobile && "size-(--cell-size) m-2",
+          !isMobile && "size-14 text-sm font-medium tabular-nums leading-none",
+          isToday && !isSelected && "rounded-full bg-primary/30 text-primary",
           "data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
           "aria-selected:bg-primary aria-selected:text-primary-foreground",
+          "data-[selected=true]:rounded-full aria-selected:rounded-full",
           "data-[disabled=true]:opacity-50",
           className,
         )}
@@ -93,7 +102,7 @@ export default function RecurringCalendar({
       >
         {children}
         {hasPayments && (
-          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+          <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-primary" />
         )}
       </DayButton>
     );
@@ -106,10 +115,16 @@ export default function RecurringCalendar({
   };
 
   return (
-    <div className={cn("w-full", variant === "dashboard" ? "mb-4" : "mb-3")}>
+    <div
+      className={cn(
+        "w-full",
+        variant === "dashboard" ? "mb-4" : "mb-3",
+        !isMobile && variant === "dashboard" && "mb-0 flex flex-col flex-1",
+      )}
+    >
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
-          <div className="flex justify-center">
+          <div className="flex w-full justify-center lg:h-full lg:flex-1 lg:items-center">
             <Calendar
               mode="single"
               selected={selectedDate}
@@ -126,7 +141,34 @@ export default function RecurringCalendar({
               onMonthChange={setCurrentMonth}
               locale={dfLocale}
               showOutsideDays={false}
-              className="w-fit mx-auto"
+              captionLayout={isMobile ? "dropdown" : "label"}
+              buttonVariant={isMobile ? "ghost" : "ghost"}
+              hideNav={isMobile}
+              className={cn(
+                "w-full",
+                isMobile
+                  ? "[--cell-size:56px]"
+                  : "[--cell-size:56px] max-w-[560px] mx-auto px-10 py-8",
+              )}
+              classNames={
+                isMobile
+                  ? { week: "flex w-full mt-3 gap-2" }
+                  : {
+                      root: "w-full flex flex-col",
+                      months: "w-full flex flex-col relative",
+                      month: "w-full flex flex-col",
+                      month_caption:
+                        "flex items-center justify-center h-(--cell-size) w-full px-(--cell-size) mb-4",
+                      table: "w-full",
+                      weekdays: "grid grid-cols-7 w-full mb-4",
+                      weekday:
+                        "text-muted-foreground font-normal text-[0.75rem] select-none text-center",
+                      weeks:
+                        "grid grid-cols-7 w-full gap-y-4",
+                      week: "contents",
+                      day: "relative w-full h-full p-0 text-center group/day select-none flex items-center justify-center",
+                    }
+              }
               components={{
                 DayButton: CustomDayButton,
               }}
