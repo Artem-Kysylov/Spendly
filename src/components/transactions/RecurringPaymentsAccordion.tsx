@@ -106,16 +106,7 @@ export default function RecurringPaymentsAccordion({
             </div>
           ) : (
             <>
-              <div className="md:hidden">
-                <RecurringCalendar
-                  transactions={recurringTransactions}
-                  variant="settings"
-                  currency={currency}
-                />
-                <div className="my-4 border-t border-border" />
-              </div>
-
-              <div className="hidden md:flex md:gap-4 md:items-stretch md:min-h-0">
+              <div className="flex flex-col md:flex-row md:gap-4 md:items-stretch md:min-h-0">
                 <div className="md:w-[520px] md:shrink-0">
                   <RecurringCalendar
                     transactions={recurringTransactions}
@@ -124,10 +115,10 @@ export default function RecurringPaymentsAccordion({
                   />
                 </div>
 
-                <div className="w-px bg-border" />
-              </div>
+                <div className="hidden md:block w-px bg-border" />
+                <div className="md:hidden my-4 border-t border-border" />
 
-              <div className="space-y-2 md:flex-1 md:min-h-0 md:max-h-[420px] md:overflow-y-auto md:pr-1">
+                <div className="space-y-2 md:flex-1 md:min-h-0 md:max-h-[420px] md:overflow-y-auto md:pr-1">
                 {recurringTransactions.map((transaction) => (
                   <div
                     key={transaction.id}
@@ -162,6 +153,7 @@ export default function RecurringPaymentsAccordion({
                     </div>
                   </div>
                 ))}
+                </div>
               </div>
             </>
           )}
