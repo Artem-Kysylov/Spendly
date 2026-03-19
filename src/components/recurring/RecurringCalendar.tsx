@@ -154,7 +154,7 @@ export default function RecurringCalendar({
                     : "[--cell-size:44px] sm:[--cell-size:56px]",
                 )}
                 classNames={{
-                  week: "flex w-full mt-3 gap-1 sm:gap-2",
+                  week: "flex w-full mt-4 gap-1 sm:gap-2",
                   day: "relative flex-1 h-(--cell-size) p-0 text-center group/day select-none flex items-center justify-center",
                 }}
                 components={{
