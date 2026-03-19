@@ -90,7 +90,8 @@ export default function RecurringCalendar({
       <DayButton
         className={cn(
           "flex items-center justify-center rounded-md relative",
-          isMobile && "w-full h-full touch-manipulation",
+          isMobile &&
+            "w-[var(--cell-size)] h-[var(--cell-size)] shrink-0 touch-manipulation",
           !isMobile && "size-14 text-sm font-medium tabular-nums leading-none",
           isToday && !isSelected && "rounded-full bg-primary/30 text-primary",
           "data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
@@ -154,7 +155,7 @@ export default function RecurringCalendar({
                 )}
                 classNames={{
                   week: "flex w-full mt-4 gap-1 sm:gap-2",
-                  day: "relative flex-1 aspect-square p-0 text-center group/day select-none flex items-center justify-center",
+                  day: "relative flex-1 h-[var(--cell-size)] p-0 text-center group/day select-none flex items-center justify-center",
                 }}
                 components={{
                   DayButton: CustomDayButton,
