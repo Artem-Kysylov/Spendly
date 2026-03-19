@@ -147,7 +147,10 @@ export default function RecurringCalendar({
                 buttonVariant={"ghost"}
                 hideNav
                 className={cn("w-full", "[--cell-size:56px]")}
-                classNames={{ week: "flex w-full mt-3 gap-2" }}
+                classNames={{
+                  week: "flex w-full mt-3 gap-2",
+                  day: "relative w-full h-(--cell-size) p-0 text-center group/day select-none",
+                }}
                 components={{
                   DayButton: CustomDayButton,
                 }}
