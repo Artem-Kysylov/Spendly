@@ -48,8 +48,8 @@ function MobileDayButton({
       props["aria-current"] === "date");
   const isSelected =
     !!props.modifiers?.selected ||
-    (typeof props["data-selected"] !== "undefined" &&
-      props["data-selected"] === "true");
+    props["aria-selected"] === true ||
+    props["aria-selected"] === "true";
 
   return (
     <DayButton
