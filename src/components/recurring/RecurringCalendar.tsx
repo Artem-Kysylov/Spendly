@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
+  PopoverAnchor,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
@@ -89,7 +90,7 @@ export default function RecurringCalendar({
       <DayButton
         className={cn(
           "flex items-center justify-center rounded-md relative",
-          isMobile && "size-(--cell-size) m-2",
+          isMobile && "size-(--cell-size) w-full h-full touch-manipulation",
           !isMobile && "size-14 text-sm font-medium tabular-nums leading-none",
           isToday && !isSelected && "rounded-full bg-primary/30 text-primary",
           "data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
@@ -123,58 +124,83 @@ export default function RecurringCalendar({
       )}
     >
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-        <PopoverTrigger asChild>
-          <div className="flex w-full justify-center lg:h-full lg:flex-1 lg:items-center">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={(date) => {
-                if (date) {
-                  const dateKey = date.toISOString().split("T")[0];
-                  if (paymentDatesMap.has(dateKey)) {
-                    setSelectedDate(date);
-                    setIsPopoverOpen(true);
-                  }
-                }
-              }}
-              month={currentMonth}
-              onMonthChange={setCurrentMonth}
-              locale={dfLocale}
-              showOutsideDays={false}
-              captionLayout={isMobile ? "dropdown" : "label"}
-              buttonVariant={isMobile ? "ghost" : "ghost"}
-              hideNav={isMobile}
-              className={cn(
-                "w-full",
-                isMobile
-                  ? "[--cell-size:56px]"
-                  : "[--cell-size:56px] max-w-[560px] mx-auto px-10 py-8",
-              )}
-              classNames={
-                isMobile
-                  ? { week: "flex w-full mt-3 gap-2" }
-                  : {
-                      root: "w-full flex flex-col",
-                      months: "w-full flex flex-col relative",
-                      month: "w-full flex flex-col",
-                      month_caption:
-                        "flex items-center justify-center h-(--cell-size) w-full px-(--cell-size) mb-4",
-                      table: "w-full",
-                      weekdays: "grid grid-cols-7 w-full mb-4",
-                      weekday:
-                        "text-muted-foreground font-normal text-[0.75rem] select-none text-center",
-                      weeks:
-                        "grid grid-cols-7 w-full gap-y-4",
-                      week: "contents",
-                      day: "relative w-full h-full p-0 text-center group/day select-none flex items-center justify-center",
+        {isMobile ? (
+          <PopoverAnchor asChild>
+            <div className="flex w-full justify-center lg:h-full lg:flex-1 lg:items-center">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => {
+                  if (date) {
+                    const dateKey = date.toISOString().split("T")[0];
+                    if (paymentDatesMap.has(dateKey)) {
+                      setSelectedDate(date);
+                      setIsPopoverOpen(true);
                     }
-              }
-              components={{
-                DayButton: CustomDayButton,
-              }}
-            />
-          </div>
-        </PopoverTrigger>
+                  }
+                }}
+                month={currentMonth}
+                onMonthChange={setCurrentMonth}
+                locale={dfLocale}
+                showOutsideDays={false}
+                captionLayout={"dropdown"}
+                buttonVariant={"ghost"}
+                hideNav
+                className={cn("w-full", "[--cell-size:56px]")}
+                classNames={{ week: "flex w-full mt-3 gap-2" }}
+                components={{
+                  DayButton: CustomDayButton,
+                }}
+              />
+            </div>
+          </PopoverAnchor>
+        ) : (
+          <PopoverTrigger asChild>
+            <div className="flex w-full justify-center lg:h-full lg:flex-1 lg:items-center">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={(date) => {
+                  if (date) {
+                    const dateKey = date.toISOString().split("T")[0];
+                    if (paymentDatesMap.has(dateKey)) {
+                      setSelectedDate(date);
+                      setIsPopoverOpen(true);
+                    }
+                  }
+                }}
+                month={currentMonth}
+                onMonthChange={setCurrentMonth}
+                locale={dfLocale}
+                showOutsideDays={false}
+                captionLayout={"label"}
+                buttonVariant={"ghost"}
+                className={cn(
+                  "w-full",
+                  "[--cell-size:56px] max-w-[560px] mx-auto px-10 py-8",
+                )}
+                classNames={{
+                  root: "w-full flex flex-col",
+                  months: "w-full flex flex-col relative",
+                  month: "w-full flex flex-col",
+                  month_caption:
+                    "flex items-center justify-center h-(--cell-size) w-full px-(--cell-size) mb-4",
+                  table: "w-full",
+                  weekdays: "grid grid-cols-7 w-full mb-4",
+                  weekday:
+                    "text-muted-foreground font-normal text-[0.75rem] select-none text-center",
+                  weeks:
+                    "grid grid-cols-7 w-full gap-y-4",
+                  week: "contents",
+                  day: "relative w-full h-full p-0 text-center group/day select-none flex items-center justify-center",
+                }}
+                components={{
+                  DayButton: CustomDayButton,
+                }}
+              />
+            </div>
+          </PopoverTrigger>
+        )}
         <PopoverContent
           className="w-auto p-0 bg-card/95 backdrop-blur-md border border-border shadow-lg"
           align="center"
