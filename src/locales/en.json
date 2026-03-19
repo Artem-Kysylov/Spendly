@@ -324,6 +324,7 @@
     "title": "Limit Reached",
     "budgets": "You have reached the limit of 3 budgets on the Free plan.",
     "wallets": "You have reached the limit of 5 wallets on the Free plan.",
+    "custom": "You have reached the limit for your current plan.",
     "description": "Upgrade to Pro to unlock unlimited budgets, AI assistant, and more powerful features.",
     "upgrade": "Upgrade to Pro",
     "cancel": "Not now"
@@ -338,7 +339,16 @@
     "recurring": {
       "title": "Recurring Payments",
       "empty": "No recurring payments",
-      "dayLabel": "Day {day} of month"
+      "dayLabel": "Day {day} of month",
+      "calendar": {
+        "title": "Recurring transactions",
+        "total": "Total",
+        "inDays": "In {days} days",
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "monthly": "Monthly",
+        "noPayments": "No recurring payments scheduled"
+      }
     },
     "search": {
       "placeholder": "Search transactions..."
@@ -432,6 +442,8 @@
       "usedPercent": "used",
       "overBudget": "Over budget",
       "daysLeftInMonth": "{days} days left in month",
+      "safeToSpend": "safe to spend",
+      "reserved": "reserved",
       "status": {
         "exceeded": "Exceeded",
         "warning": "Warning",
@@ -807,6 +819,9 @@
     "welcomeTitle": "Meet Spendly Pal",
     "welcomeDesc": "Your AI-powered financial assistant. Ask questions like \"What's my spending this month?\" or \"Add a new transaction.\"",
     "rateLimited": "You've reached your AI request limit. Try again later or upgrade to Pro.",
+    "transactionSaved": {
+      "message": "✅ Added successfully!\n\nWant to add another transaction or update a budget?"
+    },
     "transactionFallback": "I couldn't parse that as a transaction. Try: 'Lunch 150', 'Taxi 200 yesterday', or 'Pizza 150, Cola 50 yesterday'.",
     "input": {
       "placeholder": "Message Spendly Pal..."
@@ -827,6 +842,11 @@
         "budget": "Budget",
         "amount": "Amount"
       }
+    },
+    "budgetConfirm": {
+      "title": "Set budget?",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
     },
     "headings": {
       "spendingAnalysis": "Spending Analysis",
@@ -1200,6 +1220,15 @@
       "createdBodyFriendly": "Done! I logged {name} ({amount}).",
       "createdBodyFormal": "A transaction was logged: {name} ({amount}).",
       "createdBodyPlayful": "Cha-ching! Logged {name} ({amount})."
+    },
+    "calendar": {
+      "title": "Recurring transactions",
+      "total": "Total",
+      "inDays": "In {days} days",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "monthly": "Monthly",
+      "noPayments": "No recurring payments scheduled"
     }
   },
   "errors": {

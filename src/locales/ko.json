@@ -324,6 +324,7 @@
     "title": "Limit Reached",
     "budgets": "You have reached the limit of 3 budgets on the Free plan.",
     "wallets": "You have reached the limit of 5 wallets on the Free plan.",
+    "custom": "현재 플랜의 한도에 도달했습니다.",
     "description": "Upgrade to Pro to unlock unlimited budgets, AI assistant, and more powerful features.",
     "upgrade": "Upgrade to Pro",
     "cancel": "Not now"
@@ -338,7 +339,16 @@
     "recurring": {
       "title": "정기 결제",
       "empty": "정기 결제가 없습니다",
-      "dayLabel": "매월 {day}일"
+      "dayLabel": "매월 {day}일",
+      "calendar": {
+        "title": "정기 거래",
+        "total": "합계",
+        "inDays": "{days}일 후",
+        "today": "오늘",
+        "tomorrow": "내일",
+        "monthly": "매월",
+        "noPayments": "예정된 정기 결제가 없습니다"
+      }
     },
     "search": {
       "placeholder": "Search transactions..."
@@ -432,6 +442,8 @@
       "usedPercent": "사용됨",
       "overBudget": "Over budget",
       "daysLeftInMonth": "{days} days left in month",
+      "safeToSpend": "안전하게 사용 가능",
+      "reserved": "예약됨",
       "status": {
         "exceeded": "Exceeded",
         "warning": "Warning",
@@ -806,10 +818,13 @@
     "title": "Spendly Pal",
     "welcomeTitle": "Spendly Pal을 만나보세요",
     "welcomeDesc": "AI 기반 금융 비서입니다. \"이번 달 지출이 얼마인가요?\" 또는 \"새 거래 추가\"와 같은 질문을 해보세요.",
-    "rateLimited": "AI 일일 한도에 도달했습니다. 나중에 다시 시도하거나 Pro로 업그레이드하세요.",
-    "transactionFallback": "거래로 해석하지 못했어요. 예: '점심 150', '택시 200 어제', 또는 '피자 150, 콜라 50 어제'.",
+    "rateLimited": "AI 요청 한도에 도달했습니다. 나중에 다시 시도하거나 Pro로 업그레이드하세요.",
+    "transactionSaved": {
+      "message": "✅ 추가했어요!\n\n거래를 하나 더 추가할까요, 아니면 예산을 업데이트할까요?"
+    },
+    "transactionFallback": "거래로 해석할 수 없었어요. 예: '점심 150', '택시 200 어제', 또는 '피자 150, 콜라 50 어제'.",
     "input": {
-      "placeholder": "Spendly Pal에게 메시지 보내기..."
+      "placeholder": "Spendly Pal에게 메시지..."
     },
     "toasts": {
       "usedNOfDailyLimit": "오늘 {limit}개의 AI 메시지 중 {count}개를 사용했습니다."
@@ -827,6 +842,11 @@
         "budget": "예산",
         "amount": "금액"
       }
+    },
+    "budgetConfirm": {
+      "title": "예산을 설정할까요?",
+      "confirm": "확인",
+      "cancel": "취소"
     },
     "headings": {
       "spendingAnalysis": "지출 분석",
@@ -1200,6 +1220,15 @@
       "createdBodyFriendly": "완료! {name}({amount})를 기록했어요.",
       "createdBodyFormal": "거래가 기록되었습니다: {name}({amount}).",
       "createdBodyPlayful": "짤랑! {name}({amount}) 기록 완료."
+    },
+    "calendar": {
+      "title": "정기 거래",
+      "total": "합계",
+      "inDays": "{days}일 후",
+      "today": "오늘",
+      "tomorrow": "내일",
+      "monthly": "매월",
+      "noPayments": "예정된 정기 결제가 없습니다"
     }
   },
   "errors": {

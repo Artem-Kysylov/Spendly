@@ -324,6 +324,7 @@
     "title": "Limit Reached",
     "budgets": "You have reached the limit of 3 budgets on the Free plan.",
     "wallets": "You have reached the limit of 5 wallets on the Free plan.",
+    "custom": "आपने अपने वर्तमान प्लान की सीमा तक पहुंच गए हैं।",
     "description": "Upgrade to Pro to unlock unlimited budgets, AI assistant, and more powerful features.",
     "upgrade": "Upgrade to Pro",
     "cancel": "Not now"
@@ -338,7 +339,16 @@
     "recurring": {
       "title": "आवर्ती भुगतान",
       "empty": "कोई आवर्ती भुगतान नहीं",
-      "dayLabel": "हर महीने की {day} तारीख"
+      "dayLabel": "हर महीने की {day} तारीख",
+      "calendar": {
+        "title": "आवर्ती लेन-देन",
+        "total": "कुल",
+        "inDays": "{days} दिनों में",
+        "today": "आज",
+        "tomorrow": "कल",
+        "monthly": "मासिक",
+        "noPayments": "कोई नियमित भुगतान निर्धारित नहीं है"
+      }
     },
     "search": {
       "placeholder": "Search transactions..."
@@ -432,6 +442,8 @@
       "usedPercent": "उपयोग",
       "overBudget": "बजट से अधिक",
       "daysLeftInMonth": "{days} days left in month",
+      "safeToSpend": "सुरक्षित खर्च",
+      "reserved": "आरक्षित",
       "status": {
         "exceeded": "अधिक",
         "warning": "चेतावनी",
@@ -806,10 +818,13 @@
     "title": "Spendly Pal",
     "welcomeTitle": "Spendly Pal से मिलें",
     "welcomeDesc": "आपका AI-संचालित वित्तीय सहायक। पूछें: \"मैंे इस महीने कितना खर्च किया?\" या \"नई लेन-देन जोड़ें।\"",
-    "rateLimited": "आप AI की दैनिक सीमा पर पहुँच गए हैं। बाद में प्रयास करें या Pro में अपग्रेड करें।",
-    "transactionFallback": "मैं इसे ट्रांज़ैक्शन के रूप में नहीं समझ पाया। ऐसे लिखें: 'लंच 150', 'टैक्सी 200 कल', या 'पिज़्ज़ा 150, कोला 50 कल'.",
+    "rateLimited": "आप AI अनुरोध सीमा तक पहुँच गए हैं। बाद में फिर कोशिश करें या Pro में अपग्रेड करें।",
+    "transactionSaved": {
+      "message": "✅ सफलतापूर्वक जोड़ दिया!\n\nक्या आप एक और लेन-देन जोड़ना चाहते हैं या बजट अपडेट करना चाहते हैं?"
+    },
+    "transactionFallback": "मैं इसे लेन-देन के रूप में पार्स नहीं कर सका। उदाहरण: 'लंच 150', 'टैक्सी 200 कल', या 'पिज़्ज़ा 150, कोला 50 कल'.",
     "input": {
-      "placeholder": "Spendly Pal को संदेश…"
+      "placeholder": "Spendly Pal को संदेश..."
     },
     "toasts": {
       "usedNOfDailyLimit": "आज आपने {count}/{limit} AI संदेश उपयोग किए।"
@@ -827,6 +842,11 @@
         "budget": "बजट",
         "amount": "राशि"
       }
+    },
+    "budgetConfirm": {
+      "title": "बजट सेट करें?",
+      "confirm": "पुष्टि करें",
+      "cancel": "रद्द करें"
     },
     "headings": {
       "spendingAnalysis": "खर्च विश्लेषण",
@@ -1200,6 +1220,15 @@
       "createdBodyFriendly": "हो गया! मैंने {name} ({amount}) लॉग कर दिया।",
       "createdBodyFormal": "एक लेन-देन लॉग किया गया: {name} ({amount}).",
       "createdBodyPlayful": "चिंग! {name} ({amount}) लॉग हो गया।"
+    },
+    "calendar": {
+      "title": "आवर्ती लेन-देन",
+      "total": "कुल",
+      "inDays": "{days} दिनों में",
+      "today": "आज",
+      "tomorrow": "कल",
+      "monthly": "मासिक",
+      "noPayments": "कोई नियमित भुगतान निर्धारित नहीं है"
     }
   },
   "errors": {

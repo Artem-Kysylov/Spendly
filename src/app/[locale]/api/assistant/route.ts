@@ -77,6 +77,29 @@ function getUtcDayStartIso(date: Date): string {
   return d.toISOString();
 }
 
+function getStreamErrorFallbackText(localeRaw: string | undefined): string {
+  const locale = String(localeRaw || "en").toLowerCase().split("-")[0];
+  if (locale === "ru") {
+    return "Провайдер ИИ временно ограничил запросы. Попробуй ещё раз через несколько секунд.";
+  }
+  if (locale === "uk") {
+    return "Провайдер ШІ тимчасово обмежив запити. Спробуй ще раз за кілька секунд.";
+  }
+  if (locale === "ja") {
+    return "AIプロバイダーが一時的に混雑しています。数秒後にもう一度お試しください。";
+  }
+  if (locale === "id") {
+    return "Penyedia AI sedang membatasi permintaan sementara. Coba lagi dalam beberapa detik.";
+  }
+  if (locale === "hi") {
+    return "AI प्रदाता अस्थायी रूप से अनुरोध सीमित कर रहा है। कृपया कुछ सेकंड बाद फिर से कोशिश करें।";
+  }
+  if (locale === "ko") {
+    return "AI 제공자가 일시적으로 요청을 제한하고 있어요. 몇 초 후에 다시 시도해 주세요.";
+  }
+  return "The AI provider is temporarily rate-limited. Please try again in a few seconds.";
+}
+
 async function getIsProUser(userId: string): Promise<boolean> {
   const supabase = getServerSupabaseClient();
   const { data, error } = await supabase
@@ -281,6 +304,7 @@ function streamProviderWithUsage(
     process.env.LLM_DEBUG === "1" || process.env.LLM_DEBUG === "true";
   const startTs = Date.now();
   let firstChunkTs: number | null = null;
+  let finalized = false;
 
   const out = new ReadableStream({
     start(controller) {
@@ -331,6 +355,7 @@ function streamProviderWithUsage(
               bypassUsed: false,
               requestType: "chat",
             });
+            finalized = true;
             return;
           }
           const chunk = typeof value === "string" ? value : String(value ?? "");
@@ -339,7 +364,39 @@ function streamProviderWithUsage(
           controller.enqueue(encoder.encode(chunk));
           loop();
         } catch (e) {
-          controller.error(e);
+          const errorMessage =
+            e instanceof Error ? e.message : "Unknown stream error";
+
+          // Avoid throwing from stream: it can crash Next.js piping.
+          // Instead, return a short localized fallback and log failure.
+          if (!finalized) {
+            finalized = true;
+            const fallback = getStreamErrorFallbackText(meta.locale);
+            try {
+              controller.enqueue(encoder.encode(fallback));
+            } catch {
+              // ignore
+            }
+            try {
+              controller.close();
+            } catch {
+              // ignore
+            }
+            await logUsage({
+              userId: meta.userId,
+              provider: meta.provider,
+              model: meta.model,
+              promptLength: meta.promptLength,
+              responseLength,
+              success: false,
+              errorMessage,
+              intent: meta.intent,
+              period: meta.period,
+              bypassUsed: false,
+              requestType: "chat",
+              blockReason: errorMessage.includes(":429:") ? "provider_429" : "provider_error",
+            });
+          }
         }
       };
       loop();
@@ -439,7 +496,16 @@ export async function POST(req: NextRequest) {
   const acceptLocaleRaw = acceptLang.split(",")?.[0];
   const locale: SupportedLocale =
     normalizeLocale(pathLocaleRaw) || normalizeLocale(acceptLocaleRaw) || "en";
-  const currency = locale === "ru" ? "RUB" : "USD";
+  
+  // Fetch user's actual currency from user_settings (most authoritative source)
+  const supabase = getServerSupabaseClient();
+  const { data: userSettings } = await supabase
+    .from("user_settings")
+    .select("currency")
+    .eq("user_id", userId)
+    .maybeSingle();
+  
+  const currency = userSettings?.currency || (locale === "ru" ? "RUB" : "USD");
 
   // Определяем intent и период
   const intent = detectIntentFromMessage(safeMessage);

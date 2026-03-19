@@ -55,6 +55,22 @@ export interface ToastMessageProps {
   type: "success" | "error";
 }
 
+export interface ToolInvocation {
+  toolCallId: string;
+  toolName: string;
+  args: unknown;
+  state: "call" | "result";
+  result?: unknown;
+}
+
+export interface ChatMessage {
+  id: string;
+  content: string;
+  role: "user" | "assistant";
+  timestamp: Date;
+  toolInvocations?: ToolInvocation[];
+}
+
 export interface Transaction {
   id: string;
   title: string;
@@ -355,6 +371,7 @@ export interface BarChartProps {
   emptyMessage?: string;
   barColor?: string;
   orientation?: "vertical" | "horizontal";
+  barCategoryGap?: number | string;
   className?: string;
   showBudgetLine?: boolean; // Показывать ли бюджетную линию
   mainBudget?: number; // Общий бюджет
@@ -548,7 +565,7 @@ export interface ChatMessage {
   content: string;
   role: "user" | "assistant";
   timestamp: Date;
-  toolInvocations?: any[];
+  toolInvocations?: ToolInvocation[];
 }
 
 export interface ChatState {

@@ -12,6 +12,7 @@ import {
   periodLabel as canonicalPeriodLabel,
 } from "@/prompts/spendlyPal/canonicalPhrases";
 import { parseTransactionLocally } from "@/lib/parseTransactionLocally";
+import { isBudgetLimitIntent } from "@/lib/ai/intent";
 // import { trackEvent } from "@/lib/telemetry";
 import { supabase } from "@/lib/supabaseClient";
 import type { AIResponse, AssistantTone, Period } from "@/types/ai";
@@ -81,6 +82,7 @@ export const useChat = (): UseChatReturn => {
   const [limitModalMessage, setLimitModalMessage] = useState<string | null>(null);
 
   const tAssistant = useTranslations("assistant");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const { subscriptionPlan } = useSubscription();
   const { toast } = useToast();
@@ -476,6 +478,115 @@ export const useChat = (): UseChatReturn => {
       const sid = await createSessionIfNeeded(content);
       await persistMessage("user", content, sid);
 
+      if (isBudgetLimitIntent(content)) {
+        try {
+          const {
+            data: { session: currentSession },
+          } = await supabase.auth.getSession();
+          const token = currentSession?.access_token;
+          if (!token) throw new Error("Not authenticated");
+
+          const consumeResp = await fetch("/api/ai/consume", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              requestType: "chat",
+              promptChars: String(content || "").length,
+            }),
+          });
+
+          if (!consumeResp.ok) {
+            setRateLimitedUntil(Date.now() + 60_000);
+            setIsLimitModalOpen(true);
+
+            let custom = "";
+            try {
+              const ct = consumeResp.headers.get("content-type") || "";
+              if (ct.includes("application/json")) {
+                const json = (await consumeResp.json().catch(() => null)) as unknown;
+                if (json && typeof json === "object") {
+                  const j = json as { message?: unknown; error?: unknown };
+                  if (typeof j.message === "string") custom = j.message;
+                  else if (typeof j.error === "string") custom = j.error;
+                }
+              }
+            } catch {
+              // ignore
+            }
+
+            const msg = custom || tAssistant("rateLimited");
+            setLimitModalMessage(msg);
+
+            const aiMessage: ChatMessage = {
+              id: (Date.now() + 1).toString(),
+              content: msg,
+              role: "assistant",
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, aiMessage]);
+            await persistMessage("assistant", msg, sid);
+            setIsTyping(false);
+            setAbortController(null);
+            return;
+          }
+
+          const parseResp = await fetch("/api/budget/parse", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message: content }),
+          });
+
+          if (!parseResp.ok) {
+            throw new Error("Parse failed");
+          }
+
+          const proposal = (await parseResp.json().catch(() => null)) as unknown;
+          if (!proposal || typeof proposal !== "object") {
+            throw new Error("Invalid proposal");
+          }
+
+          const aiMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            content: "",
+            role: "assistant",
+            timestamp: new Date(),
+            toolInvocations: [
+              {
+                toolCallId: `budget-${Date.now()}`,
+                toolName: "propose_budget",
+                args: proposal,
+                state: "result",
+                result: proposal,
+              },
+            ],
+          };
+
+          setMessages((prev) => [...prev, aiMessage]);
+          setIsTyping(false);
+          setAbortController(null);
+          return;
+        } catch {
+          const msg = tCommon("unexpectedError");
+          const aiMessage: ChatMessage = {
+            id: (Date.now() + 1).toString(),
+            content: msg,
+            role: "assistant",
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          await persistMessage("assistant", msg, sid);
+          setIsTyping(false);
+          setAbortController(null);
+          return;
+        }
+      }
+
       const localParse = parseTransactionLocally(content, locale);
       if (localParse.success && (localParse.transactions?.length || localParse.transaction)) {
         const transactions =
@@ -605,6 +716,8 @@ export const useChat = (): UseChatReturn => {
             },
           ],
         };
+        // Let the typing indicator show briefly before rendering the card
+        await new Promise((r) => setTimeout(r, 450));
         setMessages((prev) => [...prev, aiMessage]);
         setIsTyping(false);
         setAbortController(null);

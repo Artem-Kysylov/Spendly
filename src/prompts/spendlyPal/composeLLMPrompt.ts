@@ -43,6 +43,11 @@ export const composeLLMPrompt = (
       next_due_date: string;
       count: number;
     }>;
+    userProfile: {
+      currency: string;
+      total_budget: number;
+      budget_reset_day: number;
+    };
   },
   userMessage: string,
   opts?: {
@@ -177,6 +182,14 @@ export const composeLLMPrompt = (
         })
       : undefined;
 
+  // User profile section
+  const { currencySymbol } = require("./promptBuilder");
+  const symbol = currencySymbol(ctx.userProfile.currency);
+  const userProfileSection = `User Profile:
+- Currency: ${ctx.userProfile.currency}
+- Total Budget: ${symbol}${ctx.userProfile.total_budget}
+- Budget Reset Day: ${ctx.userProfile.budget_reset_day} of each month`;
+
   return buildPrompt({
     budgets: ctx.budgets,
     instructions,
@@ -185,5 +198,6 @@ export const composeLLMPrompt = (
     userMessage,
     maxChars: opts?.maxChars,
     recurringSection,
+    userProfileSection,
   });
 };

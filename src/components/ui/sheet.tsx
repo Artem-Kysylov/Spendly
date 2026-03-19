@@ -112,6 +112,16 @@ export function SheetContent({
           ? "inset-x-0 top-0 w-screen h-[85vh]"
           : "inset-x-0 bottom-0 w-screen h-[85vh]";
 
+  const radiusClasses =
+    side === "bottom"
+      ? "rounded-t-[10px]"
+      : side === "top"
+        ? "rounded-b-[10px]"
+        : "rounded-none sm:rounded-l-xl";
+
+  const safeAreaClasses =
+    side === "bottom" ? "pb-safe sm:pb-0" : "pt-safe pb-safe sm:pb-0 sm:pt-0";
+
   const swipeToCloseEnabled = side === "bottom";
 
   const enterAnim =
@@ -213,8 +223,9 @@ export function SheetContent({
             tabIndex={-1}
             className={cn(
               "fixed z-10 bg-background text-foreground border border-border shadow-2xl",
-              "pt-safe pb-safe sm:pb-0 sm:pt-0",
-              "rounded-none sm:rounded-l-xl overflow-hidden",
+              safeAreaClasses,
+              radiusClasses,
+              "overflow-hidden",
               sideClasses,
               className,
             )}

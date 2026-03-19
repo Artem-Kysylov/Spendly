@@ -151,10 +151,12 @@ export function streamGeminiText({
 
       const CHUNK_SIZE = 48;
       const chunks = text.match(new RegExp(`.{1,${CHUNK_SIZE}}`, "g")) || [text];
+      const PREMIUM_BASE_DELAY = 30; // ms
+      const PREMIUM_JITTER = 20; // ms
       for (const chunk of chunks) {
         controller.enqueue(chunk);
-        const jitter = Math.floor(Math.random() * 40);
-        await new Promise((r) => setTimeout(r, 80 + jitter));
+        const jitter = Math.floor(Math.random() * PREMIUM_JITTER);
+        await new Promise((r) => setTimeout(r, PREMIUM_BASE_DELAY + jitter));
       }
       controller.close();
       return;

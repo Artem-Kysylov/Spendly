@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
@@ -21,6 +21,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import Button from "@/components/ui-elements/Button";
@@ -28,9 +34,12 @@ import HybridDatePicker from "@/components/ui-elements/HybridDatePicker";
 import TextInput from "@/components/ui-elements/TextInput";
 import { UserAuth } from "@/context/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
+import useDeviceType from "@/hooks/useDeviceType";
 import { supabase } from "@/lib/supabaseClient";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
+import { checkBudgetThresholds } from "@/lib/budget/checkThresholds";
 import type { BudgetFolderItemProps, Transaction } from "@/types/types";
+import type { Language } from "@/types/locale";
 
 // Schema definition
 const transactionSchema = z.object({
@@ -70,6 +79,7 @@ export default function TransactionForm({
   allowTypeChange = true,
 }: TransactionFormProps) {
   const { session } = UserAuth();
+  const locale = useLocale() as Language;
   const tModals = useTranslations("modals");
   const tCommon = useTranslations("common");
   const tTransactions = useTranslations("transactions");
@@ -85,8 +95,10 @@ export default function TransactionForm({
   const [searchQuery, setSearchQuery] = useState("");
   const [_isBudgetsLoading, setIsBudgetsLoading] = useState(false);
   const [isTypeDisabled, setIsTypeDisabled] = useState(!allowTypeChange);
+  const [isBudgetSheetOpen, setIsBudgetSheetOpen] = useState(false);
 
   const amountRef = useRef<HTMLInputElement | null>(null);
+  const { isMobile } = useDeviceType();
 
   const { subscriptionPlan } = useSubscription();
   const isPro = subscriptionPlan === "pro";
@@ -240,6 +252,21 @@ export default function TransactionForm({
 
       if (error) throw error;
 
+      // Check budget thresholds for expense transactions
+      if (data.type === "expense" && transactionData.budget_folder_id) {
+        try {
+          await checkBudgetThresholds(
+            supabase,
+            session.user.id,
+            transactionData.budget_folder_id,
+            locale
+          );
+        } catch (budgetCheckError) {
+          console.error("Error checking budget thresholds:", budgetCheckError);
+          // Don't fail the transaction if budget check fails
+        }
+      }
+
       // Save Template if checked
       if (data.saveAsTemplate && !initialData?.id) {
         const limitReached = templates.length >= 3;
@@ -304,14 +331,14 @@ export default function TransactionForm({
                 disabled={isTypeDisabled}
                 className="data-[state=active]:bg-error data-[state=active]:text-error-foreground"
               >
-                {tModals("transaction.type.expense")}
+                <span>{tModals("transaction.type.expense")}</span>
               </TabsTrigger>
               <TabsTrigger
                 value="income"
                 disabled={isTypeDisabled}
                 className="data-[state=active]:bg-success data-[state=active]:text-success-foreground"
               >
-                {tModals("transaction.type.income")}
+                <span>{tModals("transaction.type.income")}</span>
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -429,29 +456,151 @@ export default function TransactionForm({
         <Controller
           name="budget_folder_id"
           control={control}
-          render={({ field }) => (
-            <Select
-              value={field.value || "unbudgeted"}
-              onValueChange={(val) => {
-                field.onChange(val);
-                applyBudgetId(val);
-              }}
-            >
-              <SelectTrigger className="bg-background text-foreground h-[50px] px-[20px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unbudgeted">
-                  {tModals("transaction.select.unbudgeted")}
-                </SelectItem>
-                {filteredBudgets.map((b) => (
-                  <SelectItem key={b.id} value={b.id}>
-                    {b.emoji ? `${b.emoji} ${b.name}` : b.name}
+          render={({ field }) => {
+            const selectedBudget = budgetFolders.find((b) => b.id === field.value);
+            const displayLabel = selectedBudget
+              ? `${selectedBudget.emoji ? `${selectedBudget.emoji} ` : ""}${selectedBudget.name}`
+              : tModals("transaction.select.unbudgeted");
+
+            return isMobile ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsBudgetSheetOpen(true);
+                  }}
+                  className="flex h-[50px] w-full items-center justify-between rounded-md border border-input bg-background px-[20px] text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  <span className="text-foreground">{displayLabel}</span>
+                  <svg
+                    width="15"
+                    height="15"
+                    viewBox="0 0 15 15"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4 opacity-50"
+                  >
+                    <path
+                      d="M4.93179 5.43179C4.75605 5.60753 4.75605 5.89245 4.93179 6.06819C5.10753 6.24392 5.39245 6.24392 5.56819 6.06819L7.49999 4.13638L9.43179 6.06819C9.60753 6.24392 9.89245 6.24392 10.0682 6.06819C10.2439 5.89245 10.2439 5.60753 10.0682 5.43179L7.81819 3.18179C7.73379 3.0974 7.61933 3.04999 7.49999 3.04999C7.38064 3.04999 7.26618 3.0974 7.18179 3.18179L4.93179 5.43179ZM10.0682 9.56819C10.2439 9.39245 10.2439 9.10753 10.0682 8.93179C9.89245 8.75606 9.60753 8.75606 9.43179 8.93179L7.49999 10.8636L5.56819 8.93179C5.39245 8.75606 5.10753 8.75606 4.93179 8.93179C4.75605 9.10753 4.75605 9.39245 4.93179 9.56819L7.18179 11.8182C7.26618 11.9026 7.38064 11.95 7.49999 11.95C7.61933 11.95 7.73379 11.9026 7.81819 11.8182L10.0682 9.56819Z"
+                      fill="currentColor"
+                      fillRule="evenodd"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+
+                <Sheet open={isBudgetSheetOpen} onOpenChange={setIsBudgetSheetOpen}>
+                  <SheetContent side="bottom" className="px-4 pb-4 pt-6">
+                    <div className="mx-auto h-1.5 w-12 rounded-full bg-muted mb-6" />
+                    <SheetHeader className="justify-center">
+                      <SheetTitle className="w-full text-lg text-center">
+                        {tModals("transaction.select.label")}
+                      </SheetTitle>
+                    </SheetHeader>
+                    <div className="mt-6 flex flex-col gap-2 max-h-[60vh] overflow-y-auto pb-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          field.onChange(null);
+                          applyBudgetId("unbudgeted");
+                          setIsBudgetSheetOpen(false);
+                        }}
+                        className={`flex items-center justify-between p-4 rounded-md border transition-colors ${
+                          field.value === null || field.value === "unbudgeted"
+                            ? "border-primary bg-primary/10"
+                            : "border-border bg-background"
+                        }`}
+                      >
+                        <span className="text-base font-medium">
+                          {tModals("transaction.select.unbudgeted")}
+                        </span>
+                        {(field.value === null || field.value === "unbudgeted") && (
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                            <svg
+                              width="15"
+                              height="15"
+                              viewBox="0 0 15 15"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-4 w-4 text-white"
+                            >
+                              <path
+                                d="M11.4669 3.72684C11.7558 3.91574 11.8369 4.30308 11.648 4.59198L7.39799 11.092C7.29783 11.2452 7.13556 11.3467 6.95402 11.3699C6.77247 11.3931 6.58989 11.3355 6.45446 11.2124L3.70446 8.71241C3.44905 8.48022 3.43023 8.08494 3.66242 7.82953C3.89461 7.57412 4.28989 7.55529 4.5453 7.78749L6.75292 9.79441L10.6018 3.90792C10.7907 3.61902 11.178 3.53795 11.4669 3.72684Z"
+                                fill="currentColor"
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </span>
+                        )}
+                      </button>
+                      {filteredBudgets.map((b) => (
+                        <button
+                          key={b.id}
+                          type="button"
+                          onClick={() => {
+                            field.onChange(b.id);
+                            applyBudgetId(b.id);
+                            setIsBudgetSheetOpen(false);
+                          }}
+                          className={`flex items-center justify-between p-4 rounded-md border transition-colors ${
+                            field.value === b.id
+                              ? "border-primary bg-primary/10"
+                              : "border-border bg-background"
+                          }`}
+                        >
+                          <span className="text-base font-medium">
+                            {b.emoji ? `${b.emoji} ${b.name}` : b.name}
+                          </span>
+                          {field.value === b.id && (
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                              <svg
+                                width="15"
+                                height="15"
+                                viewBox="0 0 15 15"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-4 w-4 text-white"
+                              >
+                                <path
+                                  d="M11.4669 3.72684C11.7558 3.91574 11.8369 4.30308 11.648 4.59198L7.39799 11.092C7.29783 11.2452 7.13556 11.3467 6.95402 11.3699C6.77247 11.3931 6.58989 11.3355 6.45446 11.2124L3.70446 8.71241C3.44905 8.48022 3.43023 8.08494 3.66242 7.82953C3.89461 7.57412 4.28989 7.55529 4.5453 7.78749L6.75292 9.79441L10.6018 3.90792C10.7907 3.61902 11.178 3.53795 11.4669 3.72684Z"
+                                  fill="currentColor"
+                                  fillRule="evenodd"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </>
+            ) : (
+              <Select
+                value={field.value || "unbudgeted"}
+                onValueChange={(val) => {
+                  field.onChange(val);
+                  applyBudgetId(val);
+                }}
+              >
+                <SelectTrigger className="bg-background text-foreground h-[50px] px-[20px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unbudgeted">
+                    {tModals("transaction.select.unbudgeted")}
                   </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+                  {filteredBudgets.map((b) => (
+                    <SelectItem key={b.id} value={b.id}>
+                      {b.emoji ? `${b.emoji} ${b.name}` : b.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            );
+          }}
         />
       </div>
 
@@ -476,7 +625,7 @@ export default function TransactionForm({
               checked={field.value}
               onChange={field.onChange}
               disabled={!isPro && templates.length >= 3}
-              className="h-4 w-4 rounded border border-border bg-transparent dark:bg-transparent accent-primary"
+              className="h-7 w-7 md:h-4 md:w-4 rounded border border-border bg-transparent dark:bg-transparent accent-primary"
             />
           )}
         />
@@ -510,7 +659,7 @@ export default function TransactionForm({
                   }
                   field.onChange(checked);
                 }}
-                className="h-4 w-4 rounded border border-border bg-transparent dark:bg-transparent accent-primary"
+                className="h-7 w-7 md:h-4 md:w-4 rounded border border-border bg-transparent dark:bg-transparent accent-primary"
               />
             )}
           />

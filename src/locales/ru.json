@@ -324,6 +324,7 @@
     "title": "Limit Reached",
     "budgets": "You have reached the limit of 3 budgets on the Free plan.",
     "wallets": "You have reached the limit of 5 wallets on the Free plan.",
+    "custom": "Вы достигли лимита текущего плана.",
     "description": "Upgrade to Pro to unlock unlimited budgets, AI assistant, and more powerful features.",
     "upgrade": "Upgrade to Pro",
     "cancel": "Not now"
@@ -338,7 +339,16 @@
     "recurring": {
       "title": "Регулярные платежи",
       "empty": "Регулярных платежей нет",
-      "dayLabel": "{day} число месяца"
+      "dayLabel": "{day} число месяца",
+      "calendar": {
+        "title": "Регулярные транзакции",
+        "total": "Итого",
+        "inDays": "Через {days} дн.",
+        "today": "Сегодня",
+        "tomorrow": "Завтра",
+        "monthly": "Ежемесячно",
+        "noPayments": "Нет запланированных регулярных платежей"
+      }
     },
     "search": {
       "placeholder": "Поиск транзакций..."
@@ -432,6 +442,8 @@
       "usedPercent": "использовано",
       "overBudget": "Превышен",
       "daysLeftInMonth": "Осталось {days} дней в месяце",
+      "safeToSpend": "безопасно тратить",
+      "reserved": "зарезервировано",
       "status": {
         "exceeded": "Превышен",
         "warning": "Предупреждение",
@@ -807,6 +819,9 @@
     "welcomeTitle": "Познакомьтесь со Spendly Pal",
     "welcomeDesc": "Ваш AI‑помощник по финансам. Спросите, например: \"Сколько я потратил в этом месяце?\" или \"Добавь транзакцию\".",
     "rateLimited": "Вы достигли лимита AI-запросов. Попробуйте позже или обновитесь до Pro.",
+    "transactionSaved": {
+      "message": "✅ Успешно добавлено!\n\nДобавим ещё одну транзакцию или обновим бюджет?"
+    },
     "transactionFallback": "Не смог распознать это как транзакцию. Попробуйте: 'Обед 150', 'Такси 200 вчера' или 'Пицца 150, Кола 50 вчера'.",
     "input": {
       "placeholder": "Сообщение Spendly Pal..."
@@ -827,6 +842,11 @@
         "budget": "Бюджет",
         "amount": "Сумма"
       }
+    },
+    "budgetConfirm": {
+      "title": "Установить бюджет?",
+      "confirm": "Подтвердить",
+      "cancel": "Отмена"
     },
     "headings": {
       "spendingAnalysis": "Анализ расходов",
@@ -1200,6 +1220,15 @@
       "createdBodyFriendly": "Готово! Я записал(а) {name} ({amount}).",
       "createdBodyFormal": "Записана транзакция: {name} ({amount}).",
       "createdBodyPlayful": "Дзынь! Записал(а) {name} ({amount})."
+    },
+    "calendar": {
+      "title": "Регулярные транзакции",
+      "total": "Итого",
+      "inDays": "Через {days} дн.",
+      "today": "Сегодня",
+      "tomorrow": "Завтра",
+      "monthly": "Ежемесячно",
+      "noPayments": "Нет запланированных регулярных платежей"
     }
   },
   "errors": {

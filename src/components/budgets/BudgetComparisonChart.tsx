@@ -31,24 +31,43 @@ export default function BudgetComparisonChart({
   const { isMobile } = useDeviceType();
   const orientation = isMobile ? "horizontal" : "vertical";
   const chartHeight = isMobile
-    ? Math.max(280, Math.min(600, data.length * 40)) // как было для горизонтального
-    : 360; // фиксированная высота для вертикального десктопа
+    ? Math.max(280, Math.min(1400, data.length * 60))
+    : 360;
+
+  const enableDesktopHorizontalScroll = !isMobile && data.length > 6;
+  const desktopMinWidth = enableDesktopHorizontalScroll
+    ? Math.max(640, data.length * 120)
+    : undefined;
 
   return (
-    <BarChart
-      data={data}
-      title={tCharts("titles.comparisonBar")}
-      description={description}
-      showGrid
-      showTooltip
-      height={chartHeight}
-      currency={currency}
-      isLoading={isLoading}
-      error={error}
-      className={className}
-      onBarHover={onBarHover}
-      onBarLeave={onBarLeave}
-      orientation={orientation}
-    />
+    <div
+      className={
+        enableDesktopHorizontalScroll
+          ? "w-full overflow-x-auto overflow-y-hidden"
+          : "w-full"
+      }
+    >
+      <div
+        className={enableDesktopHorizontalScroll ? "min-w-full" : undefined}
+        style={desktopMinWidth ? { minWidth: desktopMinWidth } : undefined}
+      >
+        <BarChart
+          data={data}
+          title={tCharts("titles.comparisonBar")}
+          description={description}
+          showGrid
+          showTooltip
+          height={chartHeight}
+          currency={currency}
+          isLoading={isLoading}
+          error={error}
+          className={className}
+          onBarHover={onBarHover}
+          onBarLeave={onBarLeave}
+          orientation={orientation}
+          barCategoryGap={isMobile ? "32%" : undefined}
+        />
+      </div>
+    </div>
   );
 }

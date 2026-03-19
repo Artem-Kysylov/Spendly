@@ -138,14 +138,25 @@ export function buildInstructions(opts: {
   return [
     "You are a helpful finance assistant.",
     toneDirective,
-    "Respond in the user’s language.",
-    "Format using Markdown. Separate sections with a blank line.",
-    "Start sections with bold headings, e.g., **This Week**, **Budget breakdown**, **Transactions**, **Top expenses**, **Insight**.",
+    "Respond in the user's language.",
+    "Use minimal Markdown: **bold** for key terms only. DO NOT use # headers (###, ##, #).",
+    "Separate sections with blank lines. Use **bold** for important keywords and amounts.",
+    "Start sections with bold text like **This Week**, **Budget breakdown**. ALWAYS add a line break after bold section headings.",
     'Lists: use hyphen bullets "- " with ONE item per line. Do NOT use "*" or "•".',
     'Transactions section: print each transaction on its own line as "- YYYY-MM-DD — Budget — Title — **$amount**".',
-    "Use a simple Markdown table only for comparisons (e.g. months or budgets).",
+    "CRITICAL: Keep the 💡 emoji for Insight section. Format as: **💡 Insight**",
+    "Tables for comparisons are perfect - keep using them exactly as you do now.",
+    "Keep formatting clean with proper line breaks between sections.",
     "Use only the data provided below. Do not invent transactions, merchants, categories, or amounts.",
     "Do not use JSON or code fences unless explicitly asked for code.",
+    "CRITICAL: When user asks about specific expenses, search transaction titles SEMANTICALLY across ALL languages.",
+    "Match by meaning, not exact words. Examples:",
+    "- 'coffee'/'кофе'/'кава' → 'Starbucks', 'Coffee Shop', 'Кофейня', 'Café', 'Espresso Bar'",
+    "- 'groceries'/'продукты'/'продукти' → 'Supermarket', 'ATB', 'Silpo', 'Grocery Store', 'Магазин'",
+    "- 'transport'/'транспорт' → 'Uber', 'Bolt', 'Metro', 'Taxi', 'Gas Station', 'Заправка'",
+    "- 'food'/'еда'/'їжа' → 'Restaurant', 'McDonald\\'s', 'Delivery', 'Ресторан', 'Доставка'",
+    "Apply this logic to ANY category user asks about in ANY language (EN/RU/UK/JA/ID/HI/KO).",
+    `CRITICAL: Use ONLY ${currency} for ALL amounts. Never use RUB if user currency is UAH, USD, EUR, etc. Always respect user's currency setting.`,
     "When the request is weekly, summarize ThisWeek/LastWeek sections. When monthly, summarize ThisMonth/LastMonth.",
     `If the requested weekly period has "none", reply exactly: "${weeklyNone}" or "${weeklyNoneLast}".`,
     `If the requested monthly period has "none", reply exactly: "${monthlyNone}" or "${monthlyNoneLast}".`,
@@ -153,13 +164,12 @@ export function buildInstructions(opts: {
     isRu
       ? "Если показываешь подписки — кратко отметь оптимизацию."
       : "If recurring charges are listed — add brief optimization tips.",
-    // Навигация и follow-up вопросы
     "When it helps the user navigate the app, use Markdown links like [Settings](/settings), [Budgets](/budgets), [Dashboard](/dashboard), [Transactions](/transactions).",
     isRu
       ? "В самом конце ответа добавь раздел `### 🔮 Next Steps` с 2–3 короткими следующими вопросами по теме. Используй маркированный список `-` и формулируй вопросы на языке пользователя. Не нумеруй их."
-      : "At the very end of the response, add a section `### 🔮 Next Steps` with 2–3 short follow-up questions the user might ask next. Use a bulleted list `-` and write questions in the user’s language. Do NOT number them.",
+      : "At the very end of the response, add a section `### 🔮 Next Steps` with 2–3 short follow-up questions the user might ask next. Use a bulleted list `-` and write questions in the user's language. Do NOT number them.",
     intentExtra,
-    `Currency: ${currency}. PromptVersion: ${pv}.`,
+    `Use ${currency} for all amounts. Internal: pv=${pv}`,
   ].join(" ");
 }
 
@@ -310,6 +320,8 @@ export function buildPrompt(params: {
   maxChars?: number;
   // Новое: секция подписок (необязательно)
   recurringSection?: string;
+  // Профиль пользователя
+  userProfileSection?: string;
 }): string {
   const budgetsSummary =
     params.budgetsSummary ??
@@ -321,6 +333,7 @@ export function buildPrompt(params: {
   const full = [
     params.instructions,
     `Known budgets: ${budgetsSummary || "none"}.`,
+    params.userProfileSection ? params.userProfileSection : "",
     params.weeklySection,
     params.monthlySection,
     params.recurringSection ? params.recurringSection : "",
@@ -328,45 +341,66 @@ export function buildPrompt(params: {
   ].join("\n");
 
   if (params.maxChars && full.length > params.maxChars) {
+    const takeBlocks = (section: string, opts: { headers: string[]; maxLinesPerBlock: number }) => {
+      const lines = section.split("\n");
+      const headerStarts = opts.headers;
+      const headerSet = new Set(headerStarts);
+      const startsWithAnyHeader = (line: string) =>
+        headerStarts.some((h) => line.startsWith(h));
+
+      const out: string[] = [];
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const matchedHeader = headerStarts.find((h) => line.startsWith(h));
+        if (!matchedHeader) continue;
+
+        if (!headerSet.has(matchedHeader)) continue;
+        out.push(line);
+
+        let added = 0;
+        for (let j = i + 1; j < lines.length; j++) {
+          const next = lines[j];
+          if (startsWithAnyHeader(next)) break;
+          if (next.trim().length === 0) continue;
+          out.push(next);
+          added++;
+          if (added >= opts.maxLinesPerBlock) break;
+        }
+      }
+      return out;
+    };
+
     // Compact variant
     const compact = [
       params.instructions,
       `Known budgets: ${budgetsSummary || "none"}.`,
+      params.userProfileSection ? params.userProfileSection : "",
       // Keep most useful lines in short output
-      ...params.weeklySection
-        .split("\n")
-        .filter(
-          (line) =>
-            line.startsWith("TotalThisWeek:") ||
-            line.startsWith("BudgetTotalsThisWeek:") ||
-            line.startsWith("TopExpensesThisWeek:"),
-        ),
-      ...params.monthlySection
-        .split("\n")
-        .filter(
-          (line) =>
-            line.startsWith("TotalThisMonth:") ||
-            line.startsWith("BudgetTotalsThisMonth:") ||
-            line.startsWith("TopExpensesThisMonth:"),
-        ),
-      // Also include last period totals to aid LLM
-      ...params.weeklySection
-        .split("\n")
-        .filter(
-          (line) =>
-            line.startsWith("TotalLastWeek:") ||
-            line.startsWith("BudgetTotalsLastWeek:"),
-        ),
-      ...params.monthlySection
-        .split("\n")
-        .filter(
-          (line) =>
-            line.startsWith("TotalLastMonth:") ||
-            line.startsWith("BudgetTotalsLastMonth:"),
-        ),
-      ...params.monthlySection
-        .split("\n")
-        .filter((line) => line.startsWith("CompareMonths:")),
+      ...takeBlocks(params.weeklySection, {
+        headers: [
+          "TotalThisWeek:",
+          "BudgetTotalsThisWeek:",
+          "TransactionsThisWeek:",
+          "TopExpensesThisWeek:",
+          "TotalLastWeek:",
+          "BudgetTotalsLastWeek:",
+          "TransactionsLastWeek:",
+          "TopExpensesLastWeek:",
+        ],
+        maxLinesPerBlock: 20,
+      }),
+      ...takeBlocks(params.monthlySection, {
+        headers: [
+          "TotalThisMonth:",
+          "BudgetTotalsThisMonth:",
+          "TopExpensesThisMonth:",
+          "TotalLastMonth:",
+          "BudgetTotalsLastMonth:",
+          "TopExpensesLastMonth:",
+          "CompareMonths:",
+        ],
+        maxLinesPerBlock: 10,
+      }),
       `User: ${params.userMessage}`,
     ].join("\n");
     return compact;

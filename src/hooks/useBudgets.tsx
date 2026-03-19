@@ -50,5 +50,14 @@ export const useBudgets = () => {
     fetchBudgets();
   }, [session?.user?.id]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = () => {
+      void fetchBudgets();
+    };
+    window.addEventListener("budgets:updated", handler);
+    return () => window.removeEventListener("budgets:updated", handler);
+  }, [session?.user?.id]);
+
   return { budgets, isLoading, refetch: fetchBudgets };
 };

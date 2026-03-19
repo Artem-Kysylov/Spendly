@@ -2,7 +2,7 @@
 
 import { Send, X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -41,6 +41,8 @@ export function TransactionChatWindow({
   } = useTransactionChat();
   const [budgets, setBudgets] = useState<Budget[]>([]);
   const [currency, setCurrency] = useState<string>("USD");
+  const formRef = useRef<HTMLFormElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   // Fetch budgets on mount
   useEffect(() => {
@@ -141,11 +143,12 @@ export function TransactionChatWindow({
               <TransactionShortcuts
                 onSelectShortcut={(text) => {
                   setInput(text);
-                  // Trigger form submission programmatically
-                  const form = document.querySelector('form');
-                  if (form) {
-                    form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
-                  }
+                  requestAnimationFrame(() => {
+                    formRef.current?.requestSubmit();
+                    requestAnimationFrame(() => {
+                      inputRef.current?.focus();
+                    });
+                  });
                 }}
                 currency={currency}
               />
@@ -165,8 +168,9 @@ export function TransactionChatWindow({
 
         {/* Input */}
         <div className="bg-background flex-shrink-0 border-t border-border px-4 pt-4 pb-[calc(env(safe-area-inset-bottom)+16px)]">
-          <form onSubmit={handleSubmit} className="flex items-center gap-2">
+          <form ref={formRef} onSubmit={handleSubmit} className="flex items-center gap-2">
             <Input
+              ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={tAI("input.placeholder")}

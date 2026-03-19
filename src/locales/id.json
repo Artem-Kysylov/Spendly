@@ -324,6 +324,7 @@
     "title": "Limit Reached",
     "budgets": "You have reached the limit of 3 budgets on the Free plan.",
     "wallets": "You have reached the limit of 5 wallets on the Free plan.",
+    "custom": "Anda telah mencapai batas untuk paket saat ini.",
     "description": "Upgrade to Pro to unlock unlimited budgets, AI assistant, and more powerful features.",
     "upgrade": "Upgrade to Pro",
     "cancel": "Not now"
@@ -338,7 +339,16 @@
     "recurring": {
       "title": "Pembayaran Berulang",
       "empty": "Tidak ada pembayaran berulang",
-      "dayLabel": "Tanggal {day} setiap bulan"
+      "dayLabel": "Tanggal {day} setiap bulan",
+      "calendar": {
+        "title": "Transaksi berulang",
+        "total": "Total",
+        "inDays": "Dalam {days} hari",
+        "today": "Hari ini",
+        "tomorrow": "Besok",
+        "monthly": "Bulanan",
+        "noPayments": "Tidak ada pembayaran rutin yang dijadwalkan"
+      }
     },
     "search": {
       "placeholder": "Search transactions..."
@@ -367,7 +377,7 @@
         "date": "Date",
         "actions": "Actions"
       },
-      "unbudgeted": "Unbudgeted",
+      "unbudgeted": "Tanpa Anggaran",
       "empty": {
         "default": "No transactions found"
       },
@@ -432,6 +442,8 @@
       "usedPercent": "used",
       "overBudget": "Over budget",
       "daysLeftInMonth": "{days} days left in month",
+      "safeToSpend": "aman dibelanjakan",
+      "reserved": "dicadangkan",
       "status": {
         "exceeded": "Exceeded",
         "warning": "Warning",
@@ -806,10 +818,13 @@
     "title": "Spendly Pal",
     "welcomeTitle": "Temui Spendly Pal",
     "welcomeDesc": "Asisten keuangan bertenaga AI Anda. Ajukan pertanyaan seperti \"Berapa pengeluaran saya bulan ini?\" atau \"Tambahkan transaksi baru.\"",
-    "rateLimited": "Anda sudah mencapai batas permintaan AI. Coba lagi nanti atau upgrade ke Pro.",
-    "transactionFallback": "Aku belum bisa membaca itu sebagai transaksi. Coba: 'Makan siang 150', 'Taksi 200 kemarin', atau 'Pizza 150, Cola 50 kemarin'.",
+    "rateLimited": "Anda telah mencapai batas permintaan AI. Coba lagi nanti atau upgrade ke Pro.",
+    "transactionSaved": {
+      "message": "✅ Berhasil ditambahkan!\n\nMau tambah transaksi lagi atau perbarui anggaran?"
+    },
+    "transactionFallback": "Saya tidak bisa mem-parsing itu sebagai transaksi. Coba: 'Makan siang 150', 'Taksi 200 kemarin', atau 'Pizza 150, Cola 50 kemarin'.",
     "input": {
-      "placeholder": "Pesan Spendly Pal..."
+      "placeholder": "Kirim pesan ke Spendly Pal..."
     },
     "toasts": {
       "usedNOfDailyLimit": "Anda telah menggunakan {count} dari {limit} pesan AI hari ini."
@@ -827,6 +842,11 @@
         "budget": "Anggaran",
         "amount": "Jumlah"
       }
+    },
+    "budgetConfirm": {
+      "title": "Atur anggaran?",
+      "confirm": "Konfirmasi",
+      "cancel": "Batal"
     },
     "headings": {
       "spendingAnalysis": "Analisis Pengeluaran",
@@ -1200,6 +1220,15 @@
       "createdBodyFriendly": "Beres! Aku mencatat {name} ({amount}).",
       "createdBodyFormal": "Transaksi dicatat: {name} ({amount}).",
       "createdBodyPlayful": "Cing! Tercatat {name} ({amount})."
+    },
+    "calendar": {
+      "title": "Transaksi berulang",
+      "total": "Total",
+      "inDays": "Dalam {days} hari",
+      "today": "Hari ini",
+      "tomorrow": "Besok",
+      "monthly": "Bulanan",
+      "noPayments": "Tidak ada pembayaran rutin yang dijadwalkan"
     }
   },
   "errors": {

@@ -324,6 +324,7 @@
     "title": "Limit Reached",
     "budgets": "You have reached the limit of 3 budgets on the Free plan.",
     "wallets": "You have reached the limit of 5 wallets on the Free plan.",
+    "custom": "Ви досягли ліміту поточного плану.",
     "description": "Upgrade to Pro to unlock unlimited budgets, AI assistant, and more powerful features.",
     "upgrade": "Upgrade to Pro",
     "cancel": "Not now"
@@ -338,7 +339,16 @@
     "recurring": {
       "title": "Регулярні платежі",
       "empty": "Регулярних платежів немає",
-      "dayLabel": "{day} число місяця"
+      "dayLabel": "{day} число місяця",
+      "calendar": {
+        "title": "Регулярні транзакції",
+        "total": "Всього",
+        "inDays": "Через {days} дн.",
+        "today": "Сьогодні",
+        "tomorrow": "Завтра",
+        "monthly": "Щомісяця",
+        "noPayments": "Немає запланованих регулярних платежів"
+      }
     },
     "search": {
       "placeholder": "Пошук транзакцій..."
@@ -432,6 +442,8 @@
       "usedPercent": "використано",
       "overBudget": "Перевищено",
       "daysLeftInMonth": "Залишилось {days} днів у місяці",
+      "safeToSpend": "безпечно витрачати",
+      "reserved": "зарезервовано",
       "status": {
         "exceeded": "Перевищено",
         "warning": "Попередження",
@@ -807,6 +819,9 @@
     "welcomeTitle": "Познайомтеся зі Spendly Pal",
     "welcomeDesc": "Ваш AI-фінансовий помічник. Запитайте: „Які мої витрати цього місяця?“ або „Додай нову транзакцію“.",
     "rateLimited": "Ви досягли ліміту AI-запитів. Спробуйте пізніше або оновіться до Pro.",
+    "transactionSaved": {
+      "message": "✅ Успішно додано!\n\nДодамо ще одну транзакцію чи оновимо бюджет?"
+    },
     "transactionFallback": "Не зміг розпізнати це як транзакцію. Спробуйте: «Обід 150», «Таксі 200 вчора» або «Піца 150, Кола 50 вчора».",
     "input": {
       "placeholder": "Повідомлення Spendly Pal…"
@@ -827,6 +842,11 @@
         "budget": "Бюджет",
         "amount": "Сумма"
       }
+    },
+    "budgetConfirm": {
+      "title": "Встановити бюджет?",
+      "confirm": "Підтвердити",
+      "cancel": "Скасувати"
     },
     "headings": {
       "spendingAnalysis": "Аналіз витрат",
@@ -1200,6 +1220,15 @@
       "createdBodyFriendly": "Готово! Я записав(ла) {name} ({amount}).",
       "createdBodyFormal": "Транзакцію записано: {name} ({amount}).",
       "createdBodyPlayful": "Є! Записав(ла) {name} ({amount})."
+    },
+    "calendar": {
+      "title": "Регулярні транзакції",
+      "total": "Всього",
+      "inDays": "Через {days} дн.",
+      "today": "Сьогодні",
+      "tomorrow": "Завтра",
+      "monthly": "Щомісяця",
+      "noPayments": "Немає запланованих регулярних платежів"
     }
   },
   "errors": {

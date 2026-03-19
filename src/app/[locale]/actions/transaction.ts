@@ -8,7 +8,7 @@ export interface SaveTransactionInput {
   title: string;
   amount: number;
   type: "expense" | "income";
-  budget_folder_id: string;
+  budget_folder_id: string | null;
   created_at: string; // ISO date string
 }
 
@@ -44,8 +44,8 @@ export async function saveProposedTransaction(
       return { success: false, error: "Invalid user ID" };
     }
 
-    // Validate budget_folder_id
-    if (!input.budget_folder_id || !isValidUUID(input.budget_folder_id)) {
+    // Validate budget_folder_id (allow null for unbudgeted transactions)
+    if (input.budget_folder_id !== null && !isValidUUID(input.budget_folder_id)) {
       return { success: false, error: "Invalid budget folder ID" };
     }
 
@@ -67,24 +67,27 @@ export async function saveProposedTransaction(
       return { success: false, error: "Invalid date format" };
     }
 
-    // Verify budget folder exists and belongs to user
-    const { data: budgetFolder, error: budgetError } = await supabase
-      .from("budget_folders")
-      .select("id, type, user_id")
-      .eq("id", input.budget_folder_id)
-      .eq("user_id", input.user_id)
-      .single();
+    // Verify budget folder exists and belongs to user (skip if unbudgeted)
+    let transactionType = input.type;
+    
+    if (input.budget_folder_id !== null) {
+      const { data: budgetFolder, error: budgetError } = await supabase
+        .from("budget_folders")
+        .select("id, type, user_id")
+        .eq("id", input.budget_folder_id)
+        .eq("user_id", input.user_id)
+        .single();
 
-    if (budgetError || !budgetFolder) {
-      return {
-        success: false,
-        error: "Budget folder not found or access denied",
-      };
+      if (budgetError || !budgetFolder) {
+        return {
+          success: false,
+          error: "Budget folder not found or access denied",
+        };
+      }
+
+      // Ensure transaction type matches budget folder type
+      transactionType = budgetFolder.type === "income" ? "income" : "expense";
     }
-
-    // Ensure transaction type matches budget folder type
-    const transactionType =
-      budgetFolder.type === "income" ? "income" : "expense";
 
     // Insert transaction
     const { data: transaction, error: insertError } = await supabase

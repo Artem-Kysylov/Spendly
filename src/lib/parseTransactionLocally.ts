@@ -125,7 +125,7 @@ function detectCategory(title: string): string {
     }
   }
   
-  return 'Other'; // Default if no keywords match
+  return 'Unbudgeted'; // Default if no keywords match
 }
 
 export interface LocalParsedTransaction {

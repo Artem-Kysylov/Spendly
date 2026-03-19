@@ -324,6 +324,7 @@
     "title": "Limit Reached",
     "budgets": "You have reached the limit of 3 budgets on the Free plan.",
     "wallets": "You have reached the limit of 5 wallets on the Free plan.",
+    "custom": "現在のプランの上限に達しました。",
     "description": "Upgrade to Pro to unlock unlimited budgets, AI assistant, and more powerful features.",
     "upgrade": "Upgrade to Pro",
     "cancel": "Not now"
@@ -338,7 +339,16 @@
     "recurring": {
       "title": "定期支払い",
       "empty": "定期支払いはありません",
-      "dayLabel": "毎月{day}日"
+      "dayLabel": "毎月{day}日",
+      "calendar": {
+        "title": "定期取引",
+        "total": "合計",
+        "inDays": "{days}日後",
+        "today": "今日",
+        "tomorrow": "明日",
+        "monthly": "毎月",
+        "noPayments": "定期的な支払いの予定はありません"
+      }
     },
     "search": {
       "placeholder": "Search transactions..."
@@ -432,6 +442,8 @@
       "usedPercent": "使用済み",
       "overBudget": "予算超過",
       "daysLeftInMonth": "{days} days left in month",
+      "safeToSpend": "安全に使える",
+      "reserved": "予約済み",
       "status": {
         "exceeded": "超過",
         "warning": "警告",
@@ -807,6 +819,9 @@
     "welcomeTitle": "Spendly Pal を紹介",
     "welcomeDesc": "あなたの AI 搭載ファイナンスアシスタント。「今月の支出はいくら？」や「新しい取引を追加して」といった質問ができます。",
     "rateLimited": "AI の上限に達しました。後でもう一度試すか、Pro にアップグレードしてください。",
+    "transactionSaved": {
+      "message": "✅ 追加しました！\n\nもう1件追加しますか？それとも予算を更新しますか？"
+    },
     "transactionFallback": "取引として解析できませんでした。例: 「ランチ 150」「タクシー 200 昨日」「ピザ 150, コーラ 50 昨日」。",
     "input": {
       "placeholder": "Spendly Pal にメッセージ…"
@@ -827,6 +842,11 @@
         "budget": "予算",
         "amount": "金額"
       }
+    },
+    "budgetConfirm": {
+      "title": "予算を設定しますか？",
+      "confirm": "確認",
+      "cancel": "キャンセル"
     },
     "headings": {
       "spendingAnalysis": "支出分析",
@@ -1200,6 +1220,15 @@
       "createdBodyFriendly": "完了！{name}（{amount}）を記録しました。",
       "createdBodyFormal": "取引を記録しました: {name}（{amount}）。",
       "createdBodyPlayful": "チャリン！{name}（{amount}）を記録したよ。"
+    },
+    "calendar": {
+      "title": "定期取引",
+      "total": "合計",
+      "inDays": "{days}日後",
+      "today": "今日",
+      "tomorrow": "明日",
+      "monthly": "毎月",
+      "noPayments": "定期的な支払いの予定はありません"
     }
   },
   "errors": {

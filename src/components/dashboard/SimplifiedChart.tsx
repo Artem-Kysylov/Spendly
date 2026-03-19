@@ -172,16 +172,28 @@ export default function SimplifiedChart() {
   }
 
   return (
-    <Card className="w-full overflow-hidden">
+    <Card className="w-full overflow-hidden lg:min-h-[340px] flex flex-col">
       <CardHeader className="px-4 pt-5 pb-3 sm:px-5">
         <CardTitle>{t("titles.analytics")}</CardTitle>
         <p className="text-sm text-muted-foreground">
           {t("labels.expenses")} • {formatCurrency(total)}
         </p>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-0 flex-1 flex items-center">
         <div className="relative h-[200px] w-full px-4 min-w-0">
-          <div className="h-full w-full overflow-x-auto overflow-y-visible">
+          <div className="h-full w-full overflow-x-auto overflow-y-visible simplified-chart-scroll">
+            <style jsx>{`
+              .simplified-chart-scroll {
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+              }
+
+              .simplified-chart-scroll::-webkit-scrollbar {
+                width: 0;
+                height: 0;
+                display: none;
+              }
+            `}</style>
             <div style={{ width: chartWidth, height: "100%" }}>
               <LineChart
                 width={chartWidth}

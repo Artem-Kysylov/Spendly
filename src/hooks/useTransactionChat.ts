@@ -3,15 +3,17 @@
 import { UserAuth } from "@/context/AuthContext";
 import { useState, useCallback } from "react";
 import { parseTransactionLocally } from "@/lib/parseTransactionLocally";
+import { isBudgetLimitIntent } from "@/lib/ai/intent";
 import { supabase } from "@/lib/supabaseClient";
 import { useTranslations } from "next-intl";
 import { getAssistantApiUrl } from "@/lib/assistantApi";
+import type { ToolInvocation } from "@/types/types";
 
 export interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
-  toolInvocations?: any[];
+  toolInvocations?: ToolInvocation[];
 }
 
 export interface UseTransactionChatReturn {
@@ -37,6 +39,7 @@ export function useTransactionChat(): UseTransactionChatReturn {
   const { session } = UserAuth();
   const userId = session?.user?.id;
   const tAssistant = useTranslations("assistant");
+  const tCommon = useTranslations("common");
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -83,6 +86,130 @@ export function useTransactionChat(): UseTransactionChatReturn {
 
       const isTransactionLike = /\d/.test(rawInput) && /[\p{L}]/u.test(rawInput);
       const transactionFallback = tAssistant("transactionFallback");
+
+      if (isBudgetLimitIntent(rawInput)) {
+        setIsLoading(true);
+        const controller = new AbortController();
+        setAbortController(controller);
+
+        let timeoutId: number | null = null;
+        let didTimeout = false;
+
+        try {
+          timeoutId = window.setTimeout(() => {
+            didTimeout = true;
+            controller.abort();
+          }, 45000);
+
+          const {
+            data: { session: currentSession },
+          } = await supabase.auth.getSession();
+          const token = currentSession?.access_token;
+          if (!token) {
+            throw new Error("Not authenticated");
+          }
+
+          const consumeResp = await fetch("/api/ai/consume", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              requestType: "chat",
+              promptChars: String(rawInput || "").length,
+            }),
+            signal: controller.signal,
+          });
+
+          if (!consumeResp.ok) {
+            setRateLimitedUntil(Date.now() + 60_000);
+            setIsLimitModalOpen(true);
+
+            let custom = "";
+            try {
+              const ct = consumeResp.headers.get("content-type") || "";
+              if (ct.includes("application/json")) {
+                const json = (await consumeResp.json().catch(() => null)) as unknown;
+                if (json && typeof json === "object") {
+                  const j = json as { message?: unknown; error?: unknown };
+                  if (typeof j.message === "string") custom = j.message;
+                  else if (typeof j.error === "string") custom = j.error;
+                }
+              }
+            } catch {
+              // ignore
+            }
+
+            const msg = custom || tAssistant("rateLimited");
+            setLimitModalMessage(msg);
+            const aiMessage: Message = {
+              id: (Date.now() + 1).toString(),
+              role: "assistant",
+              content: msg,
+            };
+            setMessages((prev) => [...prev, aiMessage]);
+            setError(new Error(msg));
+            return;
+          }
+
+          const parseResp = await fetch("/api/budget/parse", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ message: rawInput }),
+            signal: controller.signal,
+          });
+
+          if (!parseResp.ok) {
+            throw new Error("Parse failed");
+          }
+
+          const proposal = (await parseResp.json().catch(() => null)) as unknown;
+          if (!proposal || typeof proposal !== "object") {
+            throw new Error("Invalid proposal");
+          }
+
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: "",
+            toolInvocations: [
+              {
+                toolCallId: `budget-${Date.now()}`,
+                toolName: "propose_budget",
+                args: proposal,
+                state: "result",
+                result: proposal,
+              },
+            ],
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+          return;
+        } catch (_e) {
+          const msg = didTimeout
+            ? (locale === "ru"
+              ? "Ассистент временно недоступен. Попробуйте повторить позже."
+              : tCommon("unexpectedError"))
+            : tCommon("unexpectedError");
+          const aiMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: msg,
+          };
+          setMessages((prev) => [...prev, aiMessage]);
+          setError(new Error(msg));
+          return;
+        } finally {
+          if (timeoutId) {
+            window.clearTimeout(timeoutId);
+          }
+          setIsLoading(false);
+          setAbortController(null);
+        }
+      }
 
       // ECONOMY MODE: Try to parse simple patterns locally first
       // Do this BEFORE enabling loading state to avoid any chance of being stuck.
@@ -199,31 +326,35 @@ export function useTransactionChat(): UseTransactionChatReturn {
         if (transactions.length === 0) {
           setIsLoading(true);
         } else {
-        // Simple pattern detected! Skip LLM, create tool invocation directly
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: "assistant",
-          content: "", // No text content needed, just the tool card
-          toolInvocations: [
-            {
-              toolCallId: `local-${Date.now()}`,
-              toolName: "propose_transaction",
-              // UI expects a single proposal object shape (title/amount/category/date)
-              args: { transactions: finalTransactions },
-              state: "result",
-              result: {
-                success: true,
-                transactions: finalTransactions,
+          // Show typing indicator briefly before rendering the card
+          setIsLoading(true);
+          await new Promise((r) => setTimeout(r, 450));
+
+          // Simple pattern detected! Skip LLM, create tool invocation directly
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: "assistant",
+            content: "", // No text content needed, just the tool card
+            toolInvocations: [
+              {
+                toolCallId: `local-${Date.now()}`,
+                toolName: "propose_transaction",
+                // UI expects a single proposal object shape (title/amount/category/date)
+                args: { transactions: finalTransactions },
+                state: "result",
+                result: {
+                  success: true,
+                  transactions: finalTransactions,
+                },
               },
-            },
-          ],
-        };
-        
-        setMessages((prev) => [...prev, assistantMessage]);
-        console.log("Force Reset Loading State (local parse)");
-        setIsLoading(false);
-        setAbortController(null);
-        return; // Skip LLM call entirely!
+            ],
+          };
+
+          setMessages((prev) => [...prev, assistantMessage]);
+          console.log("Force Reset Loading State (local parse)");
+          setIsLoading(false);
+          setAbortController(null);
+          return; // Skip LLM call entirely!
         }
       }
 
@@ -460,7 +591,10 @@ export function useTransactionChat(): UseTransactionChatReturn {
               try {
                 const toolCall = JSON.parse(line.slice(2));
                 if (toolCall.toolName === "propose_transaction") {
-                  const toolInvocation = {
+                  // Make UI feel more chat-like: briefly show typing indicator before rendering cards
+                  setIsLoading(true);
+                  await new Promise((r) => setTimeout(r, 450));
+                  const toolInvocation: ToolInvocation = {
                     toolCallId: toolCall.toolCallId,
                     toolName: toolCall.toolName,
                     args: toolCall.args,
@@ -475,6 +609,7 @@ export function useTransactionChat(): UseTransactionChatReturn {
                       m.id === currentMessage.id ? { ...currentMessage } : m,
                     ),
                   );
+                  setIsLoading(false);
                 }
               } catch (e) {
                 console.error("Failed to parse tool call:", e);
@@ -485,9 +620,9 @@ export function useTransactionChat(): UseTransactionChatReturn {
                 const toolResult = JSON.parse(line.slice(2));
                 if (currentMessage.toolInvocations) {
                   currentMessage.toolInvocations = currentMessage.toolInvocations.map(
-                    (inv: any) =>
+                    (inv) =>
                       inv.toolCallId === toolResult.toolCallId
-                        ? { ...inv, state: "result", result: toolResult.result }
+                        ? { ...inv, state: "result" as const, result: toolResult.result }
                         : inv,
                   );
                   setMessages((prev) =>

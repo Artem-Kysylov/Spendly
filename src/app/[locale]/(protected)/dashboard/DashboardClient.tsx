@@ -13,6 +13,7 @@ import CompactKPICard from "@/components/dashboard/CompactKPICard";
 import AiInsightTeaser from "@/components/dashboard/AiInsightTeaser";
 import SimplifiedChart from "@/components/dashboard/SimplifiedChart";
 import DashboardTransactionsTable from "@/components/dashboard/DashboardTransactionsTable";
+import RecurringCalendar from "@/components/recurring/RecurringCalendar";
 import { useMainBudget } from "@/hooks/useMainBudget";
 import {
   getFinancialMonthToDateRange,
@@ -32,6 +33,7 @@ import { ToastMessageProps, Transaction } from "@/types/types";
 import type { EditTransactionPayload } from "@/types/types";
 import { calculatePercentageChange, formatCurrency } from "@/lib/chartUtils";
 import type { AssistantTone } from "@/types/ai";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 function DashboardClient() {
   const { session } = UserAuth();
@@ -66,6 +68,13 @@ function DashboardClient() {
   const tTransactions = useTranslations("transactions");
   const tCommon = useTranslations("common");
   const tGreeting = useTranslations("greeting");
+
+  const recurringTransactions = transactions.filter((t) => t.is_recurring);
+  const recurringTotal = recurringTransactions.reduce((sum, tx) => {
+    const n = Number(tx.amount);
+    if (!Number.isFinite(n)) return sum;
+    return sum + Math.abs(n);
+  }, 0);
 
   const [greetingKey, setGreetingKey] = useState<string>("morning");
 
@@ -455,7 +464,34 @@ function DashboardClient() {
               transition={{ duration: 0.28 }}
               className="mt-8 min-w-0 overflow-x-hidden"
             >
-              <SimplifiedChart />
+              {recurringTransactions.length > 0 ? (
+                <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+                  <SimplifiedChart />
+
+                  <Card className="w-full overflow-hidden lg:min-h-[340px] flex flex-col">
+                    <CardHeader className="px-4 pt-5 pb-3 sm:px-5">
+                      <CardTitle>
+                        {tTransactions("recurring.calendar.title")}
+                      </CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        {tTransactions("recurring.calendar.total")} •{" "}
+                        {formatCurrency(recurringTotal, currency)} • ({
+                          recurringTransactions.length
+                        })
+                      </p>
+                    </CardHeader>
+                    <CardContent className="px-4 pb-4 sm:px-5 lg:px-6 lg:pb-6 lg:flex-1 lg:flex lg:items-stretch">
+                      <RecurringCalendar
+                        transactions={recurringTransactions}
+                        variant="dashboard"
+                        currency={currency}
+                      />
+                    </CardContent>
+                  </Card>
+                </div>
+              ) : (
+                <SimplifiedChart />
+              )}
             </motion.div>
 
             {isLoading ? (

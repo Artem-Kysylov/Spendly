@@ -71,7 +71,7 @@ export default function LimitReachedModal({
             <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
                 <SheetContent
                     side="bottom"
-                    className="z-[10000] rounded-t-3xl"
+                    className="z-[10000] rounded-t-[10px]"
                     overlayClassName="bg-foreground/50"
                 >
                     <div className="mx-auto mt-2 mb-4 h-1.5 w-12 rounded-full bg-muted" />
@@ -123,6 +123,7 @@ export default function LimitReachedModal({
                         {tLimitReached("title")}
                     </DialogTitle>
                     <button
+                        type="button"
                         onClick={onClose}
                         className="absolute right-4 top-4 text-muted-foreground hover:text-foreground"
                     >

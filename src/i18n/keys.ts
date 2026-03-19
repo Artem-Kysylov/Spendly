@@ -72,6 +72,7 @@ export type NamespaceKeys = {
     | "rateLimited"
     | "welcomeTitle"
     | "welcomeDesc"
+    | "transactionSaved.message"
     | "confirm.title"
     | "confirm.fields.title"
     | "confirm.fields.budget"

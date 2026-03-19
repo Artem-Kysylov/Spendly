@@ -21,7 +21,7 @@ import { Link } from "@/i18n/routing";
 import { computeCarry } from "@/lib/budgetRollover";
 import { getPreviousMonthRange } from "@/lib/dateUtils";
 import { supabase } from "@/lib/supabaseClient";
-import type { BudgetFolderItemProps, ToastMessageProps } from "@/types/types";
+import type { BarChartData, BudgetFolderItemProps, ToastMessageProps } from "@/types/types";
 export default function BudgetsClient() {
   const { session } = UserAuth();
   const locale = useLocale();
@@ -33,6 +33,8 @@ export default function BudgetsClient() {
   );
   const { isModalOpen, openModal, closeModal } = useModal();
   const tBudgets = useTranslations("budgets");
+  const tTransactions = useTranslations("transactions");
+  const tModals = useTranslations("modals");
   const tCommon = useTranslations("common");
   const { subscriptionPlan, isLoading: isSubscriptionLoading } =
     useSubscription();
@@ -217,14 +219,31 @@ export default function BudgetsClient() {
 
   // Данные для сравнительного графика
   const chartData = useMemo(() => {
-    return budgetFolders.map((folder) => ({
+    const data: BarChartData[] = budgetFolders.map((folder) => ({
       category: folder.emoji ? `${folder.emoji} ${folder.name}` : folder.name,
       amount: spentByBudget[folder.id] || 0,
       // цвет бара = цвет бюджета, иначе primary
       fill: folder.color_code ? `#${folder.color_code}` : "hsl(var(--primary))",
       emoji: folder.emoji,
     }));
-  }, [budgetFolders, spentByBudget]);
+
+    const unbudgetedAmount = allTransactions.reduce((sum, t) => {
+      if (t.type === "expense" && !t.budget_folder_id) {
+        return sum + t.amount;
+      }
+      return sum;
+    }, 0);
+
+    if (unbudgetedAmount > 0) {
+      data.push({
+        category: tModals("transaction.select.unbudgeted"),
+        amount: unbudgetedAmount,
+        fill: "hsl(var(--muted-foreground))",
+      });
+    }
+
+    return data;
+  }, [allTransactions, budgetFolders, spentByBudget, tModals]);
 
   const [prevSpentByBudget, setPrevSpentByBudget] = useState<
     Record<string, number>
