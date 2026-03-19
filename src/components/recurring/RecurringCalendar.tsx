@@ -90,7 +90,8 @@ export default function RecurringCalendar({
       <DayButton
         className={cn(
           "flex items-center justify-center rounded-md relative",
-          isMobile && "size-(--cell-size) touch-manipulation",
+          isMobile &&
+            "!w-[min(100%,var(--cell-size))] !h-[min(100%,var(--cell-size))] touch-manipulation",
           !isMobile && "size-14 text-sm font-medium tabular-nums leading-none",
           isToday && !isSelected && "rounded-full bg-primary/30 text-primary",
           "data-[selected=true]:bg-primary data-[selected=true]:text-primary-foreground",
@@ -146,7 +147,12 @@ export default function RecurringCalendar({
                 captionLayout={"dropdown"}
                 buttonVariant={"ghost"}
                 hideNav
-                className={cn("w-full", "[--cell-size:44px] sm:[--cell-size:56px]")}
+                className={cn(
+                  "w-full",
+                  variant === "settings"
+                    ? "[--cell-size:38px] min-[390px]:[--cell-size:44px] sm:[--cell-size:56px]"
+                    : "[--cell-size:44px] sm:[--cell-size:56px]",
+                )}
                 classNames={{
                   week: "flex w-full mt-3 gap-1 sm:gap-2",
                   day: "relative flex-1 h-(--cell-size) p-0 text-center group/day select-none flex items-center justify-center",
