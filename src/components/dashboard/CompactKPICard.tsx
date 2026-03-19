@@ -74,7 +74,7 @@ export default function CompactKPICard({
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 w-full min-w-0">
       {/* Card 1: Total Budget */}
-      <div className="bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-between h-[110px] md:h-[140px] relative group">
+      <div className="bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-between h-[120px] md:h-[150px] relative group">
         <button
           type="button"
           className="absolute top-3 right-3 cursor-pointer opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
@@ -116,26 +116,24 @@ export default function CompactKPICard({
             reservedAmount={upcomingRecurringSum}
             showLabels={false}
           />
-          <div className="flex justify-between text-[11px] md:text-xs text-muted-foreground">
+          <div className="flex justify-between text-[10px] md:text-xs text-muted-foreground">
             <span>
               {formatCurrency(totalExpenses, currency)} {tBudgets("labels.spent")}
             </span>
             <div className="flex flex-col items-end">
               <span>
-                {formatCurrency(remainingBudget, currency)} {tBudgets("labels.left")}
+                {upcomingRecurringSum > 0 
+                  ? `${formatCurrency(remainingBudget, currency)} ${tBudgets("labels.left")} (${formatCurrency(Math.max(0, safeSpendBalance), currency)} ${tDashboard("counters.safeToSpend")})`
+                  : `${formatCurrency(remainingBudget, currency)} ${tBudgets("labels.left")}`
+                }
               </span>
-              {upcomingRecurringSum > 0 && (
-                <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                  ({formatCurrency(Math.max(0, safeSpendBalance), currency)} {tDashboard("counters.safeToSpend")})
-                </span>
-              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Card 2: Total Expenses */}
-      <div className="bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-between h-[110px] md:h-[140px]">
+      <div className="bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-between h-[120px] md:h-[150px]">
         <div>
           <h3 className="text-[13px] md:text-sm font-medium text-muted-foreground">
             {tDashboard("counters.totalExpenses")}
@@ -152,7 +150,7 @@ export default function CompactKPICard({
       </div>
 
       {/* Card 3: Daily Safe-to-Spend */}
-      <div className="bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-between h-[110px] md:h-[140px]">
+      <div className="bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-between h-[120px] md:h-[150px]">
         <div>
           <h3 className="text-[13px] md:text-sm font-medium text-muted-foreground">
             {tDashboard("counters.dailySafeToSpend")}
@@ -165,7 +163,7 @@ export default function CompactKPICard({
             </span>
           </div>
         </div>
-        <div className="text-[11px] md:text-xs text-muted-foreground">
+        <div className="text-[10px] md:text-xs text-muted-foreground">
           {tDashboard("counters.daysLeftInMonth", { days: daysLeft })}
         </div>
       </div>
