@@ -114,9 +114,9 @@ export function SheetContent({
 
   const radiusClasses =
     side === "bottom"
-      ? "rounded-t-[10px]"
+      ? "rounded-t-[20px]"
       : side === "top"
-        ? "rounded-b-[10px]"
+        ? "rounded-b-[20px]"
         : "rounded-none sm:rounded-l-xl";
 
   const safeAreaClasses =
@@ -222,7 +222,7 @@ export function SheetContent({
             ref={contentRef}
             tabIndex={-1}
             className={cn(
-              "fixed z-10 bg-background text-foreground border border-border shadow-2xl",
+              "fixed z-10 bg-background text-foreground shadow-2xl",
               safeAreaClasses,
               radiusClasses,
               "overflow-hidden",

@@ -344,8 +344,10 @@
         "title": "定期取引",
         "total": "合計",
         "inDays": "{days}日後",
+        "daysAgo": "{days}日前",
         "today": "今日",
         "tomorrow": "明日",
+        "yesterday": "昨日",
         "monthly": "毎月",
         "noPayments": "定期的な支払いの予定はありません"
       }

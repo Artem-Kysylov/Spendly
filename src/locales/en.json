@@ -344,8 +344,10 @@
         "title": "Recurring transactions",
         "total": "Total",
         "inDays": "In {days} days",
+        "daysAgo": "{days} days ago",
         "today": "Today",
         "tomorrow": "Tomorrow",
+        "yesterday": "Yesterday",
         "monthly": "Monthly",
         "noPayments": "No recurring payments scheduled"
       }

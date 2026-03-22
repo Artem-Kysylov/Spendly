@@ -137,7 +137,19 @@ export const useChat = (): UseChatReturn => {
     [tAssistant],
   );
   const [assistantTone, setAssistantToneState] =
-    useState<AssistantTone>("neutral");
+    useState<AssistantTone>(() => {
+      // Initialize from localStorage to avoid flash
+      if (typeof window === 'undefined') return "neutral";
+      try {
+        const stored = window.localStorage.getItem("spendly:assistant_tone");
+        if (stored && ["neutral", "friendly", "formal", "playful"].includes(stored)) {
+          return stored as AssistantTone;
+        }
+      } catch {
+        // ignore
+      }
+      return "neutral";
+    });
   const persistTimer = useRef<number | null>(null);
   const skipNextLoadRef = useRef(false);
 
@@ -192,6 +204,14 @@ export const useChat = (): UseChatReturn => {
         return;
       }
       setAssistantToneState(tone);
+      
+      // Save to localStorage immediately to prevent flash on reload
+      try {
+        window.localStorage.setItem("spendly:assistant_tone", tone);
+      } catch {
+        // ignore
+      }
+      
       if (persistTimer.current) {
         window.clearTimeout(persistTimer.current);
       }

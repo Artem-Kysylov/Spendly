@@ -110,7 +110,7 @@ export default function HybridDatePicker({
     <Button
       variant="outline"
       className={cn(
-        "w-full justify-start text-left font-normal",
+        "w-full h-[50px] justify-start text-left font-normal",
         !selectedDate && "text-muted-foreground",
       )}
       text={

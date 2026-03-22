@@ -113,6 +113,8 @@ export default function RecurringCalendar({
   const getDaysText = (days: number): string => {
     if (days === 0) return t("today");
     if (days === 1) return t("tomorrow");
+    if (days === -1) return t("yesterday");
+    if (days < 0) return t("daysAgo", { days: Math.abs(days) });
     return t("inDays", { days });
   };
 

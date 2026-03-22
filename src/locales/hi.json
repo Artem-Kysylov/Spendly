@@ -344,8 +344,10 @@
         "title": "आवर्ती लेन-देन",
         "total": "कुल",
         "inDays": "{days} दिनों में",
+        "daysAgo": "{days} दिन पहले",
         "today": "आज",
         "tomorrow": "कल",
+        "yesterday": "कल",
         "monthly": "मासिक",
         "noPayments": "कोई नियमित भुगतान निर्धारित नहीं है"
       }

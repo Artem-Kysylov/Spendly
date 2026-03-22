@@ -344,8 +344,10 @@
         "title": "Transaksi berulang",
         "total": "Total",
         "inDays": "Dalam {days} hari",
+        "daysAgo": "{days} hari yang lalu",
         "today": "Hari ini",
         "tomorrow": "Besok",
+        "yesterday": "Kemarin",
         "monthly": "Bulanan",
         "noPayments": "Tidak ada pembayaran rutin yang dijadwalkan"
       }
