@@ -119,6 +119,17 @@ export default function SimplifiedChart() {
     return Math.max(320, visibleData.length * pxPerDay);
   }, [visibleData.length]);
 
+  // Auto-scroll to the end (latest data) when chart loads or updates
+  useEffect(() => {
+    const scrollContainer = document.querySelector('.simplified-chart-scroll');
+    if (scrollContainer && visibleData.length > 0) {
+      // Small delay to ensure DOM is ready
+      setTimeout(() => {
+        scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+      }, 100);
+    }
+  }, [visibleData.length, chartWidth]);
+
   const CustomDot = ({ cx, cy, payload }: CustomDotProps) => {
     const amount = Number((payload as { amount?: unknown } | null)?.amount ?? 0);
     const normalized = maxAmount > 0 ? Math.min(1, amount / maxAmount) : 0;

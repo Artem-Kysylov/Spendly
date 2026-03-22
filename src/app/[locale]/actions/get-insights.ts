@@ -301,6 +301,22 @@ export async function generateSpendingInsights({
         console.log('[AI Insights] Starting generation for user:', userId);
         console.log('[AI Insights] Date range:', { startDate: startDate.toISOString(), endDate: endDate.toISOString() });
 
+        // Get user's currency preference
+        const { data: authData } = await supabase.auth.getUser();
+        const userCurrency = 
+            (authData?.user?.user_metadata as any)?.currency_preference as string | undefined;
+        const currency = userCurrency || 'USD';
+        
+        // Get currency symbol
+        const getCurrencySymbol = (curr: string): string => {
+            const symbols: Record<string, string> = {
+                'USD': '$', 'EUR': '€', 'UAH': '₴', 'RUB': '₽',
+                'JPY': '¥', 'KRW': '₩', 'INR': '₹', 'IDR': 'Rp'
+            };
+            return symbols[curr] || curr;
+        };
+        const currencySymbol = getCurrencySymbol(currency);
+
         // Calculate previous period dates for comparison
         const periodDays = Math.ceil(
             (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
@@ -417,10 +433,11 @@ export async function generateSpendingInsights({
         const languageName = getLanguageName(locale);
         const systemPrompt = `You are a financial advisor analyzing spending patterns. Be specific, helpful, and slightly friendly in your advice.
 IMPORTANT: Respond ONLY in ${languageName} (locale: ${locale}).
+IMPORTANT: Use ${currencySymbol} (${currency}) as the currency symbol in all monetary amounts.
 
 Current Period: ${dateFormatter.format(startDate)} - ${dateFormatter.format(endDate)}
-Total Spending: $${numberFormatter.format(currentExpenses)}
-Previous Period Spending: $${numberFormatter.format(previousExpenses)}
+Total Spending: ${currencySymbol}${numberFormatter.format(currentExpenses)}
+Previous Period Spending: ${currencySymbol}${numberFormatter.format(previousExpenses)}
 Trend: ${trendPercentage > 0 ? "+" : ""}${trendPercentage.toFixed(1)}%
 
 Top Categories:

@@ -37,7 +37,7 @@ export const PresetChipsRow = ({
           <button
             key={idx}
             onClick={() => onSelect(label)}
-            className="flex-shrink-0 text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary hover:bg-primary/30 transition-colors"
+            className="flex-shrink-0 text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary md:hover:bg-primary/30 transition-colors"
             aria-label={label}
             title={label}
           >

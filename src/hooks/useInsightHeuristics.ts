@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import { useTranslations } from "next-intl";
-import { Transaction } from "@/types/types";
+import { useTranslations, useLocale } from "next-intl";
+import type { Transaction } from "@/types/types";
+import { getWeekStartDay } from "@/lib/getWeekStartDay";
 
 interface UseInsightHeuristicsProps {
   budget: number;
@@ -21,6 +22,7 @@ export function useInsightHeuristics({
   transactions,
 }: UseInsightHeuristicsProps): InsightResult {
   const t = useTranslations("dashboard.insights");
+  const locale = useLocale();
 
   return useMemo(() => {
     // 1. Critical: Budget > 90% spent
@@ -30,11 +32,23 @@ export function useInsightHeuristics({
 
     // 2. Positive: Weekly expenses < last week
     const now = new Date();
-    // Assuming week starts on Sunday (0). Adjust if needed based on locale, but simple heuristic is fine.
+    const weekStartDay = getWeekStartDay(locale); // 0 for Sunday, 1 for Monday
+    const dayOfWeek = now.getDay();
+    
+    // Calculate days from week start
+    let daysFromWeekStart: number;
+    if (weekStartDay === 0) {
+      // Week starts on Sunday
+      daysFromWeekStart = dayOfWeek;
+    } else {
+      // Week starts on Monday
+      daysFromWeekStart = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    }
+    
     const startOfThisWeek = new Date(
       now.getFullYear(),
       now.getMonth(),
-      now.getDate() - now.getDay(),
+      now.getDate() - daysFromWeekStart,
     );
     startOfThisWeek.setHours(0, 0, 0, 0);
 
@@ -60,11 +74,9 @@ export function useInsightHeuristics({
       .reduce((sum, t) => sum + t.amount, 0);
 
     // Only show praise if we have data for last week and this week is actually lower
-    // And maybe check if we are at least a few days into the week?
-    // Requirement says: "If weekly expenses < last week".
-    // If it's Monday morning, this will likely be true.
-    // I'll stick to simple logic for now as per requirements.
-    if (lastWeekExpenses > 0 && thisWeekExpenses < lastWeekExpenses) {
+    // Also check that we're at least 2 days into the week to avoid false positives
+    const daysIntoWeek = Math.floor((now.getTime() - startOfThisWeek.getTime()) / (1000 * 60 * 60 * 24));
+    if (lastWeekExpenses > 0 && thisWeekExpenses < lastWeekExpenses && daysIntoWeek >= 2) {
       return { type: "praise", message: t("positive") };
     }
 
@@ -84,5 +96,5 @@ export function useInsightHeuristics({
 
     // 4. Default
     return { type: "default", message: t("default") };
-  }, [budget, totalExpenses, transactions, t]);
+  }, [budget, totalExpenses, transactions, t, locale]);
 }

@@ -310,12 +310,12 @@ export const ChatMessages = ({
             )}
 
             {!isUser && suggestions.length > 0 && onSuggestionClick && (
-              <div className="mt-2 flex flex-wrap gap-5 md:gap-2 self-end justify-end">
+              <div className="mt-2 flex flex-wrap gap-5 md:gap-2 w-full md:justify-end md:self-end">
                 {suggestions.map((s, idx) => (
                   <button
                     key={idx}
                     type="button"
-                    className="inline-flex items-center justify-start rounded-full border bg-background hover:bg-muted text-sm px-4 py-2.5 md:text-xs md:px-3 md:py-1.5 text-left cursor-pointer transition-colors"
+                    className="inline-flex items-center justify-start rounded-full border bg-background md:hover:bg-muted text-sm px-4 py-2.5 md:text-xs md:px-3 md:py-1.5 text-left cursor-pointer transition-colors"
                     onClick={() => onSuggestionClick(s)}
                   >
                     {s}
