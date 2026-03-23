@@ -17,6 +17,8 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn as clsxNames } from "@/lib/utils";
+import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import { saveUserLocaleSettings } from "@/app/[locale]/actions/saveUserLocaleSettings";
 import { Button } from "@/components/ui/button";
 import LanguageSelect from "@/components/ui-elements/locale/LanguageSelect";
@@ -26,7 +28,6 @@ import { detectInitialLocale } from "@/i18n/detect";
 import { useRouter } from "@/i18n/routing";
 import { toOffsetISOString } from "@/lib/dateUtils";
 import { supabase } from "@/lib/supabaseClient";
-import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import type { Language } from "@/types/locale";
 
 type Step = 0 | 1 | 2 | 3 | 4 | 5;
@@ -512,7 +513,7 @@ export default function ChatOnboarding() {
           {messages.map((message) => (
             <div
               key={message.id}
-              className={cn(
+              className={clsxNames(
                 "flex flex-col max-w-[85%]",
                 message.role === "user"
                   ? "self-end items-end ml-auto"
@@ -520,7 +521,7 @@ export default function ChatOnboarding() {
               )}
             >
               <div
-                className={cn(
+                className={clsxNames(
                   "rounded-2xl px-4 py-3 shadow-sm",
                   message.role === "user"
                     ? "bg-blue-600 text-white"
@@ -555,7 +556,7 @@ export default function ChatOnboarding() {
                   key={curr.code}
                   type="button"
                   onClick={() => handleCurrencySelect(curr.code, curr.flag)}
-                  className={cn(
+                  className={clsxNames(
                     "px-4 py-2 rounded-full border transition-colors",
                     currency === curr.code
                       ? "border-blue-500 bg-blue-50 text-blue-700"
@@ -629,7 +630,7 @@ export default function ChatOnboarding() {
                     onClick={() =>
                       handleBudgetStyleSelect(style.id, style.label)
                     }
-                    className={cn(
+                    className={clsxNames(
                       "w-full flex items-center gap-4 p-4 rounded-2xl border transition-colors text-left",
                       selectedBudgetStyle === style.id
                         ? "border-blue-500 bg-blue-50"
