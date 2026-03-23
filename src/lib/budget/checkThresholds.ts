@@ -1,4 +1,5 @@
 import { SupabaseClient } from "@supabase/supabase-js";
+import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
 import { getCurrentMonthRange } from "@/lib/dateUtils";
 import {
   getNotificationMessage,
@@ -13,6 +14,21 @@ export async function checkBudgetThresholds(
   locale: Language
 ) {
   try {
+    const normalizeLanguage = (value: unknown): Language => {
+      if (typeof value !== "string") return locale || DEFAULT_LOCALE;
+      const base = value.trim().toLowerCase().split(/[-_]/)[0] || "";
+      if (!isSupportedLanguage(base)) return locale || DEFAULT_LOCALE;
+      return base as Language;
+    };
+
+    const { data: userSettings } = await supabase
+      .from("user_settings")
+      .select("locale")
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    const resolvedLocale = normalizeLanguage(userSettings?.locale ?? locale);
+
     // 1. Get budget info
     const { data: budget, error: budgetErr } = await supabase
       .from("budget_folders")
@@ -75,6 +91,25 @@ export async function checkBudgetThresholds(
 
     if (existing && existing.length > 0) return;
 
+    const queueTypes =
+      threshold === "exceeded"
+        ? ["budget_overrun"]
+        : ["budget_warning"];
+
+    const { data: existingQueued } = await supabase
+      .from("notification_queue")
+      .select("id")
+      .eq("user_id", userId)
+      .in("notification_type", queueTypes)
+      .contains("data", {
+        budget_id: budgetFolderId,
+        threshold,
+        month: currentMonthKey,
+      })
+      .limit(1);
+
+    if (existingQueued && existingQueued.length > 0) return;
+
     // 5. Send Notification
     // Get user preferences to know if we should send push
     const { data: prefs } = await supabase
@@ -85,7 +120,7 @@ export async function checkBudgetThresholds(
 
     const message = getNotificationMessage(
       "budget_alert",
-      locale,
+      resolvedLocale,
       { category: budget.name },
       variant
     );
@@ -100,7 +135,7 @@ export async function checkBudgetThresholds(
       ja: "予算アラート",
       ko: "예산 알림",
     };
-    const title = titleMap[locale] || titleMap["en"];
+    const title = titleMap[resolvedLocale] || titleMap["en"];
 
     const queueType = threshold === "exceeded" ? "budget_overrun" : "budget_warning";
 

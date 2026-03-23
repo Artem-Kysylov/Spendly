@@ -112,6 +112,33 @@ export async function POST(req: NextRequest) {
       console.warn("Upsert user_settings failed:", { code, message });
     }
 
+    try {
+      const prefsUpdate = await adminSupabase
+        .from("notification_preferences")
+        .update({ locale: normalized.locale })
+        .eq("user_id", user.id);
+
+      if (prefsUpdate.error) {
+        const e = prefsUpdate.error as unknown as {
+          code?: unknown;
+          message?: unknown;
+        };
+        const code = typeof e.code === "string" ? e.code : "";
+        const message = typeof e.message === "string" ? e.message : "";
+        const missingLocaleColumn =
+          code === "42703" || message.toLowerCase().includes("locale");
+
+        if (!missingLocaleColumn) {
+          console.warn("Update notification_preferences locale failed:", {
+            code,
+            message,
+          });
+        }
+      }
+    } catch {
+      // ignore notification_preferences locale sync errors
+    }
+
     // Обновляем метаданные auth пользователя (совместимость)
     await supabase.auth.updateUser({
       data: {

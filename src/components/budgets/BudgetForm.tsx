@@ -4,6 +4,7 @@ import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import Button from "../ui-elements/Button";
@@ -231,16 +232,12 @@ export default function BudgetForm({
                       {tBudgets("cyclic.toggleDescription")}
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsCyclic((v) => !v)}
-                    className={`ml-3 w-10 h-6 rounded-full ${isCyclic ? "bg-primary" : "bg-muted"} relative transition-colors shrink-0`}
-                    aria-pressed={isCyclic}
-                  >
-                    <span
-                      className={`absolute top-0.5 ${isCyclic ? "left-5" : "left-1"} w-5 h-5 rounded-full bg-white transition-all`}
-                    />
-                  </button>
+                  <Switch
+                    checked={isCyclic}
+                    onCheckedChange={setIsCyclic}
+                    className="ml-3 shrink-0 data-[state=checked]:bg-primary"
+                    aria-label={tBudgets("cyclic.toggleTitle")}
+                  />
                 </div>
               </div>
 

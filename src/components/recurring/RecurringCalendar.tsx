@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -38,6 +38,7 @@ export default function RecurringCalendar({
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const dfLocaleMap: Record<string, DateFnsLocale> = {
     en: enUS,
@@ -71,10 +72,32 @@ export default function RecurringCalendar({
     return paymentDatesMap.get(dateKey) || [];
   }, [selectedDate, paymentDatesMap]);
 
+  const clearCloseTimeout = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
+      closeTimeoutRef.current = null;
+    }
+  };
+
+  const openForDate = (date: Date) => {
+    clearCloseTimeout();
+    setSelectedDate(date);
+    setIsPopoverOpen(true);
+  };
+
+  const scheduleClose = () => {
+    clearCloseTimeout();
+    closeTimeoutRef.current = setTimeout(() => {
+      setIsPopoverOpen(false);
+    }, 120);
+  };
+
   // Custom day button with markers
   const CustomDayButton = ({
     className,
     children,
+    onMouseEnter,
+    onMouseLeave,
     ...props
   }: React.ComponentProps<typeof DayButton>) => {
     const day = props.day?.date;
@@ -99,6 +122,18 @@ export default function RecurringCalendar({
           className,
         )}
         {...props}
+        onMouseEnter={(event) => {
+          onMouseEnter?.(event);
+          if (!isMobile && day && hasPayments) {
+            openForDate(day);
+          }
+        }}
+        onMouseLeave={(event) => {
+          onMouseLeave?.(event);
+          if (!isMobile && hasPayments) {
+            scheduleClose();
+          }
+        }}
       >
         {children}
         {hasPayments && (
@@ -123,6 +158,16 @@ export default function RecurringCalendar({
         variant === "dashboard" ? "mb-4" : "mb-3",
         !isMobile && variant === "dashboard" && "mb-0 flex flex-col flex-1",
       )}
+      onMouseEnter={() => {
+        if (!isMobile) {
+          clearCloseTimeout();
+        }
+      }}
+      onMouseLeave={() => {
+        if (!isMobile) {
+          scheduleClose();
+        }
+      }}
     >
       <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
         <PopoverTrigger asChild>
@@ -131,11 +176,10 @@ export default function RecurringCalendar({
               mode="single"
               selected={selectedDate}
               onSelect={(date) => {
-                if (date) {
+                if (date && isMobile) {
                   const dateKey = date.toISOString().split("T")[0];
                   if (paymentDatesMap.has(dateKey)) {
-                    setSelectedDate(date);
-                    setIsPopoverOpen(true);
+                    openForDate(date);
                   }
                 }
               }}
@@ -182,6 +226,16 @@ export default function RecurringCalendar({
           align="center"
           side="bottom"
           sideOffset={8}
+          onMouseEnter={() => {
+            if (!isMobile) {
+              clearCloseTimeout();
+            }
+          }}
+          onMouseLeave={() => {
+            if (!isMobile) {
+              scheduleClose();
+            }
+          }}
         >
           {selectedDateTransactions.length > 0 ? (
             <div className="p-4 space-y-3 max-w-[280px]">

@@ -347,9 +347,14 @@ export const useMainBudget = () => {
   }, [fetchMainBudget]);
 
   const isNewCycle = useMemo(() => {
-    if (!lastRenewalDate || !budgetResetDay) return false;
+    if (!budgetResetDay) return false;
     const now = new Date();
     const currentCycleStart = getFinancialMonthStart(budgetResetDay, now);
+
+    if (!lastRenewalDate) {
+      return formatDateOnly(now) === formatDateOnly(currentCycleStart);
+    }
+
     const lastRenewal = new Date(lastRenewalDate);
     return now >= currentCycleStart && lastRenewal < currentCycleStart;
   }, [lastRenewalDate, budgetResetDay]);

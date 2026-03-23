@@ -6,6 +6,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
+import { checkBudgetThresholds } from "@/lib/budget/checkThresholds";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
 import { computeNextAllowedTime } from "@/lib/quietHours";
 import type { AssistantTone } from "@/types/ai";
@@ -312,6 +313,22 @@ export async function processRecurringTransactions(): Promise<{
 
         if (createdId) {
           processed++;
+
+          if (tx.type === "expense" && tx.budget_folder_id) {
+            try {
+              await checkBudgetThresholds(
+                supabase,
+                user_id,
+                tx.budget_folder_id,
+                resolvedLocale,
+              );
+            } catch (thresholdError) {
+              console.error(
+                `Error checking recurring threshold for user ${user_id}:`,
+                thresholdError,
+              );
+            }
+          }
 
           // Get user's currency preference
           const { data: settings } = await supabase

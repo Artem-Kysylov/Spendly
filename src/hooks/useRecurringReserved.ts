@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabaseClient";
 import { UserAuth } from "@/context/AuthContext";
 import { useMainBudget } from "@/hooks/useMainBudget";
 import { getFinancialMonthFullRange } from "@/lib/dateUtils";
+import { getPaymentDateForMonth } from "@/lib/calculateRecurringDates";
 
 interface RecurringTransaction {
   id: string;
@@ -33,10 +34,11 @@ export const useRecurringReserved = () => {
 
       const userId = session.user.id;
       const now = new Date();
-      const today = now.getDate();
+      const todayStart = new Date(now);
+      todayStart.setHours(0, 0, 0, 0);
 
       // Get financial month boundaries
-      const { start, end } = getFinancialMonthFullRange(budgetResetDay || 1, now);
+      const { end } = getFinancialMonthFullRange(budgetResetDay || 1, now);
 
       // Fetch all active recurring transactions
       const { data: recurringTxs, error: recurringError } = await supabase
@@ -60,43 +62,70 @@ export const useRecurringReserved = () => {
       const transactions = recurringTxs as RecurringTransaction[];
       let totalReserved = 0;
 
-      // Get last day of current month
-      const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-
       for (const tx of transactions) {
-        // Determine effective recurrence day (handle month-end edge cases)
-        const effectiveDay = tx.recurrence_day > lastDayOfMonth 
-          ? lastDayOfMonth 
-          : tx.recurrence_day;
+        const cycleOccurrenceDates: Date[] = [];
+        const startMonth = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1);
+        const endMonth = new Date(end.getFullYear(), end.getMonth(), 1);
 
-        // Only count if recurrence day is today or in the future this month
-        if (effectiveDay < today) {
-          continue;
+        const currentMonthOccurrence = getPaymentDateForMonth(
+          tx.recurrence_day,
+          startMonth.getMonth(),
+          startMonth.getFullYear(),
+        );
+
+        if (currentMonthOccurrence) {
+          cycleOccurrenceDates.push(currentMonthOccurrence);
         }
 
-        // Check if this recurring transaction was already processed today
-        // Look for a matching non-recurring transaction created in the last 2 hours
-        const sinceIso = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-        
-        const { data: existing } = await supabase
-          .from("transactions")
-          .select("id")
-          .eq("user_id", userId)
-          .eq("is_recurring", false)
-          .eq("title", tx.title)
-          .eq("amount", tx.amount)
-          .eq("type", tx.type)
-          .gte("created_at", sinceIso)
-          .limit(1);
+        if (
+          endMonth.getFullYear() !== startMonth.getFullYear() ||
+          endMonth.getMonth() !== startMonth.getMonth()
+        ) {
+          const endMonthOccurrence = getPaymentDateForMonth(
+            tx.recurrence_day,
+            endMonth.getMonth(),
+            endMonth.getFullYear(),
+          );
 
-        // If already processed, skip this recurring transaction
-        if (existing && existing.length > 0) {
-          continue;
+          if (endMonthOccurrence) {
+            cycleOccurrenceDates.push(endMonthOccurrence);
+          }
         }
 
-        // Add to reserved amount (only expenses reduce safe-to-spend)
-        if (tx.type === "expense") {
-          totalReserved += Math.abs(Number(tx.amount));
+        for (const occurrenceDate of cycleOccurrenceDates) {
+          const occurrenceStart = new Date(occurrenceDate);
+          occurrenceStart.setHours(0, 0, 0, 0);
+
+          if (occurrenceStart < todayStart || occurrenceStart > end) {
+            continue;
+          }
+
+          // If today's recurring payment has already been materialized into a regular transaction,
+          // don't reserve it again.
+          if (occurrenceStart.getTime() === todayStart.getTime()) {
+            const nextDayStart = new Date(todayStart);
+            nextDayStart.setDate(nextDayStart.getDate() + 1);
+
+            const { data: existing } = await supabase
+              .from("transactions")
+              .select("id")
+              .eq("user_id", userId)
+              .eq("is_recurring", false)
+              .eq("title", tx.title)
+              .eq("amount", tx.amount)
+              .eq("type", tx.type)
+              .gte("created_at", todayStart.toISOString())
+              .lt("created_at", nextDayStart.toISOString())
+              .limit(1);
+
+            if (existing && existing.length > 0) {
+              continue;
+            }
+          }
+
+          if (tx.type === "expense") {
+            totalReserved += Math.abs(Number(tx.amount));
+          }
         }
       }
 
