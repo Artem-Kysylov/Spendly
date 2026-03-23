@@ -13,6 +13,8 @@ interface Budget {
   rollover_enabled?: boolean;
   rollover_mode?: "positive-only" | "allow-negative" | null;
   rollover_cap?: number | null;
+  is_cyclic?: boolean;
+  rollover_carry?: number;
 }
 
 export const useBudgets = () => {

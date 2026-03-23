@@ -227,6 +227,8 @@ export interface BudgetFolderItemProps {
   rolloverMode?: RolloverMode;
   rolloverCap?: number | null;
   rolloverPreviewCarry?: number;
+  is_cyclic?: boolean;
+  rollover_carry?: number;
 }
 
 export interface BudgetDetailsInfoProps {
@@ -242,10 +244,13 @@ export interface BudgetDetailsProps {
   amount: number;
   type: "expense" | "income";
   color_code?: string | null;
+  currency?: string;
   rolloverEnabled?: boolean;
   rolloverMode?: RolloverMode;
   rolloverPreviewCarry?: number;
   rolloverCap?: number | null;
+  is_cyclic?: boolean;
+  rollover_carry?: number;
 }
 
 export interface BudgetDetailsFormProps {
@@ -270,6 +275,7 @@ export interface BudgetModalProps {
     rolloverEnabled?: boolean,
     rolloverMode?: RolloverMode,
     rolloverCap?: number | null,
+    is_cyclic?: boolean,
   ) => Promise<void>;
   isLoading?: boolean;
   initialData?: BudgetDetailsProps;
@@ -728,4 +734,24 @@ export interface UseNotificationSettingsReturn {
   updateSettings: (updates: Partial<NotificationSettings>) => Promise<void>;
   subscribeToPush: () => Promise<boolean>;
   unsubscribeFromPush: () => Promise<boolean>;
+}
+
+export interface BudgetInsight {
+  id: string;
+  user_id: string;
+  budget_folder_id: string;
+  budget_name?: string;
+  budget_emoji?: string;
+  insight_type: "savings_success";
+  cycle_date: string;
+  amount_saved: number;
+  dismissed: boolean;
+  created_at: string;
+  dismissed_at?: string | null;
+}
+
+export interface BudgetInsightCardProps {
+  insight: BudgetInsight;
+  currency: string;
+  onDismiss: (insightId: string) => Promise<void>;
 }

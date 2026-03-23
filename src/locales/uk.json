@@ -472,6 +472,14 @@
       "toastSuccessPlayful": "Готово — дохід додано!",
       "toastSnoozed": "Добре, нагадаю завтра.",
       "rolloverBreakdown": "Включно з перенесенням: {amount}"
+    },
+    "budgetRenewal": {
+      "modalTitle": "Час оновити основний бюджет? 💰",
+      "modalMessage": "Почався новий бюджетний цикл. Бажаєте оновити бюджет зараз?",
+      "renewNow": "Так, оновити",
+      "notYet": "Не зараз",
+      "toastSuccess": "Бюджет оновлено! Залишок минулого місяця додано.",
+      "renewButtonLabel": "Оновити бюджет"
     }
   },
   "budgets": {
@@ -485,10 +493,19 @@
       "toggleLabel": "Увімкнути перенесення",
       "modeLabel": "Режим",
       "positiveOnly": "Тільки позитивний",
-      "allowNegative": "Дозволити від'ємний",
-      "label": "Rollover",
-      "positive": "Rollover from last month",
-      "negative": "Overspending from last month"
+      "allowNegative": "Дозволити негативний",
+      "label": "Перенесення",
+      "positive": "Залишок з минулого місяця",
+      "negative": "Перевитрата з минулого місяця"
+    },
+    "cyclic": {
+      "toggleTitle": "Щомісячне скидання (у день зарплати)",
+      "toggleDescription": "Автоматично обнуляє витрати в день оновлення головного бюджету. Історія зберігається.",
+      "activeLabel": "Циклічний бюджет активний"
+    },
+    "spendlyPal": {
+      "savingsMessage": "Spendly Pal: Чудова робота! Минулого циклу ви заощадили {{amount}} у категорії {{budgetName}}. ✨",
+      "dismiss": "Закрити"
     },
     "meta": {
       "title": "Бюджети",
@@ -1226,8 +1243,10 @@
       "title": "Регулярні транзакції",
       "total": "Всього",
       "inDays": "Через {days} дн.",
+      "daysAgo": "{days} дн. тому",
       "today": "Сьогодні",
       "tomorrow": "Завтра",
+      "yesterday": "Вчора",
       "monthly": "Щомісяця",
       "noPayments": "Немає запланованих регулярних платежів"
     }

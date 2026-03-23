@@ -2,7 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import BudgetDetailsControls from "@/components/budgets/BudgetDetailsControls";
 import BudgetDetailsForm from "@/components/budgets/BudgetDetailsForm";
@@ -34,6 +34,7 @@ export default function BudgetDetailsClient() {
   const { budgetId } = useParams<{ budgetId: string }>();
   const id = budgetId as string;
   const router = useRouter();
+  const locale = useLocale();
   const { session } = UserAuth();
   const userId = session?.user?.id;
 
@@ -63,6 +64,20 @@ export default function BudgetDetailsClient() {
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
   const [rolloverPreview, setRolloverPreview] = useState<number>(0);
+  const [lastRenewalDate, setLastRenewalDate] = useState<string | null>(null);
+  const [currency, setCurrency] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return window.localStorage.getItem("user-currency") || "USD";
+    }
+    const base = locale.split("-")[0];
+    if (base === "uk") return "UAH";
+    if (base === "ru") return "RUB";
+    if (base === "ja") return "JPY";
+    if (base === "ko") return "KRW";
+    if (base === "id") return "IDR";
+    if (base === "hi") return "INR";
+    return "USD";
+  });
 
   type RolloverMode = "positive-only" | "allow-negative";
   type BudgetRolloverFields = {
@@ -119,6 +134,37 @@ export default function BudgetDetailsClient() {
   const tCommon = useTranslations("common");
   const tTransactions = useTranslations("transactions");
 
+  useEffect(() => {
+    if (!userId) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: userSettings } = await supabase
+          .from("user_settings")
+          .select("currency")
+          .eq("user_id", userId)
+          .maybeSingle();
+
+        const next = userSettings?.currency;
+        if (!cancelled && typeof next === "string" && next.length > 0) {
+          setCurrency(next);
+          try {
+            window.localStorage.setItem("user-currency", next);
+          } catch {
+            // no-op
+          }
+        }
+      } catch (error) {
+        console.error("Error loading currency:", error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
   const handleToastMessage = (
     text: string,
     type: ToastMessageProps["type"],
@@ -131,6 +177,8 @@ export default function BudgetDetailsClient() {
     if (!userId || !id) return;
     try {
       setIsLoading(true);
+      
+      // Fetch budget details
       const { data, error } = await supabase
         .from("budget_folders")
         .select("*")
@@ -142,6 +190,16 @@ export default function BudgetDetailsClient() {
         return;
       }
       if (data) setBudgetDetails(data as BudgetDetailsProps);
+      
+      // Fetch last_renewal_date for cyclic budgets
+      if (data?.is_cyclic) {
+        const { data: stateData } = await supabase
+          .from("main_budget_state")
+          .select("last_renewal_date")
+          .eq("user_id", userId)
+          .maybeSingle();
+        setLastRenewalDate(stateData?.last_renewal_date || null);
+      }
     } catch (error) {
       console.error("Error:", error);
     } finally {
@@ -169,7 +227,13 @@ export default function BudgetDetailsClient() {
           return;
         }
 
-        const prevSpent = data?.reduce((sum, tx) => sum + tx.amount, 0) || 0;
+        // If no transactions in previous month, rollover should be 0 (new budget)
+        if (!data || data.length === 0) {
+          setRolloverPreview(0);
+          return;
+        }
+
+        const prevSpent = data.reduce((sum, tx) => sum + tx.amount, 0);
 
         // Get rollover settings from budgetDetails
         const rollover = details as unknown as BudgetRolloverFields;
@@ -414,10 +478,19 @@ export default function BudgetDetailsClient() {
         <ToastMessage text={toastMessage.text} type={toastMessage.type} />
       )}
 
-      <BudgetDetailsControls
-        onDeleteClick={openDeleteModal}
-        onEditClick={openEditModal}
-      />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {budgetDetails.is_cyclic && (
+            <div className="px-2 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium">
+              {tBudgets("cyclic.activeLabel")}
+            </div>
+          )}
+        </div>
+        <BudgetDetailsControls
+          onDeleteClick={openDeleteModal}
+          onEditClick={openEditModal}
+        />
+      </div>
 
       {/* Мобильная версия: инфо + кнопка + список транзакций по группам */}
       <div className="block md:hidden">
@@ -429,7 +502,10 @@ export default function BudgetDetailsClient() {
             amount={budgetDetails.amount}
             type={budgetDetails.type}
             color_code={budgetDetails.color_code ?? null}
+            currency={currency}
             rolloverPreviewCarry={rolloverPreview}
+            is_cyclic={budgetDetails.is_cyclic}
+            rollover_carry={budgetDetails.rollover_carry}
           />
           <div className="mt-2">
             <Button
@@ -499,7 +575,10 @@ export default function BudgetDetailsClient() {
           amount={budgetDetails.amount}
           type={budgetDetails.type}
           color_code={budgetDetails.color_code ?? null}
+          currency={currency}
           rolloverPreviewCarry={rolloverPreview}
+          is_cyclic={budgetDetails.is_cyclic}
+          rollover_carry={budgetDetails.rollover_carry}
         />
         <BudgetDetailsForm
           isSubmitting={isSubmitting}

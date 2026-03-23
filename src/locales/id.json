@@ -466,12 +466,20 @@
       "cardTitle": "Konfirmasi pemasukan",
       "cardMessage": "Tambahkan {amount} sebagai pemasukan untuk siklus ini?",
       "confirm": "Konfirmasi",
-      "notYet": "Belum",
+      "notYet": "Belum sekarang",
       "salaryTitle": "Gaji",
       "toastSuccessNeutral": "Pemasukan dikonfirmasi.",
       "toastSuccessPlayful": "Beres — pemasukan ditambahkan!",
       "toastSnoozed": "Oke, aku ingatkan besok.",
       "rolloverBreakdown": "Termasuk rollover: {amount}"
+    },
+    "budgetRenewal": {
+      "modalTitle": "Saatnya memperbarui anggaran utama? 💰",
+      "modalMessage": "Siklus anggaran baru telah dimulai. Apakah Anda ingin memperbarui anggaran sekarang?",
+      "renewNow": "Ya, perbarui",
+      "notYet": "Belum sekarang",
+      "toastSuccess": "Anggaran diperbarui! Sisa bulan lalu telah ditambahkan.",
+      "renewButtonLabel": "Perbarui anggaran"
     }
   },
   "budgets": {
@@ -487,8 +495,17 @@
       "positiveOnly": "Hanya positif",
       "allowNegative": "Izinkan negatif",
       "label": "Rollover",
-      "positive": "Rollover from last month",
-      "negative": "Overspending from last month"
+      "positive": "Rollover dari bulan lalu",
+      "negative": "Pengeluaran berlebih dari bulan lalu"
+    },
+    "cyclic": {
+      "toggleTitle": "Atur Ulang Bulanan (Siklus Gaji)",
+      "toggleDescription": "Secara otomatis mengatur ulang jumlah pengeluaran pada hari pembaruan anggaran utama. Riwayat Anda tetap aman.",
+      "activeLabel": "Anggaran siklik aktif"
+    },
+    "spendlyPal": {
+      "savingsMessage": "Spendly Pal: Kerja bagus! Anda menghemat {{amount}} untuk {{budgetName}} di siklus lalu. ✨",
+      "dismiss": "Tutup"
     },
     "meta": {
       "title": "Anggaran",
@@ -1226,8 +1243,10 @@
       "title": "Transaksi berulang",
       "total": "Total",
       "inDays": "Dalam {days} hari",
+      "daysAgo": "{days} hari yang lalu",
       "today": "Hari ini",
       "tomorrow": "Besok",
+      "yesterday": "Kemarin",
       "monthly": "Bulanan",
       "noPayments": "Tidak ada pembayaran rutin yang dijadwalkan"
     }
