@@ -6,9 +6,11 @@
 import { getTranslations } from "next-intl/server";
 
 import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
+import { checkMainBudgetThresholds } from "@/lib/budget/checkMainBudgetThresholds";
 import { checkBudgetThresholds } from "@/lib/budget/checkThresholds";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
 import { computeNextAllowedTime } from "@/lib/quietHours";
+import { toOffsetISOString } from "@/lib/dateUtils";
 import type { AssistantTone } from "@/types/ai";
 import type { Language } from "@/types/locale";
 
@@ -140,7 +142,7 @@ async function createTransactionFromRecurring(
       amount: recurring.amount,
       type: recurring.type,
       budget_folder_id: recurring.budget_folder_id,
-      created_at: new Date().toISOString(),
+      created_at: toOffsetISOString(new Date()),
       is_recurring: false, // The created transaction is not recurring itself
     })
     .select("id")
@@ -326,6 +328,17 @@ export async function processRecurringTransactions(): Promise<{
               console.error(
                 `Error checking recurring threshold for user ${user_id}:`,
                 thresholdError,
+              );
+            }
+          }
+
+          if (tx.type === "expense") {
+            try {
+              await checkMainBudgetThresholds(supabase, user_id, resolvedLocale);
+            } catch (mainThresholdError) {
+              console.error(
+                `Error checking recurring main budget threshold for user ${user_id}:`,
+                mainThresholdError,
               );
             }
           }

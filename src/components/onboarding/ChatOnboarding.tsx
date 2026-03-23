@@ -24,8 +24,9 @@ import ToastMessage from "@/components/ui-elements/ToastMessage";
 import { UserAuth } from "@/context/AuthContext";
 import { detectInitialLocale } from "@/i18n/detect";
 import { useRouter } from "@/i18n/routing";
+import { toOffsetISOString } from "@/lib/dateUtils";
 import { supabase } from "@/lib/supabaseClient";
-import { cn, isValidAmountInput, parseAmountInput } from "@/lib/utils";
+import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import type { Language } from "@/types/locale";
 
 type Step = 0 | 1 | 2 | 3 | 4 | 5;
@@ -342,7 +343,7 @@ export default function ChatOnboarding() {
                 amount: parsedAmount,
                 type: "expense",
                 budget_folder_id: null,
-                created_at: new Date().toISOString(),
+                created_at: toOffsetISOString(new Date()),
               });
 
             if (txError) {

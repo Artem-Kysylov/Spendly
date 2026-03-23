@@ -439,3 +439,7 @@
 2026-03-16T13:29:41.090Z [LLM_DEBUG gemini pre] {"requestId":"budget-parse-1773667781090","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[770,22]}
 2026-03-16T13:30:20.854Z [LLM_DEBUG gemini pre] {"requestId":"budget-parse-1773667820854","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[770,22]}
 2026-03-16T13:30:56.524Z [LLM_DEBUG gemini pre] {"requestId":"94339c58-8689-4e94-aa58-2524fc153006","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,5292]}
+2026-03-23T17:16:25.151Z [LLM_DEBUG gemini pre] {"requestId":"404fcb9d-2e7b-4c7e-ad8d-2641f779da36","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,6229]}
+2026-03-23T17:47:48.285Z [LLM_DEBUG gemini pre] {"requestId":"924c73a3-bd82-46a7-812e-eebd7d186203","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,6324]}
+2026-03-23T17:47:48.327Z [LLM_DEBUG gemini pre] {"requestId":"aa42ae9c-2261-4184-b213-2e16ef4524d5","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,6321]}
+2026-03-23T17:48:27.772Z [LLM_DEBUG gemini pre] {"requestId":"e0752881-7a8b-4de8-a09e-a40eeea5f227","model":"gemini-2.5-flash","userPartsLen":2,"userPartsLengths":[282,6216]}

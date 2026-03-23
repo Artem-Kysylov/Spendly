@@ -7,6 +7,8 @@ import {
 } from "@/lib/notificationStrings";
 import type { Language } from "@/types/locale";
 
+type ThresholdKey = "80" | "90" | "100" | "exceeded";
+
 export async function checkBudgetThresholds(
   supabase: SupabaseClient,
   userId: string,
@@ -54,7 +56,7 @@ export async function checkBudgetThresholds(
     const percentage = budget.amount > 0 ? (totalSpent / budget.amount) * 100 : 0;
 
     // 3. Determine threshold
-    let threshold: "80" | "100" | "exceeded" | null = null;
+    let threshold: ThresholdKey | null = null;
     let variant: NotificationVariant | null = null;
 
     if (percentage > 100) {
@@ -63,6 +65,9 @@ export async function checkBudgetThresholds(
     } else if (percentage >= 100) {
       threshold = "100";
       variant = "limit_reached";
+    } else if (percentage >= 90) {
+      threshold = "90";
+      variant = "warning_90";
     } else if (percentage >= 80) {
       threshold = "80";
       variant = "warning_80";
@@ -80,7 +85,7 @@ export async function checkBudgetThresholds(
       .from("notifications")
       .select("id")
       .eq("user_id", userId)
-      .eq("type", "budget_alert")
+      .in("type", ["budget_warning", "budget_overrun"])
       // JSON containment check
       .contains("metadata", {
         budget_id: budgetFolderId,
@@ -127,13 +132,62 @@ export async function checkBudgetThresholds(
 
     // Title localized
     const titleMap: Record<string, string> = {
-      en: "Budget Alert",
-      ru: "Уведомление о бюджете",
-      uk: "Сповіщення про бюджет",
-      hi: "बजट चेतावनी",
-      id: "Peringatan Anggaran",
-      ja: "予算アラート",
-      ko: "예산 알림",
+      en:
+        threshold === "80"
+          ? `${budget.name} budget at 80%`
+          : threshold === "90"
+            ? `${budget.name} budget at 90%`
+            : threshold === "100"
+              ? `${budget.name} budget limit reached`
+              : `${budget.name} budget exceeded`,
+      ru:
+        threshold === "80"
+          ? `Бюджет ${budget.name} достиг 80%`
+          : threshold === "90"
+            ? `Бюджет ${budget.name} достиг 90%`
+            : threshold === "100"
+              ? `Лимит бюджета ${budget.name} достигнут`
+              : `Бюджет ${budget.name} превышен`,
+      uk:
+        threshold === "80"
+          ? `Бюджет ${budget.name} досяг 80%`
+          : threshold === "90"
+            ? `Бюджет ${budget.name} досяг 90%`
+            : threshold === "100"
+              ? `Ліміт бюджету ${budget.name} досягнуто`
+              : `Бюджет ${budget.name} перевищено`,
+      hi:
+        threshold === "80"
+          ? `${budget.name} बजट 80% पर है`
+          : threshold === "90"
+            ? `${budget.name} बजट 90% पर है`
+            : threshold === "100"
+              ? `${budget.name} बजट की सीमा पूरी हो गई`
+              : `${budget.name} बजट पार हो गया`,
+      id:
+        threshold === "80"
+          ? `Anggaran ${budget.name} mencapai 80%`
+          : threshold === "90"
+            ? `Anggaran ${budget.name} mencapai 90%`
+            : threshold === "100"
+              ? `Batas anggaran ${budget.name} tercapai`
+              : `Anggaran ${budget.name} terlampaui`,
+      ja:
+        threshold === "80"
+          ? `${budget.name} の予算が80%に達しました`
+          : threshold === "90"
+            ? `${budget.name} の予算が90%に達しました`
+            : threshold === "100"
+              ? `${budget.name} の予算上限に達しました`
+              : `${budget.name} の予算を超過しました`,
+      ko:
+        threshold === "80"
+          ? `${budget.name} 예산이 80%에 도달했어요`
+          : threshold === "90"
+            ? `${budget.name} 예산이 90%에 도달했어요`
+            : threshold === "100"
+              ? `${budget.name} 예산 한도에 도달했어요`
+              : `${budget.name} 예산을 초과했어요`,
     };
     const title = titleMap[resolvedLocale] || titleMap["en"];
 

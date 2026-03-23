@@ -6,6 +6,7 @@ import { useState } from "react";
 
 // Import types
 import type { BudgetDetailsFormProps } from "../../types/types";
+import { mergeDateWithTime } from "@/lib/dateUtils";
 import Button from "../ui-elements/Button";
 import HybridDatePicker from "../ui-elements/HybridDatePicker";
 import TextInput from "../ui-elements/TextInput";
@@ -90,7 +91,9 @@ const BudgetDetailsForm = ({
         >
           <HybridDatePicker
             selectedDate={selectedDate}
-            onDateSelect={setSelectedDate}
+            onDateSelect={(date) =>
+              setSelectedDate((prev) => mergeDateWithTime(date, prev))
+            }
             label={tModals("transaction.date.label")}
             placeholder={tModals("transaction.date.placeholder")}
           />

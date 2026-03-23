@@ -244,7 +244,7 @@ export async function POST(req: NextRequest) {
       .from("notification_queue")
       .select("id")
       .eq("user_id", userId)
-      .eq("notification_type", "weekly_reminder")
+      .eq("notification_type", "weekly_summary")
       .gte("created_at", lastWeekStart.toISOString())
       .lte("created_at", lastWeekEnd.toISOString())
       .limit(1);
@@ -451,7 +451,7 @@ export async function POST(req: NextRequest) {
       user_id: userId,
       title,
       message: body,
-      type: "weekly_reminder",
+      type: "weekly_summary",
       metadata: {
         week_start: lastWeekStart.toISOString().slice(0, 10),
         transactions_count: (lastWeekTxs || []).length,
@@ -509,7 +509,7 @@ export async function POST(req: NextRequest) {
         user_id: userId,
         event_name: "digest_generated",
         payload: {
-          type: "weekly_reminder",
+          type: "weekly_summary",
           is_pro: isPro,
           has_ai_insight: hasAIInsight,
         },

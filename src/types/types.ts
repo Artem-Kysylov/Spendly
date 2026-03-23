@@ -657,7 +657,18 @@ export interface Notification {
   message: string;
   type:
   | "budget_alert"
+  | "budget_warning"
+  | "budget_overrun"
   | "weekly_reminder"
+  | "weekly_summary"
+  | "reminder"
+  | "daily_reminder"
+  | "aggressive"
+  | "retention"
+  | "system"
+  | "ai_insight"
+  | "achievement"
+  | "monthly_summary"
   | "expense_warning"
   | "goal_achieved"
   | "info"

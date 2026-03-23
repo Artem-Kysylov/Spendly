@@ -21,6 +21,7 @@ import useModal from "@/hooks/useModal";
 import { useRouter } from "@/i18n/routing";
 import { computeCarry } from "@/lib/budgetRollover";
 import { getPreviousMonthRange } from "@/lib/dateUtils";
+import { toOffsetISOString } from "@/lib/dateUtils";
 import { supabase } from "@/lib/supabaseClient";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import type {
@@ -302,7 +303,7 @@ export default function BudgetDetailsClient() {
           title,
           amount: parsedAmount,
           type: budgetData.type,
-          created_at: date.toISOString(),
+          created_at: toOffsetISOString(date),
         })
         .select();
       if (transactionError) {

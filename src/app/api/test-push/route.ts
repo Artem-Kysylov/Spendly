@@ -65,19 +65,14 @@ export async function POST(req: NextRequest) {
       new Set(
         [
           resolvedType,
-          "weekly_reminder",
+          "weekly_summary",
           "daily_reminder",
           "retention",
           "aggressive",
           "budget_warning",
-          "budget_alert",
-          "expense_warning",
+          "budget_overrun",
           "reminder",
-          "general",
-          "info",
-          "warning",
-          "error",
-          "success",
+          "system",
         ].filter(Boolean),
       ),
     ) as string[];

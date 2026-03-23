@@ -96,6 +96,7 @@ function NotificationBell({
       case "budget_overrun":
         return "⚠️";
       case "reminder":
+      case "weekly_summary":
       case "weekly_reminder":
         return "📅";
       case "expense_warning":
@@ -318,7 +319,19 @@ function NotificationBell({
                                   </button>
                                 </>
                               )}
-                            {["weekly_reminder", "reminder"].includes(notification.type) && (
+                            {["budget_warning", "budget_overrun"].includes(notification.type) &&
+                              notification?.metadata?.budget_scope === "main_budget" && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openReport(notification);
+                                  }}
+                                  className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 supports-[hover:hover]:hover:bg-blue-200"
+                                >
+                                  {tNotifications("bell.actions.openReport")}
+                                </button>
+                              )}
+                            {["weekly_summary", "weekly_reminder", "reminder"].includes(notification.type) && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();

@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
           user_id: user.id,
           title,
           message,
-          type: "weekly_reminder",
+          type: "reminder",
           metadata: {
             recurring_rule_id: r.id,
             due_date: r.next_due_date,
@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
           user_id: user.id,
           title,
           message,
-          type: "weekly_reminder",
+          type: "reminder",
           metadata: {
             recurring_rule_id: r.id,
             due_date: r.next_due_date,

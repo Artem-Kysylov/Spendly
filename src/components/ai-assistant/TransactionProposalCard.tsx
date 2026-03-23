@@ -22,6 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UserAuth } from "@/context/AuthContext";
+import { mergeDateWithTime, toOffsetISOString } from "@/lib/dateUtils";
 import { formatMoney } from "@/lib/format/money";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import { HybridDatePicker } from "../ui-elements";
@@ -33,7 +34,7 @@ interface Budget {
   type: "expense" | "income";
 }
 
-interface ProposedTransaction {
+export interface ProposedTransaction {
   title: string;
   amount: number;
   type: "expense" | "income";
@@ -145,7 +146,7 @@ export function TransactionProposalCard({
         amount: parseAmountInput(amount),
         type: proposal.type,
         budget_folder_id: selectedBudgetId === "unbudgeted" ? null : selectedBudgetId,
-        created_at: selectedDate.toISOString(), // сохраняем ISO
+        created_at: toOffsetISOString(selectedDate),
       });
 
       if (result.success) {
@@ -274,7 +275,9 @@ export function TransactionProposalCard({
             <div className="space-y-2">
               <HybridDatePicker
                 selectedDate={selectedDate}
-                onDateSelect={setSelectedDate}
+                onDateSelect={(date) =>
+                  setSelectedDate((prev) => mergeDateWithTime(date, prev))
+                }
                 label="Date"
                 placeholder="Choose date"
               />

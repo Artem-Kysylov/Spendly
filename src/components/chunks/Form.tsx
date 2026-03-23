@@ -3,6 +3,7 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { toOffsetISOString } from "@/lib/dateUtils";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import { UserAuth } from "../../context/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
@@ -53,7 +54,7 @@ function Form() {
           title: title,
           amount: parsedAmount,
           type,
-          created_at: new Date().toISOString(),
+          created_at: toOffsetISOString(new Date()),
         })
         .select();
 
