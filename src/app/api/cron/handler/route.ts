@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-async function proxy(req: NextRequest, path: string) {
+async function proxy(req: NextRequest, path: string, method: "GET" | "POST" = "GET") {
   const url = new URL(path, req.nextUrl.origin);
   const authorization = req.headers.get("authorization");
   const cronSecret = req.headers.get("x-cron-secret");
@@ -10,7 +10,7 @@ async function proxy(req: NextRequest, path: string) {
   const injectedAuthorization = authorization ?? fallbackAuthorization;
 
   const res = await fetch(url, {
-    method: "GET",
+    method,
     headers: {
       ...(injectedAuthorization ? { authorization: injectedAuthorization } : {}),
       ...(cronSecret ? { "x-cron-secret": cronSecret } : {}),
@@ -35,11 +35,11 @@ function isMondayUtc(d: Date) {
 export async function GET(req: NextRequest) {
   const startedAt = Date.now();
 
-  const daily = await proxy(req, "/en/api/notifications/daily");
+  const daily = await proxy(req, "/en/api/notifications/daily", "POST");
 
   const digestRun = isMondayUtc(new Date());
   const digest = digestRun
-    ? await proxy(req, "/en/api/notifications/digest")
+    ? await proxy(req, "/en/api/notifications/digest", "POST")
     : { status: 204, headers: { "content-type": "application/json" }, body: "" };
 
   // Process recurring transactions
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
 
   const processorRuns: Array<{ status: number; body: string }> = [];
   for (let i = 0; i < 10; i++) {
-    const res = await proxy(req, "/en/api/notifications/processor");
+    const res = await proxy(req, "/en/api/notifications/processor", "POST");
     processorRuns.push({ status: res.status, body: res.body });
 
     let processed = 0;

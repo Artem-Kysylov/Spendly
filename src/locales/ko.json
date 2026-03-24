@@ -472,6 +472,17 @@
       "toastSuccessPlayful": "완료! 수입을 추가했어요!",
       "toastSnoozed": "좋아요. 내일 다시 알려드릴게요.",
       "rolloverBreakdown": "이월 포함: {amount}"
+    },
+    "budgetRenewal": {
+      "modalTitle": "메인 예산을 갱신할 시간인가요? 💰",
+      "modalMessage": "새로운 예산 주기가 시작되었습니다. 지금 예산을 갱신하시겠습니까?",
+      "renewNow": "네, 갱신하기",
+      "notYet": "나중에",
+      "toastSuccess": "예산이 갱신되었습니다! 지난달 이월 금액이 추가되었습니다.",
+      "renewButtonLabel": "예산 갱신",
+      "renewBadge": "갱신",
+      "manualTitle": "메인 예산 갱신",
+      "manualMessage": "새 주기를 시작하고 이전 기간의 이월 금액을 추가합니다."
     }
   },
   "budgets": {
@@ -486,9 +497,18 @@
       "modeLabel": "모드",
       "positiveOnly": "양수만",
       "allowNegative": "음수 허용",
-      "label": "Rollover",
-      "positive": "Rollover from last month",
-      "negative": "Overspending from last month"
+      "label": "이월",
+      "positive": "지난달 이월",
+      "negative": "지난달 초과 지출"
+    },
+    "cyclic": {
+      "toggleTitle": "매월 초기화 (급여일 주기)",
+      "toggleDescription": "메인 예산 갱신일에 사용 금액을 초기화합니다. 내역은 유지됩니다.",
+      "activeLabel": "순환 예산 활성화됨"
+    },
+    "spendlyPal": {
+      "savingsMessage": "Spendly Pal: 잘하셨어요! 지난 주기에 {{budgetName}}에서 {{amount}}를 절약했습니다. ",
+      "dismiss": "닫기"
     },
     "meta": {
       "title": "예산",
@@ -1227,8 +1247,10 @@
       "title": "정기 거래",
       "total": "합계",
       "inDays": "{days}일 후",
+      "daysAgo": "{days}일 전",
       "today": "오늘",
       "tomorrow": "내일",
+      "yesterday": "어제",
       "monthly": "매월",
       "noPayments": "예정된 정기 결제가 없습니다"
     }

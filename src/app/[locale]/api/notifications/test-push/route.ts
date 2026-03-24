@@ -39,11 +39,14 @@ export async function POST(req: NextRequest) {
       new Set(
         [
           resolvedType,
-          "weekly_reminder",
+          "weekly_summary",
           "daily_reminder",
           "retention",
           "aggressive",
           "budget_warning",
+          "budget_overrun",
+          "reminder",
+          "system",
         ].filter(Boolean),
       ),
     ) as string[];

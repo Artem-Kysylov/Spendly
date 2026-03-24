@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
+import { formatCurrency } from "@/lib/chartUtils";
 import { supabase } from "../../lib/supabaseClient";
 import { UserAuth } from "../../context/AuthContext";
 import { useTranslations } from "next-intl";
@@ -21,6 +22,9 @@ function BudgetDetailsInfo({
   type,
   color_code,
   rolloverPreviewCarry,
+  is_cyclic,
+  rollover_carry,
+  currency,
 }: BudgetDetailsProps) {
   const { session } = UserAuth();
   const [spentAmount, setSpentAmount] = useState(0);
@@ -105,11 +109,34 @@ function BudgetDetailsInfo({
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.4, ease: "easeOut" }}
       >
-        ${amount}
+        {formatCurrency(amount, currency)}
       </motion.p>
 
-      {/* Rollover indicator */}
+      {/* Rollover carry for cyclic budgets */}
       {type === "expense" &&
+        is_cyclic &&
+        typeof rollover_carry === "number" &&
+        rollover_carry > 0 && (
+          <motion.div
+            className="mt-2 px-3 py-2 rounded-md text-sm bg-primary/10 text-primary border border-primary/20"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.5, ease: "easeOut" }}
+          >
+            <div className="flex items-center justify-center gap-2">
+              <span className="font-medium">
+                {tBudgets("rollover.positive")}:
+              </span>
+              <span className="font-semibold">
+                +{formatCurrency(rollover_carry, currency)}
+              </span>
+            </div>
+          </motion.div>
+        )}
+
+      {/* Rollover preview for non-cyclic budgets */}
+      {type === "expense" &&
+        !is_cyclic &&
         typeof rolloverPreviewCarry === "number" &&
         rolloverPreviewCarry !== 0 && (
           <motion.div
@@ -131,8 +158,8 @@ function BudgetDetailsInfo({
                 :
               </span>
               <span className="font-semibold">
-                {rolloverPreviewCarry > 0 ? "+" : ""}$
-                {Math.abs(rolloverPreviewCarry).toFixed(2)}
+                {rolloverPreviewCarry > 0 ? "+" : ""}
+                {formatCurrency(Math.abs(rolloverPreviewCarry), currency)}
               </span>
             </div>
           </motion.div>

@@ -10,7 +10,7 @@ async function proxy(req: NextRequest, path: string) {
   const injectedAuthorization = authorization ?? fallbackAuthorization;
 
   const res = await fetch(url, {
-    method: "GET",
+    method: "POST",
     headers: {
       ...(injectedAuthorization ? { authorization: injectedAuthorization } : {}),
       ...(cronSecret ? { "x-cron-secret": cronSecret } : {}),

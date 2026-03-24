@@ -4,6 +4,7 @@ import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import Button from "../ui-elements/Button";
@@ -19,6 +20,7 @@ interface BudgetFormProps {
     rolloverEnabled?: boolean;
     rolloverMode?: "positive-only" | "allow-negative";
     rolloverCap?: number | null;
+    is_cyclic?: boolean;
   };
   onSubmit: (
     emoji: string,
@@ -29,6 +31,7 @@ interface BudgetFormProps {
     rolloverEnabled?: boolean,
     rolloverMode?: "positive-only" | "allow-negative",
     rolloverCap?: number | null,
+    is_cyclic?: boolean,
   ) => Promise<void>;
   isLoading?: boolean;
   onCancel?: () => void;
@@ -72,6 +75,9 @@ export default function BudgetForm({
   const [rolloverMode, setRolloverMode] = useState<
     "positive-only" | "allow-negative"
   >(initialData?.rolloverMode ?? "positive-only");
+  const [isCyclic, setIsCyclic] = useState<boolean>(
+    initialData?.is_cyclic ?? false,
+  );
 
   const COLOR_OPTIONS: Array<string | null> = [
     null,
@@ -100,9 +106,10 @@ export default function BudgetForm({
       parseAmountInput(amount),
       type,
       selectedColor,
-      type === "expense" ? rolloverEnabled : false,
-      type === "expense" ? rolloverMode : undefined,
+      type === "expense" && !isCyclic ? true : false, // Always enabled for non-cyclic
+      type === "expense" && !isCyclic ? rolloverMode : undefined,
       undefined, // cap placeholder
+      type === "expense" ? isCyclic : false,
     );
   };
 
@@ -214,53 +221,58 @@ export default function BudgetForm({
           />
 
           {type === "expense" && (
-            <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
-              <div className="text-sm font-medium">
-                {tRollover("panelTitle")}
-              </div>
-
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">
-                  {tRollover("toggleLabel")}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setRolloverEnabled((v) => !v)}
-                  className={`w-10 h-6 rounded-full ${rolloverEnabled ? "bg-primary" : "bg-muted"} relative transition-colors`}
-                  aria-pressed={rolloverEnabled}
-                >
-                  <span
-                    className={`absolute top-0.5 ${rolloverEnabled ? "left-5" : "left-1"} w-5 h-5 rounded-full bg-white transition-all`}
+            <>
+              <div className="flex flex-col gap-3 rounded-lg border border-border p-3 mb-4">
+                <div className="text-sm font-medium">
+                  {tBudgets("cyclic.toggleTitle")}
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <span className="text-xs text-muted-foreground">
+                      {tBudgets("cyclic.toggleDescription")}
+                    </span>
+                  </div>
+                  <Switch
+                    checked={isCyclic}
+                    onCheckedChange={setIsCyclic}
+                    className="ml-3 shrink-0 data-[state=checked]:bg-primary"
+                    aria-label={tBudgets("cyclic.toggleTitle")}
                   />
-                </button>
-              </div>
-
-              <div className="space-y-2">
-                <span className="text-sm text-muted-foreground">
-                  {tRollover("modeLabel")}
-                </span>
-                <div className="relative">
-                  <select
-                    value={rolloverMode}
-                    onChange={(e) =>
-                      setRolloverMode(
-                        e.target.value as "positive-only" | "allow-negative",
-                      )
-                    }
-                    disabled={!rolloverEnabled}
-                    className="w-full bg-background text-foreground h-10 px-3 border border-input rounded-md appearance-none disabled:opacity-50"
-                  >
-                    <option value="positive-only">
-                      {tRollover("positiveOnly")}
-                    </option>
-                    <option value="allow-negative">
-                      {tRollover("allowNegative")}
-                    </option>
-                  </select>
-                  {/* Custom arrow if needed, but standard select is fine for mobile/desktop hybrid */}
                 </div>
               </div>
-            </div>
+
+              {!isCyclic && (
+                <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
+                  <div className="text-sm font-medium">
+                    {tRollover("panelTitle")}
+                  </div>
+
+                  <div className="space-y-2">
+                    <span className="text-sm text-muted-foreground">
+                      {tRollover("modeLabel")}
+                    </span>
+                    <div className="relative">
+                      <select
+                        value={rolloverMode}
+                        onChange={(e) =>
+                          setRolloverMode(
+                            e.target.value as "positive-only" | "allow-negative",
+                          )
+                        }
+                        className="w-full bg-background text-foreground h-10 px-3 border border-input rounded-md appearance-none"
+                      >
+                        <option value="positive-only">
+                          {tRollover("positiveOnly")}
+                        </option>
+                        <option value="allow-negative">
+                          {tRollover("allowNegative")}
+                        </option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           <div className="mt-4 pb-1">

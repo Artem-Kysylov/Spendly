@@ -16,6 +16,8 @@ function BudgetFolderItem({
   type,
   color_code,
   currency,
+  rollover_carry,
+  is_cyclic,
 }: BudgetFolderItemProps & { currency?: string }) {
   const { session } = UserAuth();
   const [spentAmount, setSpentAmount] = useState(0);
@@ -69,6 +71,13 @@ function BudgetFolderItem({
       >
         {name}
       </h3>
+
+      {/* Rollover для cyclic budgets */}
+      {is_cyclic && rollover_carry && rollover_carry > 0 && (
+        <div className={`${color_code ? "text-black dark:text-black" : "text-primary"} text-xs font-medium text-center`}>
+          {tBudgets("rollover.positive")}: +{formatCurrency(rollover_carry, currency)}
+        </div>
+      )}
 
       {/* Общая сумма сразу под названием */}
       <p

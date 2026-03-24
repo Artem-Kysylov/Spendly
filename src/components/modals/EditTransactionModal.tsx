@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { mergeDateWithTime, toOffsetISOString } from "@/lib/dateUtils";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import type { EditTransactionModalProps } from "../../types/types";
 import Button from "../ui-elements/Button";
@@ -55,7 +56,7 @@ const EditTransactionModal = ({
       amount: parseAmountInput(amount),
       type: allowTypeChange ? type : initialData.type,
       budget_folder_id: initialData.budget_folder_id ?? null,
-      created_at: selectedDate.toISOString(),
+      created_at: toOffsetISOString(selectedDate),
     });
 
     onClose();
@@ -130,7 +131,9 @@ const EditTransactionModal = ({
 
             <HybridDatePicker
               selectedDate={selectedDate}
-              onDateSelect={setSelectedDate}
+              onDateSelect={(date) =>
+                setSelectedDate((prev) => mergeDateWithTime(date, prev))
+              }
               label={tModals("transaction.date.label")}
               placeholder={tModals("transaction.date.placeholder")}
             />

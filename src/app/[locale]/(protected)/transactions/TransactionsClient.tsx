@@ -45,6 +45,7 @@ import {
   useTransactionsInfinite,
 } from "@/hooks/useTransactionsInfinite";
 import { formatCurrency } from "@/lib/chartUtils";
+import { toOffsetISOString } from "@/lib/dateUtils";
 import { supabase } from "@/lib/supabaseClient";
 import type { ToastMessageProps, Transaction } from "@/types/types";
 
@@ -684,7 +685,7 @@ export default function TransactionsClient() {
               amount: template.amount,
               type: template.type,
               budget_folder_id: template.budget_folder_id,
-              created_at: new Date().toISOString(),
+              created_at: toOffsetISOString(new Date()),
             });
             openModal();
           }}

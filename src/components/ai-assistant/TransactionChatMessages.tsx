@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
-import { useEffect, useRef } from "react";
-import { TransactionProposalCard } from "./TransactionProposalCard";
+import { useEffect, useRef, useState } from "react";
+import { TransactionProposalCard, type ProposedTransaction } from "./TransactionProposalCard";
 import { BudgetProposalCard, type ProposedBudget } from "./BudgetProposalCard";
 import { Loader2 } from "lucide-react";
 import { formatMoney } from "@/lib/format/money";
@@ -16,6 +16,34 @@ function normalizeProposedTransactions(input: any): any[] {
   if (Array.isArray(input.transactions)) return input.transactions.filter(Boolean);
   if (input.transaction) return [input.transaction];
   return [input];
+}
+
+function sanitizeSuggestion(input: string) {
+  let out = String(input || "").trim();
+  out = out.replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1");
+  out = out.replace(/^\[([\s\S]*)\]$/, "$1");
+  out = out.replace(/\*\*/g, "");
+  out = out.replace(/`/g, "");
+  out = out.replace(/\s+/g, " ").trim();
+  return out;
+}
+
+function extractSuggestions(rawContent: string): { content: string; suggestions: string[] } {
+  const sections = rawContent.split(/###\s*(?:🔮\s*)?(?:Next Steps|Следующие шаги|Наступні кроки|अगले कदम|Langkah berikutnya|次のステップ|다음 단계)/i);
+  const content = (sections[0] || "").trimEnd();
+  const followUpsRaw = sections[1];
+
+  if (!followUpsRaw) {
+    return { content, suggestions: [] };
+  }
+
+  const text = followUpsRaw.replace(/\n+/g, " ").trim();
+  const matches = Array.from(text.matchAll(/-\s+([^\-]+?)(?=\s*-\s+|$)/g)).map((m) => m[1].trim());
+  const suggestions = matches
+    .map((q) => sanitizeSuggestion(q))
+    .filter((q) => q.length > 0);
+
+  return { content, suggestions };
 }
 
 interface TransactionChatMessagesProps {
@@ -48,6 +76,8 @@ const cleanContent = (text: string) => {
   let cleaned = text;
 
   cleaned = cleaned.replace(/\\([*_])/g, "$1");
+
+  cleaned = cleaned.replace(/\*\*\s*([^\n*][^\n]*?[^\s*])\s*\*\*/g, "**$1**");
 
   cleaned = cleaned.replace(
     /^(\s*(?:[-*]\s*)?)(\d{4}-\d{2}-\d{2})(\s+(?:—|-)\s+)/gm,
@@ -121,8 +151,19 @@ const cleanContent = (text: string) => {
   // 6. Generic Fix: Ensure space after ANY bold text
   cleaned = cleaned.replace(/(\*\*[^*]+\*\*)(?=[^\s\n.,:;!?])/g, '$1 ');
 
+  cleaned = cleaned.replace(/\*\*(?=\S)/g, " **");
+  cleaned = cleaned.replace(/(?<=\S)\*\*/g, "** ");
+  
+  // Fix double spaces around bold text: ** text ** -> **text**
+  cleaned = cleaned.replace(/\*\*\s+([^\s*]+?)\s+\*\*/g, "**$1**");
+
   // 7. Fix "Period" or "This Week" merging
   cleaned = cleaned.replace(/([^\n])((?:This|Last)\s(?:Week|Month)[-:])/g, '$1\n\n$2');
+
+  cleaned = cleaned.replace(/\]\(\s*([^\)]+?)\s*\)/g, (_m, href: string) => {
+    const normalizedHref = href.replace(/\s+/g, "");
+    return `](${normalizedHref})`;
+  });
 
   return cleaned;
 };
@@ -178,15 +219,21 @@ export const TransactionChatMessages = ({
   currency,
 }: TransactionChatMessagesProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [clickedMessageIndices, setClickedMessageIndices] = useState<Set<number>>(new Set());
 
   // Auto-scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isLoading]);
 
+  const handleSuggestionClick = (suggestion: string, messageIndex: number) => {
+    setClickedMessageIndices(prev => new Set(prev).add(messageIndex));
+    onSuggestionClick?.(suggestion);
+  };
+
   return (
     <div className="flex flex-col gap-4 p-4">
-      {messages.map((message) => {
+      {messages.map((message, index) => {
         const isUser = message.role === "user";
 
         const rawContent = message.content;
@@ -194,85 +241,64 @@ export const TransactionChatMessages = ({
         let suggestions: string[] = [];
 
         if (!isUser && rawContent) {
-          const [main, followUpsRaw] = rawContent.split("### 🔮 Next Steps");
-          content = main.trimEnd();
-          if (followUpsRaw) {
-            suggestions = followUpsRaw
-              .split("\n")
-              .filter((line) => line.trim().startsWith("-"))
-              .map((line) => line.replace(/^-\s*/, "").trim())
-              .filter((line) => line.length > 0);
-          }
+          ({ content, suggestions } = extractSuggestions(rawContent));
         }
 
         return (
           <div
-            key={message.id}
+            key={index}
             className={cn(
-              "flex flex-col md:max-w-xl",
-              isUser
-                ? "self-end items-end max-w-[90%]"
-                : "self-start items-start w-full"
+              "flex w-full flex-col",
+              isUser ? "items-end" : "items-start"
             )}
           >
-            {/* Render Text Bubble if there is content */}
             {content && (
               <div
                 className={cn(
-                  "rounded-2xl px-4 py-3 shadow-sm w-full mb-2",
-                  isUser
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted/50"
+                  isUser ? "max-w-[85%] md:max-w-xl" : "w-full md:max-w-xl"
                 )}
               >
-                <div className={cn(
-                  "prose prose-sm dark:prose-invert max-w-none leading-relaxed",
-                  "prose-headings:mt-4 prose-headings:mb-2 prose-headings:font-bold",
-                  "prose-p:my-2",
-                  "prose-ul:my-2 prose-li:my-0",
-                  "prose-table:my-2",
-                  isUser && "prose-headings:text-primary-foreground prose-p:text-primary-foreground prose-li:text-primary-foreground prose-strong:text-primary-foreground"
-                )}>
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm, remarkBreaks]}
-                    components={{
-                      table: ({ node, ...props }) => (
-                        <div className="my-4 w-full overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-sm border-collapse" {...props} />
+                <div
+                  className={cn(
+                    "rounded-2xl px-4 py-3 shadow-sm w-full",
+                    isUser
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/50"
+                  )}
+                >
+                  <div className={cn(
+                    "prose prose-sm dark:prose-invert max-w-none leading-relaxed",
+                    "prose-headings:mt-4 prose-headings:mb-2 prose-headings:font-bold",
+                    "prose-p:my-2",
+                    "prose-ul:my-2 prose-li:my-0",
+                    "prose-table:my-2",
+                    isUser && "prose-headings:text-primary-foreground prose-p:text-primary-foreground prose-li:text-primary-foreground prose-strong:text-primary-foreground"
+                  )}>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkBreaks]}
+                      components={{
+                        table: ({ node, ...props }) => (
+                          <div className="my-4 w-full overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm border-collapse" {...props} />
+                            </div>
                           </div>
-                        </div>
-                      ),
-                      // Add clear borders to cells to distinguish from plain text
-                      th: ({ node, ...props }) => (
-                        <th className="px-4 py-2 text-left font-semibold bg-muted/50 border-b border-border" {...props} />
-                      ),
-                      td: ({ node, ...props }) => (
-                        <td className="px-4 py-2 align-top border-b border-border" {...props} />
-                      ),
-                      a: ({ node, ...props }) => (
-                        <a target="_blank" rel="noopener noreferrer" className="underline font-medium" {...props} />
-                      )
-                    }}
-                  >
-                    {normalizeCurrencyInText(cleanContent(content), currency)}
-                  </ReactMarkdown>
+                        ),
+                        th: ({ node, ...props }) => (
+                          <th className="px-4 py-2 text-left font-semibold bg-muted/50 border-b border-border" {...props} />
+                        ),
+                        td: ({ node, ...props }) => (
+                          <td className="px-4 py-2 align-top border-b border-border" {...props} />
+                        ),
+                        a: ({ node, ...props }) => (
+                          <a target="_blank" rel="noopener noreferrer" className="underline font-medium" {...props} />
+                        )
+                      }}
+                    >
+                      {normalizeCurrencyInText(cleanContent(content), currency)}
+                    </ReactMarkdown>
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {!isUser && suggestions.length > 0 && onSuggestionClick && (
-              <div className="mt-1 flex flex-wrap gap-5 md:gap-2 self-end justify-end">
-                {suggestions.map((s, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    className="inline-flex items-center justify-start rounded-full border bg-background hover:bg-muted text-sm px-4 py-2.5 md:text-xs md:px-3 md:py-1.5 text-left cursor-pointer transition-colors"
-                    onClick={() => onSuggestionClick(s)}
-                  >
-                    {s}
-                  </button>
-                ))}
               </div>
             )}
 
@@ -292,27 +318,20 @@ export const TransactionChatMessages = ({
                 // Let's assume toolInvocation.args contains the proposal details
                 // formatted as: { title, amount, type, category_name, date }
 
-                const proposals =
-                  normalizeProposedTransactions(toolInvocation.args).length > 0
-                    ? normalizeProposedTransactions(toolInvocation.args)
-                    : normalizeProposedTransactions(result);
-
-                if (proposals.length === 0) return null;
+                const proposal = toolInvocation.args as ProposedTransaction;
+                if (!proposal || !proposal.title) return null;
 
                 return (
                   <div key={toolInvocation.toolCallId} className="w-full mt-2">
-                    {proposals.map((proposal, idx) => (
-                      <div key={`${toolInvocation.toolCallId}-${idx}`} className={idx === 0 ? "" : "mt-2"}>
-                        <TransactionProposalCard
-                          proposal={proposal}
-                          budgets={budgets}
-                          onSuccess={onTransactionSuccess}
-                          onError={onTransactionError}
-                          autoDismissSuccess={false}
-                          currency={currency}
-                        />
-                      </div>
-                    ))}
+                    <TransactionProposalCard
+                      proposal={proposal}
+                      budgets={budgets || []}
+                      autoDismissSuccess={false}
+                      currency={currency}
+                      onSuccess={() => {
+                        // Optional: Handle success
+                      }}
+                    />
                   </div>
                 );
               }
@@ -338,6 +357,23 @@ export const TransactionChatMessages = ({
 
               return null;
             })}
+
+            {!isUser && suggestions.length > 0 && onSuggestionClick && !clickedMessageIndices.has(index) && (
+              <div className="mt-2 flex w-full justify-end">
+                <div className="flex max-w-[85%] flex-wrap justify-end gap-3 md:max-w-xl md:gap-2">
+                  {suggestions.map((s, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      className="inline-flex items-center justify-start rounded-full border bg-background hover:bg-muted text-sm px-4 py-2.5 md:text-xs md:px-3 md:py-1.5 text-left cursor-pointer transition-colors"
+                      onClick={() => handleSuggestionClick(s, index)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         );
       })}

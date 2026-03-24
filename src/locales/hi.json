@@ -472,6 +472,17 @@
       "toastSuccessPlayful": "हो गया — आय जोड़ दी गई!",
       "toastSnoozed": "ठीक है, मैं कल याद दिलाऊँगा।",
       "rolloverBreakdown": "रोलओवर सहित: {amount}"
+    },
+    "budgetRenewal": {
+      "modalTitle": "क्या मुख्य बजट को रिन्यू करने का समय आ गया है? 💰",
+      "modalMessage": "एक नया बजट चक्र शुरू हो गया है। क्या आप अभी अपना बजट रिन्यू करना चाहेंगे?",
+      "renewNow": "हाँ, रिन्यू करें",
+      "notYet": "अभी नहीं",
+      "toastSuccess": "बजट रिन्यू हो गया! पिछले महीने की शेष राशि जोड़ी गई।",
+      "renewButtonLabel": "बजट रिन्यू करें",
+      "renewBadge": "रिन्यू",
+      "manualTitle": "मुख्य बजट रिन्यू करें",
+      "manualMessage": "नया चक्र शुरू करें और पिछले पीरियड का रोलओवर जोड़ें।"
     }
   },
   "budgets": {
@@ -486,9 +497,18 @@
       "modeLabel": "मोड",
       "positiveOnly": "केवल सकारात्मक",
       "allowNegative": "नकारात्मक की अनुमति दें",
-      "label": "Rollover",
-      "positive": "Rollover from last month",
-      "negative": "Overspending from last month"
+      "label": "रोलओवर",
+      "positive": "पिछले महीने से रोलओवर",
+      "negative": "पिछले महीने से अधिक खर्च"
+    },
+    "cyclic": {
+      "toggleTitle": "मासिक रीसेट (वेतन चक्र)",
+      "toggleDescription": "मुख्य बजट नवीनीकरण के दिन खर्च की गई राशि को रीसेट करता है। आपका इतिहास सुरक्षित रहेगा।",
+      "activeLabel": "चक्रीय बजट सक्रिय"
+    },
+    "spendlyPal": {
+      "savingsMessage": "Spendly Pal: बहुत बढ़िया! आपने पिछले चक्र में {{budgetName}} पर {{amount}} बचाए। ✨",
+      "dismiss": "बंद करें"
     },
     "meta": {
       "title": "Budgets",
@@ -1227,8 +1247,10 @@
       "title": "आवर्ती लेन-देन",
       "total": "कुल",
       "inDays": "{days} दिनों में",
+      "daysAgo": "{days} दिन पहले",
       "today": "आज",
       "tomorrow": "कल",
+      "yesterday": "बीता कल",
       "monthly": "मासिक",
       "noPayments": "कोई नियमित भुगतान निर्धारित नहीं है"
     }

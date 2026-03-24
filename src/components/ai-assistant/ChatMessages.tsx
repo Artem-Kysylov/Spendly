@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TransactionProposalCard } from "./TransactionProposalCard";
 import { BudgetProposalCard, type ProposedBudget } from "./BudgetProposalCard";
 import { formatMoney } from "@/lib/format/money";
@@ -39,6 +39,24 @@ function normalizeProposedTransactions(input: any): any[] {
   return [input];
 }
 
+function extractSuggestions(rawContent: string): { content: string; suggestions: string[] } {
+  const sections = rawContent.split(/###\s*(?:🔮\s*)?(?:Next Steps|Следующие шаги|Наступні кроки|अगले कदम|Langkah berikutnya|次のステップ|다음 단계)/i);
+  const content = (sections[0] || "").trimEnd();
+  const followUpsRaw = sections[1];
+
+  if (!followUpsRaw) {
+    return { content, suggestions: [] };
+  }
+
+  const text = followUpsRaw.replace(/\n+/g, " ").trim();
+  const matches = Array.from(text.matchAll(/-\s+([^\-]+?)(?=\s*-\s+|$)/g)).map((m) => m[1].trim());
+  const suggestions = matches
+    .map((q) => sanitizeSuggestion(q))
+    .filter((q) => q.length > 0);
+
+  return { content, suggestions };
+}
+
 // Minimal cleaner to fix "AI laziness" with newlines
 const cleanContent = (text: string) => {
   if (!text) return "";
@@ -49,6 +67,8 @@ const cleanContent = (text: string) => {
   cleaned = cleaned.replace(/\u00A0/g, " ");
 
   cleaned = cleaned.replace(/\|\|/g, "|\n|");
+
+  cleaned = cleaned.replace(/\*\*\s*([^\n*][^\n]*?[^\s*])\s*\*\*/g, "**$1**");
 
   const insightTerms =
     "Insight|Tip|Advice|Совет|Порада|सुझाव|Wawasan|インサイト|인사이트";
@@ -116,6 +136,9 @@ const cleanContent = (text: string) => {
 
     l = l.replace(/\*\*\s+/g, "**");
     l = l.replace(/\s+\*\*/g, "**");
+    
+    // Fix double spaces around bold text: ** text ** -> **text**
+    l = l.replace(/\*\*\s+([^\s*]+?)\s+\*\*/g, "**$1**");
 
     l = l.replace(/([\p{L}0-9])\*\*/gu, "$1 **");
 
@@ -138,6 +161,9 @@ const cleanContent = (text: string) => {
     l = l.replace(/([.!?])\s+(?=\p{L})/gu, "$1\n");
 
     l = l.replace(/([0-9])(?=\p{L})/gu, "$1 ");
+
+    l = l.replace(/\*\*(?=\S)/g, " **");
+    l = l.replace(/(?<=\S)\*\*/g, "** ");
 
     l = l.replace(insightPattern, "$1**💡 $2** ");
 
@@ -162,6 +188,11 @@ const cleanContent = (text: string) => {
   }
 
   cleaned = out.join("\n");
+
+  cleaned = cleaned.replace(/\]\(\s*([^\)]+?)\s*\)/g, (_m, href: string) => {
+    const normalizedHref = href.replace(/\s+/g, "");
+    return `](${normalizedHref})`;
+  });
 
   return cleaned;
 };
@@ -226,11 +257,17 @@ export const ChatMessages = ({
   budgets,
 }: ChatMessagesProps) => {
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [clickedMessageIndices, setClickedMessageIndices] = useState<Set<number>>(new Set());
 
   // Auto-scroll to bottom
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
+
+  const handleSuggestionClick = (suggestion: string, messageIndex: number) => {
+    setClickedMessageIndices(prev => new Set(prev).add(messageIndex));
+    onSuggestionClick?.(suggestion);
+  };
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -241,15 +278,7 @@ export const ChatMessages = ({
         let suggestions: string[] = [];
 
         if (!isUser && rawContent) {
-          const [main, followUpsRaw] = rawContent.split("### 🔮 Next Steps");
-          content = main.trimEnd();
-          if (followUpsRaw) {
-            const text = followUpsRaw.replace(/\n+/g, ' ').trim();
-            const matches = Array.from(text.matchAll(/-\s+([^\-]+?)(?=\s*-\s+|$)/g)).map((m) => m[1].trim());
-            suggestions = matches
-              .map((q) => sanitizeSuggestion(q))
-              .filter((q) => q.length > 0);
-          }
+          ({ content, suggestions } = extractSuggestions(rawContent));
         }
 
         if (!content && !message.toolInvocations && suggestions.length === 0) return null;
@@ -258,69 +287,58 @@ export const ChatMessages = ({
           <div
             key={index}
             className={cn(
-              "flex flex-col md:max-w-xl",
-              isUser
-                ? "self-end items-end max-w-[85%]"
-                : "self-start items-start w-full"
+              "flex w-full flex-col",
+              isUser ? "items-end" : "items-start"
             )}
           >
             {content && (
               <div
                 className={cn(
-                  "rounded-2xl px-4 py-3 shadow-sm w-full",
-                  isUser
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted/50"
+                  isUser ? "max-w-[85%] md:max-w-xl" : "w-full md:max-w-xl"
                 )}
               >
-                <div className={cn(
-                  "prose prose-sm dark:prose-invert max-w-none leading-relaxed",
-                  // Customizing prose specifics
-                  "prose-headings:mt-4 prose-headings:mb-2 prose-headings:font-bold",
-                  "prose-p:my-2",
-                  "prose-ul:my-2 prose-li:my-0",
-                  "prose-table:my-2",
-                  isUser && "prose-headings:text-primary-foreground prose-p:text-primary-foreground prose-li:text-primary-foreground prose-strong:text-primary-foreground"
-                )}>
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm, remarkBreaks]}
-                    components={{
-                      table: ({ node, ...props }) => (
-                        <div className="my-4 w-full overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-                          <div className="overflow-x-auto">
-                            <table className="w-full text-sm border-collapse" {...props} />
+                <div
+                  className={cn(
+                    "rounded-2xl px-4 py-3 shadow-sm w-full",
+                    isUser
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted/50"
+                  )}
+                >
+                  <div className={cn(
+                    "prose prose-sm dark:prose-invert max-w-none leading-relaxed",
+                    // Customizing prose specifics
+                    "prose-headings:mt-4 prose-headings:mb-2 prose-headings:font-bold",
+                    "prose-p:my-2",
+                    "prose-ul:my-2 prose-li:my-0",
+                    "prose-table:my-2",
+                    isUser && "prose-headings:text-primary-foreground prose-p:text-primary-foreground prose-li:text-primary-foreground prose-strong:text-primary-foreground"
+                  )}>
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm, remarkBreaks]}
+                      components={{
+                        table: ({ node, ...props }) => (
+                          <div className="my-4 w-full overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-sm border-collapse" {...props} />
+                            </div>
                           </div>
-                        </div>
-                      ),
-                      th: ({ node, ...props }) => (
-                        <th className="px-4 py-2 text-left font-semibold bg-muted/50 border-b border-border" {...props} />
-                      ),
-                      td: ({ node, ...props }) => (
-                        <td className="px-4 py-2 align-top border-b border-border" {...props} />
-                      ),
-                      a: ({ node, ...props }) => (
-                        <a target="_blank" rel="noopener noreferrer" className="underline font-medium" {...props} />
-                      ),
-                    }}
-                  >
-                    {normalizeCurrencyInText(cleanContent(content), currency)}
-                  </ReactMarkdown>
+                        ),
+                        th: ({ node, ...props }) => (
+                          <th className="px-4 py-2 text-left font-semibold bg-muted/50 border-b border-border" {...props} />
+                        ),
+                        td: ({ node, ...props }) => (
+                          <td className="px-4 py-2 align-top border-b border-border" {...props} />
+                        ),
+                        a: ({ node, ...props }) => (
+                          <a target="_blank" rel="noopener noreferrer" className="underline font-medium" {...props} />
+                        ),
+                      }}
+                    >
+                      {normalizeCurrencyInText(cleanContent(content), currency)}
+                    </ReactMarkdown>
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {!isUser && suggestions.length > 0 && onSuggestionClick && (
-              <div className="mt-2 flex flex-wrap gap-5 md:gap-2 w-full md:justify-end md:self-end">
-                {suggestions.map((s, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    className="inline-flex items-center justify-start rounded-full border bg-background md:hover:bg-muted text-sm px-4 py-2.5 md:text-xs md:px-3 md:py-1.5 text-left cursor-pointer transition-colors"
-                    onClick={() => onSuggestionClick(s)}
-                  >
-                    {s}
-                  </button>
-                ))}
               </div>
             )}
 
@@ -370,6 +388,23 @@ export const ChatMessages = ({
               }
               return null;
             })}
+
+            {!isUser && suggestions.length > 0 && onSuggestionClick && !clickedMessageIndices.has(index) && (
+              <div className="mt-2 flex w-full justify-end">
+                <div className="flex max-w-[85%] flex-wrap justify-end gap-3 md:max-w-xl md:gap-2">
+                  {suggestions.map((s, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      className="inline-flex items-center justify-start rounded-full border bg-background md:hover:bg-muted text-sm px-4 py-2.5 md:text-xs md:px-3 md:py-1.5 text-left cursor-pointer transition-colors"
+                      onClick={() => handleSuggestionClick(s, index)}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         );
       })}

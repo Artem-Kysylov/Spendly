@@ -16,11 +16,15 @@ import DashboardTransactionsTable from "@/components/dashboard/DashboardTransact
 import RecurringCalendar from "@/components/recurring/RecurringCalendar";
 import { useMainBudget } from "@/hooks/useMainBudget";
 import {
+  formatDateOnly,
+  getFinancialMonthStart,
   getFinancialMonthToDateRange,
   getPreviousFinancialMonthFullRange,
 } from "@/lib/dateUtils";
 import Spinner from "@/components/ui-elements/Spinner";
 import MainBudgetModal from "@/components/modals/MainBudgetModal";
+import BudgetRenewalModal from "@/components/modals/BudgetRenewalModal";
+import ManualBudgetRenewalModal from "@/components/modals/ManualBudgetRenewalModal";
 import ToastMessage from "@/components/ui-elements/ToastMessage";
 import Button from "@/components/ui-elements/Button";
 import TransactionModal from "@/components/modals/TransactionModal";
@@ -60,9 +64,12 @@ function DashboardClient() {
   } = useModal();
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
+  const [isManualRenewalOpen, setIsManualRenewalOpen] = useState(false);
 
   const [isConfirmingIncome, setIsConfirmingIncome] = useState(false);
   const [isSnoozingIncome, setIsSnoozingIncome] = useState(false);
+  const [isRenewing, setIsRenewing] = useState(false);
+  const [isDismissing, setIsDismissing] = useState(false);
 
   const tDashboard = useTranslations("dashboard");
   const tTransactions = useTranslations("transactions");
@@ -214,6 +221,15 @@ function DashboardClient() {
     openModal();
   };
 
+  const handleManualRenewalOpen = () => {
+    setIsManualRenewalOpen(true);
+  };
+
+  const handleManualRenewalClose = () => {
+    if (isRenewing) return;
+    setIsManualRenewalOpen(false);
+  };
+
   const handleDeleteTransaction = async (id: string) => {
     try {
       const { error } = await supabase
@@ -242,7 +258,13 @@ function DashboardClient() {
   };
 
   // Calculations for KPI Cards
-  const { budgetResetDay, needsIncomeConfirmation } = useMainBudget();
+  const { 
+    budgetResetDay, 
+    needsIncomeConfirmation, 
+    showRenewalModal, 
+    showRenewalButton, 
+    carryover 
+  } = useMainBudget();
 
   const handleConfirmIncome = async () => {
     if (!session?.user?.id) return;
@@ -344,6 +366,175 @@ function DashboardClient() {
     }
   };
 
+  const handleRenewBudget = async () => {
+    if (!session?.user?.id) return;
+    if (isRenewing) return;
+    try {
+      setIsRenewing(true);
+
+      const userId = session.user.id;
+
+      // CRITICAL: Fetch current state BEFORE updating last_renewal_date
+      const { data: currentState } = await supabase
+        .from("main_budget_state")
+        .select("last_renewal_date, cycle_start_date")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      const currentLastRenewalDate = currentState?.last_renewal_date;
+      const currentCycleDate = currentState?.cycle_start_date;
+
+      // STEP 1: Fetch all cyclic budgets
+      const { data: cyclicBudgets } = await supabase
+        .from("budget_folders")
+        .select("id, name, emoji, amount, is_cyclic")
+        .eq("user_id", userId)
+        .eq("type", "expense")
+        .eq("is_cyclic", true);
+
+      // STEP 2: Calculate savings for each cyclic budget using CURRENT last_renewal_date
+      const insights = [];
+      const cyclicUpdates = [];
+      
+      if (cyclicBudgets && cyclicBudgets.length > 0 && currentLastRenewalDate) {
+        for (const budget of cyclicBudgets) {
+          const { data: transactions } = await supabase
+            .from("transactions")
+            .select("amount")
+            .eq("user_id", userId)
+            .eq("budget_folder_id", budget.id)
+            .eq("type", "expense")
+            .gte("created_at", currentLastRenewalDate);
+
+          const spent = (transactions || []).reduce(
+            (sum, t) => sum + Number(t.amount || 0),
+            0
+          );
+          const leftover = budget.amount - spent;
+
+          // Store leftover as rollover for cyclic budgets
+          if (leftover > 0) {
+            insights.push({
+              user_id: userId,
+              budget_folder_id: budget.id,
+              insight_type: "savings_success",
+              cycle_date: currentCycleDate || new Date().toISOString().split("T")[0],
+              amount_saved: leftover,
+              dismissed: false,
+            });
+            
+            cyclicUpdates.push({
+              id: budget.id,
+              rollover_carry: leftover,
+            });
+          } else {
+            // No leftover, set rollover to 0
+            cyclicUpdates.push({
+              id: budget.id,
+              rollover_carry: 0,
+            });
+          }
+        }
+      }
+
+      // STEP 3: Insert insights and update cyclic budget rollovers
+      if (insights.length > 0) {
+        const { error: insightError } = await supabase
+          .from("budget_insights")
+          .insert(insights);
+
+        if (insightError) {
+          console.error("Error creating insights:", insightError);
+        }
+      }
+      
+      // Update rollover_carry for cyclic budgets
+      for (const update of cyclicUpdates) {
+        await supabase
+          .from("budget_folders")
+          .update({ rollover_carry: update.rollover_carry })
+          .eq("id", update.id)
+          .eq("user_id", userId);
+      }
+
+      // STEP 4: NOW update last_renewal_date
+      const { error: stateError } = await supabase
+        .from("main_budget_state")
+        .update({ 
+          last_renewal_date: new Date().toISOString(),
+          snooze_until: null 
+        })
+        .eq("user_id", userId);
+
+      if (stateError) {
+        console.error("Error renewing budget:", stateError);
+        handleToastMessage(tCommon("unexpectedError"), "error");
+        return;
+      }
+
+      handleToastMessage(tDashboard("budgetRenewal.toastSuccess"), "success");
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("main_budget:updated"));
+      }
+
+      setRefreshCounters((prev) => prev + 1);
+    } catch (e) {
+      console.error("Unexpected error renewing budget:", e);
+      handleToastMessage(tCommon("unexpectedError"), "error");
+    } finally {
+      setIsRenewing(false);
+    }
+  };
+
+  const handleDismissRenewal = async () => {
+    if (!session?.user?.id) return;
+    if (isDismissing) return;
+    try {
+      setIsDismissing(true);
+
+      const userId = session.user.id;
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("budget_reset_day")
+        .eq("id", userId)
+        .maybeSingle();
+
+      const resetDayRaw = profileData?.budget_reset_day;
+      const resetDay =
+        typeof resetDayRaw === "number" && Number.isFinite(resetDayRaw)
+          ? Math.min(31, Math.max(1, Math.floor(resetDayRaw)))
+          : 1;
+
+      const now = new Date();
+      const currentCycleStart = getFinancialMonthStart(resetDay, now);
+      const nextCycleProbe = new Date(currentCycleStart);
+      nextCycleProbe.setMonth(nextCycleProbe.getMonth() + 1);
+      const nextCycleStart = getFinancialMonthStart(resetDay, nextCycleProbe);
+      const snoozeUntil = `${formatDateOnly(nextCycleStart)}T00:00:00.000`;
+
+      const { error: stateError } = await supabase
+        .from("main_budget_state")
+        .update({ snooze_until: snoozeUntil })
+        .eq("user_id", userId);
+
+      if (stateError) {
+        console.error("Error dismissing renewal modal:", stateError);
+        handleToastMessage(tCommon("unexpectedError"), "error");
+        return;
+      }
+
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("main_budget:updated"));
+      }
+    } catch (e) {
+      console.error("Unexpected error dismissing renewal modal:", e);
+      handleToastMessage(tCommon("unexpectedError"), "error");
+    } finally {
+      setIsDismissing(false);
+    }
+  };
+
   const currentCycleData = transactions.filter((transaction) => {
     const { start, end } = getFinancialMonthToDateRange(budgetResetDay || 1);
     const transactionDate = new Date(transaction.created_at);
@@ -410,6 +601,8 @@ function DashboardClient() {
               totalExpenses={totalExpenses}
               expensesTrend={expensesTrend}
               onBudgetClick={handleIconClick}
+              showRenewalButton={showRenewalButton}
+              onRenewClick={handleManualRenewalOpen}
               currency={currency}
             />
 
@@ -521,6 +714,30 @@ function DashboardClient() {
             )}
           </motion.div>
 
+          {showRenewalModal && (
+            <BudgetRenewalModal
+              isOpen={showRenewalModal}
+              carryover={carryover}
+              currency={currency}
+              onRenew={handleRenewBudget}
+              onDismiss={handleDismissRenewal}
+              isRenewing={isRenewing}
+              isDismissing={isDismissing}
+            />
+          )}
+          {isManualRenewalOpen && (
+            <ManualBudgetRenewalModal
+              isOpen={isManualRenewalOpen}
+              carryover={carryover}
+              currency={currency}
+              onClose={handleManualRenewalClose}
+              onRenew={async () => {
+                await handleRenewBudget();
+                setIsManualRenewalOpen(false);
+              }}
+              isRenewing={isRenewing}
+            />
+          )}
           {isModalOpen && (
             <MainBudgetModal
               title={tDashboard("mainBudget.editTitle")}

@@ -8,6 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import NewBudget from "@/components/budgets/AddNewBudget";
 import BudgetComparisonChart from "@/components/budgets/BudgetComparisonChart";
 import BudgetFolderItem from "@/components/budgets/BudgetFolderItem";
+import SpendlyPalInsightCard from "@/components/budgets/SpendlyPalInsightCard";
 import UpgradeCornerPanel from "@/components/free/UpgradeCornerPanel";
 import NewBudgetModal from "@/components/modals/BudgetModal";
 import ToastMessage from "@/components/ui-elements/ToastMessage";
@@ -21,13 +22,15 @@ import { Link } from "@/i18n/routing";
 import { computeCarry } from "@/lib/budgetRollover";
 import { getPreviousMonthRange } from "@/lib/dateUtils";
 import { supabase } from "@/lib/supabaseClient";
-import type { BarChartData, BudgetFolderItemProps, ToastMessageProps } from "@/types/types";
+import type { BarChartData, BudgetFolderItemProps, ToastMessageProps, BudgetInsight } from "@/types/types";
 export default function BudgetsClient() {
   const { session } = UserAuth();
   const locale = useLocale();
   const [toastMessage, setToastMessage] = useState<ToastMessageProps | null>(
     null,
   );
+  const [insights, setInsights] = useState<BudgetInsight[]>([]);
+  const [lastRenewalDate, setLastRenewalDate] = useState<string | null>(null);
   const [budgetFolders, setBudgetFolders] = useState<BudgetFolderItemProps[]>(
     [],
   );
@@ -91,6 +94,21 @@ export default function BudgetsClient() {
   const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
+  // Fetch last_renewal_date for cyclic budget calculations
+  useEffect(() => {
+    const fetchLastRenewalDate = async () => {
+      if (!session?.user?.id) return;
+      const { data } = await supabase
+        .from("main_budget_state")
+        .select("last_renewal_date")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      
+      setLastRenewalDate(data?.last_renewal_date || null);
+    };
+    fetchLastRenewalDate();
+  }, [session?.user?.id]);
+
   // Транзакции для расчета потраченного по бюджетам
   const { allTransactions, isLoading: isTransactionsLoading } =
     useTransactionsData({
@@ -102,17 +120,75 @@ export default function BudgetsClient() {
     const acc: Record<string, number> = {};
     for (const t of allTransactions) {
       if (t.type === "expense" && t.budget_folder_id) {
+        const budget = budgetFolders.find(b => b.id === t.budget_folder_id);
+        
+        // For cyclic budgets, only count transactions after last_renewal_date
+        if (budget?.is_cyclic && lastRenewalDate) {
+          const transactionDate = new Date(t.created_at);
+          const renewalDate = new Date(lastRenewalDate);
+          if (transactionDate < renewalDate) {
+            continue; // Skip transactions before renewal
+          }
+        }
+        
         acc[t.budget_folder_id] = (acc[t.budget_folder_id] || 0) + t.amount;
       }
     }
     return acc;
-  }, [allTransactions]);
+  }, [allTransactions, budgetFolders, lastRenewalDate]);
 
   // Синхронизация папок бюджета с хуком
   const { budgets, isLoading: _isBudgetsLoading, refetch } = useBudgets();
   useEffect(() => {
     setBudgetFolders(budgets);
   }, [budgets]);
+
+  // Fetch insights
+  useEffect(() => {
+    const fetchInsights = async () => {
+      if (!session?.user?.id) return;
+      const { data, error } = await supabase
+        .from("budget_insights")
+        .select(`
+          id,
+          user_id,
+          budget_folder_id,
+          insight_type,
+          cycle_date,
+          amount_saved,
+          dismissed,
+          created_at,
+          dismissed_at,
+          budget_folders!inner(name, emoji)
+        `)
+        .eq("user_id", session.user.id)
+        .eq("dismissed", false)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching insights:", error);
+        return;
+      }
+
+      const formattedInsights: BudgetInsight[] = (data || []).map((item: any) => ({
+        id: item.id,
+        user_id: item.user_id,
+        budget_folder_id: item.budget_folder_id,
+        budget_name: item.budget_folders?.name,
+        budget_emoji: item.budget_folders?.emoji,
+        insight_type: item.insight_type,
+        cycle_date: item.cycle_date,
+        amount_saved: item.amount_saved,
+        dismissed: item.dismissed,
+        created_at: item.created_at,
+        dismissed_at: item.dismissed_at,
+      }));
+
+      setInsights(formattedInsights);
+    };
+
+    fetchInsights();
+  }, [session?.user?.id]);
 
   // Лимит для Free плана (например, 3 бюджета)
   const isLimitReached =
@@ -127,6 +203,23 @@ export default function BudgetsClient() {
   ) => {
     setToastMessage({ text, type });
     setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleDismissInsight = async (insightId: string) => {
+    if (!session?.user?.id) return;
+    const { error } = await supabase
+      .from("budget_insights")
+      .update({ dismissed: true, dismissed_at: new Date().toISOString() })
+      .eq("id", insightId)
+      .eq("user_id", session.user.id);
+
+    if (error) {
+      console.error("Error dismissing insight:", error);
+      handleToastMessage(tCommon("unexpectedError"), "error");
+      return;
+    }
+
+    setInsights((prev) => prev.filter((i) => i.id !== insightId));
   };
 
   // Ограничение показа апгрейд‑попапа
@@ -167,6 +260,7 @@ export default function BudgetsClient() {
     rolloverEnabled?: boolean,
     rolloverMode?: "positive-only" | "allow-negative",
     rolloverCap?: number | null,
+    is_cyclic?: boolean,
   ): Promise<void> => {
     if (!session?.user?.id) {
       throw new Error("Not authenticated");
@@ -182,10 +276,11 @@ export default function BudgetsClient() {
           amount,
           type,
           color_code: color_code ?? null,
-          rollover_enabled: type === "expense" ? !!rolloverEnabled : false,
+          rollover_enabled: type === "expense" && !is_cyclic ? true : false,
           rollover_mode:
-            type === "expense" ? (rolloverMode ?? "positive-only") : null,
-          rollover_cap: type === "expense" ? (rolloverCap ?? null) : null,
+            type === "expense" && !is_cyclic ? (rolloverMode ?? "positive-only") : null,
+          rollover_cap: type === "expense" && !is_cyclic ? (rolloverCap ?? null) : null,
+          is_cyclic: type === "expense" ? !!is_cyclic : false,
         })
         .select();
       if (insertErr) {
@@ -281,7 +376,14 @@ export default function BudgetsClient() {
     const next: Record<string, number> = {};
     for (const folder of budgetFolders) {
       if (folder.type === "expense") {
-        const prev = prevSpentByBudget[folder.id] || 0;
+        const prev = prevSpentByBudget[folder.id];
+        
+        // If no previous month data exists, rollover should be 0 (new budget)
+        if (prev === undefined) {
+          next[folder.id] = 0;
+          continue;
+        }
+        
         const rollover = folder as unknown as {
           rollover_mode?: "positive-only" | "allow-negative";
           rollover_cap?: number | null;
@@ -316,6 +418,20 @@ export default function BudgetsClient() {
         <ToastMessage text={toastMessage.text} type={toastMessage.type} />
       )}
       {showUpgrade && <UpgradeCornerPanel />}
+
+      {/* Spendly Pal Insight Cards */}
+      {insights.length > 0 && (
+        <div className="mb-6 space-y-4">
+          {insights.map((insight) => (
+            <SpendlyPalInsightCard
+              key={insight.id}
+              insight={insight}
+              currency={currency}
+              onDismiss={handleDismissInsight}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Аналитика: мобильная — скрываема; десктоп — всегда видна */}
       <motion.div
@@ -468,6 +584,8 @@ export default function BudgetsClient() {
                 color_code={folder.color_code}
                 currency={currency}
                 rolloverPreviewCarry={rolloverPreviewById[folder.id]}
+                rollover_carry={folder.rollover_carry}
+                is_cyclic={folder.is_cyclic}
               />
             </Link>
           </motion.div>

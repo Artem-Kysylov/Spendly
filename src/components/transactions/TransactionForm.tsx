@@ -35,6 +35,8 @@ import TextInput from "@/components/ui-elements/TextInput";
 import { UserAuth } from "@/context/AuthContext";
 import { useSubscription } from "@/hooks/useSubscription";
 import useDeviceType from "@/hooks/useDeviceType";
+import { checkMainBudgetThresholds } from "@/lib/budget/checkMainBudgetThresholds";
+import { mergeDateWithTime, toOffsetISOString } from "@/lib/dateUtils";
 import { supabase } from "@/lib/supabaseClient";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import { checkBudgetThresholds } from "@/lib/budget/checkThresholds";
@@ -228,7 +230,7 @@ export default function TransactionForm({
         type: data.type,
         budget_folder_id:
           data.budget_folder_id === "unbudgeted" ? null : data.budget_folder_id,
-        created_at: data.created_at.toISOString(),
+        created_at: toOffsetISOString(data.created_at),
         is_recurring: data.isRecurring || false,
         recurrence_day: data.isRecurring
           ? (data.recurrenceDay ?? new Date().getDate())
@@ -264,6 +266,14 @@ export default function TransactionForm({
         } catch (budgetCheckError) {
           console.error("Error checking budget thresholds:", budgetCheckError);
           // Don't fail the transaction if budget check fails
+        }
+      }
+
+      if (data.type === "expense") {
+        try {
+          await checkMainBudgetThresholds(supabase, session.user.id, locale);
+        } catch (mainBudgetCheckError) {
+          console.error("Error checking main budget thresholds:", mainBudgetCheckError);
         }
       }
 
@@ -441,7 +451,9 @@ export default function TransactionForm({
         render={({ field }) => (
           <HybridDatePicker
             selectedDate={field.value}
-            onDateSelect={field.onChange}
+            onDateSelect={(nextDate) =>
+              field.onChange(mergeDateWithTime(nextDate, field.value ?? new Date()))
+            }
             label={tModals("transaction.date.label")}
             placeholder={tModals("transaction.date.placeholder")}
           />

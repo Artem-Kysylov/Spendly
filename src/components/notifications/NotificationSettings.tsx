@@ -488,12 +488,7 @@ const NotificationSettings = () => {
                 onCheckedChange={handlePushToggle}
                 disabled={isUpdatingPush}
                 aria-label={tN("a11y.togglePush")}
-                className="
-                  border border-gray-300 dark:border-border
-                  data-[state=unchecked]:bg-gray-200 dark:data-[state=unchecked]:bg-neutral-800
-                  data-[state=checked]:bg-primary
-                "
-                thumbClassName="bg-white dark:bg-white shadow-sm"
+                className="data-[state=checked]:bg-primary"
               />
             )}
           </div>

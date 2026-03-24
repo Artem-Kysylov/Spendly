@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedClient } from "@/lib/serverSupabase";
+import { getUserPreferredLanguage } from "@/lib/i18n/user-locale";
 import { DEFAULT_LOCALE, isSupportedLanguage } from "@/i18n/config";
 import { getTranslations } from "next-intl/server";
 
@@ -16,9 +17,11 @@ const dayDiff = (a: Date, b: Date) =>
 export async function POST(req: NextRequest) {
   try {
     const { supabase, user, locale } = await getAuthenticatedClient(req);
-    const tErrors = await getTranslations({ locale, namespace: "errors" });
+    const preferredLocale = await getUserPreferredLanguage(user.id);
+    const resolvedLocale = preferredLocale || locale;
+    const tErrors = await getTranslations({ locale: resolvedLocale, namespace: "errors" });
     const tNotifications = await getTranslations({
-      locale,
+      locale: resolvedLocale,
       namespace: "notifications",
     });
 
@@ -60,7 +63,7 @@ export async function POST(req: NextRequest) {
           user_id: user.id,
           title,
           message,
-          type: "weekly_reminder",
+          type: "reminder",
           metadata: {
             recurring_rule_id: r.id,
             due_date: r.next_due_date,
@@ -95,7 +98,7 @@ export async function POST(req: NextRequest) {
           user_id: user.id,
           title,
           message,
-          type: "weekly_reminder",
+          type: "reminder",
           metadata: {
             recurring_rule_id: r.id,
             due_date: r.next_due_date,

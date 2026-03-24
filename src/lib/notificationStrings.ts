@@ -13,6 +13,7 @@ export type NotificationVariant =
   | "short" 
   | "professional"
   | "warning_80"
+  | "warning_90"
   | "limit_reached"
   | "over_budget"
   | "saving_goal"
@@ -89,6 +90,15 @@ export const NOTIFICATION_STRINGS: Record<NotificationCategory, Record<string, N
       id: (p) => `Perhatian! Kamu sudah memakai 80% anggaran ${p.category}.`,
       ja: (p) => `注意！${p.category} の予算を80%使いました。`,
       ko: (p) => `주의! ${p.category} 예산의 80%를 사용했어요.`
+    },
+    warning_90: {
+      en: (p) => `Careful! You’ve already used 90% of your ${p.category} budget.`,
+      ru: (p) => `Осторожно! Вы уже использовали 90% бюджета категории ${p.category}.`,
+      uk: (p) => `Обережно! Ви вже використали 90% бюджету категорії ${p.category}.`,
+      hi: (p) => `सावधान! आपने ${p.category} बजट का 90% पहले ही उपयोग कर लिया है।`,
+      id: (p) => `Hati-hati! Kamu sudah memakai 90% anggaran ${p.category}.`,
+      ja: (p) => `注意！${p.category} の予算をすでに90%使っています。`,
+      ko: (p) => `주의! ${p.category} 예산의 90%를 이미 사용했어요.`
     },
     limit_reached: {
       en: (p) => `Budget Alert: You've reached your limit for ${p.category}. Time to slow down?`,

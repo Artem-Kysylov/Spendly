@@ -4,9 +4,10 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Bell, X } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { enUS, hi, id, ja, ko, ru, uk } from "date-fns/locale";
 import { useNotifications } from "@/hooks/useNotifications";
 import type { NotificationBellProps } from "@/types/types";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 
 function NotificationBell({
@@ -26,6 +27,7 @@ function NotificationBell({
   } = useNotifications();
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const locale = useLocale();
   const [pageOffset, setPageOffset] = useState(0);
   const PAGE_SIZE = 10;
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -36,6 +38,16 @@ function NotificationBell({
   }>({ top: 0, left: 0 });
   const DROPDOWN_WIDTH = 320; // w-80 ≈ 320px
   const tNotifications = useTranslations("notifications");
+  const dateFnsLocaleMap = {
+    en: enUS,
+    ru,
+    uk,
+    ja,
+    ko,
+    id,
+    hi,
+  } as const;
+  const dateFnsLocale = dateFnsLocaleMap[locale as keyof typeof dateFnsLocaleMap] ?? enUS;
 
   // Явный type guard для error (исправляет ts(18047))
   const hasDbError =
@@ -80,7 +92,11 @@ function NotificationBell({
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "budget_alert":
+      case "budget_warning":
+      case "budget_overrun":
         return "⚠️";
+      case "reminder":
+      case "weekly_summary":
       case "weekly_reminder":
         return "📅";
       case "expense_warning":
@@ -274,13 +290,13 @@ function NotificationBell({
                           <p className="text-xs text-gray-400 mt-2">
                             {formatDistanceToNow(
                               new Date(notification.created_at),
-                              { addSuffix: true },
+                              { addSuffix: true, locale: dateFnsLocale },
                             )}
                           </p>
 
                           {/* CTA buttons per type */}
                           <div className="mt-2 flex gap-2">
-                            {notification.type === "budget_alert" &&
+                            {["budget_alert", "budget_warning", "budget_overrun"].includes(notification.type) &&
                               notification?.metadata?.budget_id && (
                                 <>
                                   <button
@@ -303,7 +319,19 @@ function NotificationBell({
                                   </button>
                                 </>
                               )}
-                            {notification.type === "weekly_reminder" && (
+                            {["budget_warning", "budget_overrun"].includes(notification.type) &&
+                              notification?.metadata?.budget_scope === "main_budget" && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openReport(notification);
+                                  }}
+                                  className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 supports-[hover:hover]:hover:bg-blue-200"
+                                >
+                                  {tNotifications("bell.actions.openReport")}
+                                </button>
+                              )}
+                            {["weekly_summary", "weekly_reminder", "reminder"].includes(notification.type) && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();

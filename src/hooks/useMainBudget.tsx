@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import { UserAuth } from "../context/AuthContext";
 import {
@@ -24,6 +24,7 @@ interface MainBudgetState {
   last_base_budget: number;
   income_confirmed: boolean;
   snooze_until: string | null;
+  last_renewal_date: string | null;
 }
 
 interface TransactionAmount {
@@ -38,6 +39,8 @@ export const useMainBudget = () => {
   const [carryover, setCarryover] = useState<number>(0);
   const [needsIncomeConfirmation, setNeedsIncomeConfirmation] = useState<boolean>(false);
   const [incomeConfirmed, setIncomeConfirmed] = useState<boolean>(false);
+  const [lastRenewalDate, setLastRenewalDate] = useState<string | null>(null);
+  const [renewalSnoozeUntil, setRenewalSnoozeUntil] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -95,7 +98,7 @@ export const useMainBudget = () => {
       // Fetch or create budget state
       const { data: stateData, error: stateError } = await supabase
         .from("main_budget_state")
-        .select("cycle_start_date, carryover, last_base_budget, income_confirmed, snooze_until")
+        .select("cycle_start_date, carryover, last_base_budget, income_confirmed, snooze_until, last_renewal_date")
         .eq("user_id", userId)
         .maybeSingle();
 
@@ -109,6 +112,10 @@ export const useMainBudget = () => {
       const storedLastBase = Number(state?.last_base_budget ?? baseBudget);
       const storedIncomeConfirmed = state?.income_confirmed ?? false;
       const snoozeUntil = state?.snooze_until;
+      const storedLastRenewalDate = state?.last_renewal_date ?? null;
+
+      setLastRenewalDate(storedLastRenewalDate);
+      setRenewalSnoozeUntil(snoozeUntil ?? null);
 
       if (!state) {
         const initialIncomeConfirmed = enableConfirmation ? false : true;
@@ -337,6 +344,33 @@ export const useMainBudget = () => {
     return () => window.removeEventListener("main_budget:updated", handler);
   }, [fetchMainBudget]);
 
+  const isNewCycle = useMemo(() => {
+    if (!budgetResetDay) return false;
+    const now = new Date();
+    const currentCycleStart = getFinancialMonthStart(budgetResetDay, now);
+
+    if (!lastRenewalDate) {
+      return formatDateOnly(now) === formatDateOnly(currentCycleStart);
+    }
+
+    const lastRenewal = new Date(lastRenewalDate);
+    return now >= currentCycleStart && lastRenewal < currentCycleStart;
+  }, [lastRenewalDate, budgetResetDay]);
+
+  const isRenewalSnoozed = useMemo(() => {
+    if (!renewalSnoozeUntil) return false;
+    const snoozeDate = new Date(renewalSnoozeUntil);
+    return Number.isFinite(snoozeDate.getTime()) && snoozeDate > new Date();
+  }, [renewalSnoozeUntil]);
+
+  const showRenewalModal = useMemo(() => {
+    return isNewCycle && !isRenewalSnoozed;
+  }, [isNewCycle, isRenewalSnoozed]);
+
+  const showRenewalButton = useMemo(() => {
+    return isNewCycle && isRenewalSnoozed;
+  }, [isNewCycle, isRenewalSnoozed]);
+
   return {
     mainBudget,
     availableToSpend,
@@ -344,6 +378,10 @@ export const useMainBudget = () => {
     carryover,
     incomeConfirmed,
     needsIncomeConfirmation,
+    isNewCycle,
+    showRenewalModal,
+    showRenewalButton,
+    lastRenewalDate,
     isLoading,
     error,
     refetch: fetchMainBudget,

@@ -62,8 +62,7 @@ export async function saveProposedTransaction(
     }
 
     // Validate created_at date
-    const createdAt = new Date(input.created_at);
-    if (isNaN(createdAt.getTime())) {
+    if (isNaN(new Date(input.created_at).getTime())) {
       return { success: false, error: "Invalid date format" };
     }
 
@@ -98,7 +97,7 @@ export async function saveProposedTransaction(
         amount,
         type: transactionType,
         budget_folder_id: input.budget_folder_id,
-        created_at: createdAt.toISOString(),
+        created_at: input.created_at,
       })
       .select("id")
       .single();

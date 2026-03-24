@@ -472,6 +472,17 @@
       "toastSuccessPlayful": "All set — income added!",
       "toastSnoozed": "Okay, I’ll remind you tomorrow.",
       "rolloverBreakdown": "Includes rollover: {amount}"
+    },
+    "budgetRenewal": {
+      "modalTitle": "Time to renew your main budget? 💰",
+      "modalMessage": "A new budget cycle has started. Would you like to renew your budget now?",
+      "renewNow": "Yes, renew now",
+      "notYet": "Not yet",
+      "toastSuccess": "Budget renewed! Rollover from last month added.",
+      "renewButtonLabel": "Renew budget",
+      "renewBadge": "Renew",
+      "manualTitle": "Renew main budget",
+      "manualMessage": "Start a fresh cycle and add any rollover from the previous one."
     }
   },
   "budgets": {
@@ -489,6 +500,15 @@
       "label": "Rollover",
       "positive": "Rollover from last month",
       "negative": "Overspending from last month"
+    },
+    "cyclic": {
+      "toggleTitle": "Reset Monthly (Salary Cycle)",
+      "toggleDescription": "Automatically resets the spent amount on your main budget renewal day. Keeps your history.",
+      "activeLabel": "Cyclic budget active"
+    },
+    "spendlyPal": {
+      "savingsMessage": "Spendly Pal: Great job! You saved {{amount}} on {{budgetName}} last cycle. ✨",
+      "dismiss": "Dismiss"
     },
     "meta": {
       "title": "Budgets",
@@ -1227,8 +1247,10 @@
       "title": "Recurring transactions",
       "total": "Total",
       "inDays": "In {days} days",
+      "daysAgo": "{days} days ago",
       "today": "Today",
       "tomorrow": "Tomorrow",
+      "yesterday": "Yesterday",
       "monthly": "Monthly",
       "noPayments": "No recurring payments scheduled"
     }

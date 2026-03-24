@@ -106,53 +106,51 @@ export default function RecurringPaymentsAccordion({
             </div>
           ) : (
             <>
-              <div className="flex flex-col md:flex-row md:gap-4 md:items-stretch md:min-h-0">
-                <div className="md:w-[520px] md:shrink-0">
+              <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)] lg:items-start">
+                <div className="min-w-0">
                   <RecurringCalendar
                     transactions={recurringTransactions}
                     variant="settings"
                     currency={currency}
                   />
                 </div>
-
-                <div className="hidden md:block w-px bg-border" />
-                <div className="md:hidden my-4 border-t border-border" />
-
-                <div className="space-y-2 md:flex-1 md:min-h-0 md:max-h-[420px] md:overflow-y-auto md:pr-1">
-                {recurringTransactions.map((transaction) => (
-                  <div
-                    key={transaction.id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">{transaction.title}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {transaction.amount} • {transaction.type}
-                        {transaction.recurrence_day && (
-                          <> • {t("recurring.dayLabel", { day: transaction.recurrence_day })}</>
-                        )}
+                <div className="min-w-0 border-t border-border pt-4 lg:border-t-0 lg:border-l lg:pl-4 lg:pt-0">
+                  <div className="space-y-2 lg:max-h-[420px] lg:overflow-y-auto lg:pr-1">
+                    {recurringTransactions.map((transaction) => (
+                      <div
+                        key={transaction.id}
+                        className="flex items-center justify-between p-3 rounded-lg border border-border bg-card hover:bg-muted/50 transition-colors"
+                      >
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm truncate">{transaction.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {transaction.amount} • {transaction.type}
+                            {transaction.recurrence_day && (
+                              <> • {t("recurring.dayLabel", { day: transaction.recurrence_day })}</>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 ml-3">
+                          <button
+                            type="button"
+                            onClick={() => onEdit(transaction)}
+                            className="p-2 rounded-md hover:bg-primary/10 text-primary transition-colors"
+                            aria-label="Edit recurring transaction"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(transaction.id)}
+                            className="p-2 rounded-md hover:bg-destructive/10 text-destructive transition-colors"
+                            aria-label="Delete recurring transaction"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => onEdit(transaction)}
-                        className="p-2 rounded-md hover:bg-primary/10 text-primary transition-colors"
-                        aria-label="Edit recurring transaction"
-                      >
-                        <Pencil size={16} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(transaction.id)}
-                        className="p-2 rounded-md hover:bg-destructive/10 text-destructive transition-colors"
-                        aria-label="Delete recurring transaction"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
+                    ))}
                   </div>
-                ))}
                 </div>
               </div>
             </>

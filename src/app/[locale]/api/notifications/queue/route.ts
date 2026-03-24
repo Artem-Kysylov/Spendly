@@ -101,14 +101,7 @@ export async function POST(req: NextRequest) {
 
     // Дублируем в in‑app notifications для центра уведомлений (анти‑дубли в пределах 1 часа)
     try {
-      const notifTypeMap = (t: string) =>
-        t === "budget_warning" ? "budget_alert" :
-        t === "budget_overrun" ? "budget_alert" :
-        t === "weekly_reminder" ? "weekly_reminder" :
-        t === "weekly_summary" ? "weekly_reminder" :
-        "general";
-
-      const candidateType = notifTypeMap(notification_type);
+      const candidateType = notification_type;
       const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
       const { data: existing } = await supabase
         .from("notifications")

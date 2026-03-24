@@ -9,7 +9,6 @@ import {
 import {
   Sheet,
   SheetContent,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -81,28 +80,44 @@ export function ToneSelect({
   );
 
   const optionsList = (
-    <div className="grid gap-1">
+    <div className="space-y-3">
       {items.map((tone) => (
         <button
           key={tone}
           type="button"
           className={cn(
-            "flex w-full items-center gap-2 rounded-md px-3 py-2 text-sm",
-            "hover:bg-muted text-foreground",
-            tone === value ? "bg-muted" : "",
+            "flex w-full items-center gap-3 rounded-lg border-2 p-4 text-left transition-all duration-200",
+            tone === value
+              ? "border-primary bg-primary/10"
+              : "border-border bg-background hover:bg-muted/60",
           )}
           onClick={async () => {
             await onChange(tone);
             setOpen(false);
           }}
         >
-          <span>{toneEmoji[tone]}</span>
-          <span>
+          <span className="text-2xl leading-none">{toneEmoji[tone]}</span>
+          <span className="flex-1 font-medium text-foreground">
             {tone === "neutral" && tAI("tone.options.neutral")}
             {tone === "formal" && tAI("tone.options.formal")}
             {tone === "friendly" && tAI("tone.options.friendly")}
             {tone === "playful" && tAI("tone.options.playful")}
           </span>
+          {tone === value && (
+            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <svg
+                className="h-3 w-3"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </span>
+          )}
         </button>
       ))}
     </div>
@@ -144,12 +159,16 @@ export function ToneSelect({
             />
           </svg>
         </button>
-        <SheetContent side="bottom" className="p-4">
-          <div className="mb-4">
-            <h3 className="text-lg font-semibold">{tAI("tone.label")}</h3>
-            <p className="text-sm text-muted-foreground mt-1">{tAI("tone.description")}</p>
+        <SheetContent side="bottom" className="h-[50dvh] rounded-t-[28px] p-0">
+          <div className="flex h-full flex-col overflow-hidden p-4">
+            <div className="mb-4 text-center">
+              <h3 className="text-2xl font-semibold">{tAI("settings.title")}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {tAI("settings.description")}
+              </p>
+            </div>
+            <div className="overflow-y-auto pb-2">{optionsList}</div>
           </div>
-          {optionsList}
         </SheetContent>
       </Sheet>
     );
@@ -160,7 +179,7 @@ export function ToneSelect({
       <PopoverTrigger asChild>
         {triggerButton}
       </PopoverTrigger>
-      <PopoverContent side="top" sideOffset={6} className="w-[260px] p-1">
+      <PopoverContent side="top" sideOffset={6} className="w-[320px] p-3">
         {optionsList}
       </PopoverContent>
     </Popover>

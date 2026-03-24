@@ -466,12 +466,23 @@
       "cardTitle": "収入を確認",
       "cardMessage": "このサイクルに {amount} を収入として追加しますか？",
       "confirm": "確認する",
-      "notYet": "後で",
+      "notYet": "まだしない",
       "salaryTitle": "給料",
       "toastSuccessNeutral": "収入を確認しました。",
       "toastSuccessPlayful": "OK！収入を追加しました！",
       "toastSnoozed": "わかりました。明日リマインドします。",
       "rolloverBreakdown": "繰り越しを含む: {amount}"
+    },
+    "budgetRenewal": {
+      "modalTitle": "メイン予算を更新しますか？ 💰",
+      "modalMessage": "新しい予算サイクルが始まりました。今すぐ予算を更新しますか？",
+      "renewNow": "はい、更新する",
+      "notYet": "まだしない",
+      "toastSuccess": "予算が更新されました！前月の繰越分が追加されました。",
+      "renewButtonLabel": "予算を更新",
+      "renewBadge": "更新",
+      "manualTitle": "メイン予算を更新",
+      "manualMessage": "新しいサイクルを開始し、前の期間からの繰越を追加します。"
     }
   },
   "budgets": {
@@ -489,6 +500,15 @@
       "label": "Rollover",
       "positive": "Rollover from last month",
       "negative": "Overspending from last month"
+    },
+    "cyclic": {
+      "toggleTitle": "毎月リセット（給料日サイクル）",
+      "toggleDescription": "メイン予算の更新日に使用額をリセットします。履歴は保持されます。",
+      "activeLabel": "サイクリック予算が有効"
+    },
+    "spendlyPal": {
+      "savingsMessage": "Spendly Pal: 素晴らしい！前回のサイクルで {{budgetName}} から {{amount}} を節約しました。 ✨",
+      "dismiss": "閉じる"
     },
     "meta": {
       "title": "予算",
@@ -1227,8 +1247,10 @@
       "title": "定期取引",
       "total": "合計",
       "inDays": "{days}日後",
+      "daysAgo": "{days}日前",
       "today": "今日",
       "tomorrow": "明日",
+      "yesterday": "昨日",
       "monthly": "毎月",
       "noPayments": "定期的な支払いの予定はありません"
     }
