@@ -79,20 +79,21 @@ export default function CompactKPICard({
     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-4 w-full min-w-0">
       {/* Card 1: Total Budget */}
       <div className="bg-card border border-border rounded-xl p-3 md:p-4 flex flex-col justify-between h-[120px] md:h-[150px] relative group">
-        <div className="absolute top-3 right-3 flex gap-2">
+        <div className="absolute top-3 right-3 flex items-center gap-2 md:gap-2">
           {showRenewalButton && onRenewClick && (
             <button
               type="button"
-              className="cursor-pointer opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
+              className="inline-flex items-center gap-1 rounded-full border border-border bg-background px-2 py-1 text-[10px] font-medium text-muted-foreground opacity-100 transition-colors hover:text-primary mr-5 md:mr-0"
               onClick={onRenewClick}
               aria-label={tDashboard("budgetRenewal.renewButtonLabel") ?? "Renew budget"}
             >
-              <RotateCw className="text-muted-foreground w-4 h-4 hover:text-primary" />
+              <RotateCw className="w-3.5 h-3.5" />
+              <span>{tDashboard("budgetRenewal.renewBadge")}</span>
             </button>
           )}
           <button
             type="button"
-            className="cursor-pointer opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
+            className="cursor-pointer opacity-100 transition-opacity"
             onClick={onBudgetClick}
             aria-label={tBudgets("actions.edit") ?? "Edit budget"}
           >

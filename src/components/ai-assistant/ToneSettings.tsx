@@ -120,7 +120,7 @@ const ToneSettings = () => {
               p-4 rounded-lg border-2 transition-all duration-200
               ${selectedTone === option.value ? "border-primary bg-primary/10" : "border-border hover:bg-muted"}
               ${isUpdating ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
-              hover:shadow-sm hover:scale-[1.01]
+              md:hover:shadow-sm md:hover:scale-[1.01]
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
             `}
           >

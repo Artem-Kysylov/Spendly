@@ -25,7 +25,6 @@ interface MainBudgetState {
   income_confirmed: boolean;
   snooze_until: string | null;
   last_renewal_date: string | null;
-  has_seen_renewal_modal: boolean;
 }
 
 interface TransactionAmount {
@@ -41,7 +40,7 @@ export const useMainBudget = () => {
   const [needsIncomeConfirmation, setNeedsIncomeConfirmation] = useState<boolean>(false);
   const [incomeConfirmed, setIncomeConfirmed] = useState<boolean>(false);
   const [lastRenewalDate, setLastRenewalDate] = useState<string | null>(null);
-  const [hasSeenRenewalModal, setHasSeenRenewalModal] = useState<boolean>(false);
+  const [renewalSnoozeUntil, setRenewalSnoozeUntil] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -99,7 +98,7 @@ export const useMainBudget = () => {
       // Fetch or create budget state
       const { data: stateData, error: stateError } = await supabase
         .from("main_budget_state")
-        .select("cycle_start_date, carryover, last_base_budget, income_confirmed, snooze_until, last_renewal_date, has_seen_renewal_modal")
+        .select("cycle_start_date, carryover, last_base_budget, income_confirmed, snooze_until, last_renewal_date")
         .eq("user_id", userId)
         .maybeSingle();
 
@@ -114,10 +113,9 @@ export const useMainBudget = () => {
       const storedIncomeConfirmed = state?.income_confirmed ?? false;
       const snoozeUntil = state?.snooze_until;
       const storedLastRenewalDate = state?.last_renewal_date ?? null;
-      const storedHasSeenRenewalModal = state?.has_seen_renewal_modal ?? false;
 
       setLastRenewalDate(storedLastRenewalDate);
-      setHasSeenRenewalModal(storedHasSeenRenewalModal);
+      setRenewalSnoozeUntil(snoozeUntil ?? null);
 
       if (!state) {
         const initialIncomeConfirmed = enableConfirmation ? false : true;
@@ -359,13 +357,19 @@ export const useMainBudget = () => {
     return now >= currentCycleStart && lastRenewal < currentCycleStart;
   }, [lastRenewalDate, budgetResetDay]);
 
+  const isRenewalSnoozed = useMemo(() => {
+    if (!renewalSnoozeUntil) return false;
+    const snoozeDate = new Date(renewalSnoozeUntil);
+    return Number.isFinite(snoozeDate.getTime()) && snoozeDate > new Date();
+  }, [renewalSnoozeUntil]);
+
   const showRenewalModal = useMemo(() => {
-    return isNewCycle && !hasSeenRenewalModal;
-  }, [isNewCycle, hasSeenRenewalModal]);
+    return isNewCycle && !isRenewalSnoozed;
+  }, [isNewCycle, isRenewalSnoozed]);
 
   const showRenewalButton = useMemo(() => {
-    return isNewCycle && hasSeenRenewalModal;
-  }, [isNewCycle, hasSeenRenewalModal]);
+    return isNewCycle && isRenewalSnoozed;
+  }, [isNewCycle, isRenewalSnoozed]);
 
   return {
     mainBudget,

@@ -479,7 +479,10 @@
       "renewNow": "Ya, perbarui",
       "notYet": "Belum sekarang",
       "toastSuccess": "Anggaran diperbarui! Sisa bulan lalu telah ditambahkan.",
-      "renewButtonLabel": "Perbarui anggaran"
+      "renewButtonLabel": "Perbarui anggaran",
+      "renewBadge": "Perbarui",
+      "manualTitle": "Perbarui anggaran utama",
+      "manualMessage": "Mulai siklus baru dan tambahkan rollover dari periode sebelumnya."
     }
   },
   "budgets": {

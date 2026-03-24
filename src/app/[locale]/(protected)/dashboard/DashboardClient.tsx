@@ -16,12 +16,15 @@ import DashboardTransactionsTable from "@/components/dashboard/DashboardTransact
 import RecurringCalendar from "@/components/recurring/RecurringCalendar";
 import { useMainBudget } from "@/hooks/useMainBudget";
 import {
+  formatDateOnly,
+  getFinancialMonthStart,
   getFinancialMonthToDateRange,
   getPreviousFinancialMonthFullRange,
 } from "@/lib/dateUtils";
 import Spinner from "@/components/ui-elements/Spinner";
 import MainBudgetModal from "@/components/modals/MainBudgetModal";
 import BudgetRenewalModal from "@/components/modals/BudgetRenewalModal";
+import ManualBudgetRenewalModal from "@/components/modals/ManualBudgetRenewalModal";
 import ToastMessage from "@/components/ui-elements/ToastMessage";
 import Button from "@/components/ui-elements/Button";
 import TransactionModal from "@/components/modals/TransactionModal";
@@ -61,6 +64,7 @@ function DashboardClient() {
   } = useModal();
   const [editingTransaction, setEditingTransaction] =
     useState<Transaction | null>(null);
+  const [isManualRenewalOpen, setIsManualRenewalOpen] = useState(false);
 
   const [isConfirmingIncome, setIsConfirmingIncome] = useState(false);
   const [isSnoozingIncome, setIsSnoozingIncome] = useState(false);
@@ -215,6 +219,15 @@ function DashboardClient() {
 
   const handleIconClick = () => {
     openModal();
+  };
+
+  const handleManualRenewalOpen = () => {
+    setIsManualRenewalOpen(true);
+  };
+
+  const handleManualRenewalClose = () => {
+    if (isRenewing) return;
+    setIsManualRenewalOpen(false);
   };
 
   const handleDeleteTransaction = async (id: string) => {
@@ -449,7 +462,7 @@ function DashboardClient() {
         .from("main_budget_state")
         .update({ 
           last_renewal_date: new Date().toISOString(),
-          has_seen_renewal_modal: false 
+          snooze_until: null 
         })
         .eq("user_id", userId);
 
@@ -481,9 +494,28 @@ function DashboardClient() {
       setIsDismissing(true);
 
       const userId = session.user.id;
+      const { data: profileData } = await supabase
+        .from("profiles")
+        .select("budget_reset_day")
+        .eq("id", userId)
+        .maybeSingle();
+
+      const resetDayRaw = profileData?.budget_reset_day;
+      const resetDay =
+        typeof resetDayRaw === "number" && Number.isFinite(resetDayRaw)
+          ? Math.min(31, Math.max(1, Math.floor(resetDayRaw)))
+          : 1;
+
+      const now = new Date();
+      const currentCycleStart = getFinancialMonthStart(resetDay, now);
+      const nextCycleProbe = new Date(currentCycleStart);
+      nextCycleProbe.setMonth(nextCycleProbe.getMonth() + 1);
+      const nextCycleStart = getFinancialMonthStart(resetDay, nextCycleProbe);
+      const snoozeUntil = `${formatDateOnly(nextCycleStart)}T00:00:00.000`;
+
       const { error: stateError } = await supabase
         .from("main_budget_state")
-        .update({ has_seen_renewal_modal: true })
+        .update({ snooze_until: snoozeUntil })
         .eq("user_id", userId);
 
       if (stateError) {
@@ -570,7 +602,7 @@ function DashboardClient() {
               expensesTrend={expensesTrend}
               onBudgetClick={handleIconClick}
               showRenewalButton={showRenewalButton}
-              onRenewClick={handleRenewBudget}
+              onRenewClick={handleManualRenewalOpen}
               currency={currency}
             />
 
@@ -691,6 +723,19 @@ function DashboardClient() {
               onDismiss={handleDismissRenewal}
               isRenewing={isRenewing}
               isDismissing={isDismissing}
+            />
+          )}
+          {isManualRenewalOpen && (
+            <ManualBudgetRenewalModal
+              isOpen={isManualRenewalOpen}
+              carryover={carryover}
+              currency={currency}
+              onClose={handleManualRenewalClose}
+              onRenew={async () => {
+                await handleRenewBudget();
+                setIsManualRenewalOpen(false);
+              }}
+              isRenewing={isRenewing}
             />
           )}
           {isModalOpen && (

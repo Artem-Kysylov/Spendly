@@ -479,7 +479,10 @@
       "renewNow": "はい、更新する",
       "notYet": "まだしない",
       "toastSuccess": "予算が更新されました！前月の繰越分が追加されました。",
-      "renewButtonLabel": "予算を更新"
+      "renewButtonLabel": "予算を更新",
+      "renewBadge": "更新",
+      "manualTitle": "メイン予算を更新",
+      "manualMessage": "新しいサイクルを開始し、前の期間からの繰越を追加します。"
     }
   },
   "budgets": {

@@ -479,7 +479,10 @@
       "renewNow": "Yes, renew now",
       "notYet": "Not yet",
       "toastSuccess": "Budget renewed! Rollover from last month added.",
-      "renewButtonLabel": "Renew budget"
+      "renewButtonLabel": "Renew budget",
+      "renewBadge": "Renew",
+      "manualTitle": "Renew main budget",
+      "manualMessage": "Start a fresh cycle and add any rollover from the previous one."
     }
   },
   "budgets": {
