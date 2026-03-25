@@ -1183,9 +1183,10 @@
     },
     "push_subscribed": "푸시 구독 완료",
     "push_failed": "푸시 구독 실패",
-    "permission_denied": "알림 권한 거부됨",
-    "budget_80": "예산의 80%에 도달했습니다",
+    "permission_denied": "알림 권한이 거부되었습니다",
+    "budget_80": "예산의 80%를 사용했습니다",
     "budget_100": "예산을 초과했습니다",
+    "budgetAlertTitle": "예산 알림",
     "frequency": {
       "title": "알림 빈도",
       "aria": "알림 빈도 선택",

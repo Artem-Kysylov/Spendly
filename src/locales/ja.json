@@ -1183,9 +1183,10 @@
     },
     "push_subscribed": "Push subscribed",
     "push_failed": "Push subscription failed",
-    "permission_denied": "Notification permission denied",
-    "budget_80": "Budget usage reached 80%",
-    "budget_100": "Budget exceeded",
+    "permission_denied": "通知の許可が拒否されました",
+    "budget_80": "予算の80%を使用しました",
+    "budget_100": "予算を超過しました",
+    "budgetAlertTitle": "予算アラート",
     "frequency": {
       "title": "通知頻度",
       "aria": "通知頻度",

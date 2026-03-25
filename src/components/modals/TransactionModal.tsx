@@ -64,7 +64,7 @@ function TransactionModal({
       >
         <SheetContent
           side="bottom"
-          className="transaction-modal fixed h-[95dvh] pb-[env(safe-area-inset-bottom)] overflow-y-auto z-[10000]"
+          className="transaction-modal fixed h-[95dvh] pb-[env(safe-area-inset-bottom)] overflow-hidden z-[10000]"
           overlayClassName="bg-foreground/45"
         >
           <div className="flex flex-col h-full">
@@ -78,7 +78,7 @@ function TransactionModal({
               <div className="w-10" />
             </SheetHeader>
 
-            <div className="mt-[10px] px-4 flex-1">
+            <div className="mt-[10px] px-4 flex-1 min-h-0 overflow-y-auto">
               <Button
                 type="button"
                 variant="outline"

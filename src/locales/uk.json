@@ -1183,9 +1183,10 @@
     },
     "push_subscribed": "Push subscribed",
     "push_failed": "Push subscription failed",
-    "permission_denied": "Notification permission denied",
-    "budget_80": "Budget usage reached 80%",
-    "budget_100": "Budget exceeded",
+    "permission_denied": "Доступ до сповіщень заборонено",
+    "budget_80": "Використано 80% бюджету",
+    "budget_100": "Бюджет перевищено",
+    "budgetAlertTitle": "Сповіщення про бюджет",
     "frequency": {
       "title": "Частота сповіщень",
       "aria": "Частота сповіщень",

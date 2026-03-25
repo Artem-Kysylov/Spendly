@@ -93,10 +93,12 @@ export function SheetContent({
   className,
   children,
   overlayClassName,
+  disableAutoFocus = false,
   ...rest
 }: SheetDivProps & {
   side?: "right" | "left" | "top" | "bottom";
   overlayClassName?: string;
+  disableAutoFocus?: boolean;
 }) {
   const { open, onOpenChange } = useSheet();
   const contentRef = React.useRef<HTMLDivElement>(null);
@@ -147,12 +149,16 @@ export function SheetContent({
         ),
       );
 
-    // Предпочитаем явный элемент с autofocus, если он есть
-    const autofocusEl = node.querySelector<HTMLElement>(
-      '[autofocus], [data-auto-focus="true"]',
-    );
-    const el = autofocusEl ?? focusables()[0] ?? node;
-    el.focus();
+    if (disableAutoFocus) {
+      node.focus();
+    } else {
+      // Предпочитаем явный элемент с autofocus, если он есть
+      const autofocusEl = node.querySelector<HTMLElement>(
+        '[autofocus], [data-auto-focus="true"]',
+      );
+      const el = autofocusEl ?? focusables()[0] ?? node;
+      el.focus();
+    }
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -176,7 +182,7 @@ export function SheetContent({
 
     node.addEventListener("keydown", onKeyDown);
     return () => node.removeEventListener("keydown", onKeyDown);
-  }, [isBrowser, open, onOpenChange]);
+  }, [isBrowser, open, onOpenChange, disableAutoFocus]);
 
   // Блокировка фонового скролла при открытой шторке
   React.useEffect(() => {

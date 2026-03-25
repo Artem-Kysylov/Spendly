@@ -1186,6 +1186,7 @@
     "permission_denied": "Notification permission denied",
     "budget_80": "Budget usage reached 80%",
     "budget_100": "Budget exceeded",
+    "budgetAlertTitle": "Budget Alert",
     "frequency": {
       "title": "Notification Frequency",
       "aria": "Notification frequency",
