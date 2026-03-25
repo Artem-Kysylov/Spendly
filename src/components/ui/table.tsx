@@ -23,7 +23,8 @@ const TableHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
 ));
-TableHeader.displayName = "TableHeader";
+// TableHeader should only have TableRow as direct children
+TableHeader.displayName = "TableHeader (children: TableRow only)";
 
 const TableBody = React.forwardRef<
   HTMLTableSectionElement,

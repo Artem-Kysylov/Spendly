@@ -28,7 +28,8 @@
   },
   "common": {
     "saving": "Збереження...",
-    "unexpectedError": "Сталася несподівана помилка",
+    "loading": "Завантаження...",
+    "unexpectedError": "Сталася неочікувана помилка",
     "errorLabel": "Помилка",
     "cancel": "Скасувати",
     "delete": "Видалити",
@@ -36,8 +37,8 @@
     "submit": "Надіслати",
     "close": "Закрити",
     "pagination": {
-      "previous": "Попередня",
-      "next": "Наступна"
+      "previous": "Назад",
+      "next": "Вперед"
     },
     "today": "Сьогодні",
     "yesterday": "Вчора"

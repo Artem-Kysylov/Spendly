@@ -53,6 +53,7 @@ export function SheetTrigger({ children }: { children: React.ReactElement }) {
     },
     "aria-haspopup": "dialog",
     "aria-expanded": false,
+    type: "button", // Ensure the cloned element has type="button" to prevent nested button issues
   });
 }
 

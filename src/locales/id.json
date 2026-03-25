@@ -22,25 +22,26 @@
     "evening": "Good evening"
   },
   "Settings": {
-    "language": "Language",
-    "selectLanguage": "Select language",
-    "saveLanguage": "Save language"
+    "language": "Bahasa",
+    "selectLanguage": "Pilih bahasa",
+    "saveLanguage": "Simpan bahasa"
   },
   "common": {
-    "saving": "Saving…",
-    "unexpectedError": "An unexpected error occurred",
-    "errorLabel": "Error",
-    "cancel": "Cancel",
-    "delete": "Delete",
-    "save": "Save",
-    "submit": "Submit",
-    "close": "Close",
+    "saving": "Menyimpan…",
+    "loading": "Memuat…",
+    "unexpectedError": "Terjadi kesalahan yang tidak terduga",
+    "errorLabel": "Kesalahan",
+    "cancel": "Batal",
+    "delete": "Hapus",
+    "save": "Simpan",
+    "submit": "Kirim",
+    "close": "Tutup",
     "pagination": {
-      "previous": "Previous",
-      "next": "Next"
+      "previous": "Sebelumnya",
+      "next": "Berikutnya"
     },
-    "today": "Today",
-    "yesterday": "Yesterday"
+    "today": "Hari ini",
+    "yesterday": "Kemarin"
   },
   "cta": {
     "upgradeToPro": "Tingkatkan ke Pro",

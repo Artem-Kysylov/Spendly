@@ -28,6 +28,7 @@
   },
   "common": {
     "saving": "Сохранение...",
+    "loading": "Загрузка...",
     "unexpectedError": "Произошла неожиданная ошибка",
     "errorLabel": "Ошибка",
     "cancel": "Отмена",

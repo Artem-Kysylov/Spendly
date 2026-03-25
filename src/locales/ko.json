@@ -27,11 +27,12 @@
     "saveLanguage": "Save language"
   },
   "common": {
-    "saving": "저장 중...",
-    "unexpectedError": "예기치 않은 오류가 발생했어요",
+    "saving": "저장 중…",
+    "loading": "로딩 중…",
+    "unexpectedError": "예기치 않은 오류가 발생했습니다",
     "errorLabel": "오류",
     "cancel": "취소",
-    "delete": "Delete",
+    "delete": "삭제",
     "save": "저장",
     "submit": "제출",
     "close": "닫기",
@@ -39,8 +40,8 @@
       "previous": "이전",
       "next": "다음"
     },
-    "today": "Today",
-    "yesterday": "Yesterday"
+    "today": "오늘",
+    "yesterday": "어제"
   },
   "cta": {
     "upgradeToPro": "Pro로 업그레이드",

@@ -27,20 +27,21 @@
     "saveLanguage": "Save language"
   },
   "common": {
-    "saving": "Saving…",
-    "unexpectedError": "An unexpected error occurred",
-    "errorLabel": "Error",
+    "saving": "सहेजा जा रहा है…",
+    "loading": "लोड हो रहा है…",
+    "unexpectedError": "एक अप्रत्याशित त्रुटि हुई",
+    "errorLabel": "त्रुटि",
     "cancel": "रद्द करें",
     "delete": "हटाएं",
     "save": "सहेजें",
-    "submit": "Submit",
+    "submit": "जमा करें",
     "close": "बंद करें",
     "pagination": {
-      "previous": "Previous",
-      "next": "Next"
+      "previous": "पिछला",
+      "next": "अगला"
     },
-    "today": "Today",
-    "yesterday": "Yesterday"
+    "today": "आज",
+    "yesterday": "कल"
   },
   "cta": {
     "upgradeToPro": "Pro में अपग्रेड करें 🚀",
