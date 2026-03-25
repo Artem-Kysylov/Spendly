@@ -14,6 +14,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { UserAuth } from "../../context/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
@@ -238,25 +239,27 @@ function TransactionsTable({
       >
         <Table className="w-full">
           <TableHeader className="border-b border-border">
-            <TableHead className="!text-[16px] font-semibold text-foreground">
-              {tTransactions("table.headers.title")}
-            </TableHead>
-            <TableHead className="!text-[16px] font-semibold text-foreground">
-              {tTransactions("table.headers.budget")}
-            </TableHead>
-            <TableHead className="!text-[16px] font-semibold text-foreground">
-              {tTransactions("table.headers.amount")}
-            </TableHead>
-            <TableHead className="!text-[16px] font-semibold text-foreground">
-              {tTransactions("table.headers.type")}
-            </TableHead>
-            <TableHead className="!text-[16px] font-semibold text-foreground">
-              {tTransactions("table.headers.date")}
-            </TableHead>
-            <TableHead className="!text-[16px] font-semibold text-foreground">
-              {tTransactions("table.headers.actions")}
-            </TableHead>
-          </TableHeader>
+  <TableRow>
+    <TableHead className="!text-[16px] font-semibold text-foreground">
+      {tTransactions("table.headers.title")}
+    </TableHead>
+    <TableHead className="!text-[16px] font-semibold text-foreground">
+      {tTransactions("table.headers.budget")}
+    </TableHead>
+    <TableHead className="!text-[16px] font-semibold text-foreground">
+      {tTransactions("table.headers.amount")}
+    </TableHead>
+    <TableHead className="!text-[16px] font-semibold text-foreground">
+      {tTransactions("table.headers.type")}
+    </TableHead>
+    <TableHead className="!text-[16px] font-semibold text-foreground">
+      {tTransactions("table.headers.date")}
+    </TableHead>
+    <TableHead className="!text-[16px] font-semibold text-foreground">
+      {tTransactions("table.headers.actions")}
+    </TableHead>
+  </TableRow>
+</TableHeader>
           <TableBody>
             {sortedTransactions.map((transaction, index) => (
               <motion.tr

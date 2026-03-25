@@ -28,6 +28,7 @@
   },
   "common": {
     "saving": "Saving…",
+    "loading": "Loading…",
     "unexpectedError": "An unexpected error occurred",
     "errorLabel": "Error",
     "cancel": "Cancel",

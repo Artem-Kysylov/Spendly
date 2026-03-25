@@ -27,20 +27,21 @@
     "saveLanguage": "Save language"
   },
   "common": {
-    "saving": "Saving…",
-    "unexpectedError": "An unexpected error occurred",
-    "errorLabel": "Error",
+    "saving": "保存中…",
+    "loading": "読み込み中…",
+    "unexpectedError": "予期せぬエラーが発生しました",
+    "errorLabel": "エラー",
     "cancel": "キャンセル",
     "delete": "削除",
     "save": "保存",
-    "submit": "Submit",
-    "close": "Close",
+    "submit": "送信",
+    "close": "閉じる",
     "pagination": {
-      "previous": "Previous",
-      "next": "Next"
+      "previous": "前へ",
+      "next": "次へ"
     },
-    "today": "Today",
-    "yesterday": "Yesterday"
+    "today": "今日",
+    "yesterday": "昨日"
   },
   "cta": {
     "upgradeToPro": "Pro にアップグレード",

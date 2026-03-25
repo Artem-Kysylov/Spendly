@@ -46,6 +46,12 @@ export const formatCurrency = (
   
   const locale = localeMap[userCurrency] || 'en-US';
 
+  // Use a fixed format for server-side rendering to avoid hydration mismatch
+  if (typeof window === 'undefined') {
+    // Server-side: use a simple format without locale-specific symbols
+    return `${userCurrency === 'USD' ? '$' : userCurrency === 'EUR' ? '€' : userCurrency === 'GBP' ? '£' : userCurrency === 'UAH' ? '₴' : userCurrency === 'RUB' ? '₽' : userCurrency === 'JPY' ? '¥' : userCurrency === 'KRW' ? '₩' : userCurrency === 'INR' ? '₹' : userCurrency === 'IDR' ? 'Rp' : userCurrency}${amount.toFixed(2)}`;
+  }
+
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: userCurrency,
