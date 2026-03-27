@@ -309,13 +309,13 @@ export const TransactionChatMessages = ({
                 
                 // Extract transactions from either result or args
                 let proposalData = null;
-                if (result && result.transactions) {
-                  proposalData = result.transactions;
-                } else if (args && args.transactions) {
-                  proposalData = args.transactions;
-                } else if (args && !args.transactions && args.title) {
+                if (result && typeof result === 'object' && 'transactions' in result && Array.isArray((result as any).transactions)) {
+                  proposalData = (result as any).transactions;
+                } else if (args && typeof args === 'object' && 'transactions' in args && Array.isArray((args as any).transactions)) {
+                  proposalData = (args as any).transactions;
+                } else if (args && typeof args === 'object' && !('transactions' in args) && 'title' in args) {
                   // Single transaction case
-                  proposalData = [args];
+                  proposalData = [args as ProposedTransaction];
                 }
 
                 if (!proposalData || !Array.isArray(proposalData)) return null;
