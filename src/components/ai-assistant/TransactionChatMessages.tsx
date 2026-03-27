@@ -307,18 +307,29 @@ export const TransactionChatMessages = ({
               if (toolInvocation.toolName === 'propose_transaction') {
                 const { result, args } = toolInvocation;
                 
-                // Extract transactions from either result or args
-                let proposalData = null;
-                if (result && typeof result === 'object' && 'transactions' in result && Array.isArray((result as any).transactions)) {
-                  proposalData = (result as any).transactions;
-                } else if (args && typeof args === 'object' && 'transactions' in args && Array.isArray((args as any).transactions)) {
-                  proposalData = (args as any).transactions;
-                } else if (args && typeof args === 'object' && !('transactions' in args) && 'title' in args) {
-                  // Single transaction case
-                  proposalData = [args as ProposedTransaction];
+                // Extract transactions data with proper type handling
+                let proposalData: ProposedTransaction[] | null = null;
+                
+                // Try result first (from local parse)
+                if (result && typeof result === 'object' && 'transactions' in result) {
+                  const resultData = result as { success?: boolean; transactions?: ProposedTransaction[] };
+                  if (Array.isArray(resultData.transactions)) {
+                    proposalData = resultData.transactions;
+                  }
+                }
+                
+                // Try args (from streaming AI)
+                if (!proposalData && args && typeof args === 'object') {
+                  const argsData = args as { transactions?: ProposedTransaction[] } | ProposedTransaction;
+                  if ('transactions' in argsData && Array.isArray(argsData.transactions)) {
+                    proposalData = argsData.transactions;
+                  } else if ('title' in argsData && 'amount' in argsData) {
+                    // Single transaction case
+                    proposalData = [argsData as ProposedTransaction];
+                  }
                 }
 
-                if (!proposalData || !Array.isArray(proposalData)) return null;
+                if (!proposalData || !Array.isArray(proposalData) || proposalData.length === 0) return null;
 
                 return (
                   <div key={toolInvocation.toolCallId} className="w-full mt-2">
