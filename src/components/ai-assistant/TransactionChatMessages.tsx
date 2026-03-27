@@ -305,33 +305,46 @@ export const TransactionChatMessages = ({
             {/* Render Tool Invocations (Transaction Cards) */}
             {message.toolInvocations?.map((toolInvocation) => {
               if (toolInvocation.toolName === 'propose_transaction') {
-                const { result } = toolInvocation;
-                // Since 'args' is the proposal, we can use it directly even if result is pending
-                // But usually we wait for result or use optimistic args. 
-                // The proposal card expects a specific shape.
-                // Assuming toolInvocation.args matches ProposedTransaction shape partially or fully.
+                const { result, args } = toolInvocation;
+                
+                // Extract transactions data with proper type handling
+                let proposalData: ProposedTransaction[] | null = null;
+                
+                // Try result first (from local parse)
+                if (result && typeof result === 'object' && 'transactions' in result) {
+                  const resultData = result as { success?: boolean; transactions?: ProposedTransaction[] };
+                  if (Array.isArray(resultData.transactions)) {
+                    proposalData = resultData.transactions;
+                  }
+                }
+                
+                // Try args (from streaming AI)
+                if (!proposalData && args && typeof args === 'object') {
+                  const argsData = args as { transactions?: ProposedTransaction[] } | ProposedTransaction;
+                  if ('transactions' in argsData && Array.isArray(argsData.transactions)) {
+                    proposalData = argsData.transactions;
+                  } else if ('title' in argsData && 'amount' in argsData) {
+                    // Single transaction case
+                    proposalData = [argsData as ProposedTransaction];
+                  }
+                }
 
-                // If the tool has a result, it means it was executed? 
-                // Actually propose_transaction usually returns the proposed transaction data confirming it was "proposed".
-                // Or maybe the AI calls it to ASK user to confirm.
-
-                // Let's assume toolInvocation.args contains the proposal details
-                // formatted as: { title, amount, type, category_name, date }
-
-                const proposal = toolInvocation.args as ProposedTransaction;
-                if (!proposal || !proposal.title) return null;
+                if (!proposalData || !Array.isArray(proposalData) || proposalData.length === 0) return null;
 
                 return (
                   <div key={toolInvocation.toolCallId} className="w-full mt-2">
-                    <TransactionProposalCard
-                      proposal={proposal}
-                      budgets={budgets || []}
-                      autoDismissSuccess={false}
-                      currency={currency}
-                      onSuccess={() => {
-                        // Optional: Handle success
-                      }}
-                    />
+                    {proposalData.map((proposal: ProposedTransaction, idx: number) => (
+                      <TransactionProposalCard
+                        key={`${toolInvocation.toolCallId}-${idx}`}
+                        proposal={proposal}
+                        budgets={budgets || []}
+                        autoDismissSuccess={false}
+                        currency={currency}
+                        onSuccess={() => {
+                          // Optional: Handle success
+                        }}
+                      />
+                    ))}
                   </div>
                 );
               }
