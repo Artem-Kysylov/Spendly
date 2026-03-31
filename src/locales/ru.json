@@ -333,6 +333,11 @@
   "transactions": {
     "title": "Транзакции",
     "addTransaction": "Добавить транзакцию",
+    "confirm": "Подтвердить",
+    "cancel": "Отменить",
+    "confirming": "Подтверждение...",
+    "confirmAll": "Подтвердить всё",
+    "confirmingAll": "Подтверждаем всё...",
     "templates": {
       "title": "Шаблоны",
       "empty": "Шаблонов пока нет"
@@ -782,6 +787,11 @@
         "expense": "Расход",
         "income": "Доход"
       },
+      "confirm": "Подтвердить",
+      "cancel": "Отменить",
+      "confirming": "Подтверждение...",
+      "confirmAll": "Подтвердить всё",
+      "confirmingAll": "Подтверждаем всё...",
       "saveAsTemplate": "Сохранить как шаблон",
       "templateLimitReached": "Обновитесь до Pro для более 3 шаблонов",
       "templates": {
@@ -1296,6 +1306,7 @@
       "quick_add_pattern": "Такси 200",
       "pattern_example": "Обед 150 вчера",
       "quick_add_footer": "Остальное я сделаю сам."
-    }
+    },
+    "goToMainChat": "Перейти в главный чат"
   }
 }

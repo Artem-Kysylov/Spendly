@@ -82,7 +82,7 @@ function TransactionModal({
               <Button
                 type="button"
                 variant="outline"
-                className="w-full h-[50px] py-0 justify-center border-primary md:hover:bg-primary/5 mb-4"
+                className="mb-4 h-[60px] w-full justify-center border-primary py-0 md:h-10 md:hover:bg-primary/5"
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent("transactions:chat"));
                 }}
@@ -152,7 +152,7 @@ function TransactionModal({
           <Button
             type="button"
             variant="outline"
-            className="w-full h-auto py-3 justify-center border-primary md:hover:bg-primary/5 mb-4"
+            className="mb-4 h-[60px] w-full justify-center border-primary py-0 md:h-10 md:hover:bg-primary/5"
             onClick={() => {
               window.dispatchEvent(new CustomEvent("transactions:chat"));
             }}

@@ -36,7 +36,6 @@ export default function BudgetsClient() {
   );
   const { isModalOpen, openModal, closeModal } = useModal();
   const tBudgets = useTranslations("budgets");
-  const tTransactions = useTranslations("transactions");
   const tModals = useTranslations("modals");
   const tCommon = useTranslations("common");
   const { subscriptionPlan, isLoading: isSubscriptionLoading } =
@@ -413,130 +412,94 @@ export default function BudgetsClient() {
   }, [budgetFolders, rolloverPreviewById]);
 
   return (
-    <div className="mt-[30px] px-4 md:px-5 pb-0 md:pb-20">
-      {toastMessage && (
-        <ToastMessage text={toastMessage.text} type={toastMessage.type} />
-      )}
-      {showUpgrade && <UpgradeCornerPanel />}
+    <div className="pb-0 md:pb-20">
+      <div className="flex items-center justify-between px-4 pt-6 pb-4 md:px-6">
+        <h1 className="text-2xl font-bold text-foreground md:text-3xl">
+          {tBudgets("meta.title")}
+        </h1>
+      </div>
 
-      {/* Spendly Pal Insight Cards */}
-      {insights.length > 0 && (
-        <div className="mb-6 space-y-4">
-          {insights.map((insight) => (
-            <SpendlyPalInsightCard
-              key={insight.id}
-              insight={insight}
-              currency={currency}
-              onDismiss={handleDismissInsight}
-            />
-          ))}
-        </div>
-      )}
+      <div className="px-4 md:px-6">
+        {toastMessage && (
+          <ToastMessage text={toastMessage.text} type={toastMessage.type} />
+        )}
+        {showUpgrade && <UpgradeCornerPanel />}
 
-      {/* Аналитика: мобильная — скрываема; десктоп — всегда видна */}
-      <motion.div
-        style={{ willChange: "opacity" }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.28 }}
-        className="mb-6"
-      >
-        {isDesktop ? (
-          <BudgetComparisonChart
-            data={chartData}
-            isLoading={isTransactionsLoading}
-            currency={currency}
-            onBarHover={(idx) => setHoveredIndex(idx)}
-            onBarLeave={() => setHoveredIndex(null)}
-          />
-        ) : (
-          <div className="space-y-3">
-            <button
-              type="button"
-              className="h-[60px] w-full px-4 rounded-lg bg-card border border-border transition-colors flex items-center justify-between"
-              onClick={() => setIsAnalyticsOpen((v) => !v)}
-            >
-              <span className="text-sm font-medium flex items-center gap-2 text-foreground">
-                <BarChart3 className="w-4 h-4 text-foreground" aria-hidden />
-                {isAnalyticsOpen ? "Hide Analytics" : "Show Analytics"}
-              </span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                className={`h-5 w-5 text-muted-foreground transition-transform ${isAnalyticsOpen ? "rotate-180" : "rotate-0"}`}
-              >
-                <title>
-                  {isAnalyticsOpen ? "Hide Analytics" : "Show Analytics"}
-                </title>
-                <path d="M12 15.5a1 1 0 0 1-.71-.29l-5.5-5.5a1 1 0 1 1 1.42-1.42L12 12.38l4.79-4.79a1 1 0 0 1 1.42 1.42l-5.5 5.5a1 1 0 0 1-.71.29z" />
-              </svg>
-            </button>
-            {isAnalyticsOpen && (
-              <BudgetComparisonChart
-                data={chartData}
-                isLoading={isTransactionsLoading}
+        {/* Spendly Pal Insight Cards */}
+        {insights.length > 0 && (
+          <div className="mb-6 space-y-4">
+            {insights.map((insight) => (
+              <SpendlyPalInsightCard
+                key={insight.id}
+                insight={insight}
                 currency={currency}
-                onBarHover={(idx) => isDesktop && setHoveredIndex(idx)}
-                onBarLeave={() => setHoveredIndex(null)}
-                className="w-full"
+                onDismiss={handleDismissInsight}
               />
-            )}
+            ))}
           </div>
         )}
-      </motion.div>
 
-      {/* Кнопка создания бюджета — на мобиле остаётся отдельным полноширинным блоком */}
-      {!isDesktop && (
+        {/* Аналитика: мобильная — скрываема; десктоп — всегда видна */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          style={{ willChange: "opacity, transform" }}
-          className="w-full mb-5"
+          style={{ willChange: "opacity" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.28 }}
+          className="mb-6"
         >
-          <NewBudget
-            onClick={() => {
-              if (
-                subscriptionPlan !== "pro" &&
-                isSubscriptionLoading &&
-                budgetFolders.length >= 3
-              ) {
-                return;
-              }
-              if (isLimitReached) {
-                handleToastMessage(
-                  tBudgets("list.toast.limitReached"),
-                  "error",
-                );
-                if (canShowUpgradePopup()) {
-                  setShowUpgrade(true);
-                  markUpgradePopupShown();
-                }
-                return;
-              }
-              openModal();
-            }}
-            disabled={isLimitReached}
-          />
+          {isDesktop ? (
+            <BudgetComparisonChart
+              data={chartData}
+              isLoading={isTransactionsLoading}
+              currency={currency}
+              onBarHover={(idx) => setHoveredIndex(idx)}
+              onBarLeave={() => setHoveredIndex(null)}
+            />
+          ) : (
+            <div className="space-y-3">
+              <button
+                type="button"
+                className="h-[60px] w-full px-4 rounded-lg bg-card border border-border transition-colors flex items-center justify-between"
+                onClick={() => setIsAnalyticsOpen((v) => !v)}
+              >
+                <span className="text-sm font-medium flex items-center gap-2 text-foreground">
+                  <BarChart3 className="w-4 h-4 text-foreground" aria-hidden />
+                  {isAnalyticsOpen ? "Hide Analytics" : "Show Analytics"}
+                </span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className={`h-5 w-5 text-muted-foreground transition-transform ${isAnalyticsOpen ? "rotate-180" : "rotate-0"}`}
+                >
+                  <title>
+                    {isAnalyticsOpen ? "Hide Analytics" : "Show Analytics"}
+                  </title>
+                  <path d="M12 15.5a1 1 0 0 1-.71-.29l-5.5-5.5a1 1 0 1 1 1.42-1.42L12 12.38l4.79-4.79a1 1 0 0 1 1.42 1.42l-5.5 5.5a1 1 0 0 1-.71.29z" />
+                </svg>
+              </button>
+              {isAnalyticsOpen && (
+                <BudgetComparisonChart
+                  data={chartData}
+                  isLoading={isTransactionsLoading}
+                  currency={currency}
+                  onBarHover={(idx) => isDesktop && setHoveredIndex(idx)}
+                  onBarLeave={() => setHoveredIndex(null)}
+                  className="w-full"
+                />
+              )}
+            </div>
+          )}
         </motion.div>
-      )}
 
-      {/* Карточки бюджетов: на десктопе 4 в ряд, первой идёт кнопка создания */}
-      <motion.div
-        style={{ willChange: "opacity" }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.28 }}
-        className="grid grid-cols-2 md:grid-cols-4 gap-5 md:gap-6"
-      >
-        {isDesktop && (
+        {/* Кнопка создания бюджета — на мобиле остаётся отдельным полноширинным блоком */}
+        {!isDesktop && (
           <motion.div
-            style={{ willChange: "opacity, transform" }}
-            className="w-full cursor-pointer"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            style={{ willChange: "opacity, transform" }}
+            className="mb-5 w-full"
           >
             <NewBudget
               onClick={() => {
@@ -565,42 +528,85 @@ export default function BudgetsClient() {
           </motion.div>
         )}
 
-        {budgetFolders.map((folder, index) => (
-          <motion.div
-            key={folder.id}
-            style={{ willChange: "opacity, transform" }}
-            className={`w-full cursor-pointer ${hoveredIndex === index ? "ring-2 ring-primary/80 bg-primary/5 scale-[1.01] transition" : ""}`}
-          >
-            {/* типизированный маршрут для next-intl */}
-            <Link
-              href={{ pathname: "/budgets/[id]", params: { id: folder.id } }}
+        {/* Карточки бюджетов: на десктопе 4 в ряд, первой идёт кнопка создания */}
+        <motion.div
+          style={{ willChange: "opacity" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.28 }}
+          className="grid grid-cols-2 gap-5 md:grid-cols-4 md:gap-6"
+        >
+          {isDesktop && (
+            <motion.div
+              style={{ willChange: "opacity, transform" }}
+              className="w-full cursor-pointer"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
             >
-              <BudgetFolderItem
-                id={folder.id}
-                emoji={folder.emoji}
-                name={folder.name}
-                amount={folder.amount}
-                type={folder.type}
-                color_code={folder.color_code}
-                currency={currency}
-                rolloverPreviewCarry={rolloverPreviewById[folder.id]}
-                rollover_carry={folder.rollover_carry}
-                is_cyclic={folder.is_cyclic}
+              <NewBudget
+                onClick={() => {
+                  if (
+                    subscriptionPlan !== "pro" &&
+                    isSubscriptionLoading &&
+                    budgetFolders.length >= 3
+                  ) {
+                    return;
+                  }
+                  if (isLimitReached) {
+                    handleToastMessage(
+                      tBudgets("list.toast.limitReached"),
+                      "error",
+                    );
+                    if (canShowUpgradePopup()) {
+                      setShowUpgrade(true);
+                      markUpgradePopupShown();
+                    }
+                    return;
+                  }
+                  openModal();
+                }}
+                disabled={isLimitReached}
               />
-            </Link>
-          </motion.div>
-        ))}
-      </motion.div>
+            </motion.div>
+          )}
 
-      {/* Модалка создания */}
-      {isModalOpen && (
-        <NewBudgetModal
-          title={tBudgets("list.modal.createTitle")}
-          onClose={closeModal}
-          onSubmit={handleBudgetSubmit}
-          handleToastMessage={handleToastMessage}
-        />
-      )}
+          {budgetFolders.map((folder, index) => (
+            <motion.div
+              key={folder.id}
+              style={{ willChange: "opacity, transform" }}
+              className={`w-full cursor-pointer ${hoveredIndex === index ? "ring-2 ring-primary/80 bg-primary/5 scale-[1.01] transition" : ""}`}
+            >
+              {/* типизированный маршрут для next-intl */}
+              <Link
+                href={{ pathname: "/budgets/[id]", params: { id: folder.id } }}
+              >
+                <BudgetFolderItem
+                  id={folder.id}
+                  emoji={folder.emoji}
+                  name={folder.name}
+                  amount={folder.amount}
+                  type={folder.type}
+                  color_code={folder.color_code}
+                  currency={currency}
+                  rolloverPreviewCarry={rolloverPreviewById[folder.id]}
+                  rollover_carry={folder.rollover_carry}
+                  is_cyclic={folder.is_cyclic}
+                />
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {isModalOpen && (
+          <NewBudgetModal
+            onClose={closeModal}
+            onSubmit={handleBudgetSubmit}
+            title={tBudgets("list.modal.createTitle")}
+          />
+        )}
+      </div>
+
     </div>
   );
 }

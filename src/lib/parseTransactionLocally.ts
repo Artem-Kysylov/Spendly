@@ -38,6 +38,10 @@ const LOCALE_SPLITTER_WORDS: Record<string, string[]> = {
   ko: ["그리고"],
 };
 
+const ALL_SPLITTER_WORDS = Array.from(
+  new Set(Object.values(LOCALE_SPLITTER_WORDS).flat()),
+).sort((a, b) => b.length - a.length);
+
 const CURRENCY_SYMBOLS_REGEX = /[$€£¥₴₽]/g;
 
 // Recurring/subscription keywords (multilingual)
@@ -199,7 +203,8 @@ function extractGlobalSingleWordDate(input: string): { text: string; date?: stri
 }
 
 function replaceLocaleSplittersWithComma(input: string, locale: string): string {
-  const words = LOCALE_SPLITTER_WORDS[locale] || LOCALE_SPLITTER_WORDS.en;
+  const localeWords = LOCALE_SPLITTER_WORDS[locale] || [];
+  const words = Array.from(new Set([...ALL_SPLITTER_WORDS, ...localeWords]));
   let out = input;
   for (const w of words) {
     const escaped = w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

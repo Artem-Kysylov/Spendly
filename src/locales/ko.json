@@ -331,8 +331,13 @@
     "cancel": "Not now"
   },
   "transactions": {
-    "title": "거래 내역 🧾",
+    "title": "거래 내역",
     "addTransaction": "거래 추가",
+    "confirm": "확인",
+    "cancel": "취소",
+    "confirming": "확인 중...",
+    "confirmAll": "모두 확인",
+    "confirmingAll": "모두 확인 중...",
     "templates": {
       "title": "템플릿",
       "empty": "아직 템플릿이 없습니다"
@@ -782,6 +787,11 @@
         "expense": "지출",
         "income": "수입"
       },
+      "confirm": "확인",
+      "cancel": "취소",
+      "confirming": "확인 중...",
+      "confirmAll": "모두 확인",
+      "confirmingAll": "모두 확인 중...",
       "saveAsTemplate": "템플릿으로 저장",
       "templateLimitReached": "3개 이상의 템플릿을 사용하려면 Pro로 업그레이드하세요",
       "templates": {
@@ -1296,6 +1306,7 @@
       "quick_add_pattern": "택시 200",
       "pattern_example": "점심 150 어제",
       "quick_add_footer": "나머지는 제가 할게요."
-    }
+    },
+    "goToMainChat": "메인 채팅으로 이동"
   }
 }

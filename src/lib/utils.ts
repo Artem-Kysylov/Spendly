@@ -93,3 +93,63 @@ export function normalizeBudgetName(name: string): string {
     .replace(/\s+/g, " ") // Collapse spaces
     .trim();
 }
+
+const GENERIC_BUDGET_ALIASES: Record<string, string[]> = {
+  food: ["food", "groceries", "grocery", "restaurant", "restaurants", "cafe", "cafes", "coffee", "pizza", "еда", "продукты", "продукти", "кафе", "рестораны", "ресторан", "їжа", "харчі"],
+  transport: ["transport", "taxi", "uber", "bolt", "metro", "bus", "fuel", "gas", "транспорт", "такси", "таксі", "метро", "автобус", "бензин", "паливо"],
+  shopping: ["shopping", "shop", "store", "clothes", "shoes", "покупки", "магазин", "одежда", "одяг", "взуття", "шопинг", "шопінг"],
+  entertainment: ["entertainment", "movie", "cinema", "concert", "theater", "театр", "кино", "кіно", "концерт", "игры", "ігри"],
+  unbudgeted: ["unbudgeted", "other", "misc", "прочее", "інше"],
+};
+
+function getBudgetMatchTerms(input: string): string[] {
+  const normalized = normalizeBudgetName(input);
+  if (!normalized) return [];
+
+  const aliases = GENERIC_BUDGET_ALIASES[normalized] || [];
+  return Array.from(new Set([normalized, ...aliases.map(normalizeBudgetName)])).filter(Boolean);
+}
+
+export function findMatchingBudget<T extends { name: string; type?: string }>(
+  budgets: T[],
+  categoryOrBudgetName: string,
+): T | undefined {
+  const normalizedTarget = normalizeBudgetName(categoryOrBudgetName);
+  const matchTerms = getBudgetMatchTerms(categoryOrBudgetName);
+  const expenseBudgets = budgets.filter((budget) => budget.type !== "income");
+
+  let bestMatch: T | undefined;
+  let bestScore = -1;
+
+  for (const budget of expenseBudgets) {
+    const normalizedBudget = normalizeBudgetName(budget.name);
+    if (!normalizedBudget) continue;
+
+    let score = 0;
+
+    if (normalizedTarget && normalizedBudget === normalizedTarget) {
+      score = 100;
+    } else if (
+      normalizedTarget &&
+      (normalizedBudget.includes(normalizedTarget) || normalizedTarget.includes(normalizedBudget))
+    ) {
+      score = 80;
+    } else {
+      for (const term of matchTerms) {
+        if (!term) continue;
+        if (normalizedBudget === term) {
+          score = Math.max(score, 70);
+        } else if (normalizedBudget.includes(term) || term.includes(normalizedBudget)) {
+          score = Math.max(score, 60);
+        }
+      }
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestMatch = budget;
+    }
+  }
+
+  return bestScore > 0 ? bestMatch : undefined;
+}

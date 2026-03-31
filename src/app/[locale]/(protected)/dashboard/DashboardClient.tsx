@@ -194,6 +194,12 @@ function DashboardClient() {
     else setGreetingKey("evening");
   }, [session?.user?.id]);
 
+  const displayName =
+    session?.user?.user_metadata?.full_name ||
+    session?.user?.user_metadata?.name ||
+    prettifyName(session?.user?.email?.split("@")[0] || "") ||
+    "User";
+
   const handleToastMessage = (
     text: string,
     type: ToastMessageProps["type"],
@@ -570,22 +576,21 @@ function DashboardClient() {
             <ToastMessage text={toastMessage.text} type={toastMessage.type} />
           )}
           <motion.div
-            className="w-full max-w-[500px] md:max-w-none mx-auto flex flex-col items-center gap-5 text-center mt-[30px] px-4 sm:px-4 md:px-5 md:flex-row md:justify-between md:text-left"
+            className="mx-auto flex w-full max-w-[500px] flex-col items-center px-4 pt-6 pb-4 text-center md:max-w-none md:px-6 md:items-start md:text-left"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
           >
             <motion.h1
-              className="text-[26px] sm:text-[32px] md:text-[35px] font-semibold text-secondary-black"
+              className="flex max-w-full min-w-0 items-center justify-center gap-2 text-2xl font-bold text-foreground md:justify-start md:text-3xl"
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
             >
-              {tGreeting(greetingKey)},{" "}
-              {session?.user?.user_metadata?.full_name ||
-                session?.user?.user_metadata?.name ||
-                prettifyName(session?.user?.email?.split("@")[0] || "") ||
-                "User"} 👋
+              <span className="min-w-0 truncate">{tGreeting(greetingKey)}, {displayName}</span>
+              <span className="shrink-0" aria-hidden>
+                👋
+              </span>
             </motion.h1>
           </motion.div>
 

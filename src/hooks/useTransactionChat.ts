@@ -50,6 +50,67 @@ export function useTransactionChat(): UseTransactionChatReturn {
   const [rateLimitedUntil, setRateLimitedUntil] = useState<number | null>(null);
   const [isLimitModalOpen, setIsLimitModalOpen] = useState(false);
   const [limitModalMessage, setLimitModalMessage] = useState<string | null>(null);
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+
+  // Helper to save message to database
+  const saveMessageToDB = useCallback(
+    async (sessionId: string, role: "user" | "assistant", content: string) => {
+      if (!userId) return;
+      
+      try {
+        await supabase.from("ai_chat_messages").insert({
+          session_id: sessionId,
+          role,
+          content,
+        });
+      } catch (err) {
+        console.warn("Failed to save message to DB:", err);
+      }
+    },
+    [userId]
+  );
+
+  // Get or create session for shortcut chat
+  const getOrCreateSession = useCallback(async () => {
+    if (!userId) return null;
+
+    // Check if we already have a session
+    if (currentSessionId) return currentSessionId;
+
+    // Try to get existing shortcut session
+    const { data: existingSessions } = await supabase
+      .from("ai_chat_sessions")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("source", "shortcut")
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    if (existingSessions && existingSessions.length > 0) {
+      const sessionId = existingSessions[0].id;
+      setCurrentSessionId(sessionId);
+      return sessionId;
+    }
+
+    // Create new session
+    const { data: newSession, error } = await supabase
+      .from("ai_chat_sessions")
+      .insert({
+        user_id: userId,
+        title: "Quick Add",
+        source: "shortcut",
+      })
+      .select("id")
+      .single();
+
+    if (error || !newSession) {
+      console.warn("Failed to create session:", error);
+      return null;
+    }
+
+    setCurrentSessionId(newSession.id);
+    return newSession.id;
+  }, [userId, currentSessionId]);
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent<HTMLFormElement>) => {
@@ -78,6 +139,12 @@ export function useTransactionChat(): UseTransactionChatReturn {
       setMessages((prev) => [...prev, userMessage]);
       setInput("");
       setError(undefined);
+
+      // Save user message to database
+      const sessionId = await getOrCreateSession();
+      if (sessionId) {
+        await saveMessageToDB(sessionId, "user", rawInput);
+      }
 
       const locale =
         typeof document !== "undefined" && document.documentElement.lang
@@ -215,6 +282,8 @@ export function useTransactionChat(): UseTransactionChatReturn {
       // Do this BEFORE enabling loading state to avoid any chance of being stuck.
       const localParse = parseTransactionLocally(rawInput, locale);
       console.log("Local Parse Result:", localParse);
+      console.log("Input text:", rawInput);
+      console.log("Detected pattern:", localParse.success ? "SUCCESS" : "FAILED", localParse.reason);
       
       if (localParse.success && (localParse.transactions?.length || localParse.transaction)) {
         console.log("Local parse SUCCESS - skipping LLM");
@@ -344,13 +413,25 @@ export function useTransactionChat(): UseTransactionChatReturn {
                 state: "result",
                 result: {
                   success: true,
-                  transactions: finalTransactions,
+                  transactions: finalTransactions.map(tx => ({
+                    title: tx.title,
+                    amount: tx.amount,
+                    type: tx.type || 'expense',
+                    category_name: tx.category_name,
+                    date: tx.date
+                  })),
                 },
               },
             ],
           };
 
           setMessages((prev) => [...prev, assistantMessage]);
+          
+          // Save assistant message to database
+          if (sessionId) {
+            await saveMessageToDB(sessionId, "assistant", `Proposed ${finalTransactions.length} transaction(s)`);
+          }
+          
           console.log("Force Reset Loading State (local parse)");
           setIsLoading(false);
           setAbortController(null);
