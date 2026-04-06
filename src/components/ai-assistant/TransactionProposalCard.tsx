@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { UserAuth } from "@/context/AuthContext";
-import { toOffsetISOString } from "@/lib/dateUtils";
+import { toOffsetISOString, mergeDateWithCurrentTime } from "@/lib/dateUtils";
 import { formatCurrency } from "@/lib/chartUtils";
 import { findMatchingBudget, parseAmountInput } from "@/lib/utils";
 
@@ -65,30 +65,9 @@ export function TransactionProposalCard({
   const [title, setTitle] = useState(proposal.title);
   const [amount, setAmount] = useState(String(proposal.amount ?? ""));
 
-  // Parse date from proposal
-  const parseInitialDate = (s: string): Date => {
-    const d1 = new Date(s);
-    if (!Number.isNaN(d1.getTime())) return d1;
-    const m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-    if (m) {
-      const dd = Number(m[1]),
-        mm = Number(m[2]) - 1,
-        yyyy = Number(m[3]);
-      const d = new Date(yyyy, mm, dd);
-      if (!Number.isNaN(d.getTime())) return d;
-    }
-    const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (m2) {
-      const yyyy = Number(m2[1]),
-        mm = Number(m2[2]) - 1,
-        dd = Number(m2[3]);
-      const d = new Date(yyyy, mm, dd);
-      if (!Number.isNaN(d.getTime())) return d;
-    }
-    return new Date();
-  };
-
-  const selectedDate = parseInitialDate(proposal.date);
+  // Parse date from proposal and merge with current time
+  // This ensures transactions have proper timestamps for chronological sorting
+  const selectedDate = mergeDateWithCurrentTime(proposal.date);
 
   // Smart mapping: Find budget by category_name (case-insensitive)
   const mappedBudget = useMemo(() => {

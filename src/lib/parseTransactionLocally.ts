@@ -16,6 +16,14 @@ const DATE_KEYWORDS = [
   // Ukrainian  
   'вчора', 'сьогодні', 'завтра', 'минулий', 'цей', 'понеділок', 'вівторок',
   'середа', 'четвер', "п'ятниця", 'субота', 'неділя', 'тиждень', 'місяць',
+  // Japanese
+  '昨日', '今日', '明日', '先週', '月曜日', '火曜日', '水曜日', '木曜日', '金曜日', '土曜日', '日曜日',
+  // Indonesian
+  'kemarin', 'hari ini', 'besok', 'lalu', 'senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu',
+  // Hindi
+  'आज', 'कल', 'पिछले', 'सोमवार', 'मंगलवार', 'बुधवार', 'गुरुवार', 'शुक्रवार', 'शनिवार', 'रविवार',
+  // Korean
+  '어제', '오늘', '내일', '지난', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일',
 ];
 
 // Complex keywords that require AI processing
@@ -181,15 +189,186 @@ function toIsoDate(offsetDays: number): string {
   return d.toISOString().split("T")[0];
 }
 
+function toLastWeekdayIso(targetDay: number): string {
+  const d = new Date();
+  const currentDayOfWeek = d.getDay();
+  let diff = currentDayOfWeek - targetDay;
+  if (diff <= 0) diff += 7;
+  d.setDate(d.getDate() - diff);
+  return d.toISOString().split("T")[0];
+}
+
+const MULTI_WORD_DATE_PATTERNS: Array<{ phrase: string; iso: () => string }> = [
+  { phrase: "last monday", iso: () => toLastWeekdayIso(1) },
+  { phrase: "last tuesday", iso: () => toLastWeekdayIso(2) },
+  { phrase: "last wednesday", iso: () => toLastWeekdayIso(3) },
+  { phrase: "last thursday", iso: () => toLastWeekdayIso(4) },
+  { phrase: "last friday", iso: () => toLastWeekdayIso(5) },
+  { phrase: "last saturday", iso: () => toLastWeekdayIso(6) },
+  { phrase: "last sunday", iso: () => toLastWeekdayIso(0) },
+  { phrase: "в понедельник", iso: () => toLastWeekdayIso(1) },
+  { phrase: "во вторник", iso: () => toLastWeekdayIso(2) },
+  { phrase: "в среду", iso: () => toLastWeekdayIso(3) },
+  { phrase: "в четверг", iso: () => toLastWeekdayIso(4) },
+  { phrase: "в пятницу", iso: () => toLastWeekdayIso(5) },
+  { phrase: "в субботу", iso: () => toLastWeekdayIso(6) },
+  { phrase: "в воскресенье", iso: () => toLastWeekdayIso(0) },
+  { phrase: "в прошлый понедельник", iso: () => toLastWeekdayIso(1) },
+  { phrase: "в прошлый вторник", iso: () => toLastWeekdayIso(2) },
+  { phrase: "в прошлую среду", iso: () => toLastWeekdayIso(3) },
+  { phrase: "в прошлый четверг", iso: () => toLastWeekdayIso(4) },
+  { phrase: "в прошлую пятницу", iso: () => toLastWeekdayIso(5) },
+  { phrase: "в прошлую субботу", iso: () => toLastWeekdayIso(6) },
+  { phrase: "в прошлое воскресенье", iso: () => toLastWeekdayIso(0) },
+  { phrase: "у понеділок", iso: () => toLastWeekdayIso(1) },
+  { phrase: "у вівторок", iso: () => toLastWeekdayIso(2) },
+  { phrase: "у середу", iso: () => toLastWeekdayIso(3) },
+  { phrase: "у четвер", iso: () => toLastWeekdayIso(4) },
+  { phrase: "у п'ятницю", iso: () => toLastWeekdayIso(5) },
+  { phrase: "у суботу", iso: () => toLastWeekdayIso(6) },
+  { phrase: "у неділю", iso: () => toLastWeekdayIso(0) },
+  { phrase: "минулого понеділка", iso: () => toLastWeekdayIso(1) },
+  { phrase: "минулого вівторка", iso: () => toLastWeekdayIso(2) },
+  { phrase: "минулої середи", iso: () => toLastWeekdayIso(3) },
+  { phrase: "минулого четверга", iso: () => toLastWeekdayIso(4) },
+  { phrase: "минулої п'ятниці", iso: () => toLastWeekdayIso(5) },
+  { phrase: "минулої суботи", iso: () => toLastWeekdayIso(6) },
+  { phrase: "минулої неділі", iso: () => toLastWeekdayIso(0) },
+  { phrase: "先週の月曜日", iso: () => toLastWeekdayIso(1) },
+  { phrase: "先週の火曜日", iso: () => toLastWeekdayIso(2) },
+  { phrase: "先週の水曜日", iso: () => toLastWeekdayIso(3) },
+  { phrase: "先週の木曜日", iso: () => toLastWeekdayIso(4) },
+  { phrase: "先週の金曜日", iso: () => toLastWeekdayIso(5) },
+  { phrase: "先週の土曜日", iso: () => toLastWeekdayIso(6) },
+  { phrase: "先週の日曜日", iso: () => toLastWeekdayIso(0) },
+  { phrase: "senin lalu", iso: () => toLastWeekdayIso(1) },
+  { phrase: "selasa lalu", iso: () => toLastWeekdayIso(2) },
+  { phrase: "rabu lalu", iso: () => toLastWeekdayIso(3) },
+  { phrase: "kamis lalu", iso: () => toLastWeekdayIso(4) },
+  { phrase: "jumat lalu", iso: () => toLastWeekdayIso(5) },
+  { phrase: "sabtu lalu", iso: () => toLastWeekdayIso(6) },
+  { phrase: "minggu lalu", iso: () => toLastWeekdayIso(0) },
+  { phrase: "पिछले सोमवार", iso: () => toLastWeekdayIso(1) },
+  { phrase: "पिछले मंगलवार", iso: () => toLastWeekdayIso(2) },
+  { phrase: "पिछले बुधवार", iso: () => toLastWeekdayIso(3) },
+  { phrase: "पिछले गुरुवार", iso: () => toLastWeekdayIso(4) },
+  { phrase: "पिछले शुक्रवार", iso: () => toLastWeekdayIso(5) },
+  { phrase: "पिछले शनिवार", iso: () => toLastWeekdayIso(6) },
+  { phrase: "पिछले रविवार", iso: () => toLastWeekdayIso(0) },
+  { phrase: "지난 월요일", iso: () => toLastWeekdayIso(1) },
+  { phrase: "지난 화요일", iso: () => toLastWeekdayIso(2) },
+  { phrase: "지난 수요일", iso: () => toLastWeekdayIso(3) },
+  { phrase: "지난 목요일", iso: () => toLastWeekdayIso(4) },
+  { phrase: "지난 금요일", iso: () => toLastWeekdayIso(5) },
+  { phrase: "지난 토요일", iso: () => toLastWeekdayIso(6) },
+  { phrase: "지난 일요일", iso: () => toLastWeekdayIso(0) },
+  { phrase: "hari ini", iso: () => toIsoDate(0) },
+];
+
 function singleWordDateToIso(word: string): string | undefined {
   const w = word.trim().toLowerCase();
   if (w === "yesterday" || w === "вчера" || w === "вчора") return toIsoDate(-1);
   if (w === "today" || w === "сегодня" || w === "сьогодні") return toIsoDate(0);
   if (w === "tomorrow" || w === "завтра") return toIsoDate(1);
+  if (w === "昨日" || w === "kemarin" || w === "어제") return toIsoDate(-1);
+  if (w === "今日" || w === "आज" || w === "오늘") return toIsoDate(0);
+  if (w === "明日" || w === "besok" || w === "내일") return toIsoDate(1);
+  if (w === "monday") return toLastWeekdayIso(1);
+  if (w === "tuesday") return toLastWeekdayIso(2);
+  if (w === "wednesday") return toLastWeekdayIso(3);
+  if (w === "thursday") return toLastWeekdayIso(4);
+  if (w === "friday") return toLastWeekdayIso(5);
+  if (w === "saturday") return toLastWeekdayIso(6);
+  if (w === "sunday") return toLastWeekdayIso(0);
+  if (w === "понедельник") return toLastWeekdayIso(1);
+  if (w === "вторник") return toLastWeekdayIso(2);
+  if (w === "среда") return toLastWeekdayIso(3);
+  if (w === "четверг") return toLastWeekdayIso(4);
+  if (w === "пятница") return toLastWeekdayIso(5);
+  if (w === "суббота") return toLastWeekdayIso(6);
+  if (w === "воскресенье") return toLastWeekdayIso(0);
+  if (w === "понеділок") return toLastWeekdayIso(1);
+  if (w === "вівторок") return toLastWeekdayIso(2);
+  if (w === "середа") return toLastWeekdayIso(3);
+  if (w === "четвер") return toLastWeekdayIso(4);
+  if (w === "п'ятниця") return toLastWeekdayIso(5);
+  if (w === "субота") return toLastWeekdayIso(6);
+  if (w === "неділя") return toLastWeekdayIso(0);
+  if (w === "月曜日") return toLastWeekdayIso(1);
+  if (w === "火曜日") return toLastWeekdayIso(2);
+  if (w === "水曜日") return toLastWeekdayIso(3);
+  if (w === "木曜日") return toLastWeekdayIso(4);
+  if (w === "金曜日") return toLastWeekdayIso(5);
+  if (w === "土曜日") return toLastWeekdayIso(6);
+  if (w === "日曜日") return toLastWeekdayIso(0);
+  if (w === "senin") return toLastWeekdayIso(1);
+  if (w === "selasa") return toLastWeekdayIso(2);
+  if (w === "rabu") return toLastWeekdayIso(3);
+  if (w === "kamis") return toLastWeekdayIso(4);
+  if (w === "jumat") return toLastWeekdayIso(5);
+  if (w === "sabtu") return toLastWeekdayIso(6);
+  if (w === "minggu") return toLastWeekdayIso(0);
+  if (w === "सोमवार") return toLastWeekdayIso(1);
+  if (w === "मंगलवार") return toLastWeekdayIso(2);
+  if (w === "बुधवार") return toLastWeekdayIso(3);
+  if (w === "गुरुवार") return toLastWeekdayIso(4);
+  if (w === "शुक्रवार") return toLastWeekdayIso(5);
+  if (w === "शनिवार") return toLastWeekdayIso(6);
+  if (w === "रविवार") return toLastWeekdayIso(0);
+  if (w === "월요일") return toLastWeekdayIso(1);
+  if (w === "화요일") return toLastWeekdayIso(2);
+  if (w === "수요일") return toLastWeekdayIso(3);
+  if (w === "목요일") return toLastWeekdayIso(4);
+  if (w === "금요일") return toLastWeekdayIso(5);
+  if (w === "토요일") return toLastWeekdayIso(6);
+  if (w === "일요일") return toLastWeekdayIso(0);
   return undefined;
 }
 
+function extractSupportedDateExpression(input: string): { text: string; date?: string } {
+  const sortedPatterns = [...MULTI_WORD_DATE_PATTERNS].sort((a, b) => b.phrase.length - a.phrase.length);
+  const lowerInput = input.toLowerCase();
+
+  for (const pattern of sortedPatterns) {
+    const lowerPhrase = pattern.phrase.toLowerCase();
+    const index = lowerInput.indexOf(lowerPhrase);
+    if (index === -1) continue;
+
+    const before = input.slice(0, index).trim();
+    const after = input.slice(index + pattern.phrase.length).trim();
+    return {
+      text: [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ").trim(),
+      date: pattern.iso(),
+    };
+  }
+
+  return extractGlobalSingleWordDate(input);
+}
+
+const ENGLISH_PREPOSITIONAL_WEEKDAY_PATTERNS: Array<{ phrase: string; iso: () => string }> = [
+  { phrase: "on monday", iso: () => toLastWeekdayIso(1) },
+  { phrase: "on tuesday", iso: () => toLastWeekdayIso(2) },
+  { phrase: "on wednesday", iso: () => toLastWeekdayIso(3) },
+  { phrase: "on thursday", iso: () => toLastWeekdayIso(4) },
+  { phrase: "on friday", iso: () => toLastWeekdayIso(5) },
+  { phrase: "on saturday", iso: () => toLastWeekdayIso(6) },
+  { phrase: "on sunday", iso: () => toLastWeekdayIso(0) },
+];
+
 function extractGlobalSingleWordDate(input: string): { text: string; date?: string } {
+  const lowerInput = input.toLowerCase();
+  for (const pattern of ENGLISH_PREPOSITIONAL_WEEKDAY_PATTERNS) {
+    const index = lowerInput.indexOf(pattern.phrase);
+    if (index === -1) continue;
+
+    const before = input.slice(0, index).trim();
+    const after = input.slice(index + pattern.phrase.length).trim();
+    return {
+      text: [before, after].filter(Boolean).join(" ").replace(/\s+/g, " ").trim(),
+      date: pattern.iso(),
+    };
+  }
+
   const parts = input.trim().split(/\s+/);
   if (parts.length < 2) return { text: input.trim() };
 
@@ -297,14 +476,31 @@ function parseSegment(segment: string, globalDate?: string): LocalParsedTransact
   const capitalizedTitle = title.charAt(0).toUpperCase() + title.slice(1).toLowerCase();
   const detectedCategory = detectCategory(title);
   const isRecurring = detectRecurring(title);
-  const today = new Date().toISOString().split('T')[0];
+  
+  // Use full ISO timestamp with current time for proper chronological sorting
+  const now = new Date();
+  const getDateWithCurrentTime = (dateStr?: string): string => {
+    if (!dateStr) return now.toISOString().split('T')[0];
+    
+    // Parse the date and merge with current time
+    const parsed = new Date(dateStr);
+    if (Number.isNaN(parsed.getTime())) return now.toISOString().split('T')[0];
+    
+    // Keep the date, but use current time
+    parsed.setHours(now.getHours());
+    parsed.setMinutes(now.getMinutes());
+    parsed.setSeconds(now.getSeconds());
+    parsed.setMilliseconds(now.getMilliseconds());
+    
+    return parsed.toISOString().split('T')[0];
+  };
 
   return {
     title: capitalizedTitle,
     amount,
     type: 'expense',
     category_name: detectedCategory,
-    date: dateOverride ?? globalDate ?? today,
+    date: getDateWithCurrentTime(dateOverride ?? globalDate),
     is_recurring: isRecurring,
     recurrence_day: isRecurring ? new Date().getDate() : undefined,
   };
@@ -329,7 +525,9 @@ export function parseTransactionLocally(input: string, locale?: string): ParseRe
 
   const currentLocale = normalizeLocale(locale);
 
-  if (containsComplexKeywords(trimmed)) {
+  const { text, date: globalDate } = extractSupportedDateExpression(trimmed);
+
+  if (containsComplexKeywords(text)) {
     return {
       success: false,
       requiresAI: true,
@@ -337,7 +535,7 @@ export function parseTransactionLocally(input: string, locale?: string): ParseRe
     };
   }
 
-  if (hasUnsupportedDateKeywords(trimmed)) {
+  if (hasUnsupportedDateKeywords(text)) {
     return {
       success: false,
       requiresAI: true,
@@ -345,7 +543,6 @@ export function parseTransactionLocally(input: string, locale?: string): ParseRe
     };
   }
 
-  const { text, date: globalDate } = extractGlobalSingleWordDate(trimmed);
   const segments = splitIntoSegments(text, currentLocale);
 
   if (segments.length === 0) {

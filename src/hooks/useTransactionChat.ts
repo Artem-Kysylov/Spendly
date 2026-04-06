@@ -544,6 +544,8 @@ export function useTransactionChat(): UseTransactionChatReturn {
           if (json && typeof json === "object" && "kind" in json) {
             if (json.kind === "action" && json.action?.type === "add_transaction") {
               const payload = json.action.payload || {};
+              // Preserve date but ensure it's in YYYY-MM-DD format for consistency
+              // Time will be merged later by TransactionProposalCard
               const proposal = {
                 title: payload.title,
                 amount: payload.amount,

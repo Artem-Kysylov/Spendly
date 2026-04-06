@@ -12,7 +12,7 @@ import { formatMoney } from "@/lib/format/money";
 import { Button } from "@/components/ui/button";
 import { saveProposedTransaction } from "@/app/[locale]/actions/transaction";
 import { UserAuth } from "@/context/AuthContext";
-import { toOffsetISOString } from "@/lib/dateUtils";
+import { toOffsetISOString, mergeDateWithCurrentTime } from "@/lib/dateUtils";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/routing";
 
@@ -281,25 +281,8 @@ export const TransactionChatMessages = ({
         const mappedBudget = findMatchingBudget(budgets, proposal.category_name);
         const selectedBudgetId = mappedBudget?.id || "unbudgeted";
 
-        const parseInitialDate = (s: string): Date => {
-          const d1 = new Date(s);
-          if (!Number.isNaN(d1.getTime())) return d1;
-          const m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-          if (m) {
-            const dd = Number(m[1]), mm = Number(m[2]) - 1, yyyy = Number(m[3]);
-            const d = new Date(yyyy, mm, dd);
-            if (!Number.isNaN(d.getTime())) return d;
-          }
-          const m2 = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-          if (m2) {
-            const yyyy = Number(m2[1]), mm = Number(m2[2]) - 1, dd = Number(m2[3]);
-            const d = new Date(yyyy, mm, dd);
-            if (!Number.isNaN(d.getTime())) return d;
-          }
-          return new Date();
-        };
-
-        const selectedDate = parseInitialDate(proposal.date);
+        // Parse date and merge with current time for proper chronological sorting
+        const selectedDate = mergeDateWithCurrentTime(proposal.date);
 
         const result = await saveProposedTransaction({
           user_id: userId,

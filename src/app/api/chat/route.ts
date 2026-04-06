@@ -270,12 +270,18 @@ export async function POST(req: NextRequest) {
 
     const now = new Date();
     const currentDate = now.toISOString().split("T")[0];
+    const currentTimestamp = now.toISOString();
     const currentDayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
     const dateContext = now.toLocaleDateString("en-US", {
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
+    });
+    const timeContext = now.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
     });
 
     // Calculate reference dates for natural language parsing
@@ -353,8 +359,12 @@ Use these terms EXACTLY as shown when creating tables, lists, or structured outp
 
     const overrideRule = `You are Spendly Pal, a smart financial assistant.
 
-TODAY'S DATE: ${currentDate} (${dateContext})
+CURRENT TIME: ${timeContext} on ${dateContext}
+CURRENT TIMESTAMP: ${currentTimestamp}
+TODAY'S DATE: ${currentDate}
 ${dateReferenceTable}
+
+IMPORTANT: When creating transactions, you only need to return the DATE (YYYY-MM-DD). The system will automatically add the current time for proper chronological sorting.
 
 !!! CREATION OVER SEARCH (CRITICAL) !!!
 If the user's message contains an ITEM + a NUMERICAL AMOUNT (and optionally a date like "yesterday" / "last Friday"), your goal is ALWAYS to CREATE a new transaction proposal.
@@ -371,9 +381,10 @@ Examples (always CREATE):
 !!! CRITICAL TRANSACTION DETECTION RULE !!!
 If the user's message contains ANY of these patterns, it is a TRANSACTION REQUEST:
 - "[Item] [Amount]" (e.g., "Taxi 200", "Coffee 5")
+- "[Item] [Amount] [Date]" (e.g., "Coffee 5 last Friday", "Taxi 200 yesterday")
 - "[Amount] [Item]" (e.g., "200 on taxi", "50 for lunch")
 - "[Amount] [Currency] [Item]" (e.g., "200 uah groceries")
-- "[Time] [Item] [Amount]" (e.g., "Yesterday lunch 50", "Last Friday taxi 300")
+- "[Date] [Item] [Amount]" (e.g., "Yesterday lunch 50", "Last Friday taxi 300")
 - Natural sentences like "I bought groceries for 200" or "Spent 500 on taxi last Friday"
 
 When detected:
@@ -384,6 +395,7 @@ When detected:
 !!!`;
 
     const globalContextBlock = `GLOBAL CONTEXT:
+- CURRENT TIME: ${timeContext} on ${dateContext}
 - TODAY: ${dateContext}. Use this for relative dates ("yesterday", "last Friday").
 - LANGUAGE: Respond in the user's detected language (${locale}).
 
@@ -441,19 +453,57 @@ PRIMARY DIRECTIVE: You are a Transaction Manager first, and an Analyst second.
 
 NATURAL LANGUAGE TRANSACTION PARSING:
 When the user mentions an expense or income in ANY format, INTELLIGENTLY extract:
-1. AMOUNT: The numeric value (e.g., "200", "50.00", "1,500")
+1. AMOUNT: The numeric value (e.g., "200", "50.00", "1,500", "5")
 2. TITLE: Short description (e.g., "Groceries", "Taxi ride", "Coffee")
 3. CATEGORY: Match to the closest budget from User's budgets list
 4. DATE: Parse relative dates using the DATE REFERENCE table above. If no date mentioned, use today (${currentDate})
 5. TYPE: Default to "expense" unless words like "earned", "received", "salary", "income" are used
 
-EXAMPLES OF NATURAL LANGUAGE INPUTS:
+CRITICAL PATTERN RECOGNITION:
+- "coffee 5 last friday" = Item: "coffee", Amount: 5, Date: last Friday → CREATE TRANSACTION
+- "taxi 200 yesterday" = Item: "taxi", Amount: 200, Date: yesterday → CREATE TRANSACTION
+- "lunch 50 вчера" = Item: "lunch", Amount: 50, Date: yesterday → CREATE TRANSACTION
+- Even if amount is small (like 5), it's still a valid transaction → CREATE IT
+- DO NOT interpret these as search queries → ALWAYS create transaction
+
+EXAMPLES OF NATURAL LANGUAGE INPUTS (ALL 7 LOCALES):
+
+ENGLISH (en):
 - "Taxi 200" -> { title: "Taxi", amount: 200, date: "${currentDate}", type: "expense" }
+- "Coffee 5 last Friday" -> { title: "Coffee", amount: 5, date: "${lastFriday.toISOString().split("T")[0]}", type: "expense" }
+- "Lunch 50 yesterday" -> { title: "Lunch", amount: 50, date: "${yesterdayISO}", type: "expense" }
 - "Yesterday I bought groceries for 200" -> { title: "Groceries", amount: 200, date: "${yesterdayISO}", type: "expense" }
-- "Taxi 500 last Friday" -> { title: "Taxi", amount: 500, date: "${lastFriday.toISOString().split("T")[0]}", type: "expense" }
-- "Spent 150 on coffee this morning" -> { title: "Coffee", amount: 150, date: "${currentDate}", type: "expense" }
 - "Received salary 50000" -> { title: "Salary", amount: 50000, date: "${currentDate}", type: "income" }
+
+RUSSIAN (ru):
+- "Такси 200" -> { title: "Такси", amount: 200, date: "${currentDate}", type: "expense" }
+- "Кофе 5 в прошлую пятницу" -> { title: "Кофе", amount: 5, date: "${lastFriday.toISOString().split("T")[0]}", type: "expense" }
+- "Обед 50 вчера" -> { title: "Обед", amount: 50, date: "${yesterdayISO}", type: "expense" }
 - "в пятницу такси 300" -> { title: "Такси", amount: 300, date: "${lastFriday.toISOString().split("T")[0]}", type: "expense" }
+
+UKRAINIAN (uk):
+- "Таксі 200" -> { title: "Таксі", amount: 200, date: "${currentDate}", type: "expense" }
+- "Кава 5 минулої п'ятниці" -> { title: "Кава", amount: 5, date: "${lastFriday.toISOString().split("T")[0]}", type: "expense" }
+- "Обід 50 вчора" -> { title: "Обід", amount: 50, date: "${yesterdayISO}", type: "expense" }
+
+JAPANESE (ja):
+- "タクシー 200" -> { title: "タクシー", amount: 200, date: "${currentDate}", type: "expense" }
+- "コーヒー 5 先週の金曜日" -> { title: "コーヒー", amount: 5, date: "${lastFriday.toISOString().split("T")[0]}", type: "expense" }
+- "ランチ 50 昨日" -> { title: "ランチ", amount: 50, date: "${yesterdayISO}", type: "expense" }
+
+INDONESIAN (id):
+- "Taksi 200" -> { title: "Taksi", amount: 200, date: "${currentDate}", type: "expense" }
+- "Kopi 5 Jumat lalu" -> { title: "Kopi", amount: 5, date: "${lastFriday.toISOString().split("T")[0]}", type: "expense" }
+- "Makan siang 50 kemarin" -> { title: "Makan siang", amount: 50, date: "${yesterdayISO}", type: "expense" }
+
+HINDI (hi):
+- "टैक्सी 200" -> { title: "टैक्सी", amount: 200, date: "${currentDate}", type: "expense" }
+- "कॉफी 5 पिछले शुक्रवार" -> { title: "कॉफी", amount: 5, date: "${lastFriday.toISOString().split("T")[0]}", type: "expense" }
+
+KOREAN (ko):
+- "택시 200" -> { title: "택시", amount: 200, date: "${currentDate}", type: "expense" }
+- "커피 5 지난 금요일" -> { title: "커피", amount: 5, date: "${lastFriday.toISOString().split("T")[0]}", type: "expense" }
+- "점심 50 어제" -> { title: "점심", amount: 50, date: "${yesterdayISO}", type: "expense" }
 
 FORBIDDEN:
 - Do NOT search the database when user mentions an expense
