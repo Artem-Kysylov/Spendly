@@ -333,6 +333,11 @@
   "transactions": {
     "title": "Транзакції",
     "addTransaction": "Додати транзакцію",
+    "confirm": "Підтвердити",
+    "cancel": "Скасувати",
+    "confirming": "Підтвердження...",
+    "confirmAll": "Підтвердити все",
+    "confirmingAll": "Підтверджуємо все...",
     "templates": {
       "title": "Шаблони",
       "empty": "Шаблонів поки немає"
@@ -782,6 +787,11 @@
         "expense": "Витрата",
         "income": "Дохід"
       },
+      "confirm": "Підтвердити",
+      "cancel": "Скасувати",
+      "confirming": "Підтвердження...",
+      "confirmAll": "Підтвердити все",
+      "confirmingAll": "Підтверджуємо все...",
       "saveAsTemplate": "Зберегти як шаблон",
       "templateLimitReached": "Оновіться до Pro для більше ніж 3 шаблонів",
       "templates": {
@@ -1296,6 +1306,7 @@
       "quick_add_pattern": "Таксі 200",
       "pattern_example": "Обід 150 вчора",
       "quick_add_footer": "Я зроблю решту."
-    }
+    },
+    "goToMainChat": "Перейти в головний чат"
   }
 }

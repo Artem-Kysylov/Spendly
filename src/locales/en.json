@@ -331,8 +331,13 @@
     "cancel": "Not now"
   },
   "transactions": {
-    "title": "Transactions📉",
+    "title": "Transactions",
     "addTransaction": "Add Transaction",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "confirming": "Confirming...",
+    "confirmAll": "Confirm All",
+    "confirmingAll": "Confirming All...",
     "templates": {
       "title": "Templates",
       "empty": "No templates yet"
@@ -782,6 +787,11 @@
         "expense": "Expense",
         "income": "Income"
       },
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "confirming": "Confirming...",
+      "confirmAll": "Confirm All",
+      "confirmingAll": "Confirming All...",
       "saveAsTemplate": "Save as template",
       "templateLimitReached": "Upgrade to Pro for more than 3 templates",
       "templates": {
@@ -1296,6 +1306,7 @@
       "quick_add_pattern": "Taxi 200",
       "pattern_example": "Lunch 150 yesterday",
       "quick_add_footer": "I'll handle the rest."
-    }
+    },
+    "goToMainChat": "Go to Main Chat"
   }
 }

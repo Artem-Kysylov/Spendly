@@ -1,14 +1,20 @@
 
 import { Message } from "@/hooks/useTransactionChat";
-import { cn } from "@/lib/utils";
+import { cn, findMatchingBudget, parseAmountInput } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { useEffect, useRef, useState } from "react";
 import { TransactionProposalCard, type ProposedTransaction } from "./TransactionProposalCard";
 import { BudgetProposalCard, type ProposedBudget } from "./BudgetProposalCard";
-import { Loader2 } from "lucide-react";
+import { Loader2, MessageSquare } from "lucide-react";
 import { formatMoney } from "@/lib/format/money";
+import { Button } from "@/components/ui/button";
+import { saveProposedTransaction } from "@/app/[locale]/actions/transaction";
+import { UserAuth } from "@/context/AuthContext";
+import { toOffsetISOString, mergeDateWithCurrentTime } from "@/lib/dateUtils";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/routing";
 
 function normalizeProposedTransactions(input: any): any[] {
   if (!input) return [];
@@ -50,10 +56,29 @@ interface TransactionChatMessagesProps {
   messages: Message[];
   isLoading: boolean;
   budgets: any[];
-  onTransactionSuccess: () => void;
-  onTransactionError: (error: string) => void;
-  onSuggestionClick?: (text: string) => void;
+  onTransactionSuccess?: () => void;
+  onTransactionError?: (error: string) => void;
+  onSuggestionClick?: (suggestion: string) => void;
   currency?: string;
+  onClose?: () => void;
+}
+
+// Detect non-transaction queries (balance, spending analysis, etc.)
+function isNonTransactionQuery(content: string): boolean {
+  const lowerContent = content.toLowerCase();
+  const nonTransactionKeywords = [
+    "balance", "баланс", "залишок",
+    "spending", "витрати", "витрачання",
+    "budget", "бюджет",
+    "analysis", "аналіз", "аналитика",
+    "report", "звіт", "отчет",
+    "statistics", "статистика",
+    "compare", "порівняти", "сравнить",
+    "show me", "покажи", "показать",
+    "how much", "скільки", "сколько",
+  ];
+  
+  return nonTransactionKeywords.some(keyword => lowerContent.includes(keyword));
 }
 
 const formatHumanDate = (isoDate: string): string => {
@@ -217,9 +242,18 @@ export const TransactionChatMessages = ({
   onTransactionError,
   onSuggestionClick,
   currency,
+  onClose,
 }: TransactionChatMessagesProps) => {
+  const { session } = UserAuth();
+  const userId = session?.user?.id;
+  const tModals = useTranslations("modals");
+  const tChat = useTranslations("chat");
+  const router = useRouter();
   const bottomRef = useRef<HTMLDivElement>(null);
   const [clickedMessageIndices, setClickedMessageIndices] = useState<Set<number>>(new Set());
+  const [bulkConfirmingIds, setBulkConfirmingIds] = useState<Set<string>>(new Set());
+  const [bulkConfirmedIds, setBulkConfirmedIds] = useState<Set<string>>(new Set());
+  const [dismissedProposalIds, setDismissedProposalIds] = useState<Set<string>>(new Set());
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -229,6 +263,54 @@ export const TransactionChatMessages = ({
   const handleSuggestionClick = (suggestion: string, messageIndex: number) => {
     setClickedMessageIndices(prev => new Set(prev).add(messageIndex));
     onSuggestionClick?.(suggestion);
+  };
+
+  const handleBulkConfirmAll = async (toolCallId: string, proposals: ProposedTransaction[], budgets: any[]) => {
+    if (!userId) {
+      onTransactionError?.("Missing user information");
+      return;
+    }
+
+    setBulkConfirmingIds(prev => new Set(prev).add(toolCallId));
+
+    try {
+      let successCount = 0;
+      let totalAmount = 0;
+
+      for (const proposal of proposals) {
+        const mappedBudget = findMatchingBudget(budgets, proposal.category_name);
+        const selectedBudgetId = mappedBudget?.id || "unbudgeted";
+
+        // Parse date and merge with current time for proper chronological sorting
+        const selectedDate = mergeDateWithCurrentTime(proposal.date);
+
+        const result = await saveProposedTransaction({
+          user_id: userId,
+          title: proposal.title,
+          amount: parseAmountInput(proposal.amount.toString()),
+          type: proposal.type,
+          budget_folder_id: selectedBudgetId === "unbudgeted" ? null : selectedBudgetId,
+          created_at: toOffsetISOString(selectedDate),
+        });
+
+        if (result.success) {
+          successCount++;
+          totalAmount += proposal.amount;
+        }
+      }
+
+      setBulkConfirmedIds(prev => new Set(prev).add(toolCallId));
+      onTransactionSuccess?.();
+
+    } catch (error) {
+      onTransactionError?.("Failed to save transactions");
+    } finally {
+      setBulkConfirmingIds(prev => {
+        const next = new Set(prev);
+        next.delete(toolCallId);
+        return next;
+      });
+    }
   };
 
   return (
@@ -299,6 +381,23 @@ export const TransactionChatMessages = ({
                     </ReactMarkdown>
                   </div>
                 </div>
+                
+                {/* Smart redirect button for non-transaction queries */}
+                {!isUser && content && isNonTransactionQuery(content) && !message.toolInvocations?.length && (
+                  <div className="mt-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        onClose?.();
+                        router.push("/ai-assistant");
+                      }}
+                      className="w-full gap-2"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      {tChat("goToMainChat") || "Go to Main Chat"}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -331,20 +430,70 @@ export const TransactionChatMessages = ({
 
                 if (!proposalData || !Array.isArray(proposalData) || proposalData.length === 0) return null;
 
+                const activeProposalEntries = proposalData
+                  .map((proposal, idx) => ({
+                    proposal,
+                    proposalId: `${toolInvocation.toolCallId}-${idx}`,
+                  }))
+                  .filter(({ proposalId }) => !dismissedProposalIds.has(proposalId));
+
+                if (activeProposalEntries.length === 0) return null;
+
+                const activeProposalData = activeProposalEntries.map(({ proposal }) => proposal);
+
+                const isConfirming = bulkConfirmingIds.has(toolInvocation.toolCallId);
+                const isConfirmed = bulkConfirmedIds.has(toolInvocation.toolCallId);
+                const hasMultiple = activeProposalData.length > 1;
+
+                if (isConfirmed) {
+                  return (
+                    <div key={toolInvocation.toolCallId} className="w-full mt-2">
+                      <div className="rounded-xl px-4 py-3 shadow-sm w-full bg-muted/50 mb-2">
+                        <div className="text-sm leading-relaxed">
+                          ✅ Added {activeProposalData.length} transaction{activeProposalData.length > 1 ? 's' : ''}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }
+
                 return (
                   <div key={toolInvocation.toolCallId} className="w-full mt-2">
-                    {proposalData.map((proposal: ProposedTransaction, idx: number) => (
+                    {activeProposalEntries.map(({ proposal, proposalId }) => (
                       <TransactionProposalCard
-                        key={`${toolInvocation.toolCallId}-${idx}`}
+                        key={proposalId}
                         proposal={proposal}
                         budgets={budgets || []}
                         autoDismissSuccess={false}
                         currency={currency}
+                        onDismiss={() => {
+                          setDismissedProposalIds((prev) => new Set(prev).add(proposalId));
+                        }}
                         onSuccess={() => {
-                          // Optional: Handle success
+                          onTransactionSuccess?.();
                         }}
                       />
                     ))}
+                    
+                    {hasMultiple && !isConfirmed && (
+                      <div className="sticky bottom-0 mt-3 pt-3 border-t border-border bg-background">
+                        <Button
+                          onClick={() => handleBulkConfirmAll(toolInvocation.toolCallId, activeProposalData, budgets || [])}
+                          disabled={isConfirming}
+                          className="w-full"
+                          size="lg"
+                        >
+                          {isConfirming ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              {tModals("transaction.confirmingAll") || "Confirming All..."}
+                            </>
+                          ) : (
+                            tModals("transaction.confirmAll") || `Confirm All (${activeProposalData.length})`
+                          )}
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 );
               }

@@ -331,8 +331,13 @@
     "cancel": "Not now"
   },
   "transactions": {
-    "title": "取引📉",
+    "title": "取引",
     "addTransaction": "取引を追加",
+    "confirm": "確認",
+    "cancel": "キャンセル",
+    "confirming": "確認中...",
+    "confirmAll": "すべて確認",
+    "confirmingAll": "すべて確認中...",
     "templates": {
       "title": "テンプレート",
       "empty": "テンプレートはまだありません"
@@ -782,6 +787,11 @@
         "expense": "支出",
         "income": "収入"
       },
+      "confirm": "確認",
+      "cancel": "キャンセル",
+      "confirming": "確認中...",
+      "confirmAll": "すべて確認",
+      "confirmingAll": "すべて確認中...",
       "saveAsTemplate": "テンプレートとして保存",
       "templateLimitReached": "3つ以上のテンプレートにはProにアップグレード",
       "templates": {
@@ -1083,8 +1093,8 @@
     },
     "budgets": {
       "meta": {
-        "title": "Budgets",
-        "description": "Create and manage your budgets."
+        "title": "予算",
+        "description": "予算を作成および管理します。"
       }
     },
     "budgetDetails": {
@@ -1296,6 +1306,7 @@
       "quick_add_pattern": "タクシー 200",
       "pattern_example": "ランチ 150 昨日",
       "quick_add_footer": "あとは任せて。"
-    }
+    },
+    "goToMainChat": "メインチャットへ移動"
   }
 }

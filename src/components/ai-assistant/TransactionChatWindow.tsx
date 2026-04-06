@@ -162,6 +162,7 @@ export function TransactionChatWindow({
               onTransactionError={handleTransactionError}
               onSuggestionClick={(text) => setInput(text)}
               currency={currency}
+              onClose={_onClose}
             />
           )}
         </div>

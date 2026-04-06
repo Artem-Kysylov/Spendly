@@ -375,7 +375,7 @@ export default function TransactionForm({
                 field.onChange(value);
               }
             }}
-            className={`text-3xl font-medium ${currentType === "expense" ? "text-error" : "text-success"}`}
+            className={`border-border/80 text-3xl font-medium focus-visible:border-border focus-visible:ring-1 focus-visible:ring-border focus-visible:ring-offset-0 ${currentType === "expense" ? "text-error" : "text-success"}`}
           />
         )}
       />
@@ -731,7 +731,7 @@ export default function TransactionForm({
           variant="default"
           disabled={isLoading}
           isLoading={isLoading}
-          className={`w-full ${currentType === "expense" ? "bg-error text-error-foreground" : "bg-success text-success-foreground"}`}
+          className="w-full"
         />
       </div>
     </form>

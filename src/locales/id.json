@@ -331,8 +331,13 @@
     "cancel": "Not now"
   },
   "transactions": {
-    "title": "Transactions📉",
+    "title": "Transaksi",
     "addTransaction": "Add Transaction",
+    "confirm": "Konfirmasi",
+    "cancel": "Batal",
+    "confirming": "Mengonfirmasi...",
+    "confirmAll": "Konfirmasi Semua",
+    "confirmingAll": "Mengonfirmasi Semua...",
     "templates": {
       "title": "Template",
       "empty": "Belum ada template"
@@ -782,6 +787,11 @@
         "expense": "Pengeluaran",
         "income": "Pemasukan"
       },
+      "confirm": "Konfirmasi",
+      "cancel": "Batal",
+      "confirming": "Mengonfirmasi...",
+      "confirmAll": "Konfirmasi Semua",
+      "confirmingAll": "Mengonfirmasi Semua...",
       "saveAsTemplate": "Simpan sebagai template",
       "templateLimitReached": "Upgrade ke Pro untuk lebih dari 3 template",
       "templates": {
@@ -1296,6 +1306,7 @@
       "quick_add_pattern": "Taksi 200",
       "pattern_example": "Makan siang 150 kemarin",
       "quick_add_footer": "Sisanya biar aku yang urus."
-    }
+    },
+    "goToMainChat": "Buka Chat Utama"
   }
 }

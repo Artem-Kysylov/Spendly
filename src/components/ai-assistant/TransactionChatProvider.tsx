@@ -38,7 +38,7 @@ export function TransactionChatProvider({
         <SheetContent
           side="bottom"
           disableAutoFocus
-          className="bg-background text-foreground flex flex-col !h-[70dvh] !min-h-[70dvh] !max-h-[70dvh] overflow-hidden z-[10010] pb-[env(safe-area-inset-bottom)] p-0"
+          className="bg-background text-foreground flex flex-col !h-[80dvh] !min-h-[80dvh] !max-h-[80dvh] overflow-hidden z-[10010] pb-[env(safe-area-inset-bottom)] p-0"
           aria-labelledby="transaction-chat-title"
           overlayClassName="bg-foreground/40"
         >

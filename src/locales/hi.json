@@ -331,8 +331,13 @@
     "cancel": "Not now"
   },
   "transactions": {
-    "title": "लेन-देन📉",
+    "title": "लेन-देन",
     "addTransaction": "लेन-देन जोड़ें",
+    "confirm": "पुष्टि करें",
+    "cancel": "रद्द करें",
+    "confirming": "पुष्टि हो रही है...",
+    "confirmAll": "सभी की पुष्टि करें",
+    "confirmingAll": "सभी की पुष्टि हो रही है...",
     "templates": {
       "title": "टेम्पलेट",
       "empty": "अभी कोई टेम्पलेट नहीं"
@@ -512,8 +517,8 @@
       "dismiss": "बंद करें"
     },
     "meta": {
-      "title": "Budgets",
-      "description": "Create and manage your budgets."
+      "title": "बजट",
+      "description": "अपने बजट बनाएं और प्रबंधित करें।"
     },
     "list": {
       "modal": {
@@ -782,6 +787,11 @@
         "expense": "खर्च",
         "income": "आय"
       },
+      "confirm": "पुष्टि करें",
+      "cancel": "रद्द करें",
+      "confirming": "पुष्टि हो रही है...",
+      "confirmAll": "सभी की पुष्टि करें",
+      "confirmingAll": "सभी की पुष्टि हो रही है...",
       "saveAsTemplate": "टेम्पलेट के रूप में सहेजें",
       "templateLimitReached": "3 से अधिक टेम्पलेट के लिए Pro में अपग्रेड करें",
       "templates": {
@@ -1296,6 +1306,7 @@
       "quick_add_pattern": "टैक्सी 200",
       "pattern_example": "लंच 150 कल",
       "quick_add_footer": "बाकी मैं संभाल लूंगा।"
-    }
+    },
+    "goToMainChat": "मुख्य चैट पर जाएँ"
   }
 }

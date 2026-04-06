@@ -135,3 +135,41 @@ export const toOffsetISOString = (date: Date): string => {
 
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}${sign}${offsetHours}:${offsetMins}`;
 };
+
+/**
+ * Merges a date-only string (YYYY-MM-DD) with current time (hours, minutes, seconds, ms)
+ * This ensures AI-created transactions have proper timestamps for chronological sorting
+ * 
+ * @param dateStr - Date string in YYYY-MM-DD, DD.MM.YYYY, or ISO format
+ * @returns Date object with parsed date + current time
+ */
+export const mergeDateWithCurrentTime = (dateStr: string): Date => {
+  const now = new Date();
+  
+  // Try parsing as ISO date first (YYYY-MM-DD or full ISO)
+  let parsed = new Date(dateStr);
+  
+  // If invalid, try DD.MM.YYYY format
+  if (Number.isNaN(parsed.getTime())) {
+    const match = dateStr.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+    if (match) {
+      const dd = Number(match[1]);
+      const mm = Number(match[2]) - 1;
+      const yyyy = Number(match[3]);
+      parsed = new Date(yyyy, mm, dd);
+    }
+  }
+  
+  // If still invalid, return current date/time
+  if (Number.isNaN(parsed.getTime())) {
+    return now;
+  }
+  
+  // Merge: use parsed date, but current time
+  parsed.setHours(now.getHours());
+  parsed.setMinutes(now.getMinutes());
+  parsed.setSeconds(now.getSeconds());
+  parsed.setMilliseconds(now.getMilliseconds());
+  
+  return parsed;
+};
