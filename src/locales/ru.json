@@ -1247,12 +1247,16 @@
     "dueTodayTitle": "Регулярный платёж сегодня: {name}",
     "dueSoonTitle": "Скоро регулярный платёж: {name}",
     "message": "Срок {date}. Примерно {amount}.",
+    "toast": {
+      "single": "Подписка {name} добавлена в ваши транзакции",
+      "multiple": "{count} регулярных платежей добавлено в ваши транзакции"
+    },
     "push": {
       "createdTitle": "Добавлено: {name}",
-      "createdBodyNeutral": "Я записал(а) {name} ({amount}).",
-      "createdBodyFriendly": "Готово! Я записал(а) {name} ({amount}).",
-      "createdBodyFormal": "Записана транзакция: {name} ({amount}).",
-      "createdBodyPlayful": "Дзынь! Записал(а) {name} ({amount})."
+      "createdBodyNeutral": "Я записал {name} ({amount}).",
+      "createdBodyFriendly": "Готово! Я записал {name} ({amount}).",
+      "createdBodyFormal": "Транзакция записана: {name} ({amount}).",
+      "createdBodyPlayful": "Ча-чинг! Записал {name} ({amount})."
     },
     "calendar": {
       "title": "Регулярные транзакции",

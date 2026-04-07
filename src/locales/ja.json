@@ -1244,15 +1244,19 @@
     }
   },
   "recurring": {
-    "dueTodayTitle": "定期的な支払い（今日）: {name}",
-    "dueSoonTitle": "定期的な支払い（近日）: {name}",
-    "message": "支払い日 {date}。概算 {amount}.",
+    "dueTodayTitle": "今日の定期支払い: {name}",
+    "dueSoonTitle": "まもなく定期支払い: {name}",
+    "message": "期限 {date}。約 {amount}。",
+    "toast": {
+      "single": "{name}のサブスクリプションが取引に追加されました",
+      "multiple": "{count}件の定期支払いが取引に追加されました"
+    },
     "push": {
-      "createdTitle": "追加しました: {name}",
-      "createdBodyNeutral": "{name}（{amount}）を記録しました。",
-      "createdBodyFriendly": "完了！{name}（{amount}）を記録しました。",
-      "createdBodyFormal": "取引を記録しました: {name}（{amount}）。",
-      "createdBodyPlayful": "チャリン！{name}（{amount}）を記録したよ。"
+      "createdTitle": "追加: {name}",
+      "createdBodyNeutral": "{name} ({amount}) を記録しました。",
+      "createdBodyFriendly": "完了！{name} ({amount}) を記録しました。",
+      "createdBodyFormal": "取引が記録されました: {name} ({amount})。",
+      "createdBodyPlayful": "チャリーン！{name} ({amount}) を記録しました。"
     },
     "calendar": {
       "title": "定期取引",

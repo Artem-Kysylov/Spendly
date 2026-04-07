@@ -1244,15 +1244,19 @@
     }
   },
   "recurring": {
-    "dueTodayTitle": "오늘 예정된 정기결제: {name}",
-    "dueSoonTitle": "곧 예정된 정기결제: {name}",
-    "message": "{date} 마감 {amount}.",
+    "dueTodayTitle": "오늘 정기 결제: {name}",
+    "dueSoonTitle": "곧 정기 결제: {name}",
+    "message": "만기일 {date}. 약 {amount}.",
+    "toast": {
+      "single": "{name} 구독이 거래에 추가되었습니다",
+      "multiple": "{count}개의 정기 결제가 거래에 추가되었습니다"
+    },
     "push": {
       "createdTitle": "추가됨: {name}",
-      "createdBodyNeutral": "{name}({amount})를 기록했어요.",
-      "createdBodyFriendly": "완료! {name}({amount})를 기록했어요.",
-      "createdBodyFormal": "거래가 기록되었습니다: {name}({amount}).",
-      "createdBodyPlayful": "짤랑! {name}({amount}) 기록 완료."
+      "createdBodyNeutral": "{name} ({amount})을(를) 기록했습니다.",
+      "createdBodyFriendly": "완료! {name} ({amount})을(를) 기록했습니다.",
+      "createdBodyFormal": "거래가 기록되었습니다: {name} ({amount}).",
+      "createdBodyPlayful": "짜잔! {name} ({amount})을(를) 기록했어요."
     },
     "calendar": {
       "title": "정기 거래",

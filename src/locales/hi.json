@@ -1244,15 +1244,19 @@
     }
   },
   "recurring": {
-    "dueTodayTitle": "आज देय नियमित भुगतान: {name}",
-    "dueSoonTitle": "जल्द देय नियमित भुगतान: {name}",
-    "message": "देय तिथि {date}. अनुमानित {amount}.",
+    "dueTodayTitle": "आज आवर्ती भुगतान: {name}",
+    "dueSoonTitle": "जल्द ही आवर्ती भुगतान: {name}",
+    "message": "नियत तिथि {date}। लगभग {amount}।",
+    "toast": {
+      "single": "{name} सदस्यता आपके लेन-देन में जोड़ी गई",
+      "multiple": "{count} आवर्ती भुगतान आपके लेन-देन में जोड़े गए"
+    },
     "push": {
       "createdTitle": "जोड़ा गया: {name}",
-      "createdBodyNeutral": "मैंने {name} ({amount}) लॉग कर दिया।",
-      "createdBodyFriendly": "हो गया! मैंने {name} ({amount}) लॉग कर दिया।",
-      "createdBodyFormal": "एक लेन-देन लॉग किया गया: {name} ({amount}).",
-      "createdBodyPlayful": "चिंग! {name} ({amount}) लॉग हो गया।"
+      "createdBodyNeutral": "मैंने {name} ({amount}) रिकॉर्ड किया।",
+      "createdBodyFriendly": "हो गया! मैंने {name} ({amount}) रिकॉर्ड किया।",
+      "createdBodyFormal": "लेन-देन रिकॉर्ड किया गया: {name} ({amount})।",
+      "createdBodyPlayful": "चा-चिंग! {name} ({amount}) रिकॉर्ड किया।"
     },
     "calendar": {
       "title": "आवर्ती लेन-देन",

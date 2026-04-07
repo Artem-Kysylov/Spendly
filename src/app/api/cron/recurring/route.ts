@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { processRecurringTransactions } from "@/lib/processRecurringTransactions";
+import { generateRecurringTransactions } from "@/lib/generateRecurringTransactions";
 
 /**
  * Cron job endpoint to process recurring transactions
- * Should be called hourly to check for users at 9am local time
+ * Processes all active recurring_rules that are due
  * 
  * Configure in vercel.json or your deployment platform:
  * - Schedule: Every hour (0 * * * *)
@@ -25,17 +25,20 @@ export async function GET(request: Request) {
     console.log("[Cron] Starting recurring transactions processing...");
     const startTime = Date.now();
 
-    const result = await processRecurringTransactions();
+    // Process all users' recurring rules (no userId filter)
+    const result = await generateRecurringTransactions();
 
     const duration = Date.now() - startTime;
     console.log(
-      `[Cron] Completed in ${duration}ms. Processed: ${result.processed}, Failed: ${result.failed}`
+      `[Cron] Completed in ${duration}ms. Generated: ${result.generated}, Skipped: ${result.skipped}, Push queued: ${result.pushQueued}, Errors: ${result.errors.length}`
     );
 
     return NextResponse.json({
       success: true,
-      processed: result.processed,
-      failed: result.failed,
+      generated: result.generated,
+      skipped: result.skipped,
+      pushQueued: result.pushQueued,
+      errors: result.errors,
       duration,
       timestamp: new Date().toISOString(),
     });

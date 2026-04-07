@@ -1244,15 +1244,19 @@
     }
   },
   "recurring": {
-    "dueTodayTitle": "Pembayaran rutin jatuh tempo hari ini: {name}",
-    "dueSoonTitle": "Pembayaran rutin segera jatuh tempo: {name}",
-    "message": "Jatuh tempo {date}. Perkiraan {amount}.",
+    "dueTodayTitle": "Pembayaran berulang hari ini: {name}",
+    "dueSoonTitle": "Pembayaran berulang segera: {name}",
+    "message": "Jatuh tempo {date}. Kira-kira {amount}.",
+    "toast": {
+      "single": "Langganan {name} ditambahkan ke transaksi Anda",
+      "multiple": "{count} pembayaran berulang ditambahkan ke transaksi Anda"
+    },
     "push": {
       "createdTitle": "Ditambahkan: {name}",
-      "createdBodyNeutral": "Aku mencatat {name} ({amount}).",
-      "createdBodyFriendly": "Beres! Aku mencatat {name} ({amount}).",
+      "createdBodyNeutral": "Saya mencatat {name} ({amount}).",
+      "createdBodyFriendly": "Selesai! Saya mencatat {name} ({amount}).",
       "createdBodyFormal": "Transaksi dicatat: {name} ({amount}).",
-      "createdBodyPlayful": "Cing! Tercatat {name} ({amount})."
+      "createdBodyPlayful": "Cha-ching! Mencatat {name} ({amount})."
     },
     "calendar": {
       "title": "Transaksi berulang",

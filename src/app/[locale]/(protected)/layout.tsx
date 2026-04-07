@@ -24,6 +24,7 @@ import AddTransactionProvider from "@/components/layout/AddTransactionProvider";
 import MobileTabBar from "@/components/layout/MobileTabBar";
 import Sidebar from "@/components/layout/Sidebar";
 import TopBar from "@/components/layout/TopBar";
+import { RecurringSync } from "@/components/recurring/RecurringSync";
 import { UserAuth } from "@/context/AuthContext";
 import useDeviceType from "@/hooks/useDeviceType";
 
@@ -147,6 +148,7 @@ export default function ProtectedLayout({
       {/* Удалён глобальный AIAssistantProvider */}
       <AddTransactionProvider />
       <TransactionChatProvider showFloatingButton={false} />
+      {isReady && session && <RecurringSync />}
       <div className="flex h-[100dvh] transition-colors duration-300 overflow-hidden">
         <Sidebar />
         <div className="flex-1 flex flex-col h-full overflow-hidden lg:ml-64 transition-colors duration-300">

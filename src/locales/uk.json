@@ -1246,13 +1246,17 @@
   "recurring": {
     "dueTodayTitle": "Регулярний платіж сьогодні: {name}",
     "dueSoonTitle": "Скоро регулярний платіж: {name}",
-    "message": "Термін {date}. Прибл. {amount}.",
+    "message": "Термін {date}. Приблизно {amount}.",
+    "toast": {
+      "single": "Підписку {name} додано до ваших транзакцій",
+      "multiple": "{count} регулярних платежів додано до ваших транзакцій"
+    },
     "push": {
       "createdTitle": "Додано: {name}",
-      "createdBodyNeutral": "Я записав(ла) {name} ({amount}).",
-      "createdBodyFriendly": "Готово! Я записав(ла) {name} ({amount}).",
+      "createdBodyNeutral": "Я записав {name} ({amount}).",
+      "createdBodyFriendly": "Готово! Я записав {name} ({amount}).",
       "createdBodyFormal": "Транзакцію записано: {name} ({amount}).",
-      "createdBodyPlayful": "Є! Записав(ла) {name} ({amount})."
+      "createdBodyPlayful": "Ча-чінг! Записав {name} ({amount})."
     },
     "calendar": {
       "title": "Регулярні транзакції",

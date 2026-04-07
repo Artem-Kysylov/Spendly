@@ -1247,6 +1247,10 @@
     "dueTodayTitle": "Recurring due today: {name}",
     "dueSoonTitle": "Recurring due soon: {name}",
     "message": "Due {date}. Approx. {amount}.",
+    "toast": {
+      "single": "{name} subscription added to your transactions",
+      "multiple": "{count} recurring payments added to your transactions"
+    },
     "push": {
       "createdTitle": "Added: {name}",
       "createdBodyNeutral": "I logged {name} ({amount}).",
