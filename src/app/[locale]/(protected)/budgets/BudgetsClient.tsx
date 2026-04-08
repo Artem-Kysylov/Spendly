@@ -304,7 +304,7 @@ export default function BudgetsClient() {
 
       handleToastMessage(tBudgets("list.toast.createSuccess"), "success");
       await refetch();
-      setTimeout(() => window.location.reload(), 500);
+      setTimeout(() => window.location.reload(), 1500);
     } catch (err) {
       console.error("Error creating budget folder:", err);
       handleToastMessage(tCommon("unexpectedError"), "error");

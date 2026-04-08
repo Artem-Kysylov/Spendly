@@ -305,7 +305,7 @@ export default function TransactionForm({
 
       // Notify parent first to show toast, then hard reload to refresh all data
       onSuccess();
-      setTimeout(() => window.location.reload(), 300);
+      setTimeout(() => window.location.reload(), 1000);
     } catch (err) {
       console.error("Error submitting transaction:", err);
       toast({
