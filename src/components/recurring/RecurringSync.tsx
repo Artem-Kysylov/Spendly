@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useToast } from "@/components/ui/use-toast";
+import { UserAuth } from "@/context/AuthContext";
 import { processUserRecurringTransactions } from "@/app/[locale]/actions/recurring";
 
 /**
@@ -14,12 +15,19 @@ export function RecurringSync() {
   const { toast } = useToast();
   const t = useTranslations("recurring.toast");
   const tCommon = useTranslations("common");
+  const { session } = UserAuth();
 
   useEffect(() => {
     let mounted = true;
 
     const syncRecurringTransactions = async () => {
-      console.log("[RecurringSync] Starting sync...");
+      // Wait for session to be ready
+      if (!session?.user?.id) {
+        console.log("[RecurringSync] No session yet, skipping sync");
+        return;
+      }
+
+      console.log("[RecurringSync] Starting sync for user:", session.user.id);
       
       try {
         const result = await processUserRecurringTransactions();
@@ -87,7 +95,7 @@ export function RecurringSync() {
     return () => {
       mounted = false;
     };
-  }, [toast, t, tCommon]);
+  }, [session, toast, t, tCommon]);
 
   return null; // Silent background component
 }
