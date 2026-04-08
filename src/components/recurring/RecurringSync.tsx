@@ -30,7 +30,7 @@ export function RecurringSync() {
       console.log("[RecurringSync] Starting sync for user:", session.user.id);
       
       try {
-        const result = await processUserRecurringTransactions();
+        const result = await processUserRecurringTransactions(session.user.id);
 
         console.log("[RecurringSync] Result:", {
           generated: result.generated,

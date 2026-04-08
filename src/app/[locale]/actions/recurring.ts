@@ -19,18 +19,17 @@ interface ProcessResult {
  * Process recurring transactions for the current authenticated user
  * Called on app boot via RecurringSync component
  */
-export async function processUserRecurringTransactions(): Promise<ProcessResult> {
+export async function processUserRecurringTransactions(
+  userId: string,
+): Promise<ProcessResult> {
   try {
     const supabase = getServerSupabaseClient();
-    
-    // Get current user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
+
+    if (!userId) {
       return {
         generated: 0,
         skipped: 0,
-        errors: ["Not authenticated"],
+        errors: ["Missing user id"],
         shouldShowToast: false,
       };
     }
@@ -39,13 +38,13 @@ export async function processUserRecurringTransactions(): Promise<ProcessResult>
     const { data: prefs } = await supabase
       .from("notification_preferences")
       .select("push_enabled")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .maybeSingle();
 
     const pushEnabled = prefs?.push_enabled ?? false;
 
     // Generate transactions for this user only
-    const result = await generateRecurringTransactions(user.id);
+    const result = await generateRecurringTransactions(userId);
 
     // Determine if we should show toast
     // Show toast if: transactions were generated AND (push is disabled OR push failed)
