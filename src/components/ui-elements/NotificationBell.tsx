@@ -331,7 +331,7 @@ function NotificationBell({
                                   {tNotifications("bell.actions.openReport")}
                                 </button>
                               )}
-                            {["weekly_summary", "weekly_reminder", "reminder"].includes(notification.type) && (
+                            {["weekly_summary", "weekly_reminder"].includes(notification.type) && (
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -340,6 +340,18 @@ function NotificationBell({
                                 className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 supports-[hover:hover]:hover:bg-blue-200"
                               >
                                 {tNotifications("bell.actions.openReport")}
+                              </button>
+                            )}
+                            {notification.type === "reminder" && notification?.metadata?.recurring_rule_id && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push("/dashboard");
+                                  setIsOpen(false);
+                                }}
+                                className="text-xs px-2 py-1 rounded bg-green-100 text-green-700 supports-[hover:hover]:hover:bg-green-200"
+                              >
+                                {tNotifications("bell.actions.viewCalendar")}
                               </button>
                             )}
                           </div>

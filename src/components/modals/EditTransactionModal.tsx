@@ -99,14 +99,12 @@ const EditTransactionModal = ({
                 <TabsTrigger
                   value="expense"
                   disabled={!allowTypeChange}
-                  className="data-[state=active]:bg-error data-[state=active]:text-error-foreground"
                 >
                   {tModals("transaction.type.expense")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="income"
                   disabled={!allowTypeChange}
-                  className="data-[state=active]:bg-success data-[state=active]:text-success-foreground"
                 >
                   {tModals("transaction.type.income")}
                 </TabsTrigger>
@@ -145,11 +143,11 @@ const EditTransactionModal = ({
             <div className="sticky bottom-0 mt-4">
               <Button
                 type="submit"
-                text={tCommon("save")}
+                text={isLoading ? tCommon("saving") : tCommon("save")}
                 variant="default"
                 disabled={isLoading || !localTitle.trim() || !amount}
                 isLoading={isLoading}
-                className={`w-full ${type === "expense" ? "bg-error text-error-foreground" : "bg-success text-success-foreground"}`}
+                className="w-full"
               />
             </div>
           </form>

@@ -13,40 +13,71 @@ import { processUserRecurringTransactions } from "@/app/[locale]/actions/recurri
 export function RecurringSync() {
   const { toast } = useToast();
   const t = useTranslations("recurring.toast");
+  const tCommon = useTranslations("common");
 
   useEffect(() => {
     let mounted = true;
 
     const syncRecurringTransactions = async () => {
+      console.log("[RecurringSync] Starting sync...");
+      
       try {
         const result = await processUserRecurringTransactions();
 
-        if (!mounted) return;
+        console.log("[RecurringSync] Result:", {
+          generated: result.generated,
+          skipped: result.skipped,
+          shouldShowToast: result.shouldShowToast,
+          errors: result.errors,
+        });
+
+        if (!mounted) {
+          console.log("[RecurringSync] Component unmounted, skipping UI updates");
+          return;
+        }
 
         // Show toast ONLY if:
         // 1. Transactions were generated
         // 2. Push notifications are disabled OR failed
         if (result.generated > 0 && result.shouldShowToast) {
           if (result.generated === 1 && result.transactionName) {
+            console.log("[RecurringSync] Showing single transaction toast:", result.transactionName);
             toast({
               title: t("single", { name: result.transactionName }),
-              variant: "success",
+              variant: "default",
               duration: 5000,
             });
           } else {
+            console.log("[RecurringSync] Showing multiple transactions toast:", result.generated);
             toast({
               title: t("multiple", { count: result.generated }),
-              variant: "success",
+              variant: "default",
               duration: 5000,
             });
           }
+        } else if (result.generated > 0) {
+          console.log("[RecurringSync] Transactions generated but toast skipped (push notification sent)");
         }
 
         if (result.errors.length > 0) {
-          console.error("RecurringSync errors:", result.errors);
+          console.error("[RecurringSync] Errors occurred:", result.errors);
+          toast({
+            title: tCommon("errorLabel"),
+            description: result.errors[0],
+            variant: "destructive",
+            duration: 7000,
+          });
         }
       } catch (err) {
-        console.error("RecurringSync error:", err);
+        console.error("[RecurringSync] Fatal error:", err);
+        if (mounted) {
+          toast({
+            title: tCommon("errorLabel"),
+            description: err instanceof Error ? err.message : tCommon("unexpectedError"),
+            variant: "destructive",
+            duration: 7000,
+          });
+        }
       }
     };
 
@@ -56,7 +87,7 @@ export function RecurringSync() {
     return () => {
       mounted = false;
     };
-  }, [toast, t]);
+  }, [toast, t, tCommon]);
 
   return null; // Silent background component
 }

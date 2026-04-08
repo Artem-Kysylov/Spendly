@@ -121,33 +121,29 @@ function Form() {
         <div className="flex gap-4 w-full">
           <label
             className={`cursor-pointer p-7 flex-1 rounded-lg border text-center font-medium transition-all
-            ${type === "expense" ? "bg-error text-error-foreground border-error" : "bg-background text-foreground border-border"}`}
+            ${type === "expense" ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border"}`}
           >
             <input
               type="radio"
               name="type"
               value="expense"
-              className="hidden"
               checked={type === "expense"}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setType(e.target.value as "expense" | "income")
-              }
+              onChange={() => setType("expense")}
+              className="sr-only"
             />
             Expense
           </label>
           <label
             className={`cursor-pointer p-7 flex-1 rounded-lg border text-center font-medium transition-all
-            ${type === "income" ? "bg-success text-success-foreground border-success" : "bg-background text-foreground border-border"}`}
+            ${type === "income" ? "bg-primary text-primary-foreground border-primary" : "bg-background text-foreground border-border"}`}
           >
             <input
               type="radio"
               name="type"
               value="income"
-              className="hidden"
               checked={type === "income"}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setType(e.target.value as "expense" | "income")
-              }
+              onChange={() => setType("income")}
+              className="sr-only"
             />
             Income
           </label>

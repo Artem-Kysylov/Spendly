@@ -1172,7 +1172,8 @@
       },
       "actions": {
         "openBudget": "Open budget",
-        "openReport": "Open report"
+        "openReport": "Open report",
+        "viewCalendar": "कैलेंडर देखें"
       },
       "pagination": {
         "prev": "Previous",
@@ -1241,6 +1242,11 @@
       "queueAdded": "नोटिफ़िकेशन कतार में जोड़ा गया",
       "subscriptionSaved": "सब्सक्रिप्शन सेव हो गया",
       "subscriptionRemoved": "सब्सक्रिप्शन हटा दिया गया"
+    },
+    "recurring": {
+      "dueTodayTitle": "आज आवर्ती भुगतान: {name}",
+      "dueSoonTitle": "जल्द ही आवर्ती भुगतान: {name}",
+      "message": "नियत तिथि {date}। लगभग {amount}।"
     }
   },
   "recurring": {

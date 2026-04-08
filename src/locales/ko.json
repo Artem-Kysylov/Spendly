@@ -1172,7 +1172,8 @@
       },
       "actions": {
         "openBudget": "예산 열기",
-        "openReport": "보고서 열기"
+        "openReport": "보고서 열기",
+        "viewCalendar": "캘린더 보기"
       },
       "pagination": {
         "prev": "이전",
@@ -1241,6 +1242,11 @@
       "queueAdded": "대기열에 추가되었습니다",
       "subscriptionSaved": "구독이 저장되었습니다",
       "subscriptionRemoved": "구독이 제거되었습니다"
+    },
+    "recurring": {
+      "dueTodayTitle": "오늘 정기 결제: {name}",
+      "dueSoonTitle": "곧 정기 결제: {name}",
+      "message": "만기일 {date}. 약 {amount}."
     }
   },
   "recurring": {

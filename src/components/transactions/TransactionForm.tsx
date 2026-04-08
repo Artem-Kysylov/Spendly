@@ -303,9 +303,9 @@ export default function TransactionForm({
       //   variant: "default",
       // });
 
-      // Notify parent first to show toast, then refresh data
+      // Notify parent first to show toast, then hard reload to refresh all data
       onSuccess();
-      setTimeout(() => router.refresh(), 100);
+      setTimeout(() => window.location.reload(), 300);
     } catch (err) {
       console.error("Error submitting transaction:", err);
       toast({
@@ -339,14 +339,12 @@ export default function TransactionForm({
               <TabsTrigger
                 value="expense"
                 disabled={isTypeDisabled}
-                className="data-[state=active]:bg-error data-[state=active]:text-error-foreground"
               >
                 <span>{tModals("transaction.type.expense")}</span>
               </TabsTrigger>
               <TabsTrigger
                 value="income"
                 disabled={isTypeDisabled}
-                className="data-[state=active]:bg-success data-[state=active]:text-success-foreground"
               >
                 <span>{tModals("transaction.type.income")}</span>
               </TabsTrigger>

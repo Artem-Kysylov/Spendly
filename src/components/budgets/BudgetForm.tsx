@@ -124,13 +124,11 @@ export default function BudgetForm({
           <TabsList className="mx-auto gap-2">
             <TabsTrigger
               value="expense"
-              className="data-[state=active]:bg-error data-[state=active]:text-error-foreground"
             >
               {tModals("budget.type.expense")}
             </TabsTrigger>
             <TabsTrigger
               value="income"
-              className="data-[state=active]:bg-success data-[state=active]:text-success-foreground"
             >
               {tModals("budget.type.income")}
             </TabsTrigger>
@@ -281,7 +279,7 @@ export default function BudgetForm({
               text={isLoading ? tCommon("saving") : tCommon("submit")}
               variant="default"
               disabled={isLoading || !name.trim() || !amount}
-              className={`w-full ${type === "expense" ? "bg-error text-error-foreground" : "bg-success text-success-foreground"}`}
+              className="w-full"
             />
           </div>
         </form>

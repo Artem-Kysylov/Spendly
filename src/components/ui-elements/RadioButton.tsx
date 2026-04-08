@@ -15,9 +15,7 @@ const RadioButton = ({
     const opacityStyles = disabled ? "opacity-50" : "";
 
     if (currentValue === value) {
-      return variant === "expense"
-        ? `bg-error text-error-foreground border-error ${baseStyles} ${opacityStyles}`
-        : `bg-success text-success-foreground border-success ${baseStyles} ${opacityStyles}`;
+      return `bg-primary text-primary-foreground border-primary ${baseStyles} ${opacityStyles}`;
     }
     return `${inactiveBgClassName ?? "bg-background"} text-secondary-foreground border-border ${baseStyles} ${opacityStyles}`;
   };

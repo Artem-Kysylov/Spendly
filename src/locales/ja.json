@@ -1172,7 +1172,8 @@
       },
       "actions": {
         "openBudget": "予算を開く",
-        "openReport": "レポートを開く"
+        "openReport": "レポートを開く",
+        "viewCalendar": "カレンダーを表示"
       },
       "pagination": {
         "prev": "前へ",
@@ -1241,6 +1242,11 @@
       "queueAdded": "キューに追加しました",
       "subscriptionSaved": "購読を保存しました",
       "subscriptionRemoved": "購読を削除しました"
+    },
+    "recurring": {
+      "dueTodayTitle": "今日の定期支払い: {name}",
+      "dueSoonTitle": "まもなく定期支払い: {name}",
+      "message": "期限 {date}。約 {amount}。"
     }
   },
   "recurring": {

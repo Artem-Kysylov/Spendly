@@ -255,6 +255,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Берём транзакции за прошлую и позапрошлую недели
+    // Дайджест создаётся ВСЕГДА, даже если транзакций нет (с нулевыми суммами)
     const { data: lastWeekTxs, error: lastErr } = await supabase
       .from("transactions")
       .select(`
@@ -267,8 +268,7 @@ export async function POST(req: NextRequest) {
 
     if (lastErr) {
       console.warn("digest: lastWeek tx error", lastErr);
-      skipped++;
-      continue;
+      // Продолжаем даже при ошибке - создадим дайджест с нулевыми данными
     }
 
     const { data: prevWeekTxs, error: prevErr } = await supabase

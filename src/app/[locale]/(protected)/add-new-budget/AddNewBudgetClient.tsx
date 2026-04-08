@@ -75,7 +75,10 @@ export default function AddNewBudgetClient() {
       if (error) throw error;
 
       handleToastMessage(tBudgets("list.toast.createSuccess"), "success");
-      setTimeout(() => router.push("/dashboard"), 2000);
+      setTimeout(() => {
+        router.push("/dashboard");
+        window.location.reload();
+      }, 1500);
     } catch (error: unknown) {
       console.error("Error creating budget:", error);
       handleToastMessage(tBudgets("list.toast.failedCreate"), "error");
