@@ -296,24 +296,9 @@ export async function generateRecurringTransactions(
         const resolvedLocale = normalizeLanguage(settings?.locale);
         const currency = settings?.currency || "USD";
 
-        let tone: AssistantTone = "neutral";
-        try {
-          const { data } = await supabase.auth.admin.getUserById(rule.user_id);
-          const raw = (data?.user?.user_metadata as unknown) as
-            | { assistant_tone?: unknown }
-            | undefined;
-          const t = raw?.assistant_tone;
-          if (
-            t === "neutral" ||
-            t === "friendly" ||
-            t === "formal" ||
-            t === "playful"
-          ) {
-            tone = t;
-          }
-        } catch {
-          // ignore
-        }
+        // Use default neutral tone for recurring transaction notifications
+        // Note: admin.getUserById requires service role key which may not be available in client-side server actions
+        const tone: AssistantTone = "neutral";
 
         // Create the transaction
         const createdId = await createTransactionFromRule(rule);
