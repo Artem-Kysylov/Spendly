@@ -108,6 +108,7 @@ export interface RecurringRule {
   avg_amount: number;
   cadence: "weekly" | "monthly";
   next_due_date: string;
+  type?: "expense" | "income";
   active: boolean;
   created_at: string;
   updated_at: string;

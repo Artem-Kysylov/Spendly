@@ -102,6 +102,7 @@ export const useTransactionsInfinite = ({
             ...transaction,
             category_emoji: transaction.budget_folders?.emoji || null,
             category_name: transaction.budget_folders?.name || null,
+            recurring_rule_id: transaction.recurring_rule_id ?? null,
           })) || [];
 
         if (transformedData.length < ITEMS_PER_PAGE) {

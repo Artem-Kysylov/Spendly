@@ -82,6 +82,7 @@ export interface Transaction {
   category_emoji?: string;
   is_recurring?: boolean;
   recurrence_day?: number | null;
+  recurring_rule_id?: string | null;
 }
 
 export interface TransactionTemplate {

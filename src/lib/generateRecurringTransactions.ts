@@ -141,6 +141,7 @@ async function createTransactionFromRule(
       budget_folder_id: rule.budget_folder_id,
       created_at: toOffsetISOString(new Date()),
       is_recurring: false, // The created transaction is not recurring itself
+      recurring_rule_id: rule.id,
     })
     .select("id")
     .single();

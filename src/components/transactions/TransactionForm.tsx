@@ -33,10 +33,11 @@ import Button from "@/components/ui-elements/Button";
 import HybridDatePicker from "@/components/ui-elements/HybridDatePicker";
 import TextInput from "@/components/ui-elements/TextInput";
 import { UserAuth } from "@/context/AuthContext";
+import { useRecurringRule } from "@/hooks/useRecurringRule";
 import { useSubscription } from "@/hooks/useSubscription";
 import useDeviceType from "@/hooks/useDeviceType";
 import { checkMainBudgetThresholds } from "@/lib/budget/checkMainBudgetThresholds";
-import { mergeDateWithTime, toOffsetISOString } from "@/lib/dateUtils";
+import { formatDateOnly, mergeDateWithTime, toOffsetISOString } from "@/lib/dateUtils";
 import { supabase } from "@/lib/supabaseClient";
 import { isValidAmountInput, parseAmountInput } from "@/lib/utils";
 import { checkBudgetThresholds } from "@/lib/budget/checkThresholds";
@@ -53,6 +54,8 @@ const transactionSchema = z.object({
   saveAsTemplate: z.boolean().optional(),
   isRecurring: z.boolean().optional(),
   recurrenceDay: z.number().min(1).max(31).nullable().optional(),
+  recurrenceCadence: z.enum(["weekly", "monthly"]).optional(),
+  nextDueDate: z.date().nullable().optional(),
 });
 
 type TransactionFormValues = z.infer<typeof transactionSchema>;
@@ -85,6 +88,7 @@ export default function TransactionForm({
   const tModals = useTranslations("modals");
   const tCommon = useTranslations("common");
   const tTransactions = useTranslations("transactions");
+  const tSettings = useTranslations("userSettings");
   const { toast } = useToast();
   const router = useRouter();
 
@@ -104,6 +108,22 @@ export default function TransactionForm({
 
   const { subscriptionPlan } = useSubscription();
   const isPro = subscriptionPlan === "pro";
+  const recurringRuleId = initialData?.recurring_rule_id ?? null;
+  const recurringRuleLookup = initialData
+    ? {
+        title: initialData.title ?? "",
+        amount: Number(initialData.amount ?? 0),
+        type: initialData.type ?? "expense",
+        budgetFolderId: initialData.budget_folder_id ?? null,
+      }
+    : undefined;
+  const {
+    recurringRule,
+    isLoading: isRecurringRuleLoading,
+    updateRecurringRule,
+  } = useRecurringRule(recurringRuleId, recurringRuleLookup);
+  const effectiveRecurringRuleId = recurringRuleId ?? recurringRule?.id ?? null;
+  const hasRecurringRule = Boolean(effectiveRecurringRuleId);
 
   const form = useForm<TransactionFormValues>({
     resolver: zodResolver(transactionSchema),
@@ -117,8 +137,10 @@ export default function TransactionForm({
         ? new Date(initialData.created_at)
         : new Date(),
       saveAsTemplate: false,
-      isRecurring: initialData?.is_recurring || false,
+      isRecurring: initialData?.is_recurring || hasRecurringRule,
       recurrenceDay: initialData?.recurrence_day || new Date().getDate(),
+      recurrenceCadence: "monthly",
+      nextDueDate: initialData?.created_at ? new Date(initialData.created_at) : new Date(),
     },
   });
 
@@ -127,6 +149,14 @@ export default function TransactionForm({
   const currentTitle = watch("title");
   const isRecurring = watch("isRecurring");
   const [recurringCount, setRecurringCount] = useState(0);
+
+  useEffect(() => {
+    if (!recurringRule) return;
+
+    setValue("isRecurring", true);
+    setValue("recurrenceCadence", recurringRule.cadence);
+    setValue("nextDueDate", parseDateOnly(recurringRule.next_due_date));
+  }, [recurringRule, setValue]);
 
   // Fetch Data
   useEffect(() => {
@@ -192,6 +222,11 @@ export default function TransactionForm({
     return s.replace(/[^\p{L}\p{N}\s]/gu, " ").trim();
   };
 
+  const parseDateOnly = (value: string): Date => {
+    const [year, month, day] = value.split("-").map(Number);
+    return new Date(year, (month || 1) - 1, day || 1);
+  };
+
   const applyBudgetId = useCallback(
     (budgetId: string) => {
       setValue("budget_folder_id", budgetId);
@@ -220,6 +255,11 @@ export default function TransactionForm({
 
     if (!isValidAmountInput(data.amount)) return;
     const parsedAmount = parseAmountInput(data.amount);
+    const normalizedBudgetFolderId =
+      data.budget_folder_id === "unbudgeted" ? null : data.budget_folder_id;
+    const nextDueDate = data.nextDueDate
+      ? formatDateOnly(data.nextDueDate)
+      : recurringRule?.next_due_date ?? formatDateOnly(new Date());
 
     setIsLoading(true);
     try {
@@ -228,13 +268,15 @@ export default function TransactionForm({
         title: data.title,
         amount: parsedAmount,
         type: data.type,
-        budget_folder_id:
-          data.budget_folder_id === "unbudgeted" ? null : data.budget_folder_id,
+        budget_folder_id: normalizedBudgetFolderId,
         created_at: toOffsetISOString(data.created_at),
-        is_recurring: data.isRecurring || false,
-        recurrence_day: data.isRecurring
+        is_recurring: hasRecurringRule ? false : (data.isRecurring || false),
+        recurrence_day: hasRecurringRule
+          ? null
+          : data.isRecurring
           ? (data.recurrenceDay ?? new Date().getDate())
           : null,
+        recurring_rule_id: effectiveRecurringRuleId,
       };
 
       let error: unknown = null;
@@ -253,6 +295,17 @@ export default function TransactionForm({
       }
 
       if (error) throw error;
+
+      if (hasRecurringRule) {
+        await updateRecurringRule({
+          title_pattern: data.title,
+          avg_amount: parsedAmount,
+          budget_folder_id: normalizedBudgetFolderId,
+          cadence: data.recurrenceCadence ?? recurringRule?.cadence ?? "monthly",
+          next_due_date: nextDueDate,
+          type: data.type,
+        });
+      }
 
       // Check budget thresholds for expense transactions
       if (data.type === "expense" && transactionData.budget_folder_id) {
@@ -651,73 +704,138 @@ export default function TransactionForm({
 
       {/* Recurring Checkbox */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-center gap-2">
-          <Controller
-            name="isRecurring"
-            control={control}
-            render={({ field }) => (
-              <Checkbox
-                checked={field.value}
-                onChange={(checked) => {
-                  if (!isPro && recurringCount >= 3 && !initialData?.is_recurring) {
-                    toast({
-                      title: tModals("transaction.recurringLimitTitle"),
-                      description: tModals("transaction.recurringLimitMessage"),
-                      variant: "destructive",
-                    });
-                    return;
-                  }
-                  field.onChange(checked);
-                }}
-                className="h-7 w-7 md:h-4 md:w-4 rounded border border-border bg-transparent dark:bg-transparent accent-primary"
-              />
+        {hasRecurringRule ? (
+          <>
+            <div className="text-sm font-medium text-secondary-black dark:text-white">
+              {tSettings("recurringRules.title")}
+            </div>
+            {isRecurringRuleLoading ? (
+              <div className="text-sm text-muted-foreground">
+                {tCommon("loading")}...
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="flex flex-col gap-1">
+                  <div className="text-sm font-medium text-secondary-black dark:text-white">
+                    {tSettings("recurringRules.form.cadence.label")}
+                  </div>
+                  <Controller
+                    name="recurrenceCadence"
+                    control={control}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value ?? recurringRule?.cadence ?? "monthly"}
+                        onValueChange={(value) =>
+                          field.onChange(value as "weekly" | "monthly")
+                        }
+                      >
+                        <SelectTrigger className="bg-background text-foreground h-[50px] px-[20px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="weekly">
+                            {tSettings("recurringRules.form.cadence.options.weekly")}
+                          </SelectItem>
+                          <SelectItem value="monthly">
+                            {tSettings("recurringRules.form.cadence.options.monthly")}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <div className="text-sm font-medium text-secondary-black dark:text-white">
+                    {tSettings("recurringRules.form.nextDue.label")}
+                  </div>
+                  <Controller
+                    name="nextDueDate"
+                    control={control}
+                    render={({ field }) => (
+                      <HybridDatePicker
+                        selectedDate={field.value ?? new Date()}
+                        onDateSelect={(nextDate) => field.onChange(nextDate)}
+                        placeholder={tSettings("recurringRules.form.nextDue.placeholder")}
+                        className="w-full"
+                      />
+                    )}
+                  />
+                </div>
+              </div>
             )}
-          />
-          <div className="text-sm">{tModals("transaction.recurring")}</div>
-        </div>
+            <div className="text-xs text-muted-foreground">
+              {tModals("transaction.recurringNotificationHint")}
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-2">
+              <Controller
+                name="isRecurring"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    checked={field.value}
+                    onChange={(checked) => {
+                      if (!isPro && recurringCount >= 3 && !initialData?.is_recurring) {
+                        toast({
+                          title: tModals("transaction.recurringLimitTitle"),
+                          description: tModals("transaction.recurringLimitMessage"),
+                          variant: "destructive",
+                        });
+                        return;
+                      }
+                      field.onChange(checked);
+                    }}
+                    className="h-7 w-7 md:h-4 md:w-4 rounded border border-border bg-transparent dark:bg-transparent accent-primary"
+                  />
+                )}
+              />
+              <div className="text-sm">{tModals("transaction.recurring")}</div>
+            </div>
 
-        {/* Recurring Day Input - shown when checkbox is checked */}
-        {isRecurring && (
-          <div className="ml-6 flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
-              {tModals("transaction.recurringRepeatEvery")}
-            </span>
-            <Controller
-              name="recurrenceDay"
-              control={control}
-              render={({ field }) => (
-                <input
-                  type="number"
-                  min="1"
-                  max="31"
-                  value={field.value ?? ""}
-                  onChange={(e) => {
-                    const raw = e.target.value;
-                    if (raw === "") {
-                      field.onChange(null);
-                      return;
-                    }
+            {isRecurring && (
+              <div className="ml-6 flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">
+                  {tModals("transaction.recurringRepeatEvery")}
+                </span>
+                <Controller
+                  name="recurrenceDay"
+                  control={control}
+                  render={({ field }) => (
+                    <input
+                      type="number"
+                      min="1"
+                      max="31"
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        if (raw === "") {
+                          field.onChange(null);
+                          return;
+                        }
 
-                    const val = Number.parseInt(raw, 10);
-                    if (!Number.isFinite(val)) return;
-                    if (val < 1 || val > 31) return;
-                    field.onChange(val);
-                  }}
-                  className="w-16 h-9 px-2 text-center rounded-md border border-primary bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        const val = Number.parseInt(raw, 10);
+                        if (!Number.isFinite(val)) return;
+                        if (val < 1 || val > 31) return;
+                        field.onChange(val);
+                      }}
+                      className="w-16 h-9 px-2 text-center rounded-md border border-primary bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  )}
                 />
-              )}
-            />
-            <span className="text-sm text-muted-foreground">
-              {tModals("transaction.recurringDayOfMonth")}
-            </span>
-          </div>
-        )}
+                <span className="text-sm text-muted-foreground">
+                  {tModals("transaction.recurringDayOfMonth")}
+                </span>
+              </div>
+            )}
 
-        {/* Notification hint */}
-        {isRecurring && (
-          <div className="ml-6 text-xs text-muted-foreground">
-            {tModals("transaction.recurringNotificationHint")}
-          </div>
+            {isRecurring && (
+              <div className="ml-6 text-xs text-muted-foreground">
+                {tModals("transaction.recurringNotificationHint")}
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -727,7 +845,7 @@ export default function TransactionForm({
           type="submit"
           text={tCommon("submit")}
           variant="default"
-          disabled={isLoading}
+          disabled={isLoading || isRecurringRuleLoading}
           isLoading={isLoading}
           className="w-full"
         />

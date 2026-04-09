@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
       title_pattern: String(body.title_pattern || "").trim(),
       budget_folder_id: body.budget_folder_id ?? null,
       avg_amount: Number(body.avg_amount),
+      type: body.type === "income" ? "income" : "expense",
       cadence: body.cadence === "weekly" ? "weekly" : "monthly",
       next_due_date: String(
         body.next_due_date || new Date().toISOString().slice(0, 10),
@@ -72,6 +73,12 @@ export async function PATCH(req: NextRequest) {
       body.budget_folder_id === null
     )
       patch.budget_folder_id = body.budget_folder_id;
+    if (body.type === "expense" || body.type === "income") {
+      patch.type = body.type;
+    }
+    if (typeof body.next_due_date === "string") {
+      patch.next_due_date = body.next_due_date;
+    }
     patch.updated_at = new Date().toISOString();
 
     const { data: ruleData, error } = await supabase
