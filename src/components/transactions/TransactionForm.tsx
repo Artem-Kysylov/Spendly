@@ -392,12 +392,14 @@ export default function TransactionForm({
               <TabsTrigger
                 value="expense"
                 disabled={isTypeDisabled}
+                className="data-[state=active]:bg-red-500 data-[state=active]:text-white"
               >
                 <span>{tModals("transaction.type.expense")}</span>
               </TabsTrigger>
               <TabsTrigger
                 value="income"
                 disabled={isTypeDisabled}
+                className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
               >
                 <span>{tModals("transaction.type.income")}</span>
               </TabsTrigger>

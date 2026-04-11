@@ -49,6 +49,17 @@ import { toOffsetISOString } from "@/lib/dateUtils";
 import { supabase } from "@/lib/supabaseClient";
 import type { ToastMessageProps, Transaction } from "@/types/types";
 
+const getInitialCurrencyFromLocale = (locale: string): string => {
+  const base = locale.split("-")[0];
+  if (base === "uk") return "UAH";
+  if (base === "ru") return "RUB";
+  if (base === "ja") return "JPY";
+  if (base === "ko") return "KRW";
+  if (base === "id") return "IDR";
+  if (base === "hi") return "INR";
+  return "USD";
+};
+
 export default function TransactionsClient() {
   const { session } = UserAuth();
   const locale = useLocale();
@@ -59,19 +70,24 @@ export default function TransactionsClient() {
   const { subscriptionPlan } = useSubscription();
   const isPro = subscriptionPlan === "pro";
 
-  const [currency, setCurrency] = useState<string>(() => {
-    if (typeof window !== "undefined") {
-      return window.localStorage.getItem("user-currency") || "USD";
+  const [currency, setCurrency] = useState<string>(
+    getInitialCurrencyFromLocale(locale),
+  );
+
+  useEffect(() => {
+    setCurrency(getInitialCurrencyFromLocale(locale));
+  }, [locale]);
+
+  useEffect(() => {
+    try {
+      const storedCurrency = window.localStorage.getItem("user-currency");
+      if (storedCurrency) {
+        setCurrency(storedCurrency);
+      }
+    } catch {
+      // no-op
     }
-    const base = locale.split("-")[0];
-    if (base === "uk") return "UAH";
-    if (base === "ru") return "RUB";
-    if (base === "ja") return "JPY";
-    if (base === "ko") return "KRW";
-    if (base === "id") return "IDR";
-    if (base === "hi") return "INR";
-    return "USD";
-  });
+  }, []);
 
   useEffect(() => {
     const userId = session?.user?.id;
@@ -411,24 +427,23 @@ export default function TransactionsClient() {
       {/* 3. Collapsible Analytics */}
       <div className="px-4 md:px-6 mb-4">
         <div className="border border-border rounded-xl overflow-hidden bg-card shadow-sm">
-          <button
-            type="button"
-            className={`flex w-full items-center justify-between p-4 transition-colors md:cursor-default ${
-              isMobile
-                ? "cursor-pointer md:hover:bg-muted/50"
-                : "cursor-default"
-            }`}
-            onClick={() => {
-              if (isMobile) toggleAnalytics();
-            }}
-            disabled={!isMobile}
-            aria-expanded={isMobile ? isAnalyticsOpen : undefined}
-          >
-            <div className="flex items-center gap-2">
+          <div className="flex w-full items-center justify-between p-4">
+            <button
+              type="button"
+              className={`flex items-center gap-2 transition-colors md:cursor-default ${
+                isMobile
+                  ? "cursor-pointer md:hover:bg-muted/50"
+                  : "cursor-default"
+              }`}
+              onClick={() => {
+                if (isMobile) toggleAnalytics();
+              }}
+              disabled={!isMobile}
+              aria-expanded={isMobile ? isAnalyticsOpen : undefined}
+            >
               <span className="font-medium text-foreground">
                 Spending Analytics
               </span>
-              {/* Chevron only on mobile */}
               <div className="md:hidden">
                 {isAnalyticsOpen ? (
                   <ChevronUp size={16} className="text-muted-foreground" />
@@ -436,7 +451,7 @@ export default function TransactionsClient() {
                   <ChevronDown size={16} className="text-muted-foreground" />
                 )}
               </div>
-            </div>
+            </button>
 
             <Sheet open={isAiSheetOpen} onOpenChange={setIsAiSheetOpen}>
               <SheetTrigger>
@@ -460,7 +475,6 @@ export default function TransactionsClient() {
                             );
                           }
                         } catch {
-                          // no-op
                         }
                       }
                       setIsAiSheetOpen(true);
@@ -647,7 +661,7 @@ export default function TransactionsClient() {
                 </div>
               </SheetContent>
             </Sheet>
-          </button>
+          </div>
 
           <AnimatePresence initial={false}>
             {shouldShowAnalytics && (

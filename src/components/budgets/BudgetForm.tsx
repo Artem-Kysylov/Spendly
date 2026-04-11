@@ -124,11 +124,13 @@ export default function BudgetForm({
           <TabsList className="mx-auto gap-2">
             <TabsTrigger
               value="expense"
+              className="data-[state=active]:bg-red-500 data-[state=active]:text-white"
             >
               {tModals("budget.type.expense")}
             </TabsTrigger>
             <TabsTrigger
               value="income"
+              className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
             >
               {tModals("budget.type.income")}
             </TabsTrigger>

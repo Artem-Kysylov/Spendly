@@ -21,8 +21,7 @@ export const formatCurrency = (
   currency?: string,
   abbreviated: boolean = false,
 ): string => {
-  // Get currency from localStorage or default to USD
-  const userCurrency = currency || (typeof window !== 'undefined' ? localStorage.getItem('user-currency') : null) || 'USD';
+  const userCurrency = currency || 'USD';
   
   if (abbreviated && amount >= 1000) {
     if (amount >= 1000000) {

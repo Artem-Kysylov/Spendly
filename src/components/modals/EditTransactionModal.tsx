@@ -99,12 +99,14 @@ const EditTransactionModal = ({
                 <TabsTrigger
                   value="expense"
                   disabled={!allowTypeChange}
+                  className="data-[state=active]:bg-red-500 data-[state=active]:text-white"
                 >
                   {tModals("transaction.type.expense")}
                 </TabsTrigger>
                 <TabsTrigger
                   value="income"
                   disabled={!allowTypeChange}
+                  className="data-[state=active]:bg-green-500 data-[state=active]:text-white"
                 >
                   {tModals("transaction.type.income")}
                 </TabsTrigger>
