@@ -108,6 +108,19 @@ function NotificationBell({
     }
   };
 
+  const formatNotificationMessage = (message: string) =>
+    message.replace(/\b\d{4}-\d{2}-\d{2}\b/g, (match) => {
+      const date = new Date(`${match}T00:00:00`);
+      if (Number.isNaN(date.getTime())) {
+        return match;
+      }
+
+      return new Intl.DateTimeFormat(locale, {
+        day: "numeric",
+        month: "long",
+      }).format(date);
+    });
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element;
@@ -285,7 +298,7 @@ function NotificationBell({
                             )}
                           </div>
                           <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                            {notification.message}
+                            {formatNotificationMessage(notification.message)}
                           </p>
                           <p className="text-xs text-gray-400 mt-2">
                             {formatDistanceToNow(
@@ -340,18 +353,6 @@ function NotificationBell({
                                 className="text-xs px-2 py-1 rounded bg-blue-100 text-blue-700 supports-[hover:hover]:hover:bg-blue-200"
                               >
                                 {tNotifications("bell.actions.openReport")}
-                              </button>
-                            )}
-                            {notification.type === "reminder" && notification?.metadata?.recurring_rule_id && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  router.push("/dashboard");
-                                  setIsOpen(false);
-                                }}
-                                className="text-xs px-2 py-1 rounded bg-green-100 text-green-700 supports-[hover:hover]:hover:bg-green-200"
-                              >
-                                {tNotifications("bell.actions.viewCalendar")}
                               </button>
                             )}
                           </div>
