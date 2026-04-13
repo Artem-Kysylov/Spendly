@@ -105,6 +105,7 @@ export interface TransactionsTableProps {
   };
   onEditTransaction?: (payload: EditTransactionPayload) => Promise<void>;
   allowTypeChange?: boolean;
+  currency?: string;
 }
 
 export interface SignOutModalProps {

@@ -547,6 +547,7 @@ export default function BudgetDetailsClient() {
                           transaction={transaction}
                           onEdit={(tx) => setEditingTransaction(tx)}
                           onDelete={handleDeleteTransaction}
+                          currency={currency}
                         />
                       ))}
                     </div>
@@ -610,6 +611,7 @@ export default function BudgetDetailsClient() {
               onDeleteTransaction={handleDeleteTransaction}
               onEditTransaction={handleEditTransaction}
               onEditClick={(tx) => setEditingTransaction(tx)}
+              currency={currency}
             />
             {/* Loading Indicator for Next Page */}
             <div ref={observerTarget} className="py-4 flex justify-center">

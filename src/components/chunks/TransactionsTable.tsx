@@ -16,6 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatCurrency } from "@/lib/chartUtils";
 import { UserAuth } from "../../context/AuthContext";
 import { supabase } from "../../lib/supabaseClient";
 
@@ -51,6 +52,7 @@ function TransactionsTable({
   emptyStateMessage,
   onTransactionUpdate,
   onEditClick,
+  currency,
 }: EnhancedTransactionsTableProps) {
   const [selectedTransactionId, setSelectedTransactionId] = useState<
     string | null
@@ -195,7 +197,7 @@ function TransactionsTable({
               <div
                 className={`${transaction.type === "expense" ? "text-error" : "text-success"} font-bold`}
               >
-                ${transaction.amount}
+                {formatCurrency(transaction.amount, currency)}
               </div>
               <div className="flex items-center gap-2">
                 <Button
@@ -292,7 +294,7 @@ function TransactionsTable({
                   )}
                 </TableCell>
                 <TableCell className="text-foreground font-semibold whitespace-nowrap">
-                  ${transaction.amount}
+                  {formatCurrency(transaction.amount, currency)}
                 </TableCell>
                 <TableCell>
                   <span

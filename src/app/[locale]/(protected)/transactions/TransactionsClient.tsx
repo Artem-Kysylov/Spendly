@@ -785,6 +785,7 @@ export default function TransactionsClient() {
                         transaction={transaction}
                         onEdit={handleEditClick}
                         onDelete={handleDeleteTransaction}
+                        currency={currency}
                       />
                     ))}
                   </div>
@@ -798,6 +799,7 @@ export default function TransactionsClient() {
                 transactions={transactions}
                 onDeleteTransaction={handleDeleteTransaction}
                 onEditClick={handleEditClick}
+                currency={currency}
               />
             </div>
 
