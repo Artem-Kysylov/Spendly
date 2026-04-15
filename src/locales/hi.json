@@ -1,30 +1,30 @@
 {
   "seo": {
     "paywall": {
-      "title": "Upgrade to Pro - Spendly",
-      "description": "Unlock unlimited budgets, AI assistant, and powerful features to take control of your finances with Spendly Pro."
+      "title": "Pro में अपग्रेड करें — Spendly",
+      "description": "असीमित बजट, AI असिस्टेंट और शक्तिशाली सुविधाओं को अनलॉक करें और Spendly Pro से अपने वित्त पर नियंत्रण पाएं।"
     }
   },
   "BudgetSetup": {
-    "title": "Set your monthly budget",
-    "selectCountry": "Select your country",
-    "selectCurrency": "Select your currency",
-    "customAmount": "Custom amount",
-    "save": "Save",
-    "autodetected": "Autodetected",
-    "searchCountry": "Search country...",
-    "searchCurrency": "Search currency...",
-    "clearSelection": "Clear"
+    "title": "अपना मासिक बजट सेट करें",
+    "selectCountry": "अपना देश चुनें",
+    "selectCurrency": "अपनी मुद्रा चुनें",
+    "customAmount": "अपनी राशि",
+    "save": "सहेजें",
+    "autodetected": "स्वतः पहचाना",
+    "searchCountry": "देश खोजें...",
+    "searchCurrency": "मुद्रा खोजें...",
+    "clearSelection": "साफ़ करें"
   },
   "greeting": {
-    "morning": "Good morning",
-    "afternoon": "Good afternoon",
-    "evening": "Good evening"
+    "morning": "सुप्रभात",
+    "afternoon": "नमस्कार",
+    "evening": "शुभ संध्या"
   },
   "Settings": {
-    "language": "Language",
-    "selectLanguage": "Select language",
-    "saveLanguage": "Save language"
+    "language": "भाषा",
+    "selectLanguage": "भाषा चुनें",
+    "saveLanguage": "भाषा सहेजें"
   },
   "common": {
     "saving": "सहेजा जा रहा है…",
@@ -74,8 +74,8 @@
       "install": "ऐप इंस्टॉल करें"
     },
     "settings": {
-      "title": "Install App",
-      "description": "Install Spendly for quick access and offline support"
+      "title": "ऐप इंस्टॉल करें",
+      "description": "त्वरित पहुँच और ऑफलाइन सपोर्ट के लिए Spendly इंस्टॉल करें"
     }
   },
   "Sidenav": {},
@@ -220,9 +220,9 @@
       "label": "फ्री",
       "short": "शुरू करने के लिए बेसिक फीचर्स",
       "features": {
-        "trackExpenses": "Track expenses and budgets",
-        "basicCharts": "Basic charts and insights",
-        "localNotifications": "Local device notifications"
+        "trackExpenses": "खर्च और बजट ट्रैक करें",
+        "basicCharts": "बुनियादी चार्ट और इनसाइट्स",
+        "localNotifications": "डिवाइस पर स्थानीय सूचनाएं"
       }
     },
     "pro": {
@@ -238,13 +238,13 @@
     }
   },
   "payment": {
-    "title": "Upgrade to Pro",
-    "subtitle": "Choose the plan that fits your needs. Billing will be powered by Lemon Squeezy.",
-    "toastComingSoon": "Payments are coming soon via Lemon Squeezy.",
-    "integrationComingSoon": "Lemon Squeezy integration — coming soon.",
-    "successTitle": "Payment Successful",
-    "successMessage": "Thank you for supporting Spendly Pro!",
-    "goToDashboard": "Go to Dashboard"
+    "title": "Pro में अपग्रेड करें",
+    "subtitle": "अपनी जरूरतों के अनुसार प्लान चुनें। बिलिंग Lemon Squeezy द्वारा संचालित होगी।",
+    "toastComingSoon": "Lemon Squeezy के माध्यम से भुगतान जल्द आ रहा है।",
+    "integrationComingSoon": "Lemon Squeezy इंटीग्रेशन — जल्द आ रहा है।",
+    "successTitle": "भुगतान सफल",
+    "successMessage": "Spendly Pro को सपोर्ट करने के लिए धन्यवाद!",
+    "goToDashboard": "डैशबोर्ड पर जाएं"
   },
   "paywall": {
     "hero": {
@@ -322,13 +322,13 @@
     }
   },
   "limitReached": {
-    "title": "Limit Reached",
-    "budgets": "You have reached the limit of 3 budgets on the Free plan.",
-    "wallets": "You have reached the limit of 5 wallets on the Free plan.",
+    "title": "सीमा पार हो गई",
+    "budgets": "आप फ्री प्लान पर 3 बजट की सीमा पर पहुँच गए हैं।",
+    "wallets": "आप फ्री प्लान पर 5 वॉलेट की सीमा पर पहुँच गए हैं।",
     "custom": "आपने अपने वर्तमान प्लान की सीमा तक पहुंच गए हैं।",
-    "description": "Upgrade to Pro to unlock unlimited budgets, AI assistant, and more powerful features.",
-    "upgrade": "Upgrade to Pro",
-    "cancel": "Not now"
+    "description": "असीमित बजट, AI असिस्टेंट और अधिक शक्तिशाली सुविधाएं पाने के लिए Pro में अपग्रेड करें।",
+    "upgrade": "Pro में अपग्रेड करें",
+    "cancel": "अभी नहीं"
   },
   "transactions": {
     "title": "लेन-देन",
@@ -359,7 +359,7 @@
       }
     },
     "search": {
-      "placeholder": "Search transactions..."
+      "placeholder": "लेन-देन खोजें..."
     },
     "empty": {
       "title": "अभी कोई लेन-देन नहीं",
@@ -444,12 +444,12 @@
     "counters": {
       "totalBudget": "कुल बजट",
       "totalExpenses": "कुल खर्च",
-      "dailySafeToSpend": "Daily safe-to-spend",
+      "dailySafeToSpend": "दैनिक सुरक्षित खर्च",
       "totalIncome": "कुल आय",
       "remaining": "शेष",
       "usedPercent": "उपयोग",
       "overBudget": "बजट से अधिक",
-      "daysLeftInMonth": "{days} days left in month",
+      "daysLeftInMonth": "महीने में {days} दिन बाकी",
       "safeToSpend": "सुरक्षित खर्च",
       "reserved": "आरक्षित",
       "status": {
@@ -461,13 +461,13 @@
       "coversExpenses": "{percent}% खर्च कवर करता है"
     },
     "insights": {
-      "critical": "Warning: You've used over 90% of your budget!",
-      "positive": "Great job! You're spending less than last week.",
-      "quietDay": "No spending today. Keep it up!",
-      "default": "Analyze your finances with Spendly Pal"
+      "critical": "चेतावनी: आपने बजट का 90% से अधिक खर्च कर लिया है!",
+      "positive": "शाबाश! आप पिछले सप्ताह से कम खर्च कर रहे हैं।",
+      "quietDay": "आज कोई खर्च नहीं। बढ़िया!",
+      "default": "Spendly Pal के साथ अपने वित्त का विश्लेषण करें"
     },
-    "recentActivity": "Recent Activity",
-    "showAll": "Show all",
+    "recentActivity": "हाल की गतिविधि",
+    "showAll": "सब दिखाएं",
     "incomeConfirmation": {
       "cardTitle": "आय की पुष्टि करें",
       "cardMessage": "इस चक्र के लिए {amount} को आय के रूप में जोड़ें?",
@@ -542,8 +542,8 @@
     },
     "details": {
       "inlineWarning": {
-        "reduceExpenses": "Reduce spending",
-        "openReport": "Open report"
+        "reduceExpenses": "खर्च कम करें",
+        "openReport": "रिपोर्ट खोलें"
       },
       "controls": {
         "goToBudgets": "बजट पर जाएँ",
@@ -579,66 +579,66 @@
     },
     "buttons": {
       "google": "Google से जारी रखें",
-      "signIn": "Sign in",
-      "signUp": "Sign up"
+      "signIn": "साइन इन करें",
+      "signUp": "साइन अप करें"
     },
     "states": {
-      "signingIn": "Signing in...",
-      "creatingAccount": "Creating account..."
+      "signingIn": "साइन इन हो रहा है...",
+      "creatingAccount": "अकाउंट बनाया जा रहा है..."
     }
   },
   "forgotPassword": {
-    "title": "Forgot your password",
-    "instructions": "Enter your email address and we’ll send you a link to reset your password. After sending, please check your inbox and the Spam folder.",
+    "title": "पासवर्ड भूल गए",
+    "instructions": "अपना ईमेल पता दर्ज करें और हम आपको पासवर्ड रीसेट करने का लिंक भेजेंगे। भेजने के बाद, कृपया अपना इनबॉक्स और स्पैम फ़ोल्डर देखें।",
     "label": {
-      "email": "Email"
+      "email": "ईमेल"
     },
     "placeholder": {
       "email": "you@example.com"
     },
     "error": {
-      "invalidEmail": "Please enter a valid email address"
+      "invalidEmail": "कृपया एक मान्य ईमेल पता दर्ज करें"
     },
     "states": {
-      "sending": "Sending..."
+      "sending": "भेजा जा रहा है..."
     },
     "buttons": {
-      "sendReset": "Send reset link",
-      "backToSignIn": "Back to Sign in"
+      "sendReset": "रीसेट लिंक भेजें",
+      "backToSignIn": "साइन इन पर वापस जाएं"
     },
     "success": {
-      "title": "Check your email",
-      "description": "If an account exists for this email, we’ve sent a password reset link. Please check your inbox and the Spam folder."
+      "title": "अपना ईमेल जाँचें",
+      "description": "यदि इस ईमेल के लिए कोई अकाउंट मौजूद है, तो हमने पासवर्ड रीसेट लिंक भेज दिया है। कृपया अपना इनबॉक्स और स्पैम फ़ोल्डर देखें।"
     }
   },
   "resetPassword": {
-    "title": "Set your new password",
-    "instructions": "Enter your new password below. Make sure it meets all the requirements.",
+    "title": "नया पासवर्ड सेट करें",
+    "instructions": "नीचे अपना नया पासवर्ड दर्ज करें। सुनिश्चित करें कि यह सभी आवश्यकताओं को पूरा करता हो।",
     "label": {
-      "password": "New Password",
-      "confirmPassword": "Confirm Password"
+      "password": "नया पासवर्ड",
+      "confirmPassword": "पासवर्ड की पुष्टि करें"
     },
     "placeholder": {
-      "password": "Enter new password",
-      "confirmPassword": "Confirm new password"
+      "password": "नया पासवर्ड दर्ज करें",
+      "confirmPassword": "नए पासवर्ड की पुष्टि करें"
     },
     "requirements": {
-      "minimumChars": "At least 6 characters",
-      "lowercase": "One lowercase letter",
-      "uppercase": "One uppercase letter",
-      "number": "One number",
-      "special": "One special character"
+      "minimumChars": "कम से कम 6 अक्षर",
+      "lowercase": "एक छोटे अक्षर",
+      "uppercase": "एक बड़ा अक्षर",
+      "number": "एक संख्या",
+      "special": "एक विशेष अक्षर"
     },
     "states": {
-      "updating": "Updating password..."
+      "updating": "पासवर्ड अपडेट हो रहा है..."
     },
     "buttons": {
-      "update": "Update password",
-      "backToSignIn": "Back to Sign in"
+      "update": "पासवर्ड अपडेट करें",
+      "backToSignIn": "साइन इन पर वापस जाएं"
     },
     "success": {
-      "title": "Password updated!",
-      "description": "Your password has been successfully updated. You will be redirected to the sign in page shortly."
+      "title": "पासवर्ड अपडेट हो गया!",
+      "description": "आपका पासवर्ड सफलतापूर्वक अपडेट हो गया है। आपको शीघ्र ही साइन इन पृष्ठ पर पुनर्निर्देशित किया जाएगा।"
     }
   },
   "notFound": {
@@ -657,14 +657,14 @@
       "dashboard": "डैशबोर्ड",
       "transactions": "लेन-देन",
       "budgets": "बजट",
-      "charts": "Charts",
-      "assistant": "AI Assistant",
-      "settings": "Settings",
+      "charts": "चार्ट",
+      "assistant": "AI असिस्टेंट",
+      "settings": "सेटिंग्स",
       "userSettings": "यूज़र सेटिंग्स"
     },
     "navbar": {
-      "welcome": "Welcome",
-      "logout": "Log out"
+      "welcome": "स्वागत है",
+      "logout": "लॉग आउट"
     },
     "alt": {
       "logo": "Spendly लोगो"
@@ -741,9 +741,9 @@
     },
     "budget": {
       "pickEmojiOptional": "इमोजी चुनें (वैकल्पिक)",
-      "pickColor": "Pick the color",
+      "pickColor": "रंग चुनें",
       "color": {
-        "none": "None/Default"
+        "none": "कोई नहीं/डिफ़ॉल्ट"
       },
       "placeholder": {
         "name": "बजट नाम",
@@ -804,7 +804,7 @@
       "recurringNotificationHint": "स्वचालित लॉग के बारे में अपडेट रहने के लिए सूचनाएं सक्षम करें",
       "recurringLimitTitle": "आवर्ती भुगतान सीमा पहुंच गई",
       "recurringLimitMessage": "मुफ्त सीमा पहुंच गई (3/3)। असीमित सदस्यता के लिए Pro प्राप्त करें!",
-      "autoTypeInfo": "Tip: using consistent names helps recognize recurring payments.",
+      "autoTypeInfo": "सुझाव: एक जैसे नाम उपयोग करने से आवर्ती भुगतान पहचानने में मदद मिलती है।",
       "hintRecurring": "टिप: आवर्ती भुगतानों को पहचानने में मदद के लिए सुसंगत नामों का उपयोग करें।",
       "ruleBadge": {
         "byRule": "नियम से स्वतः भरा गया",
@@ -840,10 +840,10 @@
   "setup": {
     "budget": {
       "toast": {
-        "signInRequired": "Please sign in to save a budget",
-        "invalidAmount": "Enter a valid budget amount",
-        "saveFailed": "Failed to save budget. Try again.",
-        "saveSuccess": "Budget saved successfully!"
+        "signInRequired": "बजट सहेजने के लिए साइन इन करें",
+        "invalidAmount": "सही बजट राशि दर्ज करें",
+        "saveFailed": "बजट सहेजने में विफल। पुनः प्रयास करें।",
+        "saveSuccess": "बजट सफलतापूर्वक सहेजा गया!"
       }
     }
   },
@@ -906,7 +906,7 @@
       "close": "AI असिस्टेंट बंद करें",
       "ask": "AI से पूछें",
       "newChat": "नई चैट",
-      "delete": "Delete"
+      "delete": "हटाएं"
     },
     "tone": {
       "label": "टोन",
@@ -919,14 +919,14 @@
       }
     },
     "history": {
-      "title": "History",
-      "empty": "No conversations yet",
-      "untitled": "Untitled",
-      "chatsLabel": "Chats history"
+      "title": "इतिहास",
+      "empty": "अभी कोई बातचीत नहीं",
+      "untitled": "बिना शीर्षक",
+      "chatsLabel": "चैट इतिहास"
     },
     "dates": {
-      "today": "Today",
-      "yesterday": "Yesterday"
+      "today": "आज",
+      "yesterday": "कल"
     },
     "settings": {
       "proOnlyHint": "कस्टम असिस्टेंट टोन प्रो पर उपलब्ध है। अनलॉक करने के लिए अपग्रेड करें।",
@@ -934,13 +934,13 @@
       "description": "अपने AI असिस्टेंट के उत्तर का टोन चुनें।"
     },
     "presets": {
-      "header": "Quick suggestions",
-      "showWeek": "Show this week’s summary",
-      "saveMoney": "Suggest how to save money",
-      "analyzePatterns": "Analyze my spending patterns",
-      "createBudgetPlan": "Create a budget plan",
-      "showBiggest": "Show biggest expenses",
-      "compareMonths": "Compare this month vs last"
+      "header": "त्वरित सुझाव",
+      "showWeek": "इस सप्ताह का सारांश दिखाएं",
+      "saveMoney": "पैसे बचाने के सुझाव दें",
+      "analyzePatterns": "मेरे खर्च के पैटर्न का विश्लेषण करें",
+      "createBudgetPlan": "बजट योजना बनाएं",
+      "showBiggest": "सबसे बड़े खर्च दिखाएं",
+      "compareMonths": "इस महीने और पिछले महीने की तुलना करें"
     },
     "errors": {
       "parseFailed": "लेन-देन बन नहीं पाया। कृपया इनपुट जाँचें और सुनिश्चित करें कि बजट मौजूद है। प्रारूप: Add \"शीर्षक\" 12.34 to <Budget> budget.",
@@ -1101,20 +1101,20 @@
       "meta": {
         "title": "बजट विवरण",
         "description": "अपने बजट विवरण देखें और प्रबंधित करें।",
-        "titleWithName": "{name} — Budget",
-        "descriptionWithName": "Details and activity for \"{name}\"."
+        "titleWithName": "{name} — बजट",
+        "descriptionWithName": "\"{name}\" के लिए विवरण और गतिविधि।"
       }
     },
     "addBudget": {
       "meta": {
-        "title": "Add New Budget",
-        "description": "Create a new budget to start tracking."
+        "title": "नया बजट जोड़ें",
+        "description": "ट्रैकिंग शुरू करने के लिए नया बजट बनाएं।"
       }
     },
     "userSettings": {
       "meta": {
-        "title": "User Settings",
-        "description": "Update account preferences and notifications."
+        "title": "यूज़र सेटिंग्स",
+        "description": "अकाउंट प्राथमिकताएं और सूचनाएं अपडेट करें।"
       }
     },
     "payment": {
@@ -1125,8 +1125,8 @@
     },
     "paywall": {
       "meta": {
-        "title": "Upgrade to Pro - Spendly",
-        "description": "Unlock unlimited budgets, AI assistant, and powerful features. Take control of your finances with Spendly Pro."
+        "title": "Pro में अपग्रेड करें — Spendly",
+        "description": "असीमित बजट, AI असिस्टेंट और शक्तिशाली सुविधाएं अनलॉक करें। Spendly Pro से अपने वित्त पर नियंत्रण पाएं।"
       }
     },
     "onboarding": {
@@ -1158,26 +1158,26 @@
   },
   "notifications": {
     "bell": {
-      "aria": "Notifications",
+      "aria": "सूचनाएँ",
       "title": "सूचनाएँ",
-      "markAllRead": "Mark all read",
+      "markAllRead": "सभी पढ़े हुए करें",
       "empty": {
-        "title": "No notifications yet",
-        "description": "We'll notify you when something important happens"
+        "title": "अभी कोई सूचना नहीं",
+        "description": "कुछ महत्वपूर्ण होने पर हम आपको सूचित करेंगे"
       },
-      "viewAll": "View all notifications",
+      "viewAll": "सभी सूचनाएँ देखें",
       "setup": {
-        "title": "Set up the database to work with notifications",
-        "subtitle": "Go to settings for instructions"
+        "title": "सूचनाओं के लिए डेटाबेस सेट करें",
+        "subtitle": "निर्देशों के लिए सेटिंग्स पर जाएं"
       },
       "actions": {
-        "openBudget": "Open budget",
-        "openReport": "Open report",
+        "openBudget": "बजट खोलें",
+        "openReport": "रिपोर्ट खोलें",
         "viewCalendar": "कैलेंडर देखें"
       },
       "pagination": {
-        "prev": "Previous",
-        "next": "Next"
+        "prev": "पिछला",
+        "next": "अगला"
       }
     },
     "settings": {
@@ -1192,8 +1192,8 @@
       "bodyPro": "AI विश्लेषण के साथ आपकी साप्ताहिक रिपोर्ट तैयार है।",
       "ctaUpgrade": "Pro में अपग्रेड करें"
     },
-    "push_subscribed": "Push subscribed",
-    "push_failed": "Push subscription failed",
+    "push_subscribed": "पुश सब्सक्रिप्शन सफल",
+    "push_failed": "पुश सब्सक्रिप्शन विफल",
     "permission_denied": "सूचना की अनुमति अस्वीकृत",
     "budget_80": "बजट का 80% उपयोग हो चुका है",
     "budget_100": "बजट पार हो गया",
@@ -1234,8 +1234,8 @@
       "togglePush": "पुश सूचनाएँ टॉगल करें"
     },
     "dev": {
-      "sqlScript": "SQL Script",
-      "copy": "Copy",
+      "sqlScript": "SQL स्क्रिप्ट",
+      "copy": "कॉपी करें",
       "copied": "कॉपी किया गया!"
     },
     "api": {
@@ -1277,24 +1277,24 @@
     }
   },
   "errors": {
-    "selectImageFile": "Please select an image file.",
-    "fileTooLarge5mb": "The file is too large (max 5 MB).",
-    "uploadAvatarFailed": "Failed to upload avatar.",
-    "removeAvatarFailed": "Failed to remove avatar.",
+    "selectImageFile": "कृपया एक इमेज फ़ाइल चुनें।",
+    "fileTooLarge5mb": "फ़ाइल बहुत बड़ी है (अधिकतम 5 MB)।",
+    "uploadAvatarFailed": "अवतार अपलोड करने में विफल।",
+    "removeAvatarFailed": "अवतार हटाने में विफल।",
     "auth": {
-      "invalidAuthHeader": "Invalid Authorization header.",
-      "notAuthenticated": "Not authenticated."
+      "invalidAuthHeader": "अमान्य Authorization हेडर।",
+      "notAuthenticated": "प्रमाणित नहीं है।"
     },
     "common": {
       "internalServerError": "आंतरिक सर्वर त्रुटि"
     },
     "notifications": {
-      "titleRequired": "Notification title is required.",
-      "invalidAction": "Invalid notification action.",
+      "titleRequired": "सूचना का शीर्षक आवश्यक है।",
+      "invalidAction": "अमान्य सूचना क्रिया।",
       "fetchFailed": "सूचनाएँ प्राप्त करने में विफल",
-      "createFailed": "Failed to create notification.",
-      "updateFailed": "Failed to update notification.",
-      "queueAdded": "Notification added to queue",
+      "createFailed": "सूचना बनाने में विफल।",
+      "updateFailed": "सूचना अपडेट करने में विफल।",
+      "queueAdded": "सूचना कतार में जोड़ी गई",
       "queueAddFailed": "नोटिफ़िकेशन को कतार में जोड़ने में विफल।",
       "queueFetchFailed": "नोटिफ़िकेशन कतार प्राप्त करने में विफल।",
       "subscriptionInvalid": "अमान्य पुश सब्सक्रिप्शन।",

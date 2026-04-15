@@ -74,8 +74,8 @@
       "install": "Встановити застосунок"
     },
     "settings": {
-      "title": "Install App",
-      "description": "Install Spendly for quick access and offline support"
+      "title": "Встановити додаток",
+      "description": "Встановіть Spendly для швидкого доступу та роботи офлайн"
     }
   },
   "Sidenav": {},
@@ -322,13 +322,13 @@
     }
   },
   "limitReached": {
-    "title": "Limit Reached",
-    "budgets": "You have reached the limit of 3 budgets on the Free plan.",
-    "wallets": "You have reached the limit of 5 wallets on the Free plan.",
+    "title": "Ліміт вичерпано",
+    "budgets": "Ви досягли ліміту в 3 бюджети на безкоштовному плані.",
+    "wallets": "Ви досягли ліміту в 5 гаманців на безкоштовному плані.",
     "custom": "Ви досягли ліміту поточного плану.",
-    "description": "Upgrade to Pro to unlock unlimited budgets, AI assistant, and more powerful features.",
-    "upgrade": "Upgrade to Pro",
-    "cancel": "Not now"
+    "description": "Оновіться до Pro, щоб отримати необмежені бюджети, AI‑асистента та потужні функції.",
+    "upgrade": "Оновити до Pro",
+    "cancel": "Не зараз"
   },
   "transactions": {
     "title": "Транзакції",
@@ -364,17 +364,17 @@
     "empty": {
       "title": "Транзакцій поки немає",
       "description": "Додайте свою першу транзакцію, щоб почати відстеження.",
-      "filtered": "No transactions found for the selected filters"
+      "filtered": "За вибраними фільтрами транзакцій не знайдено"
     },
     "modal": {
-      "addTitle": "Add Transaction",
+      "addTitle": "Додати транзакцію",
       "editTitle": "Редагувати транзакцію"
     },
     "toast": {
       "deleteFailed": "Не вдалося видалити транзакцію",
       "deleteSuccess": "Транзакцію видалено",
-      "updateFailed": "Failed to update transaction",
-      "updateSuccess": "Transaction updated successfully!"
+      "updateFailed": "Не вдалося оновити транзакцію",
+      "updateSuccess": "Транзакцію оновлено!"
     },
     "table": {
       "headers": {
@@ -467,7 +467,7 @@
       "default": "Аналізуйте свої фінанси зі Spendly Pal"
     },
     "recentActivity": "Остання активність",
-    "showAll": "Показати все",
+    "showAll": "Показати всі",
     "incomeConfirmation": {
       "cardTitle": "Підтвердіть дохід",
       "cardMessage": "Додати {amount} як дохід за цей цикл?",
@@ -525,10 +525,10 @@
         "createTitle": "Створити новий бюджет"
       },
       "toast": {
-        "failedLoad": "Failed to load budget folders",
-        "failedCreate": "Failed to create budget",
-        "createSuccess": "Budget created successfully",
-        "limitReached": "Ліміт: у безкоштовному плані — до 2 правил. Оновіться до Pro для безлімітних."
+        "failedLoad": "Не вдалося завантажити папки бюджету",
+        "failedCreate": "Не вдалося створити бюджет",
+        "createSuccess": "Бюджет створено",
+        "limitReached": "Ліміт: у безкоштовному плані доступно 3 бюджети. Оновіться до Pro для безліміту."
       },
       "card": {
         "createNew": "Створити новий бюджет"
@@ -542,8 +542,8 @@
     },
     "details": {
       "inlineWarning": {
-        "reduceExpenses": "Reduce spending",
-        "openReport": "Open report"
+        "reduceExpenses": "Скоротити витрати",
+        "openReport": "Відкрити звіт"
       },
       "controls": {
         "goToBudgets": "До бюджетів",
@@ -657,14 +657,14 @@
       "dashboard": "Панель",
       "transactions": "Транзакції",
       "budgets": "Бюджети",
-      "charts": "Charts",
-      "assistant": "AI Assistant",
-      "settings": "Settings",
+      "charts": "Графіки",
+      "assistant": "AI‑асистент",
+      "settings": "Налаштування",
       "userSettings": "Налаштування"
     },
     "navbar": {
-      "welcome": "Welcome",
-      "logout": "Log out"
+      "welcome": "Вітаємо",
+      "logout": "Вийти"
     },
     "alt": {
       "logo": "Логотип Spendly"
@@ -840,10 +840,10 @@
   "setup": {
     "budget": {
       "toast": {
-        "signInRequired": "Please sign in to save a budget",
-        "invalidAmount": "Enter a valid budget amount",
-        "saveFailed": "Failed to save budget. Try again.",
-        "saveSuccess": "Budget saved successfully!"
+        "signInRequired": "Будь ласка, увійдіть, щоб зберегти бюджет",
+        "invalidAmount": "Введіть коректну суму бюджету",
+        "saveFailed": "Не вдалося зберегти бюджет. Спробуйте ще раз.",
+        "saveSuccess": "Бюджет успішно збережено!"
       }
     }
   },
@@ -922,7 +922,7 @@
       "title": "Історія",
       "empty": "Поки що немає розмов",
       "untitled": "Чат без назви",
-      "chatsLabel": "Chats history"
+      "chatsLabel": "Історія чатів"
     },
     "dates": {
       "today": "Сьогодні",
@@ -1125,8 +1125,8 @@
     },
     "paywall": {
       "meta": {
-        "title": "Upgrade to Pro - Spendly",
-        "description": "Unlock unlimited budgets, AI assistant, and powerful features. Take control of your finances with Spendly Pro."
+        "title": "Оновлення до Pro — Spendly",
+        "description": "Розблокуйте необмежені бюджети, AI‑асистента та потужні функції для повного контролю над фінансами зі Spendly Pro."
       }
     },
     "onboarding": {
@@ -1187,13 +1187,13 @@
       }
     },
     "weekly": {
-      "title": "Weekly Digest",
-      "bodyFree": "Your weekly report is ready. Advanced insights available in Pro.",
-      "bodyPro": "Your weekly report with AI insights is ready.",
-      "ctaUpgrade": "Upgrade to Pro"
+      "title": "Щотижневий дайджест",
+      "bodyFree": "Ваш тижневий звіт готовий. Розширена аналітика доступна в Pro.",
+      "bodyPro": "Ваш тижневий звіт з AI‑аналізом готовий.",
+      "ctaUpgrade": "Оновити до Pro"
     },
-    "push_subscribed": "Push subscribed",
-    "push_failed": "Push subscription failed",
+    "push_subscribed": "Push‑підписку оформлено",
+    "push_failed": "Не вдалося підписатися на Push‑сповіщення",
     "permission_denied": "Доступ до сповіщень заборонено",
     "budget_80": "Використано 80% бюджету",
     "budget_100": "Бюджет перевищено",
@@ -1282,8 +1282,8 @@
     "uploadAvatarFailed": "Не вдалося завантажити аватар.",
     "removeAvatarFailed": "Не вдалося видалити аватар.",
     "auth": {
-      "invalidAuthHeader": "Invalid Authorization header.",
-      "notAuthenticated": "Not authenticated."
+      "invalidAuthHeader": "Недійсний заголовок авторизації.",
+      "notAuthenticated": "Не авторизовано."
     },
     "common": {
       "internalServerError": "Внутрішня помилка сервера"

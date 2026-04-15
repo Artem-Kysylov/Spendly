@@ -3,6 +3,7 @@
 import { Send, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -24,6 +25,7 @@ export function TransactionChatWindow({
   type Budget = { id: string; name: string; emoji?: string; type: "expense" | "income" };
   const { session } = UserAuth();
   const { toast } = useToast();
+  const router = useRouter();
   const tAI = useTranslations("assistant");
   const tChat = useTranslations("chat");
   const tTx = useTranslations("transactions");
@@ -93,8 +95,8 @@ export function TransactionChatWindow({
   }, [isOpen, session?.user?.user_metadata]);
 
   const handleTransactionSuccess = () => {
-    // Optionally trigger refetch of dashboard data
     window.dispatchEvent(new CustomEvent("transaction:created"));
+    router.refresh();
   };
 
   const handleTransactionError = (error: string) => {

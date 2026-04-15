@@ -1,30 +1,30 @@
 {
   "seo": {
     "paywall": {
-      "title": "Upgrade to Pro - Spendly",
-      "description": "Unlock unlimited budgets, AI assistant, and powerful features to take control of your finances with Spendly Pro."
+      "title": "Pro にアップグレード — Spendly",
+      "description": "無制限の予算、AI アシスタント、強力な機能をアンロック。Spendly Pro で家計を制御しましょう。"
     }
   },
   "BudgetSetup": {
-    "title": "Set your monthly budget",
-    "selectCountry": "Select your country",
-    "selectCurrency": "Select your currency",
-    "customAmount": "Custom amount",
-    "save": "Save",
-    "autodetected": "Autodetected",
-    "searchCountry": "Search country...",
-    "searchCurrency": "Search currency...",
-    "clearSelection": "Clear"
+    "title": "月間予算を設定",
+    "selectCountry": "国を選択",
+    "selectCurrency": "通貨を選択",
+    "customAmount": "カスタム金額",
+    "save": "保存",
+    "autodetected": "自動検出",
+    "searchCountry": "国を検索...",
+    "searchCurrency": "通貨を検索...",
+    "clearSelection": "クリア"
   },
   "greeting": {
-    "morning": "Good morning",
-    "afternoon": "Good afternoon",
-    "evening": "Good evening"
+    "morning": "おはようございます",
+    "afternoon": "こんにちは",
+    "evening": "こんばんは"
   },
   "Settings": {
-    "language": "Language",
-    "selectLanguage": "Select language",
-    "saveLanguage": "Save language"
+    "language": "言語",
+    "selectLanguage": "言語を選択",
+    "saveLanguage": "言語を保存"
   },
   "common": {
     "saving": "保存中…",
@@ -74,20 +74,20 @@
       "install": "アプリをインストール"
     },
     "settings": {
-      "title": "Install App",
-      "description": "Install Spendly for quick access and offline support"
+      "title": "アプリをインストール",
+      "description": "すばやいアクセスとオフラインサポートのために Spendly をインストール"
     }
   },
   "Sidenav": {},
   "userSettings": {
     "dangerZone": {
-      "title": "Danger Zone",
-      "description": "This action will cancel your Pro subscription and downgrade to Free.",
-      "unsubscribe": "Unsubscribe",
+      "title": "危険ゾーン",
+      "description": "この操作で Pro サブスクリプションがキャンセルされ、無料プランに戻ります。",
+      "unsubscribe": "サブスクリプションをキャンセル",
       "modal": {
-        "title": "Are you sure you want to unsubscribe?",
-        "confirm": "Confirm",
-        "cancel": "Cancel"
+        "title": "本当にサブスクリプションをキャンセルしますか？",
+        "confirm": "確認",
+        "cancel": "キャンセル"
       }
     },
     "header": {
@@ -220,9 +220,9 @@
       "label": "無料",
       "short": "はじめるための基本機能",
       "features": {
-        "trackExpenses": "Track expenses and budgets",
-        "basicCharts": "Basic charts and insights",
-        "localNotifications": "Local device notifications"
+        "trackExpenses": "支出と予算を管理",
+        "basicCharts": "基本グラフとインサイト",
+        "localNotifications": "デバイス上のローカル通知"
       }
     },
     "pro": {
@@ -238,13 +238,13 @@
     }
   },
   "payment": {
-    "title": "Upgrade to Pro",
-    "subtitle": "Choose the plan that fits your needs. Billing will be powered by Lemon Squeezy.",
-    "toastComingSoon": "Payments are coming soon via Lemon Squeezy.",
-    "integrationComingSoon": "Lemon Squeezy integration — coming soon.",
-    "successTitle": "Payment Successful",
-    "successMessage": "Thank you for supporting Spendly Pro!",
-    "goToDashboard": "Go to Dashboard"
+    "title": "Pro にアップグレード",
+    "subtitle": "ご要望に合ったプランをお選びください。Lemon Squeezy が決済を担当します。",
+    "toastComingSoon": "Lemon Squeezy 経由での支払いはまもなく提供予定です。",
+    "integrationComingSoon": "Lemon Squeezy の統合 — まもなく提供。",
+    "successTitle": "お支払い完了",
+    "successMessage": "Spendly Pro をご支援いただきありがとうございます！",
+    "goToDashboard": "ダッシュボードへ"
   },
   "paywall": {
     "hero": {
@@ -322,13 +322,13 @@
     }
   },
   "limitReached": {
-    "title": "Limit Reached",
-    "budgets": "You have reached the limit of 3 budgets on the Free plan.",
-    "wallets": "You have reached the limit of 5 wallets on the Free plan.",
+    "title": "上限に達しました",
+    "budgets": "無料プランで利用できる3つの予算の上限に達しました。",
+    "wallets": "無料プランで利用できる5つのウォレットの上限に達しました。",
     "custom": "現在のプランの上限に達しました。",
-    "description": "Upgrade to Pro to unlock unlimited budgets, AI assistant, and more powerful features.",
-    "upgrade": "Upgrade to Pro",
-    "cancel": "Not now"
+    "description": "Pro にアップグレードして、無制限の予算・AI アシスタント・強力な機能をアンロックしましょう。",
+    "upgrade": "Pro にアップグレード",
+    "cancel": "今はしない"
   },
   "transactions": {
     "title": "取引",
@@ -359,7 +359,7 @@
       }
     },
     "search": {
-      "placeholder": "Search transactions..."
+      "placeholder": "取引を検索..."
     },
     "empty": {
       "title": "まだ取引がありません",
@@ -444,12 +444,12 @@
     "counters": {
       "totalBudget": "合計予算",
       "totalExpenses": "合計支出",
-      "dailySafeToSpend": "Daily safe-to-spend",
+      "dailySafeToSpend": "1日の安全使用額",
       "totalIncome": "合計収入",
       "remaining": "残り",
       "usedPercent": "使用済み",
       "overBudget": "予算超過",
-      "daysLeftInMonth": "{days} days left in month",
+      "daysLeftInMonth": "今月残り {days} 日",
       "safeToSpend": "安全に使える",
       "reserved": "予約済み",
       "status": {
@@ -461,13 +461,13 @@
       "coversExpenses": "{percent}% の支出をカバー"
     },
     "insights": {
-      "critical": "Warning: You've used over 90% of your budget!",
-      "positive": "Great job! You're spending less than last week.",
-      "quietDay": "No spending today. Keep it up!",
-      "default": "Analyze your finances with Spendly Pal"
+      "critical": "警告: 予算の90%以上を使いました！",
+      "positive": "素晴らしい！先週より支出が少ないです。",
+      "quietDay": "今日は支出がありません。続けましょう！",
+      "default": "Spendly Pal で家計を分析"
     },
-    "recentActivity": "Recent Activity",
-    "showAll": "Show all",
+    "recentActivity": "最近の活動",
+    "showAll": "すべて見る",
     "incomeConfirmation": {
       "cardTitle": "収入を確認",
       "cardMessage": "このサイクルに {amount} を収入として追加しますか？",
@@ -503,9 +503,9 @@
       "modeLabel": "モード",
       "positiveOnly": "正のみ",
       "allowNegative": "負を許可",
-      "label": "Rollover",
-      "positive": "Rollover from last month",
-      "negative": "Overspending from last month"
+      "label": "ロールオーバー",
+      "positive": "先月からのロールオーバー",
+      "negative": "先月の超過支出"
     },
     "cyclic": {
       "toggleTitle": "毎月リセット（給料日サイクル）",
@@ -542,8 +542,8 @@
     },
     "details": {
       "inlineWarning": {
-        "reduceExpenses": "Reduce spending",
-        "openReport": "Open report"
+        "reduceExpenses": "支出を抑える",
+        "openReport": "レポートを開く"
       },
       "controls": {
         "goToBudgets": "予算へ",
@@ -579,66 +579,66 @@
     },
     "buttons": {
       "google": "Google で続行",
-      "signIn": "Sign in",
-      "signUp": "Sign up"
+      "signIn": "サインイン",
+      "signUp": "登録"
     },
     "states": {
-      "signingIn": "Signing in...",
-      "creatingAccount": "Creating account..."
+      "signingIn": "サインイン中...",
+      "creatingAccount": "アカウント作成中..."
     }
   },
   "forgotPassword": {
-    "title": "Forgot your password",
-    "instructions": "Enter your email address and we’ll send you a link to reset your password. After sending, please check your inbox and the Spam folder.",
+    "title": "パスワードを忘れた場合",
+    "instructions": "メールアドレスを入力すると、パスワードリセットリンクを送信します。送信後、受信トレイとスパムフォルダをご確認ください。",
     "label": {
-      "email": "Email"
+      "email": "メール"
     },
     "placeholder": {
       "email": "you@example.com"
     },
     "error": {
-      "invalidEmail": "Please enter a valid email address"
+      "invalidEmail": "有効なメールアドレスを入力してください"
     },
     "states": {
-      "sending": "Sending..."
+      "sending": "送信中..."
     },
     "buttons": {
-      "sendReset": "Send reset link",
-      "backToSignIn": "Back to Sign in"
+      "sendReset": "リセットリンクを送信",
+      "backToSignIn": "サインインに戻る"
     },
     "success": {
-      "title": "Check your email",
-      "description": "If an account exists for this email, we’ve sent a password reset link. Please check your inbox and the Spam folder."
+      "title": "メールを確認してください",
+      "description": "このメールにアカウントが存在する場合、パスワードリセットリンクを送信しました。受信トレイとスパムフォルダをご確認ください。"
     }
   },
   "resetPassword": {
-    "title": "Set your new password",
-    "instructions": "Enter your new password below. Make sure it meets all the requirements.",
+    "title": "新しいパスワードを設定",
+    "instructions": "新しいパスワードを入力してください。すべての要件を満たしていることを確認してください。",
     "label": {
-      "password": "New Password",
-      "confirmPassword": "Confirm Password"
+      "password": "新しいパスワード",
+      "confirmPassword": "パスワードの確認"
     },
     "placeholder": {
-      "password": "Enter new password",
-      "confirmPassword": "Confirm new password"
+      "password": "新しいパスワードを入力",
+      "confirmPassword": "新しいパスワードを確認"
     },
     "requirements": {
-      "minimumChars": "At least 6 characters",
-      "lowercase": "One lowercase letter",
-      "uppercase": "One uppercase letter",
-      "number": "One number",
-      "special": "One special character"
+      "minimumChars": "6文字以上",
+      "lowercase": "小文字1字以上",
+      "uppercase": "大文字1字以上",
+      "number": "数字1字以上",
+      "special": "特殊文字1字以上"
     },
     "states": {
-      "updating": "Updating password..."
+      "updating": "パスワード更新中..."
     },
     "buttons": {
-      "update": "Update password",
-      "backToSignIn": "Back to Sign in"
+      "update": "パスワードを更新",
+      "backToSignIn": "サインインに戻る"
     },
     "success": {
-      "title": "Password updated!",
-      "description": "Your password has been successfully updated. You will be redirected to the sign in page shortly."
+      "title": "パスワードを更新しました！",
+      "description": "パスワードが正常に更新されました。まもなくサインインページにリダイレクトされます。"
     }
   },
   "notFound": {
@@ -657,17 +657,17 @@
       "dashboard": "ダッシュボード",
       "transactions": "取引",
       "budgets": "予算",
-      "charts": "Charts",
-      "assistant": "AI Assistant",
-      "settings": "Settings",
+      "charts": "グラフ",
+      "assistant": "AI アシスタント",
+      "settings": "設定",
       "userSettings": "ユーザー設定"
     },
     "navbar": {
-      "welcome": "Welcome",
-      "logout": "Log out"
+      "welcome": "ようこそ",
+      "logout": "ログアウト"
     },
     "alt": {
-      "logo": "Spendly logo"
+      "logo": "Spendly ロゴ"
     },
     "upgradeBanner": {
       "title": "Proでインサイトを得る 🚀",
@@ -804,7 +804,7 @@
       "recurringNotificationHint": "自動記録の通知を受け取るには通知を有効にしてください",
       "recurringLimitTitle": "定期支払いの上限に達しました",
       "recurringLimitMessage": "無料プランの上限に達しました（3/3）。無制限のサブスクリプションにはProを取得してください！",
-      "autoTypeInfo": "Tip: using consistent names helps recognize recurring payments.",
+      "autoTypeInfo": "ヒント: 一貫した名前を使うと定期支払いが識別しやすくなります。",
       "hintRecurring": "ヒント: 定期的な支払いを識別しやすくするために、一貫した名前を使用してください。",
       "ruleBadge": {
         "byRule": "ルールによって自動入力されました",
@@ -840,10 +840,10 @@
   "setup": {
     "budget": {
       "toast": {
-        "signInRequired": "Please sign in to save a budget",
-        "invalidAmount": "Enter a valid budget amount",
-        "saveFailed": "Failed to save budget. Try again.",
-        "saveSuccess": "Budget saved successfully!"
+        "signInRequired": "予算を保存するにはサインインしてください",
+        "invalidAmount": "有効な予算金額を入力してください",
+        "saveFailed": "予算の保存に失敗しました。もう一度お試しください。",
+        "saveSuccess": "予算を正常に保存しました！"
       }
     }
   },
@@ -906,7 +906,7 @@
       "close": "AI アシスタントを閉じる",
       "ask": "AI に尋ねる",
       "newChat": "新しいチャット",
-      "delete": "Delete"
+      "delete": "削除"
     },
     "tone": {
       "label": "トーン",
@@ -922,7 +922,7 @@
       "title": "履歴",
       "empty": "まだ会話がありません",
       "untitled": "無題のチャット",
-      "chatsLabel": "Chats history"
+      "chatsLabel": "チャット履歴"
     },
     "dates": {
       "today": "今日",
@@ -952,28 +952,28 @@
       "beta": "ベータ",
       "messages": {
         "budgetExceeded": {
-          "title": "Budget exceeded",
-          "message": "You are over budget by {over}."
+          "title": "予算超過",
+          "message": "{over}だけ予算を超過しています。"
         },
         "budgetAlert": {
-          "title": "Budget alert",
-          "message": "{usedPercent}% of your budget is used."
+          "title": "予算アラート",
+          "message": "予算の {usedPercent}% を使用しました。"
         },
         "risingExpenses": {
-          "title": "Rising expenses",
-          "message": "Expenses are trending up by {trend}%."
+          "title": "支出増加",
+          "message": "支出が {trend}% 上昇しています。"
         },
         "incomeGrowth": {
-          "title": "Income growth",
-          "message": "Income is trending up by {trend}%."
+          "title": "収入増加",
+          "message": "収入が {trend}% 上昇しています。"
         },
         "negativeCashFlow": {
-          "title": "Negative cash flow",
-          "message": "Spending exceeds income. Consider reducing expenses."
+          "title": "マイナスのキャッシュフロー",
+          "message": "支出が収入を超えています。節約を検討してください。"
         },
         "financialHealth": {
-          "title": "Healthy finances",
-          "message": "Your spending and income look balanced."
+          "title": "健全な財務",
+          "message": "支出と収入のバランスが取れています。"
         }
       }
     },
@@ -1101,20 +1101,20 @@
       "meta": {
         "title": "予算の詳細",
         "description": "予算の詳細を表示して管理。",
-        "titleWithName": "{name} — Budget",
-        "descriptionWithName": "Details and activity for \"{name}\"."
+        "titleWithName": "{name} — 予算",
+        "descriptionWithName": "「{name}」の詳細とアクティビティ。"
       }
     },
     "addBudget": {
       "meta": {
-        "title": "Add New Budget",
-        "description": "Create a new budget to start tracking."
+        "title": "新しい予算を追加",
+        "description": "追跡を始めるための新しい予算を作成します。"
       }
     },
     "userSettings": {
       "meta": {
-        "title": "User Settings",
-        "description": "Update account preferences and notifications."
+        "title": "ユーザー設定",
+        "description": "アカウントの設定と通知を更新します。"
       }
     },
     "payment": {
@@ -1125,8 +1125,8 @@
     },
     "paywall": {
       "meta": {
-        "title": "Upgrade to Pro - Spendly",
-        "description": "Unlock unlimited budgets, AI assistant, and powerful features. Take control of your finances with Spendly Pro."
+        "title": "Pro にアップグレード — Spendly",
+        "description": "無制限の予算、AI アシスタント、強力な機能をアンロック。Spendly Pro で家計を管理しましょう。"
       }
     },
     "onboarding": {
@@ -1187,13 +1187,13 @@
       }
     },
     "weekly": {
-      "title": "Weekly Digest",
-      "bodyFree": "Your weekly report is ready. Advanced insights available in Pro.",
-      "bodyPro": "Your weekly report with AI insights is ready.",
-      "ctaUpgrade": "Upgrade to Pro"
+      "title": "週間ダイジェスト",
+      "bodyFree": "週間レポートが準備できました。高度なインサイトはProで利用可能です。",
+      "bodyPro": "AIインサイトを含む週間レポートが準備できました。",
+      "ctaUpgrade": "Proにアップグレード"
     },
-    "push_subscribed": "Push subscribed",
-    "push_failed": "Push subscription failed",
+    "push_subscribed": "プッシュ通知を登録しました",
+    "push_failed": "プッシュ通知の登録に失敗しました",
     "permission_denied": "通知の許可が拒否されました",
     "budget_80": "予算の80%を使用しました",
     "budget_100": "予算を超過しました",
@@ -1234,8 +1234,8 @@
       "togglePush": "プッシュ通知を切り替え"
     },
     "dev": {
-      "sqlScript": "SQL Script",
-      "copy": "Copy",
+      "sqlScript": "SQL スクリプト",
+      "copy": "コピー",
       "copied": "コピーしました！"
     },
     "api": {
@@ -1277,24 +1277,24 @@
     }
   },
   "errors": {
-    "selectImageFile": "Please select an image file.",
-    "fileTooLarge5mb": "The file is too large (max 5 MB).",
-    "uploadAvatarFailed": "Failed to upload avatar.",
-    "removeAvatarFailed": "Failed to remove avatar.",
+    "selectImageFile": "画像ファイルを選択してください。",
+    "fileTooLarge5mb": "ファイルが大きすぎます（最大 5 MB）。",
+    "uploadAvatarFailed": "アバターのアップロードに失敗しました。",
+    "removeAvatarFailed": "アバターの削除に失敗しました。",
     "auth": {
-      "invalidAuthHeader": "Invalid Authorization header.",
-      "notAuthenticated": "Not authenticated."
+      "invalidAuthHeader": "無効な Authorization ヘッダーです。",
+      "notAuthenticated": "認証されていません。"
     },
     "common": {
       "internalServerError": "内部サーバーエラー"
     },
     "notifications": {
-      "titleRequired": "Notification title is required.",
-      "invalidAction": "Invalid notification action.",
+      "titleRequired": "通知のタイトルは必須です。",
+      "invalidAction": "無効な通知アクションです。",
       "fetchFailed": "通知の取得に失敗しました",
-      "createFailed": "Failed to create notification.",
-      "updateFailed": "Failed to update notification.",
-      "queueAdded": "Notification added to queue",
+      "createFailed": "通知の作成に失敗しました。",
+      "updateFailed": "通知の更新に失敗しました。",
+      "queueAdded": "通知をキューに追加しました",
       "queueAddFailed": "通知をキューに追加できませんでした。",
       "queueFetchFailed": "通知キューを取得できませんでした。",
       "subscriptionInvalid": "無効なプッシュ購読です。",
