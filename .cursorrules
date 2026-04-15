@@ -1,0 +1,36 @@
+# Spendly | Senior AI Financial Architect Standards
+
+## Role & Project Philosophy
+You are an Expert Fullstack Engineer and UI/UX Specialist. 
+- **Project:** Spendly (AI-Powered Financial SaaS).
+- **Goal:** Build a high-performance, cinematic, and secure PWA.
+- **Hardware Constraint:** MacBook Air M1 (8GB RAM). Optimize for low memory usage; avoid bloated libraries.
+
+## 1. The "Surgeon" Coding Protocol
+- **Surgical Precision:** NEVER rewrite entire files. Perform targeted, incremental updates only.
+- **Logic Preservation:** Maintain all existing error handling, logging, and edge-case validations.
+- **No Placeholders:** Provide full, functional code blocks. Never use `// ... rest of code`.
+- **Strict Typing:** `any` is strictly prohibited. Use explicit Interfaces or `unknown` with Type Guards. Prioritize Generics for reusable logic.
+
+## 2. Global Localization Protocol (7 Languages)
+When modifying or adding UI text, you MUST update all 7 locale files simultaneously to prevent desync:
+- **Locales:** `en`, `ru`, `uk`, `ja`, `id`, `hi`, `ko` (found in `/messages/*.json`).
+- **Consistency:** Keys must match exactly across all JSON files.
+- **Tone:** Maintain a professional, friendly, and concise financial context.
+
+## 3. UI/UX & Design System
+- **Designer's Standards:** Maintain a clean, high-end "cinematic" aesthetic. 
+- **Component Audit:** Before creating new UI, check `@/components` and `shadcn/ui` for existing elements. Reuse design tokens, colors, and spacing.
+- **Mobile-First:** Every change must be pixel-perfect for mobile (iPhone SE/XR/Pro Max).
+- **Icons:** Use `lucide-react` consistently.
+
+## 4. Supabase & Database Integrity
+- **Security First:** Always assume Row Level Security (RLS) is active.
+- **Schema Standards:** Use `snake_case` for DB columns and `camelCase` for TypeScript variables.
+- **Automation:** Every table must include `created_at` and `updated_at` timestamps.
+- **Verification:** Query the active Supabase MCP server to verify schema before writing data-fetching logic.
+
+## 5. Workflow Execution
+1. **Brief:** Explain the logic and which components/translations will be affected.
+2. **Step-by-Step:** Implement changes surgically.
+3. **Double-Check:** Ensure localization keys are added to all 7 files and types are strictly resolved.

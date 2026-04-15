@@ -15,14 +15,19 @@ export async function GET(request: Request) {
     const authHeader = request.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
 
+    if (!cronSecret) {
+      console.warn("[Cron/Recurring] CRON_SECRET is not set — endpoint is unprotected. Set CRON_SECRET in environment variables.");
+    }
+
     if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+      console.error("[Cron/Recurring] Unauthorized request. Expected Bearer <CRON_SECRET>.");
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    console.log("[Cron] Starting recurring transactions processing...");
+    console.log("[Cron/Recurring] Starting recurring transactions processing...");
     const startTime = Date.now();
 
     // Process all users' recurring rules (no userId filter)
@@ -30,8 +35,11 @@ export async function GET(request: Request) {
 
     const duration = Date.now() - startTime;
     console.log(
-      `[Cron] Completed in ${duration}ms. Generated: ${result.generated}, Skipped: ${result.skipped}, Push queued: ${result.pushQueued}, Errors: ${result.errors.length}`
+      `[Cron/Recurring] Completed in ${duration}ms. Generated: ${result.generated}, Skipped: ${result.skipped}, Push queued: ${result.pushQueued}, Errors: ${result.errors.length}`
     );
+    if (result.errors.length > 0) {
+      console.error("[Cron/Recurring] Errors during processing:", result.errors);
+    }
 
     return NextResponse.json({
       success: true,

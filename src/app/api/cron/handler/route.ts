@@ -35,20 +35,30 @@ function isMondayUtc(d: Date) {
 export async function GET(req: NextRequest) {
   const startedAt = Date.now();
 
+  console.log("[Handler] Starting cron handler");
+
   const daily = await proxy(req, "/en/api/notifications/daily", "POST");
+  console.log(`[Handler] daily: status=${daily.status} body=${daily.body.slice(0, 160)}`);
 
   const digestRun = isMondayUtc(new Date());
   const digest = digestRun
     ? await proxy(req, "/en/api/notifications/digest", "POST")
     : { status: 204, headers: { "content-type": "application/json" }, body: "" };
+  if (digestRun) {
+    console.log(`[Handler] digest: status=${digest.status} body=${digest.body.slice(0, 160)}`);
+  } else {
+    console.log("[Handler] digest: skipped (not Monday UTC)");
+  }
 
-  // Process recurring transactions
-  const recurring = await proxy(req, "/en/api/cron/recurring");
+  // Process recurring transactions — note: /api/cron/recurring, no locale prefix
+  const recurring = await proxy(req, "/api/cron/recurring");
+  console.log(`[Handler] recurring: status=${recurring.status} body=${recurring.body.slice(0, 160)}`);
 
   const processorRuns: Array<{ status: number; body: string }> = [];
   for (let i = 0; i < 10; i++) {
     const res = await proxy(req, "/en/api/notifications/processor", "POST");
     processorRuns.push({ status: res.status, body: res.body });
+    console.log(`[Handler] processor run ${i + 1}: status=${res.status} body=${res.body.slice(0, 120)}`);
 
     let processed = 0;
     try {
@@ -69,6 +79,8 @@ export async function GET(req: NextRequest) {
     recurring.status < 300 &&
     (!digestRun || (digest.status >= 200 && digest.status < 300)) &&
     processorRuns.every((r) => r.status >= 200 && r.status < 300);
+
+  console.log(`[Handler] Finished. ok=${ok} durationMs=${Date.now() - startedAt}`);
 
   return NextResponse.json(
     {

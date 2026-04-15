@@ -171,6 +171,8 @@ function formatCurrency(n: number, locale: string, currency: string) {
   }
 }
 
+const DIGEST_BATCH_SIZE = 50;
+
 export async function POST(req: NextRequest) {
   if (!isAuthorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -216,11 +218,9 @@ export async function POST(req: NextRequest) {
   }
 
   if (prefsErr) {
-    console.error("digest: preferences error", prefsErr);
+    console.error("[Digest] preferences error", prefsErr);
     return NextResponse.json(
-      {
-        error: "Failed to fetch preferences",
-      },
+      { error: "Failed to fetch preferences" },
       { status: 500 },
     );
   }
@@ -231,296 +231,312 @@ export async function POST(req: NextRequest) {
   let created = 0;
   let skipped = 0;
 
-  for (const p of targets) {
-    const userId = p.user_id;
+  console.log(`[Digest] Starting digest for ${targets.length} users`);
 
-    const lang = normalizeLanguage((p as any).locale) ?? (await getUserPreferredLanguage(userId));
-    const strings = DIGEST_STRINGS[lang];
-    const intlLocale = toIntlLocale(lang);
+  for (let batchStart = 0; batchStart < targets.length; batchStart += DIGEST_BATCH_SIZE) {
+    const batch = (targets as any[]).slice(batchStart, batchStart + DIGEST_BATCH_SIZE);
+    const batchNum = Math.floor(batchStart / DIGEST_BATCH_SIZE) + 1;
+    const totalBatches = Math.ceil(targets.length / DIGEST_BATCH_SIZE);
+    console.log(`[Digest] Batch ${batchNum}/${totalBatches}: processing ${batch.length} users`);
 
-    // Идемпотентность: проверяем, не создавали ли дайджест за эту прошлую неделю
-    const idemKey = `weekly:${userId}:${lastWeekStart.toISOString().slice(0, 10)}`;
-    const { data: existing } = await supabase
-      .from("notification_queue")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("notification_type", "weekly_summary")
-      .gte("created_at", lastWeekStart.toISOString())
-      .lte("created_at", lastWeekEnd.toISOString())
-      .limit(1);
+    await Promise.allSettled(
+      batch.map(async (p: any) => {
+        const userId = p.user_id as string;
+        try {
+          const lang = normalizeLanguage((p as any).locale) ?? (await getUserPreferredLanguage(userId));
+          const strings = DIGEST_STRINGS[lang];
+          const intlLocale = toIntlLocale(lang);
 
-    if (existing && existing.length > 0) {
-      skipped++;
-      continue;
-    }
+          // Идемпотентность: проверяем, не создавали ли дайджест за эту прошлую неделю
+          const idemKey = `weekly:${userId}:${lastWeekStart.toISOString().slice(0, 10)}`;
+          const { data: existing } = await supabase
+            .from("notification_queue")
+            .select("id")
+            .eq("user_id", userId)
+            .eq("notification_type", "weekly_summary")
+            .gte("created_at", lastWeekStart.toISOString())
+            .lte("created_at", lastWeekEnd.toISOString())
+            .limit(1);
 
-    // Берём транзакции за прошлую и позапрошлую недели
-    // Дайджест создаётся ВСЕГДА, даже если транзакций нет (с нулевыми суммами)
-    const { data: lastWeekTxs, error: lastErr } = await supabase
-      .from("transactions")
-      .select(`
-        id, title, amount, type, created_at, budget_folder_id,
-        budget_folders ( name, emoji )
-      `)
-      .eq("user_id", userId)
-      .gte("created_at", lastWeekStart.toISOString())
-      .lte("created_at", lastWeekEnd.toISOString());
-
-    if (lastErr) {
-      console.warn("digest: lastWeek tx error", lastErr);
-      // Продолжаем даже при ошибке - создадим дайджест с нулевыми данными
-    }
-
-    const { data: prevWeekTxs, error: prevErr } = await supabase
-      .from("transactions")
-      .select("id, title, amount, type, created_at, budget_folder_id")
-      .eq("user_id", userId)
-      .gte("created_at", prevWeekStart.toISOString())
-      .lte("created_at", prevWeekEnd.toISOString());
-
-    if (prevErr) {
-      console.warn("digest: prevWeek tx error", prevErr);
-    }
-
-    const totalExpensesLast = (lastWeekTxs || [])
-      .filter((t) => t.type === "expense")
-      .reduce((s, t) => s + (t.amount || 0), 0);
-    const totalIncomeLast = (lastWeekTxs || [])
-      .filter((t) => t.type === "income")
-      .reduce((s, t) => s + (t.amount || 0), 0);
-
-    const totalExpensesPrev = (prevWeekTxs || [])
-      .filter((t) => t.type === "expense")
-      .reduce((s, t) => s + (t.amount || 0), 0);
-    const totalIncomePrev = (prevWeekTxs || [])
-      .filter((t) => t.type === "income")
-      .reduce((s, t) => s + (t.amount || 0), 0);
-
-    // Топ‑категории (по расходам)
-    const byBudget = new Map<string, number>();
-    for (const t of lastWeekTxs || []) {
-      if (t.type !== "expense") continue;
-      const name =
-        (Array.isArray(t.budget_folders)
-          ? t.budget_folders[0]?.name
-          : (t as any)?.budget_folders?.name) || "Unassigned";
-      byBudget.set(name, (byBudget.get(name) || 0) + (t.amount || 0));
-    }
-    const topBudgets = Array.from(byBudget.entries())
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3);
-
-    // Получаем план пользователя (free/pro)
-    const { data: userRow } = await supabase
-      .from("profiles")
-      .select("is_pro")
-      .eq("id", userId)
-      .maybeSingle();
-    const isPro = (userRow as any)?.is_pro === true;
-
-    // Сводка по прошлой неделе (базовая, для Free и Pro)
-    const title = strings.weeklyTitle;
-    const topBudgetsText = topBudgets.length
-      ? `${strings.topLabel}: ${topBudgets
-          .map(([n, v]) => `${n} ${formatCurrency(v, intlLocale, currency)}`)
-          .join(", ")}.`
-      : "";
-    const bodyBasic =
-      `${strings.lastWeekLabel} — ` +
-      `${strings.expensesLabel} ${formatCurrency(totalExpensesLast, intlLocale, currency)}, ` +
-      `${strings.incomeLabel} ${formatCurrency(totalIncomeLast, intlLocale, currency)}. ` +
-      topBudgetsText;
-
-    let body = bodyBasic;
-
-    // Для Pro — добавляем краткие AI-инсайты, если есть ключи API
-    if (isPro) {
-      // Получаем основной бюджет (по желанию, для процента использования)
-      const { data: mainBudgetRow } = await supabase
-        .from("main_budget")
-        .select("amount")
-        .eq("user_id", userId)
-        .maybeSingle();
-      const budget = Number(mainBudgetRow?.amount ?? 0);
-
-      // Метрики для buildCountersPrompt (на недельной выборке)
-      const expensesTrendPercent =
-        totalExpensesPrev > 0
-          ? ((totalExpensesLast - totalExpensesPrev) / totalExpensesPrev) * 100
-          : totalExpensesLast > 0
-            ? 100
-            : 0;
-      const incomeTrendPercent =
-        totalIncomePrev > 0
-          ? ((totalIncomeLast - totalIncomePrev) / totalIncomePrev) * 100
-          : totalIncomeLast > 0
-            ? 100
-            : 0;
-      const incomeCoveragePercent =
-        totalIncomeLast > 0 ? (totalExpensesLast / totalIncomeLast) * 100 : 0;
-      const budgetUsagePercentage =
-        budget > 0 ? (totalExpensesLast / budget) * 100 : 0;
-      const remainingBudget = Math.max(0, budget - totalExpensesLast);
-      const budgetStatus =
-        budget <= 0
-          ? "not-set"
-          : budgetUsagePercentage > 100
-            ? "exceeded"
-            : budgetUsagePercentage > 80
-              ? "warning"
-              : "good";
-
-      const expensesDifferenceText = strings.expensesDifferenceText(
-        Math.abs(expensesTrendPercent).toFixed(1),
-      );
-
-      const incomeDifferenceText = strings.incomeDifferenceText(
-        Math.abs(incomeTrendPercent).toFixed(1),
-      );
-
-      const prompt = buildCountersPrompt({
-        budget,
-        totalExpenses: totalExpensesLast,
-        totalIncome: totalIncomeLast,
-        previousMonthExpenses: totalExpensesPrev, // используем прежнюю неделю как ориентир
-        previousMonthIncome: totalIncomePrev,
-        budgetUsagePercentage,
-        remainingBudget,
-        budgetStatus: budgetStatus as any,
-        expensesTrendPercent,
-        incomeTrendPercent,
-        incomeCoveragePercent,
-        expensesDifferenceText,
-        incomeDifferenceText,
-        currency,
-        locale: lang,
-      });
-
-      const hasOpenAI = !!process.env.OPENAI_API_KEY;
-      const hasGemini = !!process.env.GOOGLE_API_KEY;
-      const model = selectModel(true, true); // Pro + сложный (аналитика)
-      const requestId = `digest_${userId}_${Date.now()}`;
-      let aiText = "";
-
-      try {
-        if (model.includes("gpt") && hasOpenAI) {
-          const stream = streamOpenAIText({
-            model: process.env.OPENAI_MODEL ?? "gpt-4-turbo",
-            prompt,
-            system: strings.aiSystem,
-            requestId,
-          });
-          const reader = stream.getReader();
-          const decoder = new TextDecoder();
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            aiText += typeof value === "string" ? value : decoder.decode(value);
-            if (aiText.length > 700) break;
+          if (existing && existing.length > 0) {
+            skipped++;
+            return;
           }
-        } else if (hasGemini) {
-          const stream = streamGeminiText({
-            model: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
-            prompt,
-            system: strings.aiSystem,
-            requestId,
-          });
-          const reader = stream.getReader();
-          const decoder = new TextDecoder();
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            aiText += typeof value === "string" ? value : decoder.decode(value);
-            if (aiText.length > 700) break;
+
+          // Берём транзакции за прошлую и позапрошлую недели
+          // Дайджест создаётся ВСЕГДА, даже если транзакций нет (с нулевыми суммами)
+          const { data: lastWeekTxs, error: lastErr } = await supabase
+            .from("transactions")
+            .select(`
+              id, title, amount, type, created_at, budget_folder_id,
+              budget_folders ( name, emoji )
+            `)
+            .eq("user_id", userId)
+            .gte("created_at", lastWeekStart.toISOString())
+            .lte("created_at", lastWeekEnd.toISOString());
+
+          if (lastErr) {
+            console.warn(`[Digest] User ${userId}: lastWeek tx error`, lastErr);
+            // Продолжаем даже при ошибке - создадим дайджест с нулевыми данными
           }
+
+          const { data: prevWeekTxs, error: prevErr } = await supabase
+            .from("transactions")
+            .select("id, title, amount, type, created_at, budget_folder_id")
+            .eq("user_id", userId)
+            .gte("created_at", prevWeekStart.toISOString())
+            .lte("created_at", prevWeekEnd.toISOString());
+
+          if (prevErr) {
+            console.warn(`[Digest] User ${userId}: prevWeek tx error`, prevErr);
+          }
+
+          const totalExpensesLast = (lastWeekTxs || [])
+            .filter((t) => t.type === "expense")
+            .reduce((s, t) => s + (t.amount || 0), 0);
+          const totalIncomeLast = (lastWeekTxs || [])
+            .filter((t) => t.type === "income")
+            .reduce((s, t) => s + (t.amount || 0), 0);
+
+          const totalExpensesPrev = (prevWeekTxs || [])
+            .filter((t) => t.type === "expense")
+            .reduce((s, t) => s + (t.amount || 0), 0);
+          const totalIncomePrev = (prevWeekTxs || [])
+            .filter((t) => t.type === "income")
+            .reduce((s, t) => s + (t.amount || 0), 0);
+
+          // Топ‑категории (по расходам)
+          const byBudget = new Map<string, number>();
+          for (const t of lastWeekTxs || []) {
+            if (t.type !== "expense") continue;
+            const name =
+              (Array.isArray(t.budget_folders)
+                ? t.budget_folders[0]?.name
+                : (t as any)?.budget_folders?.name) || "Unassigned";
+            byBudget.set(name, (byBudget.get(name) || 0) + (t.amount || 0));
+          }
+          const topBudgets = Array.from(byBudget.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3);
+
+          // Получаем план пользователя (free/pro)
+          const { data: userRow } = await supabase
+            .from("profiles")
+            .select("is_pro")
+            .eq("id", userId)
+            .maybeSingle();
+          const isPro = (userRow as any)?.is_pro === true;
+
+          // Сводка по прошлой неделе (базовая, для Free и Pro)
+          const title = strings.weeklyTitle;
+          const topBudgetsText = topBudgets.length
+            ? `${strings.topLabel}: ${topBudgets
+                .map(([n, v]) => `${n} ${formatCurrency(v, intlLocale, currency)}`)
+                .join(", ")}.`
+            : "";
+          const bodyBasic =
+            `${strings.lastWeekLabel} — ` +
+            `${strings.expensesLabel} ${formatCurrency(totalExpensesLast, intlLocale, currency)}, ` +
+            `${strings.incomeLabel} ${formatCurrency(totalIncomeLast, intlLocale, currency)}. ` +
+            topBudgetsText;
+
+          let body = bodyBasic;
+
+          // Для Pro — добавляем краткие AI-инсайты, если есть ключи API
+          if (isPro) {
+            // Получаем основной бюджет (по желанию, для процента использования)
+            const { data: mainBudgetRow } = await supabase
+              .from("main_budget")
+              .select("amount")
+              .eq("user_id", userId)
+              .maybeSingle();
+            const budget = Number(mainBudgetRow?.amount ?? 0);
+
+            // Метрики для buildCountersPrompt (на недельной выборке)
+            const expensesTrendPercent =
+              totalExpensesPrev > 0
+                ? ((totalExpensesLast - totalExpensesPrev) / totalExpensesPrev) * 100
+                : totalExpensesLast > 0
+                  ? 100
+                  : 0;
+            const incomeTrendPercent =
+              totalIncomePrev > 0
+                ? ((totalIncomeLast - totalIncomePrev) / totalIncomePrev) * 100
+                : totalIncomeLast > 0
+                  ? 100
+                  : 0;
+            const incomeCoveragePercent =
+              totalIncomeLast > 0 ? (totalExpensesLast / totalIncomeLast) * 100 : 0;
+            const budgetUsagePercentage =
+              budget > 0 ? (totalExpensesLast / budget) * 100 : 0;
+            const remainingBudget = Math.max(0, budget - totalExpensesLast);
+            const budgetStatus =
+              budget <= 0
+                ? "not-set"
+                : budgetUsagePercentage > 100
+                  ? "exceeded"
+                  : budgetUsagePercentage > 80
+                    ? "warning"
+                    : "good";
+
+            const expensesDifferenceText = strings.expensesDifferenceText(
+              Math.abs(expensesTrendPercent).toFixed(1),
+            );
+            const incomeDifferenceText = strings.incomeDifferenceText(
+              Math.abs(incomeTrendPercent).toFixed(1),
+            );
+
+            const prompt = buildCountersPrompt({
+              budget,
+              totalExpenses: totalExpensesLast,
+              totalIncome: totalIncomeLast,
+              previousMonthExpenses: totalExpensesPrev, // используем прежнюю неделю как ориентир
+              previousMonthIncome: totalIncomePrev,
+              budgetUsagePercentage,
+              remainingBudget,
+              budgetStatus: budgetStatus as any,
+              expensesTrendPercent,
+              incomeTrendPercent,
+              incomeCoveragePercent,
+              expensesDifferenceText,
+              incomeDifferenceText,
+              currency,
+              locale: lang,
+            });
+
+            const hasOpenAI = !!process.env.OPENAI_API_KEY;
+            const hasGemini = !!process.env.GOOGLE_API_KEY;
+            const model = selectModel(true, true); // Pro + сложный (аналитика)
+            const requestId = `digest_${userId}_${Date.now()}`;
+            let aiText = "";
+
+            try {
+              if (model.includes("gpt") && hasOpenAI) {
+                const stream = streamOpenAIText({
+                  model: process.env.OPENAI_MODEL ?? "gpt-4-turbo",
+                  prompt,
+                  system: strings.aiSystem,
+                  requestId,
+                });
+                const reader = stream.getReader();
+                const decoder = new TextDecoder();
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  aiText += typeof value === "string" ? value : decoder.decode(value);
+                  if (aiText.length > 700) break;
+                }
+              } else if (hasGemini) {
+                const stream = streamGeminiText({
+                  model: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
+                  prompt,
+                  system: strings.aiSystem,
+                  requestId,
+                });
+                const reader = stream.getReader();
+                const decoder = new TextDecoder();
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  aiText += typeof value === "string" ? value : decoder.decode(value);
+                  if (aiText.length > 700) break;
+                }
+              }
+            } catch (aiErr) {
+              console.warn(`[Digest] User ${userId}: AI generation failed, using basic body`, aiErr);
+            }
+
+            if (aiText.trim().length > 0) {
+              body = `${bodyBasic} ${aiText.trim()}`;
+            }
+          }
+
+          const actionUrl = "/dashboard?view=report&period=lastWeek";
+          const deepLink = actionUrl;
+
+          // In‑app уведомление
+          const { error: notifErr } = await supabase.from("notifications").insert({
+            user_id: userId,
+            title,
+            message: body,
+            type: "weekly_summary",
+            metadata: {
+              week_start: lastWeekStart.toISOString().slice(0, 10),
+              transactions_count: (lastWeekTxs || []).length,
+              total_spent: totalExpensesLast,
+              currency,
+              deepLink,
+            },
+            is_read: false,
+          });
+          if (notifErr) {
+            console.warn(`[Digest] User ${userId}: notif insert error`, notifErr);
+          }
+
+          const scheduledAt = computeNextAllowedTime(new Date(), p).toISOString();
+
+          // Задача в очередь + игнор дублей
+          const { error: queueErr } = await supabase
+            .from("notification_queue")
+            .insert({
+              user_id: userId,
+              notification_type: "weekly_summary",
+              title,
+              message: body,
+              data: {
+                deepLink,
+                tag: "weekly_summary",
+                renotify: true,
+                idempotent_key: idemKey,
+              },
+              action_url: actionUrl,
+              send_push: !!p.push_enabled,
+              send_email: !!p.email_enabled,
+              scheduled_for: scheduledAt,
+              status: "pending",
+              attempts: 0,
+              max_attempts: 3,
+            });
+
+          if (queueErr) {
+            if (String((queueErr as any).code) === "23505") {
+              // Конфликт уникальности — игнорируем
+              skipped++;
+              return;
+            }
+            console.warn(`[Digest] User ${userId}: queue insert error`, queueErr);
+            skipped++;
+            return;
+          }
+
+          const hasAIInsight = isPro && body !== bodyBasic;
+
+          const { error: telemetryErr } = await supabase
+            .from("telemetry_events")
+            .insert({
+              user_id: userId,
+              event_name: "digest_generated",
+              payload: {
+                type: "weekly_summary",
+                is_pro: isPro,
+                has_ai_insight: hasAIInsight,
+              },
+            });
+
+          if (telemetryErr) {
+            console.warn(`[Digest] User ${userId}: telemetry insert error`, telemetryErr);
+          }
+
+          created++;
+        } catch (err) {
+          console.error(`[Digest] User ${userId} threw unexpected error:`, err);
+          skipped++;
         }
-      } catch {
-        // safe fallback: оставляем базовый текст
-      }
-
-      if (aiText.trim().length > 0) {
-        body = `${bodyBasic} ${aiText.trim()}`;
-      }
-    }
-
-    const actionUrl = "/dashboard?view=report&period=lastWeek";
-    const deepLink = actionUrl;
-
-    // In‑app уведомление
-    const { error: notifErr } = await supabase.from("notifications").insert({
-      user_id: userId,
-      title,
-      message: body,
-      type: "weekly_summary",
-      metadata: {
-        week_start: lastWeekStart.toISOString().slice(0, 10),
-        transactions_count: (lastWeekTxs || []).length,
-        total_spent: totalExpensesLast,
-        currency,
-        deepLink,
-      },
-      is_read: false,
-    });
-    if (notifErr) {
-      console.warn("digest: notif insert error", notifErr);
-    }
-
-    const scheduledAt = computeNextAllowedTime(new Date(), p).toISOString();
-
-    // Задача в очередь + игнор дублей
-    const { error: queueErr } = await supabase
-      .from("notification_queue")
-      .insert({
-        user_id: userId,
-        notification_type: "weekly_summary",
-        title,
-        message: body,
-        data: {
-          deepLink,
-          tag: "weekly_summary",
-          renotify: true,
-          idempotent_key: idemKey,
-        },
-        action_url: actionUrl,
-        send_push: !!p.push_enabled,
-        send_email: !!p.email_enabled,
-        scheduled_for: scheduledAt,
-        status: "pending",
-        attempts: 0,
-        max_attempts: 3,
-      });
-
-    if (queueErr) {
-      if (String((queueErr as any).code) === "23505") {
-        // Конфликт уникальности — игнорируем
-        skipped++;
-        continue;
-      }
-      console.warn("digest: queue insert error", queueErr);
-      skipped++;
-      continue;
-    }
-
-    const hasAIInsight = isPro && body !== bodyBasic;
-
-    const { error: telemetryErr } = await supabase
-      .from("telemetry_events")
-      .insert({
-        user_id: userId,
-        event_name: "digest_generated",
-        payload: {
-          type: "weekly_summary",
-          is_pro: isPro,
-          has_ai_insight: hasAIInsight,
-        },
-      });
-
-    if (telemetryErr) {
-      console.warn("digest: telemetry insert error", telemetryErr);
-    }
-
-    created++;
+      })
+    );
   }
+
+  console.log(`[Digest] Completed. Created: ${created}, Skipped: ${skipped}`);
 
   return NextResponse.json({
     ok: true,
