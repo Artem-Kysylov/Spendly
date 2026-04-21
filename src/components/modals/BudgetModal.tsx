@@ -54,6 +54,7 @@ const BudgetModal = ({
     rolloverEnabled?: boolean,
     rolloverMode?: "positive-only" | "allow-negative",
     rolloverCap?: number | null,
+    is_cyclic?: boolean,
   ) => {
     try {
       await onSubmit(
@@ -65,6 +66,7 @@ const BudgetModal = ({
         rolloverEnabled,
         rolloverMode,
         rolloverCap,
+        is_cyclic,
       );
       handleClose();
     } catch (error) {

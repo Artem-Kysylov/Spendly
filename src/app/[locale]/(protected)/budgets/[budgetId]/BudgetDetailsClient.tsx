@@ -356,10 +356,12 @@ export default function BudgetDetailsClient() {
     rolloverEnabled?: boolean,
     rolloverMode?: "positive-only" | "allow-negative",
     rolloverCap?: number | null,
+    is_cyclic?: boolean,
   ) => {
     if (!session?.user?.id || !id) return;
     try {
       setIsSubmitting(true);
+      const cyclicFlag = type === "expense" ? !!is_cyclic : false;
       const { error: updateErr } = await supabase
         .from("budget_folders")
         .update({
@@ -368,10 +370,15 @@ export default function BudgetDetailsClient() {
           amount,
           type,
           color_code: color_code ?? null,
-          rollover_enabled: type === "expense" ? !!rolloverEnabled : false,
+          rollover_enabled:
+            type === "expense" && !cyclicFlag ? !!rolloverEnabled : false,
           rollover_mode:
-            type === "expense" ? (rolloverMode ?? "positive-only") : null,
-          rollover_cap: type === "expense" ? (rolloverCap ?? null) : null,
+            type === "expense" && !cyclicFlag
+              ? (rolloverMode ?? "positive-only")
+              : null,
+          rollover_cap:
+            type === "expense" && !cyclicFlag ? (rolloverCap ?? null) : null,
+          is_cyclic: cyclicFlag,
         })
         .eq("id", id)
         .eq("user_id", session.user.id);
@@ -655,6 +662,7 @@ export default function BudgetDetailsClient() {
               (budgetDetails as unknown as BudgetRolloverFields)
                 .rollover_mode ??
               "positive-only",
+            is_cyclic: budgetDetails.is_cyclic ?? false,
           }}
           onClose={closeEditModal}
           onSubmit={handleUpdateBudget}

@@ -32,6 +32,7 @@ import { Plus } from "lucide-react";
 
 import useModal from "@/hooks/useModal";
 import useCheckBudget from "@/hooks/useCheckBudget";
+import { resetCyclicBudgetFolders } from "@/lib/budget/resetCyclicBudgetFolders";
 
 import { ToastMessageProps, Transaction } from "@/types/types";
 import type { EditTransactionPayload } from "@/types/types";
@@ -310,6 +311,17 @@ function DashboardClient() {
         return;
       }
 
+      // Salary arrived → reset all cyclic ("auto-reset") budget folders.
+      // Safe no-op when the user has no cyclic folders.
+      try {
+        await resetCyclicBudgetFolders(supabase, userId);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("budgets:updated"));
+        }
+      } catch (resetErr) {
+        console.error("Error resetting cyclic budgets on income:", resetErr);
+      }
+
       const meta = session.user.user_metadata;
       const toneRaw =
         meta && typeof meta === "object"
@@ -483,6 +495,7 @@ function DashboardClient() {
 
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("main_budget:updated"));
+        window.dispatchEvent(new CustomEvent("budgets:updated"));
       }
 
       setRefreshCounters((prev) => prev + 1);
