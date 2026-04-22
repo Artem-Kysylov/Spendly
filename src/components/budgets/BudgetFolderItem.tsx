@@ -72,8 +72,10 @@ function BudgetFolderItem({
         {name}
       </h3>
 
-      {/* Rollover для cyclic budgets */}
-      {is_cyclic && rollover_carry && rollover_carry > 0 && (
+      {/* Rollover для cyclic budgets (avoid `n && 0` which React renders as "0") */}
+      {is_cyclic &&
+        typeof rollover_carry === "number" &&
+        rollover_carry > 0 && (
         <div className={`${color_code ? "text-black dark:text-black" : "text-primary"} text-xs font-medium text-center`}>
           {tBudgets("rollover.positive")}: +{formatCurrency(rollover_carry, currency)}
         </div>

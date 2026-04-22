@@ -486,14 +486,7 @@ export default function BudgetDetailsClient() {
         <ToastMessage text={toastMessage.text} type={toastMessage.type} />
       )}
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {budgetDetails.is_cyclic && (
-            <div className="px-2 py-1 rounded-md bg-primary/10 text-primary text-xs font-medium">
-              {tBudgets("cyclic.activeLabel")}
-            </div>
-          )}
-        </div>
+      <div className="w-full">
         <BudgetDetailsControls
           onDeleteClick={openDeleteModal}
           onEditClick={openEditModal}

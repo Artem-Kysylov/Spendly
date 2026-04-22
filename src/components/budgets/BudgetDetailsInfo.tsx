@@ -103,6 +103,18 @@ function BudgetDetailsInfo({
       >
         {name}
       </motion.h1>
+      {is_cyclic && (
+        <motion.div
+          className="mt-1"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.35, ease: "easeOut" }}
+        >
+          <span className="inline-flex items-center rounded-md border border-primary/25 bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+            {tBudgets("cyclic.activeLabel")}
+          </span>
+        </motion.div>
+      )}
       <motion.p
         className={`${color_code ? "text-black dark:text-black" : "text-secondary-black dark:text-white"} text-[18px] sm:text-[20px] md:text-[25px] font-semibold break-words text-center`}
         initial={{ opacity: 0, y: 20 }}
