@@ -8,6 +8,110 @@ type StreamParams = {
   requestId?: string;
 };
 
+export type GeminiFetchResult =
+  | { ok: true; text: string }
+  | { ok: false; status: number; message: string };
+
+interface GeminiFetchOptions {
+  model: string;
+  prompt: string;
+  system?: string;
+  requestId?: string;
+  timeoutMs?: number;
+}
+
+const GEMINI_FAST_TIMEOUT_MS = 6000;
+const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1/models";
+
+export async function fetchGeminiText(
+  opts: GeminiFetchOptions,
+): Promise<GeminiFetchResult> {
+  const apiKey = process.env.GOOGLE_API_KEY;
+  if (!apiKey) {
+    return { ok: false, status: 0, message: "GOOGLE_API_KEY not configured" };
+  }
+
+  const timeoutMs = opts.timeoutMs ?? GEMINI_FAST_TIMEOUT_MS;
+  const url = `${GEMINI_API_BASE}/${encodeURIComponent(opts.model)}:generateContent?key=${apiKey}`;
+
+  const parts: Array<{ text: string }> = [];
+  if (opts.system && opts.system.trim().length > 0) {
+    parts.push({ text: opts.system });
+  }
+  const userText =
+    opts.prompt && opts.prompt.trim().length > 0
+      ? opts.prompt
+      : "Respond in plain text.";
+  parts.push({ text: userText });
+
+  const payload = {
+    contents: [{ role: "user", parts }],
+    generationConfig: {
+      temperature: 0.3,
+      topP: 0.9,
+      candidateCount: 1,
+      maxOutputTokens: 2048,
+    },
+  };
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+
+    if (!res.ok) {
+      return {
+        ok: false,
+        status: res.status,
+        message: `Gemini HTTP ${res.status} ${res.statusText || ""}`.trim(),
+      };
+    }
+
+    const data = (await res.json().catch(() => null)) as
+      | { candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }> }
+      | null;
+
+    const candidates = data?.candidates ?? [];
+    let text = "";
+    if (Array.isArray(candidates) && candidates.length > 0) {
+      const outParts = candidates[0]?.content?.parts ?? [];
+      text = outParts
+        .map((p) => (typeof p?.text === "string" ? p.text : ""))
+        .join("");
+    }
+
+    if (!text || text.trim().length === 0) {
+      return { ok: false, status: 502, message: "Empty response from Gemini" };
+    }
+
+    logLLMDebug("[LLM_DEBUG gemini fast ok]", {
+      requestId: opts.requestId,
+      model: opts.model,
+      chars: text.length,
+    });
+    return { ok: true, text };
+  } catch (e) {
+    const err = e instanceof Error ? e : new Error("Unknown Gemini error");
+    const isAbort =
+      err.name === "AbortError" || /abort/i.test(err.message);
+    return {
+      ok: false,
+      status: isAbort ? 504 : 0,
+      message: isAbort
+        ? `Gemini timeout after ${timeoutMs}ms`
+        : err.message,
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export function streamGeminiText({
   model,
   prompt,

@@ -9,14 +9,17 @@ import {
 import { composeLLMPrompt } from "@/prompts/spendlyPal/composeLLMPrompt";
 import { PROMPT_VERSION } from "@/prompts/spendlyPal/promptVersion";
 import { prepareUserContext } from "@/lib/ai/context";
-import { isComplexRequest, selectModel } from "@/lib/ai/routing";
+import { isComplexRequest } from "@/lib/ai/routing";
 import {
   detectPeriodFromMessage,
   detectIntentFromMessage,
 } from "@/lib/ai/intent";
 import { getServerSupabaseClient } from "@/lib/serverSupabase";
-import { streamOpenAIText } from "@/lib/llm/openai";
-import { streamGeminiText } from "@/lib/llm/google";
+import {
+  streamChatWithFallback,
+  getFriendlyFallbackMessage,
+  type RouterProvider,
+} from "@/lib/llm/router";
 
 // Модульная область файла (добавляем RPM‑щит)
 // Минимальный стрим: нарезка строки по частям
@@ -729,17 +732,13 @@ export async function POST(req: NextRequest) {
 
   const complex = isComplexRequest(safeMessage);
 
-  const preferredProvider = (process.env.AI_PROVIDER ?? "").toLowerCase();
-  const hasOpenAI = !!process.env.OPENAI_API_KEY;
-  const hasGemini = !!process.env.GOOGLE_API_KEY;
-
-  let provider: "openai" | "google" = "google";
-  if (preferredProvider === "openai" && hasOpenAI) provider = "openai";
-  else if (preferredProvider === "gemini" && hasGemini) provider = "google";
-  else {
-    // Авто по сложности: OpenAI для комплексных, иначе Gemini
-    provider = complex && hasOpenAI ? "openai" : "google";
-  }
+  const preferredProviderRaw = (process.env.AI_PROVIDER ?? "").toLowerCase();
+  const forceProvider: RouterProvider | undefined =
+    preferredProviderRaw === "openai"
+      ? "openai"
+      : preferredProviderRaw === "gemini" || preferredProviderRaw === "google"
+        ? "google"
+        : undefined;
 
   if (debug) {
     try {
@@ -751,11 +750,8 @@ export async function POST(req: NextRequest) {
         JSON.stringify({
           requestId,
           userId,
-          provider,
-          model:
-            provider === "openai"
-              ? (process.env.OPENAI_MODEL ?? "gpt-4-turbo")
-              : (process.env.GEMINI_MODEL ?? "gemini-2.5-flash"),
+          complex,
+          forceProvider: forceProvider ?? null,
           promptVersion: PROMPT_VERSION,
           promptLengthChars: prompt.length,
           approxTokens,
@@ -770,111 +766,72 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  try {
-    if (provider === "openai") {
-      const model = process.env.OPENAI_MODEL ?? "gpt-4-turbo";
-      const stream = streamOpenAIText({
-        model,
-        prompt: promptForLLM,
-        system: systemForLLM,
-        requestId,
-      });
-      return streamProviderWithUsage(stream, {
-        requestId,
-        userId,
-        provider: "openai",
-        model,
-        promptLength: prompt.length,
-        intent,
-        period: periodDetected,
-        locale,
-        currency,
-        tone,
-        dailyLimit: limits.dailyLimit,
-        usedBefore: limits.used,
-        todayStartIso: limits.todayStartIso,
-      });
-    } else {
-      const model = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
-      const stream = streamGeminiText({
-        model,
-        prompt: promptForLLM,
-        system: systemForLLM,
-        requestId,
-      });
-      return streamProviderWithUsage(stream, {
-        requestId,
-        userId,
-        provider: "google",
-        model,
-        promptLength: prompt.length,
-        intent,
-        period: periodDetected,
-        locale,
-        currency,
-        tone,
-        dailyLimit: limits.dailyLimit,
-        usedBefore: limits.used,
-        todayStartIso: limits.todayStartIso,
-      });
-    }
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : "Unknown provider error";
+  const routed = await streamChatWithFallback({
+    prompt: promptForLLM,
+    system: systemForLLM,
+    requestId,
+    isComplex: complex,
+    locale,
+    forceProvider,
+  });
 
-    // Корректная отдача 429/503 от Gemini без fallback на OpenAI
-    const isGemini429 =
-      provider === "google" && typeof msg === "string" && /^GeminiHttp:429/.test(msg);
-    const isGemini503 =
-      provider === "google" && typeof msg === "string" && /^GeminiHttp:503/.test(msg);
-
+  if (!routed.ok) {
     await logUsage({
       userId,
-      provider,
-      model:
-        provider === "openai"
-          ? (process.env.OPENAI_MODEL ?? "gpt-4-turbo")
-          : (process.env.GEMINI_MODEL ?? "gemini-2.5-flash"),
+      provider: "google",
+      model: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
       promptLength: prompt.length,
       responseLength: 0,
       success: false,
-      errorMessage: msg,
+      errorMessage: routed.details,
       intent,
       period: periodDetected,
       bypassUsed: false,
-      blockReason: isGemini429
-        ? "rate_limited"
-        : isGemini503
-          ? "unavailable"
-          : "provider_error",
+      blockReason:
+        routed.reason === "no_providers"
+          ? "providers_not_configured"
+          : routed.status === 429
+            ? "rate_limited"
+            : "all_providers_failed",
       requestType: "chat",
     });
 
-    if (isGemini429 || isGemini503) {
-      const status = isGemini429 ? 429 : 503;
-      const payload = {
-        error: isGemini429 ? "provider_rate_limited" : "provider_unavailable",
+    const status =
+      routed.reason === "no_providers" ? 500 : routed.status || 503;
+    return new Response(
+      JSON.stringify({
+        error:
+          routed.reason === "no_providers"
+            ? "providers_not_configured"
+            : "ai_unavailable",
         message:
-          isGemini429
-            ? "Gemini is rate-limited. Please try again later."
-            : "Gemini service is temporarily unavailable. Please try again later.",
-      };
-      return new Response(JSON.stringify(payload), {
+          routed.userMessage || getFriendlyFallbackMessage(locale),
+      }),
+      {
         status,
         headers: {
           "Content-Type": "application/json",
-          "X-Provider": "google",
-          "X-Model": process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
           "X-Request-Id": requestId,
         },
-      });
-    }
-
-    // Прочие ошибки — 500
-    return new Response(JSON.stringify({ error: msg }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+      },
+    );
   }
+
+  return streamProviderWithUsage(routed.stream, {
+    requestId,
+    userId,
+    provider: routed.provider,
+    model: routed.model,
+    promptLength: prompt.length,
+    intent,
+    period: periodDetected,
+    locale,
+    currency,
+    tone,
+    dailyLimit: limits.dailyLimit,
+    usedBefore: limits.used,
+    todayStartIso: limits.todayStartIso,
+  });
 }
 
 // Модульная область файла (добавляем RPM‑щит)
